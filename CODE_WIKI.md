@@ -1,6 +1,6 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.3（2026-08-18，P-004 异基座复验批次同步：+S1 复验报告 / M7 样本 ⑥ / §2.4 工作流架构全景图（SVG））
+> **Wiki 版本**: v1.4（2026-08-18，视觉资产统一：§2.4/§3.2 换用 README 同套 Anthropic 风格 SVG（docs/assets/readme/），弃用紫色初版架构图）
 > **覆盖对象**: 本仓库全部文档（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007、断言证据框架 v1.4、5 个模板（四件套 + ADR）、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×2、spec/ 三 feature 目录）
 > **仓库性质**: 纯文档型方法论仓库 —— 无源代码、无构建系统、无运行时；"运行方式" = 工作流的执行方式（见 §6）
 
@@ -133,9 +133,9 @@ flowchart TD
 
 ### 2.4 工作流架构全景图
 
-![Spec 工作流架构全景图](../spec/doc-contract/spec_workflow_architecture.svg)
+![Spec 工作流架构全景图](docs/assets/readme/workflow.svg)
 
-> 上图为 Spec 工作流的完整架构，从 5 阶段流向到文档管道到规则体系到 ADD 审计与 DC1-DC4 文档契约的单页全景。
+> 上图与 README 共用同一套 Anthropic 风格视觉资产（`docs/assets/readme/`）：5 阶段 × 10 步流向（Review 门禁步浅橘底标识）/ 四文档管道 / 审计反馈回路（P1 清零出口）/ RULE 行 / ADD 审计 + DC1-DC4 契约。
 
 **5 阶段 × 10 步流程**：
 
@@ -189,6 +189,8 @@ flowchart TD
 ### 3.2 Review 六大规则（反幻觉机制核心）
 
 > 位于 `SPEC_PROCESS.md` §Review 检查清单。六条规则按"防什么失效模式"组织：
+
+![六条 Review 规则与 E1-E5 证据分级](docs/assets/readme/rules.svg)
 
 | # | 规则 | 防的失效模式 | 关键条款 |
 |---|------|-------------|---------|
