@@ -1,6 +1,7 @@
 # Discovery 007: 幻觉点清单自身含幻觉 — LLM 调研产出的不对称证据审计框架
 
 **状态**: RESOLVED (方法论已落地为可执行工具)
+**版本**: v1.2 (2026-08-16; 公共承载 = docs/ASSERTION_EVIDENCE_FRAMEWORK.md v1.2, 两者同步维护; 权威源 = 本仓库, 见 ADR-0006)
 **模块**: docs/ASSERTION_EVIDENCE_FRAMEWORK.md + scripts/assertion_audit.py (跨模块方法论)
 **发现日期**: 2026-08-16
 **发现背景**: Phase 7C (v1.7 多变量时序与混频模块) 调研产出经 3 审计 agent 全量独立重查, 发现"排幻觉点"的调研报告自身含 8 处实质错误 — 其中两处 (V8/CI5) 属"把正确事实标成幻觉"型, 对下游 spec 危害大于幻觉本身
@@ -83,5 +84,5 @@ Cpp_Hub 的调研工作流以"幻觉点清单"为核心产出 (Phase 7B 51 项 G
 ## 关联
 
 - 实例化路径: Phase 7C 调研 (docs/research/PHASE7C_RESEARCH.md v1.1) = 本发现的完整现场记录
-- 框架: docs/ASSERTION_EVIDENCE_FRAMEWORK.md (公共, §1-§7) + scripts/assertion_audit.py (本地)
+- 框架: docs/ASSERTION_EVIDENCE_FRAMEWORK.md (公共, §1-§9) + scripts/assertion_audit.py (本地)
 - 认知架构对应: "不信任系统"的又一实例 — 此前不信任因子/模型/博主/自己的判断 (Lean4), 本次不信任**验证产物本身**; 验证层必须与生成层独立且结构不同 (探针为纯脚本, 与 LLM 生成异构)

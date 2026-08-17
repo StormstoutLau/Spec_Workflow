@@ -8,7 +8,7 @@
 |------|------|------|--------|
 | [ADR-0004](../../adr/ADR-0004-adopt-external-benchmark-heterogeneity-quarantine.md) | 对抗审查异质性约束与测试隔离四要素 | accepted | 异构基座 + 单向权限 + quarantine 四要素 + RTM 反向追溯 |
 | [ADR-0005](../../adr/ADR-0005-audit-evidence-binding-spec-workflow.md) | 审计证据绑定（取证矩阵标准化） | accepted | E1-E5 证据五分类 + 双向映射 + 诚实结果列 |
-| [ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md) | 断言证据框架双份并存——差异分析与权威源决策 | **proposed**（方案 B 待确认） | 本仓库为权威源，v1.2 回吸收 Cpp_Hub v1.1 增量 |
+| [ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md) | 断言证据框架双份并存——差异分析与权威源决策 | accepted（2026-08-16，方案 B 已执行） | 本仓库为权威源，v1.2 已回吸收 Cpp_Hub v1.1 增量 |
 
 ## 编号空间登记
 

@@ -2,7 +2,7 @@
 id: ADR-0006
 type: adr
 version: 1.0
-status: proposed
+status: accepted
 date: 2026-08-16
 depends: [ADR-0005, FWK-ASSERTION, DIS-007]
 upstream: null
@@ -16,7 +16,7 @@ upstream: null
 |------|-----|
 | 编号 | ADR-0006 |
 | 日期 | 2026-08-16 |
-| 状态 | proposed（方案 B 待用户确认后升 accepted） |
+| 状态 | accepted（2026-08-16 用户确认方案 B；v1.2 增量合并已执行） |
 | 决策者 | Scott (鹏) + Claude GLM-5.3 |
 | 相关文档 | [ASSERTION_EVIDENCE_FRAMEWORK.md](../docs/ASSERTION_EVIDENCE_FRAMEWORK.md)（本仓库 v1.0）、[源项目·Cpp_Hub/docs/ASSERTION_EVIDENCE_FRAMEWORK.md]（v1.1）、[DIS-007](../docs/007_hallucination_audit_asymmetric_evidence.md)、[ADR-0005](./ADR-0005-audit-evidence-binding-spec-workflow.md)、[PLAN.md](../spec/doc-contract/PLAN.md) |
 | 取代 | 无 |
@@ -56,7 +56,7 @@ Cpp_Hub 侧维持"007 ↔ 框架"同步对；本仓库侧是 v1.0 时刻的**单
 
 "拆分迁移"模式（DIS-001~006 留源项目、007+框架随迁）+ **跨仓库无同步机制**。Cpp_Hub 的"版本同步维护"约定（§9）仅在源仓库内部闭环，不约束本仓库副本。迁移切片后源侧继续迭代，快照必然滞后——这不是假设风险，是已发生一次的实证。
 
-## 决策（Decision，proposed）
+## 决策（Decision，accepted 2026-08-16）
 
 **方案 B：Spec_Workflow 仓库为权威源。** 执行语义：
 
@@ -129,3 +129,4 @@ Cpp_Hub 侧维持"007 ↔ 框架"同步对；本仓库侧是 v1.0 时刻的**单
 | 日期 | 变更 |
 |------|------|
 | 2026-08-16 | 初始版本（proposed；差异分析五块定位 + 成对漂移实证 + 方案 B 提案，待用户确认） |
+| 2026-08-16 | proposed → accepted（用户确认方案 B）。v1.2 合并执行：框架文档落盘 v1.2（318 行，含修订历史节）；DIS-007 补版本行 v1.2 + §1-§9 交叉引用修正；Cpp_Hub 侧指针待源项目会话添加（跨仓库动作，见决策 3） |

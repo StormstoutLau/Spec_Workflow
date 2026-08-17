@@ -121,9 +121,9 @@ upstream: null
 | # | 位置 | 修改点 |
 |---|------|--------|
 | F1 | L3-7 头部 | → front-matter（id: FWK-ASSERTION, type: framework, version: 1.0, status: active, **upstream: 声明与 Cpp_Hub 份的权威关系**） |
-| F2 | L236-237 | 状态词表声明为全局词表权威来源（G2 引用此处） |
-| F3 | L109、L179 | assertion_audit.py → `[本地工具·仓库外]`（G3 第 4 档） |
-| F4 | （新增）upstream 语义落地 | 与 Cpp_Hub/docs/ASSERTION_EVIDENCE_FRAMEWORK.md 的双份关系：本仓库份 = 权威源（推测待用户确认），Cpp_Hub 份后续对齐 |
+| F2 | §7 模板内状态词表（v1.2 行号 L262-264） | 状态词表声明为全局词表权威来源（G2 引用此处） |
+| F3 | assertion_audit.py 共 3 处（§4.3 / §7 引言 / §7 审计闭环，v1.2 行号 L137/L207/L258） | → `[本地工具·仓库外]`（G3 第 4 档） |
+| F4 | （新增）upstream 语义落地 | 与 Cpp_Hub/docs/ASSERTION_EVIDENCE_FRAMEWORK.md 的双份关系：本仓库份 = 权威源（ADR-0006 accepted，v1.2 合并已执行），Cpp_Hub 份待加迁移指针对齐 |
 
 ### spec/templates/ 4 份（9 处，v1.2 增 1）
 
@@ -196,6 +196,6 @@ Step G  CODE_WIKI 尾随同步
 
 1. G2 双语取舍（全英/全中/映射表）
 2. `design` 是否入 type 词表（本 PLAN 自举暴露的缺口）
-3. upstream 权威源方向：已由 [ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md) 承载（proposed 方案 B，待用户确认后 F4 落地）
+3. ~~upstream 权威源方向~~ 已解决：[ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md) accepted（方案 B），v1.2 合并已执行
 4. Crucix 消费方的变更通知机制（职责边界声明）
 5. 规则 re-qualification（90 天重审）——学习回路升级独立议题，不在本方案范围
