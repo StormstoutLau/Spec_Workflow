@@ -1,8 +1,18 @@
 # Discovery 007: 幻觉点清单自身含幻觉 — LLM 调研产出的不对称证据审计框架
 
-**状态**: RESOLVED (方法论已落地为可执行工具)
+---
+id: DIS-007
+type: discovery
+version: 1.2
+status: toolized
+date: 2026-08-16
+depends: [FWK-ASSERTION]
+upstream: null
+---
+
+**状态**: toolized（方法论已落地为可执行工具；原 RESOLVED，DC2 词表化改标）
 **版本**: v1.2 (2026-08-16; 公共承载 = docs/ASSERTION_EVIDENCE_FRAMEWORK.md, 同步对版本声明见该框架 §9——框架 v1.3 词表分型不触及本发现内容, 007 不随升; 权威源 = 本仓库, 见 ADR-0006)
-**模块**: docs/ASSERTION_EVIDENCE_FRAMEWORK.md + scripts/assertion_audit.py (跨模块方法论)
+**模块**: docs/ASSERTION_EVIDENCE_FRAMEWORK.md + `scripts/assertion_audit.py` [本地工具·仓库外] (跨模块方法论)
 **发现日期**: 2026-08-16
 **发现背景**: Phase 7C (v1.7 多变量时序与混频模块) 调研产出经 3 审计 agent 全量独立重查, 发现"排幻觉点"的调研报告自身含 8 处实质错误 — 其中两处 (V8/CI5) 属"把正确事实标成幻觉"型, 对下游 spec 危害大于幻觉本身
 
@@ -66,7 +76,7 @@ Cpp_Hub 的调研工作流以"幻觉点清单"为核心产出 (Phase 7B 51 项 G
 - **8 错误逐条修正** (PHASE7C_RESEARCH.md v1.1): AR2/V8/CI5/midas_r BFGS/ZA 0.11.0/ZA −5.27644/Lütkepohl §3.6.1/fpp2 §8.1
 - **反事实检验**: 7/8 (A 类) 若生成期强制"链接+引文"当场拦截; 唯一 B 类 (CI5) 由探针机械终结 — 分类与工具各自命中设计目标
 - **NP2 裁决闭环** (类型 I 的处置实例): `mcp_scholar-mirror.fetch_by_doi` → Semantic Scholar openAccessPdf 绿色副本 → BC wp369 + AU ng_perron00 双工作稿 pypdf 提取 eq.(12) 逐字一致 → 4 源冻结 β̂₀² 形式
-- **工具自检**: `assertion_audit.py demo` 离线 4/4 通过 (CI5 证伪/NP 存活/计数证伪/STEP_GAP 检出), commit c0d1d09
+- **工具自检**: `scripts/assertion_audit.py` [本地工具·仓库外] `demo` 离线 4/4 通过 (CI5 证伪/NP 存活/计数证伪/STEP_GAP 检出), commit c0d1d09
 
 ## 工具链副发现 (NP2 裁决过程)
 

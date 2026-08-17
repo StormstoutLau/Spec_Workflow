@@ -1,5 +1,15 @@
 # 设计文档：<feature_name>
 
+---
+id: <feature-kebab>-DESIGN
+type: design
+version: 1.0
+status: draft
+date: YYYY-MM-DD
+depends: [<feature-kebab>-RESEARCH]
+upstream: null
+---
+
 > **Feature**: <feature_name>
 > **创建日期**: YYYY-MM-DD
 > **状态**: 草稿 / Review 中 / 已验证

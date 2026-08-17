@@ -1,7 +1,7 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.1（2026-08-17，第二次回流批次后同步：+ADR-0006~0009 / +M7 账本 / +discoveries / +spec 三 feature 目录 / SPEC_PROCESS v1.4 / 框架 v1.4）
-> **覆盖对象**: 本仓库全部文档（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007、断言证据框架 v1.4、4 个模板、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×2、spec/ 三 feature 四件套）
+> **Wiki 版本**: v1.2（2026-08-18，P-003 doc-contract 执行批次同步：DC1-DC4 契约落地 / RULE-1~6 冠名 + rules 登记块 / +ADR_TEMPLATE / PLAN v1.5 / 路径与分级差异消解）
+> **覆盖对象**: 本仓库全部文档（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007、断言证据框架 v1.4、5 个模板（四件套 + ADR）、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×2、spec/ 三 feature 目录）
 > **仓库性质**: 纯文档型方法论仓库 —— 无源代码、无构建系统、无运行时；"运行方式" = 工作流的执行方式（见 §6）
 
 ---
@@ -65,11 +65,11 @@ f:\Spec_Workflow/
 │   ├── discoveries/README.md             # 发现三态索引（DIS-007/008）
 │   └── dev-log/                          # DEV-LOG-001/002（事件叙事）
 └── spec/
-    ├── templates/              # 4 个标准模板
-    ├── doc-contract/PLAN.md    # 文档规范改造方案 v1.4（P-003 待执行）
+    ├── templates/              # 5 个标准模板（四件套 + ADR_TEMPLATE，P-003 Step F）
+    ├── doc-contract/PLAN.md    # 文档规范改造方案 v1.5（P-003 执行中）
     ├── cpp-hub-gap-analysis/   # 差距分析 RESEARCH + AUDIT（第二次回流依据）
     ├── cpp-hub-absorption/     # 吸收复用四件套（DESIGN v1.1 + IMPL + CHECKLIST，已验收）
-    └── adr0006-pointer/        # ADR-0006 决策 3 调研（P-001 待执行）
+    └── adr0006-pointer/        # ADR-0006 决策 3 调研（P-001 依据，已执行）
 ```
 
 ### 2.2 逻辑架构分层
@@ -131,7 +131,7 @@ flowchart TD
     S10 -->|发现 P1/P2| S9
 ```
 
-每个 feature 在 `docs/spec/<feature>/` 下产出 4 份文档（RESEARCH → DESIGN → IMPLEMENTATION → CHECKLIST），实现代码在别处（本仓库只管流程不管代码）。
+每个 feature 在 `spec/<feature>/` 下产出 4 份文档（RESEARCH → DESIGN → IMPLEMENTATION → CHECKLIST），实现代码在别处（本仓库只管流程不管代码）。
 
 ---
 
@@ -146,7 +146,7 @@ flowchart TD
 | 内容块 | 位置 | 说明 |
 |--------|------|------|
 | 10 步流程图 | 文首 | ASCII 图，5 阶段 × 10 步，每步标注工具与产出路径 |
-| 文档目录结构 | §文档目录结构 | `docs/spec/<feature>/` 四文档约定 |
+| 文档目录结构 | §文档目录结构 | `spec/<feature>/` 四文档约定 |
 | Review 独立性规则 1-6 | §Review 检查清单 | 反幻觉核心机制（见 §3.3） |
 | ADD 内联方法 | §与 ADD 的关系 | Iron Law + 审计四阶段 + 产出修复循环（v1.2.1 起自包含） |
 | 取证矩阵 | §取证矩阵 | E1-E5 证据分级表 + 矩阵形态示例 + 风险分级执行 + 复核方式 |
@@ -158,7 +158,7 @@ flowchart TD
 | Step | 阶段 | 动作 | 产出 | Review 点 |
 |------|------|------|------|----------|
 | 1 | 调研 | 用 mcp_paper-search / mcp_english-search / mcp_research-tools / mcp_scholar-mirror / WebSearch / WebFetch / SearchCodebase 调研 | （素材） | — |
-| 2 | 调研 | 按 RESEARCH 模板成文；验证所有文献引用（arXiv 编号/作者/年份）；标注置信度 | `docs/spec/<feature>/RESEARCH.md` | Step 2 Review（5 项） |
+| 2 | 调研 | 按 RESEARCH 模板成文；验证所有文献引用（arXiv 编号/作者/年份）；标注置信度 | `spec/<feature>/RESEARCH.md` | Step 2 Review（5 项） |
 | 3 | 设计 | 架构选择、模块划分、接口定义、数据流 | `DESIGN.md` | — |
 | 4 | 设计 | 检查设计是否基于已验证调研、有无未验证假设、有无论证驱动归因扭曲 | — | Step 4 Review（5 项，含替代方案≥2、职责边界） |
 | 5 | 实施 | 工程细节：版本、依赖、兼容性、接口签名；排除低效操作 | `IMPLEMENTATION.md` | — |
@@ -174,12 +174,14 @@ flowchart TD
 
 | # | 规则 | 防的失效模式 | 关键条款 |
 |---|------|-------------|---------|
-| 1 | **时序独立** | review checkbox 与正文同一次 Write 打勾（M6 并发自查） | checkbox 只能在文档完稿后的独立 pass 勾选；同次生成的须标 `[自查·并发]` 待复核升级为 `[已复核]` |
-| 2 | **统计溯源** | 从 pytest 总数推算分项通过数（M2 §10.1 虚报） | 验收统计只能来自逐项核对表（每行附测试名/实测值），禁止推算 |
-| 3 | **隔离四要素**（v1.2 升级） | skip-and-forget 反模式 | 被隔离测试须有 Owner / Deadline（30 天修复或删除）/ 降权运行（仍跑仍记录，只是不阻塞）/ Re-qualification（恢复阻塞需证明稳定性） |
-| 4 | **单 Agent 自查声明** | 既写又审的结构性无对抗 | 同 agent 自查结论标 `自查（单视角）`；文献依据：同上下文反思纠错率 <2%（arXiv:2510.08308），自我纠错盲区率 64.5%（arXiv:2507.02778） |
-| 5 | **审查异质性约束**（v1.2 预注册） | 同质 Multi-Agent Debate 无效且贵（36 场景胜率<20%、3-5x token，arXiv:2502.08788） | reviewer 与 implementer 用**异构基座**（不同模型家族）；reviewer 输出**只标记、永不改写实现**（单向权限，防 answer corruption） |
-| 6 | **审计证据绑定**（v1.3） | 无证据绑定的"全绿表演"（✅ 成本 O(1)、复核成本 O(n)） | 审计报告必含取证矩阵；四条子规则见 §3.5 |
+| RULE-1 | **时序独立** | review checkbox 与正文同一次 Write 打勾（M6 并发自查） | checkbox 只能在文档完稿后的独立 pass 勾选；同次生成的须标 `[自查·并发]` 待复核升级为 `[已复核]` |
+| RULE-2 | **统计溯源** | 从 pytest 总数推算分项通过数（M2 §10.1 虚报） | 验收统计只能来自逐项核对表（每行附测试名/实测值），禁止推算 |
+| RULE-3 | **隔离四要素**（v1.2 升级） | skip-and-forget 反模式 | 被隔离测试须有 Owner / Deadline（30 天修复或删除）/ 降权运行（仍跑仍记录，只是不阻塞）/ Re-qualification（恢复阻塞需证明稳定性） |
+| RULE-4 | **单 Agent 自查声明** | 既写又审的结构性无对抗 | 同 agent 自查结论标 `自查（单视角）`；文献依据：同上下文反思纠错率 <2%（arXiv:2510.08308），自我纠错盲区率 64.5%（arXiv:2507.02778） |
+| RULE-5 | **审查异质性约束**（v1.2 预注册） | 同质 Multi-Agent Debate 无效且贵（36 场景胜率<20%、3-5x token，arXiv:2502.08788） | reviewer 与 implementer 用**异构基座**（不同模型家族）；reviewer 输出**只标记、永不改写实现**（单向权限，防 answer corruption） |
+| RULE-6 | **审计证据绑定**（v1.3） | 无证据绑定的"全绿表演"（✅ 成本 O(1)、复核成本 O(n)） | 审计报告必含取证矩阵；四条子规则见 §3.5 |
+
+> 规则稳定 ID（RULE-1~6）与机读登记块（来源事故/失效条件/拦截记录）见 `SPEC_PROCESS.md` §规则登记（DC4，P-003 落地）。
 
 ### 3.3 ADD 审计子系统（Audit-Driven Development）
 
@@ -203,7 +205,7 @@ flowchart TD
 - **审计者永不自动修复**（与规则 5 单向权限同构，防自信但错误的批评腐蚀实现）
 - 审计报告记入开发日志
 
-> 注意：`CHECKLIST_TEMPLATE.md` §8.2 的问题分级表为 P0/P1/P2/P3 四级（比正文多一级 P0），两处存在轻微不一致，使用时以 feature 实际 CHECKLIST 填写为准。
+> 注意：~~`CHECKLIST_TEMPLATE.md` §8.2 的问题分级表为 P0/P1/P2/P3 四级（比正文多一级 P0），两处存在轻微不一致~~ **已解决（P-003 T8a/T8b，2026-08-18）**：CHECKLIST 模板 §8.2 删 P0 行、§10.2 同步改为"所有 P1 项通过"——问题严重性分级全仓统一 P1/P2/P3 三级；"P0"仅存"P0 审计项"一种语义（见 §6.4 消歧）。
 
 ### 3.4 取证矩阵（v1.3 新增，Step 10 审计报告标准节）
 
@@ -383,7 +385,7 @@ def audit_class_b(assertion, source_evidence, auditor_agent):
 
 ```mermaid
 flowchart LR
-    SP[SPEC_PROCESS.md v1.3]
+    SP[SPEC_PROCESS.md v1.4]
     A4[ADR-0004]
     A5[ADR-0005]
     AE[ASSERTION_EVIDENCE_FRAMEWORK]
@@ -406,13 +408,14 @@ flowchart LR
 - **v1.2.1 自包含化**: SPEC_PROCESS 正文已内联 ADR-0001~0003 的教训（归因扭曲案例、职责边界语义）与 M6/M2 案例 —— 仓库中**不存在** ADR-0001~0003 文件，但不影响 SPEC_PROCESS 独立使用
 - **框架 ↔ 工具**: ASSERTION_EVIDENCE_FRAMEWORK 公开 assertion_audit.py 的接口契约，工具本体在本地 scripts/（不进库）
 
-### 5.2 悬空引用（迁移时注意）
+### 5.2 悬空引用（迁移时注意，P-003 DC3 标注后账目）
 
-| 引用位置 | 指向 | 状态 |
+| 引用位置 | 指向 | 状态（DC3 四档归类） |
 |---------|------|------|
-| ADR-0004/0005 元数据"相关文档" | `../../../META_AUDIT_EXTERNAL_BENCHMARK.md`、`META_AUDIT_IMPROVEMENT_REPORT.md` | 源项目文件，未随仓库迁移 |
-| ADR-0004 | `ADR-0003-pure-technical-lean4-solution.md` | 未随仓库迁移 |
-| Discovery 007 | `docs/research/PHASE7C_RESEARCH.md`、`scripts/assertion_audit.py` | 源项目路径/本地工具 |
+| ADR-0004/0005 元数据"相关文档" | `META_AUDIT_EXTERNAL_BENCHMARK.md`、`META_AUDIT_IMPROVEMENT_REPORT.md` | `[外部·未随迁]`——f:\ 根 + Cpp_Hub + Crucix 三处零命中实证（DC3 第 3 档） |
+| ADR-0004 | `ADR-0003-pure-technical-lean4-solution.md` | `[外部·未随迁]`——同上三处零命中实证（断档显式登记于 ADR-0007 附录 A，不补写） |
+| Discovery 007 | `PHASE7C_RESEARCH.md` | `[源项目·Cpp_Hub/docs/research/PHASE7C_RESEARCH.md]`——探针实证可解析（DC3 第 2 档） |
+| Discovery 007 / 框架 | `scripts/assertion_audit.py` | `[本地工具·仓库外]`——本地 scripts/ 惯例，不进库（DC3 第 4 档） |
 
 ### 5.3 外部文献依赖（规则的证据基础）
 
@@ -445,14 +448,14 @@ flowchart LR
 
 ### 6.1 启动新 feature（标准路径）
 
-1. 在目标项目的 `docs/spec/` 下创建 `<feature>/` 目录
+1. 在目标项目的 `spec/` 下创建 `<feature>/` 目录
 2. 从本仓库 `spec/templates/` 复制 4 个模板到该目录（RESEARCH / DESIGN / IMPLEMENTATION / CHECKLIST）
 3. 从 Step 1 开始执行 10 步流程（§3.1 表格），每步完成打勾对应的 Review（遵守规则 1 时序独立：**完稿后的独立 pass 才能勾选**）
 4. 每步完成后更新目标项目 `docs/PROGRESS.md`
-5. 产生架构决策时按 §3.7 格式记 ADR 到 `docs/adr/`
+5. 产生架构决策时按 ADR 模板（`spec/templates/ADR_TEMPLATE.md`）记 ADR 到 `adr/`
 6. 完成后记开发日志到 `docs/dev-log/`（`DEV-LOG-XXX-<feature>-<action>.md`：做了什么/决策依据/遇到的问题/下一步）
 
-> **路径约定差异**: SPEC_PROCESS 约定 feature 目录为 `docs/spec/<feature>/`，而本仓库模板物理位于 `spec/templates/` —— 迁移使用时以 SPEC_PROCESS 的 `docs/spec/` 约定为准。
+> **路径约定差异**: ~~SPEC_PROCESS 约定 `docs/spec/<feature>/`，模板物理位于 `spec/templates/`~~ **已统一（P-003 S2，2026-08-18）**：feature 目录约定 = `spec/<feature>/`（SPEC_PROCESS v1.4 与本仓库物理结构一致，`docs/spec/` 全仓 grep 零命中）。
 
 ### 6.2 调研审计闭环（断言框架路径）
 
@@ -471,7 +474,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 
 ### 6.4 已知注意事项
 
-- **两处 P0/P1-P3 分级语义**：ADD 问题严重性分级（P1 阻断/P2 应修/P3 提示，CHECKLIST 模板另有 P0 级）≠ 取证矩阵的"P0 审计项"（= 不变式/隔离边界/安全相关的高风险审计项，须全量 + E1/E2 证据）
+- **两处 P0/P1-P3 分级语义**：~~ADD 问题严重性分级（CHECKLIST 模板另有 P0 级）~~ **分级差异已消解（P-003 T8a，2026-08-18）**——问题严重性全仓统一 P1/P2/P3；现存唯一 P0 语义 = 取证矩阵的"P0 审计项"（不变式/隔离边界/安全相关的高风险审计项，须全量 + E1/E2 证据），完整消歧见 ADR-0007 附录 B
 - **规则 1 的执行纪律**：同一次生成的 review 章节必须标 `[自查·并发]`，事后独立 pass 复核后才能升级 `[已复核]` —— 这是 M6 教训的直接防线
 - **审计者永不自动修复**：任何 review/audit 输出只标记问题，修复由实现者执行后交复审
 - **官方文档不是真值**：关键断言需双源（statsmodels/arch 官方文档均写错过 ZA 1992 刊名）
@@ -542,14 +545,15 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
 | [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本 + 形态 II 复发分桶 + 命中率 baseline（唯一活载体） |
 | [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open） |
-| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001/P-003/P-004 pending，P-005 done |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001/P-002/P-005 done，P-003 执行中（2026-08-18），P-004 pending |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
 | [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ DEV-LOG-002（cpp-hub-absorption 全链路） |
 | [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.1 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
 | [spec/cpp-hub-gap-analysis/](./spec/cpp-hub-gap-analysis/) | 差距分析 RESEARCH（16A+4B）+ AUDIT（形态 II 三实例谱系） |
-| [spec/doc-contract/PLAN.md](./spec/doc-contract/PLAN.md) | 文档规范改造方案 v1.4（P-003 待执行，含 G→DC 联动） |
-| [spec/adr0006-pointer/](./spec/adr0006-pointer/) | ADR-0006 决策 3 迁移指针调研（P-001 待执行） |
+| [spec/doc-contract/PLAN.md](./spec/doc-contract/PLAN.md) | 文档规范改造方案 v1.5（P-003 执行中：DC1-DC4 契约 + §6 M7 账本指针化） |
+| [spec/adr0006-pointer/](./spec/adr0006-pointer/) | ADR-0006 决策 3 迁移指针调研（P-001 依据，已执行） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |
 | [spec/templates/CHECKLIST_TEMPLATE.md](./spec/templates/CHECKLIST_TEMPLATE.md) | Step 7 验收 checklist 模板（含 ADD Phase 0 质量门与验收统计） |
+| [spec/templates/ADR_TEMPLATE.md](./spec/templates/ADR_TEMPLATE.md) | ADR 模板（P-003 Step F 新增：元数据/范围声明/背景/决策/替代方案/后果/验证骨架，DC1 front-matter） |

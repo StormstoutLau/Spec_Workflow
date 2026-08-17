@@ -1,8 +1,18 @@
 # 调研文档：<feature_name>
 
+---
+id: <feature-kebab>-RESEARCH
+type: design
+version: 1.0
+status: draft
+date: YYYY-MM-DD
+depends: []
+upstream: null
+---
+
 > **Feature**: <feature_name>
 > **创建日期**: YYYY-MM-DD
-> **状态**: 草稿 / Review 中 / 已验证
+> **状态**: draft（草稿）/ in-review（Review 中）/ verified（已验证）
 > **Spec 步骤**: Step 1-2
 
 ---

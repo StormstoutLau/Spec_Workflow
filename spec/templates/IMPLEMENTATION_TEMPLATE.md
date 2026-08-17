@@ -1,8 +1,18 @@
 # 实施文档：<feature_name>
 
+---
+id: <feature-kebab>-IMPLEMENTATION
+type: design
+version: 1.0
+status: draft
+date: YYYY-MM-DD
+depends: [<feature-kebab>-DESIGN, <feature-kebab>-RESEARCH]
+upstream: null
+---
+
 > **Feature**: <feature_name>
 > **创建日期**: YYYY-MM-DD
-> **状态**: 草稿 / Review 中 / 已验证
+> **状态**: draft（草稿）/ in-review（Review 中）/ verified（已验证）
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
 > **基于调研**: [RESEARCH.md](./RESEARCH.md)

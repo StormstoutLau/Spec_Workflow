@@ -1,5 +1,15 @@
 # 断言分级证据框架 (A/B/C) — 调研与审计工作流
 
+---
+id: FWK-ASSERTION
+type: framework
+version: 1.4.1
+status: active
+date: 2026-08-17
+depends: [DIS-007, ADR-0006]
+upstream: null
+---
+
 > **版本**: v1.4 (2026-08-17; 新增 R7 统计表计数机械枚举规则 — P-005 收口, 依据 GAP_ANALYSIS_AUDIT §4.3 结构性缺口 + P2-1 形态 II 实证) / v1.3 (2026-08-17; STEP_GAP 分型两态化 CLOSED/OPEN — cpp-hub-absorption D1, 依据 Cpp_Hub pilot §5.1-3 提案) / v1.2 (2026-08-16; 回吸收 Cpp_Hub 副本的 v1.1 增量, 本仓库为权威源 — 见 ADR-0006)
 > **来源**: Phase 7C 调研审计复盘 (126 条声明 → 8 处实质错误) + NP2 τ_T(k) MCP 学术搜索裁决
 > **用途**: 所有后续调研 agent / 审计 agent 的 prompt 约束与核验流程基准
@@ -135,7 +145,7 @@ CI5 案例解剖:
 
 ### 4.3 双盲重推导流程 (脚本骨架)
 
-> **可执行实现**: `scripts/assertion_audit.py` (本地, 不进公共仓库 — 同 `scripts/` 目录惯例) — 完整实现 5 类探针 + 双盲重推导 + STEP_GAP 检测 + 仲裁 prompt 生成; 内置 CI5/NP/计数/STEP_GAP 四个离线自检工作示例, 运行 `python scripts/assertion_audit.py demo` 验证。auditor 可插拔 (manual / OpenAI 兼容端点, 支持 LM Studio 三机)。
+> **可执行实现**: `scripts/assertion_audit.py` **[本地工具·仓库外]**（同 `scripts/` 目录惯例, 不进公共仓库） — 完整实现 5 类探针 + 双盲重推导 + STEP_GAP 检测 + 仲裁 prompt 生成; 内置 CI5/NP/计数/STEP_GAP 四个离线自检工作示例, 运行 `python scripts/assertion_audit.py demo` 验证。auditor 可插拔 (manual / OpenAI 兼容端点, 支持 LM Studio 三机)。
 
 ```python
 def audit_class_b(assertion, source_evidence, auditor_agent):
@@ -208,8 +218,9 @@ def audit_class_b(assertion, source_evidence, auditor_agent):
 
 ## 7. 调研 Agent 报告模板 Prompt 约束 (可直接粘贴)
 
-> 目的: 让调研报告本身成为审计工具的直接输入 — `python scripts/assertion_audit.py audit --input <报告.md>`
+> 目的: 让调研报告本身成为审计工具的直接输入 — `scripts/assertion_audit.py` **[本地工具·仓库外]** `audit --input <报告.md>`
 > 自动提取附录 B 的 ```assertions 机读块 (已实现并验证)。生成端与审计端共用同一份状态词表与 ID 体系。
+> **全局词表权威声明（DC2）**: 本节"状态词表"为全仓状态词的权威来源（discovery/process-spec/framework/template/design 各 type 词表映射见 ADR-0007 D4/D5 裁定）。
 
 ```markdown
 【报告模板约束 — 你的 Markdown 输出必须遵循以下骨架: 逐节存在, 顺序不变, ID 稳定不复用】
@@ -261,7 +272,7 @@ R7 (v1.4) §0 统计表的每个计数必须由机械枚举生成 (如 `grep -c 
 ## 附录 C: 假设区
 - [H1] <断言> (查证路径: <具体到工具/URL/文献>)
 
-审计闭环 (报告写完后必须执行并追加):
+审计闭环 (报告写完后必须执行并追加; 工具为 [本地工具·仓库外], 获取见 §4.3):
   python scripts/assertion_audit.py audit --input <本报告.md> \
       --auditor openai --base-url <LM Studio端点> --report <审计输出.md>
 审计结论以 "## 审计结论 (<日期>)" 章节追加回本报告末尾, 逐断言给出:
@@ -326,3 +337,4 @@ R7 (v1.4) §0 统计表的每个计数必须由机械枚举生成 (如 `grep -c 
 | v1.2 | 2026-08-16 | 回吸收 v1.1 全部增量，权威源落位本仓库（ADR-0006 方案 B，用户确认）；§9 路径本地化 + 同步对版本声明 v1.2 |
 | v1.3 | 2026-08-17 | STEP_GAP 分型两态化（STEP_GAP_CLOSED / STEP_GAP_OPEN），原单词态废除（兼容: 历史报告读作 OPEN）。来源: cpp-hub-absorption 设计 D1（Tier1）← Cpp_Hub pilot §5.1-3 提案 + B1 机械闭合实例；同步修改 §4.3 流程注释/§4.4-3/§6 效率账/§7 词表/§7.1 闭环动作/§7.2 报告骨架/§9 同步对声明（007 不随升） |
 | v1.4 | 2026-08-17 | 新增 R7（§0 统计表计数机械枚举规则）+ §3 自检清单 +1 项——P-005 收口。依据: GAP_ANALYSIS_AUDIT §4.3 结构性缺口（元断言不在 A 类拦截网）+ P2-1 实证。**DIS-008 复发修复**: 本版编辑前 Read 检出 v1.3 头部行与 §9 同步对声明两处被 Tier1 批次竞态回滚（当时终验 grep 未覆盖此两行），随本版一并修复——拦截实例再次支撑"破坏性操作后必须 grep 终验且终验模式须覆盖全部修改行" |
+| v1.4.1 | 2026-08-17 | P-003 doc-contract 批量改造（Step C/F1-F4）: +front-matter（id: FWK-ASSERTION, type: framework, DC1 七字段）; §4.3/§7×2 的 assertion_audit.py 标注 [本地工具·仓库外]（F3/DC3 第 4 档）; §7 增全局词表权威声明（F2/DC2）。内容零变更，仅治理层标注 |

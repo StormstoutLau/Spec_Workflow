@@ -1,5 +1,15 @@
 # 审查验收 Checklist：<feature_name>
 
+---
+id: <feature-kebab>-CHECKLIST
+type: design
+version: 1.0
+status: pending
+date: YYYY-MM-DD
+depends: [<feature-kebab>-IMPLEMENTATION, <feature-kebab>-DESIGN]
+upstream: null
+---
+
 > **Feature**: <feature_name>
 > **创建日期**: YYYY-MM-DD
 > **状态**: 待验收 / 验收中 / 已验收
@@ -114,7 +124,6 @@
 
 | 严重性 | 发现 | 证据 | 修复建议 |
 |--------|------|------|---------|
-| P0 | | | |
 | P1 | | | |
 | P2 | | | |
 | P3 | | | |
@@ -156,7 +165,7 @@
 
 ### 10.2 验收决定
 
-- [ ] **验收通过**：所有 P0/P1 项通过，无阻塞性问题
+- [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
 - [ ] **有条件通过**：<条件>
 - [ ] **验收失败**：<原因>
 

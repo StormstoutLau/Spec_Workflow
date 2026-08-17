@@ -1,5 +1,15 @@
 # ADR-0005: 审计证据绑定约束——Step 10 审计报告取证矩阵标准化
 
+---
+id: ADR-0005
+type: adr
+version: 1.0
+status: accepted
+date: 2026-08-16
+depends: [SPEC-PROCESS, ADR-0004]
+upstream: null
+---
+
 ## 元数据
 
 | 字段 | 值 |
@@ -8,7 +18,7 @@
 | 日期 | 2026-08-16 |
 | 状态 | 接受 |
 | 决策者 | Scott (鹏) + Claude GLM-5.3 |
-| 相关文档 | [SPEC_PROCESS.md](../../SPEC_PROCESS.md), [ADR-0004](./ADR-0004-adopt-external-benchmark-heterogeneity-quarantine.md), [META_AUDIT_IMPROVEMENT_REPORT.md](../../../META_AUDIT_IMPROVEMENT_REPORT.md) |
+| 相关文档 | [SPEC_PROCESS.md](../../SPEC_PROCESS.md), [ADR-0004](./ADR-0004-adopt-external-benchmark-heterogeneity-quarantine.md), [META_AUDIT_IMPROVEMENT_REPORT.md]（[外部·未随迁]） |
 | 取代 | 无 |
 
 ## 范围声明（先于一切）

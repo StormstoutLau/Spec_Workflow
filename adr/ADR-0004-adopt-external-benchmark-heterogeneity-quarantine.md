@@ -1,5 +1,15 @@
 # ADR-0004: 采纳外部对标结论——对抗审查异质性约束与测试隔离四要素
 
+---
+id: ADR-0004
+type: adr
+version: 1.0
+status: accepted
+date: 2026-08-01
+depends: [SPEC-PROCESS, ADR-0001, ADR-0002, ADR-0003]
+upstream: null
+---
+
 ## 元数据
 
 | 字段 | 值 |
@@ -8,12 +18,14 @@
 | 日期 | 2026-08-01 |
 | 状态 | 接受 |
 | 决策者 | Scott (鹏) + Claude GLM-5.2 |
-| 相关文档 | [META_AUDIT_EXTERNAL_BENCHMARK.md](../../../META_AUDIT_EXTERNAL_BENCHMARK.md), [META_AUDIT_IMPROVEMENT_REPORT.md](../../../META_AUDIT_IMPROVEMENT_REPORT.md), [ADR-0003](./ADR-0003-pure-technical-lean4-solution.md), [SPEC_PROCESS.md](../../SPEC_PROCESS.md) |
+| 相关文档 | [META_AUDIT_EXTERNAL_BENCHMARK.md]（[外部·未随迁]）、[META_AUDIT_IMPROVEMENT_REPORT.md]（[外部·未随迁]）、[ADR-0003]（[外部·未随迁]，三处零命中实证 2026-08-16）、[SPEC_PROCESS.md](../../SPEC_PROCESS.md) |
 | 取代 | 无（扩展 ADR-0003 后的流程决策，不取代任何 ADR） |
 
 ## 背景（Context）
 
-[META_AUDIT_IMPROVEMENT_REPORT.md](../../../META_AUDIT_IMPROVEMENT_REPORT.md) 提出 N/S/L 三级改进建议后，[META_AUDIT_EXTERNAL_BENCHMARK.md](../../../META_AUDIT_EXTERNAL_BENCHMARK.md) 对其执行了外部对标审查（7 次检索、10 组文献交叉验证）。三条关键结论要求修订原建议：
+> **编号说明**: 下文 L1-L4 / S1-S5 为[外部·未随迁]元审计改进报告的建议编号体系（L=流程层 / S=统计层），仅本背景节引用；与 SPEC_PROCESS 的 Step 1-10 及本仓 RULE/M 编号无关联。
+
+[META_AUDIT_IMPROVEMENT_REPORT.md]（[外部·未随迁]） 提出 N/S/L 三级改进建议后，[META_AUDIT_EXTERNAL_BENCHMARK.md]（[外部·未随迁]） 对其执行了外部对标审查（7 次检索、10 组文献交叉验证）。三条关键结论要求修订原建议：
 
 1. **L1（对抗式审查 Agent）面临 MAD 文献清算风险**：2025 年系统性实证（arXiv:2502.08788, ICLR 2025；arXiv:2311.17371, ICML 2024）表明同质 Multi-Agent Debate 在 36 个实验场景中对简单 CoT 的胜率无一个超过 20%，消耗 3-5x token；When Debate Fails（2025）报告辩论使模型 33% 更可能强化偏见，且存在 answer corruption（弱 agent 的自信错误带偏强 agent）。幸存区间仅限：**异质角色 + 可验证对象 + 反驳导向**。
 2. **S2（skip 审计）落后于业界 test quarantine pattern**：业界方案多三要素——Owner（责任人）、Deadline（30 天修复或删除）、Re-qualification（重新上岗需证明稳定性），且隔离 ≠ 跳过（降权运行而非停跑）。"skip-and-forget" 是公认反模式。
