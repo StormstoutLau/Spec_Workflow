@@ -1,7 +1,7 @@
 ---
 id: doc-contract-refactor
 type: design
-version: 1.3
+version: 1.4
 status: final-pending-execution
 date: 2026-08-16
 depends: [SPEC_PROCESS.md, adr/ADR-0004, adr/ADR-0005, docs/DIS-007, docs/ASSERTION_EVIDENCE_FRAMEWORK, spec/templates/*4]
@@ -24,12 +24,15 @@ upstream: null
 | v1.1 | 2026-08-16 | P1×2 修正：DIS-001~006 改"拆分迁移"登记（探针实证）；P0 改名撤销、消歧入 ADR-0007 | 同基座自查 |
 | v1.2 | 2026-08-16 | P2×7 修正融入（见 §7 修正记录）；E1 复核修正复审漏计 1 处（DIS-007 L68） | 异构复审 + E1 亲验 |
 | v1.3 | 2026-08-16 | 双份并存差异实证（v1.0 vs v1.1 成对漂移）→ 新增 [ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md)（proposed，方案 B 待确认）；doc-contract 让位为 ADR-0007；P3-9 闭环入 ADR-0006，P3-10 部分缓解 | fc+Read 双侧取证 |
+| v1.4 | 2026-08-16 | G1 增文件命名规则 `<FEATURE>_<DOCTYPE>.md`；两份调研文档按此重命名（RESEARCH.md → CPP_HUB_GAP_ANALYSIS_RESEARCH.md / ADR0006_POINTER_RESEARCH.md），id 同步 | 用户指令 + 模板 T1/Cpp_Hub 先例 |
 
 ---
 
 ## 1. 全局统一动作（G1-G4，含 P2-3/P2-4 修正）
 
 ### G1. 统一 front-matter（七字段，P2-4 修正：六→七）
+
+**文件命名规则（v1.4 新增）**: spec 产出文件名 = `<FEATURE>_<DOCTYPE>.md`（大写下划线，如 `CPP_HUB_GAP_ANALYSIS_RESEARCH.md`），front-matter id = `<feature-kebab>-<doctype>`（如 `cpp-hub-gap-analysis-RESEARCH`）。依据：模板 T1 id 约定 + Cpp_Hub 先例（`SLSQP_EXTENSION_RESEARCH.md`）；文件跨目录/跨仓库引用时保持全局唯一可 grep。存量 `PLAN.md` 为方案文档非四件套，保留原名。
 
 每份文档顶部 YAML 块：
 
