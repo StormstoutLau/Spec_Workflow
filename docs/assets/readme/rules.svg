@@ -1,0 +1,80 @@
+<svg viewBox="0 0 1200 660" width="1200" height="660" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="660" fill="#F0EEE6"/>
+
+  <text x="60" y="56" font-family="Georgia, 'Times New Roman', serif" font-size="14" letter-spacing="4" fill="#55544F">THE RULES</text>
+  <text x="60" y="92" font-family="Georgia, 'Times New Roman', serif" font-size="30" fill="#141413">六条 Review 规则</text>
+  <rect x="60" y="106" width="36" height="3" fill="#D97757"/>
+  <text x="1140" y="92" text-anchor="end" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#55544F">每条规则按「防什么失效」组织，登记来源事故与失效条件</text>
+
+  <g font-family="-apple-system, 'Segoe UI', sans-serif">
+    <!-- Row 1 -->
+    <g>
+      <rect x="60" y="134" width="352" height="148" rx="8" fill="#FFFFFF" stroke="#DBD8CC"/>
+      <text x="84" y="170" font-family="Georgia, serif" font-size="22" fill="#D97757">RULE-1</text>
+      <text x="84" y="198" font-size="16" font-weight="600" fill="#141413">时序独立</text>
+      <text x="84" y="226" font-size="12.5" fill="#3D3D3A">Review checkbox 只能在文档完稿后的</text>
+      <text x="84" y="246" font-size="12.5" fill="#3D3D3A">独立 pass 勾选，禁止与正文同次写入。</text>
+      <text x="84" y="270" font-size="11" fill="#55544F">来源事故：M6 并发自查（22 测试失败）</text>
+    </g>
+    <g>
+      <rect x="424" y="134" width="352" height="148" rx="8" fill="#FFFFFF" stroke="#DBD8CC"/>
+      <text x="448" y="170" font-family="Georgia, serif" font-size="22" fill="#D97757">RULE-2</text>
+      <text x="448" y="198" font-size="16" font-weight="600" fill="#141413">统计溯源</text>
+      <text x="448" y="226" font-size="12.5" fill="#3D3D3A">验收统计只能来自逐项核对表，</text>
+      <text x="448" y="246" font-size="12.5" fill="#3D3D3A">禁止从测试通过总数推算分项数。</text>
+      <text x="448" y="270" font-size="11" fill="#55544F">来源事故：M2 §10.1 统计虚报</text>
+    </g>
+    <g>
+      <rect x="788" y="134" width="352" height="148" rx="8" fill="#FFFFFF" stroke="#DBD8CC"/>
+      <text x="812" y="170" font-family="Georgia, serif" font-size="22" fill="#D97757">RULE-3</text>
+      <text x="812" y="198" font-size="16" font-weight="600" fill="#141413">隔离四要素</text>
+      <text x="812" y="226" font-size="12.5" fill="#3D3D3A">Owner / Deadline(30天) / 降权运行 /</text>
+      <text x="812" y="246" font-size="12.5" fill="#3D3D3A">Re-qualification —— 防 skip-and-forget。</text>
+      <text x="812" y="270" font-size="11" fill="#55544F">对标：业界 test quarantine pattern</text>
+    </g>
+
+    <!-- Row 2 -->
+    <g>
+      <rect x="60" y="300" width="352" height="148" rx="8" fill="#FFFFFF" stroke="#DBD8CC"/>
+      <text x="84" y="336" font-family="Georgia, serif" font-size="22" fill="#D97757">RULE-4</text>
+      <text x="84" y="364" font-size="16" font-weight="600" fill="#141413">单视角声明</text>
+      <text x="84" y="392" font-size="12.5" fill="#3D3D3A">同 agent 既写又审必须标注「自查（单视角）」，</text>
+      <text x="84" y="412" font-size="12.5" fill="#3D3D3A">无对抗即继承同一组盲区。</text>
+      <text x="84" y="436" font-size="11" fill="#55544F">文献：同上下文反思纠错率 &lt;2%（arXiv:2510.08308）</text>
+    </g>
+    <g>
+      <rect x="424" y="300" width="352" height="148" rx="8" fill="#FFFFFF" stroke="#DBD8CC"/>
+      <text x="448" y="336" font-family="Georgia, serif" font-size="22" fill="#D97757">RULE-5</text>
+      <text x="448" y="364" font-size="16" font-weight="600" fill="#141413">异构审查</text>
+      <text x="448" y="392" font-size="12.5" fill="#3D3D3A">reviewer 与 implementer 用不同模型家族；</text>
+      <text x="448" y="412" font-size="12.5" fill="#3D3D3A">reviewer 只标记、永不改写实现。</text>
+      <text x="448" y="436" font-size="11" fill="#55544F">文献：同质辩论 36 场景胜率 &lt;20%（arXiv:2502.08788）</text>
+    </g>
+    <g>
+      <rect x="788" y="300" width="352" height="148" rx="8" fill="#FDF4EF" stroke="#D97757" stroke-width="1.5"/>
+      <text x="812" y="336" font-family="Georgia, serif" font-size="22" fill="#D97757">RULE-6</text>
+      <text x="812" y="364" font-size="16" font-weight="600" fill="#141413">审计证据绑定</text>
+      <text x="812" y="392" font-size="12.5" fill="#3D3D3A">审计报告必含取证矩阵；每条结论绑定</text>
+      <text x="812" y="412" font-size="12.5" fill="#3D3D3A">E1–E5 可重放证据，推测级禁入结论。</text>
+      <text x="812" y="436" font-size="11" fill="#B4552F">把「假装审查」的成本抬升至「真实审查」</text>
+    </g>
+  </g>
+
+  <text x="60" y="500" font-family="Georgia, serif" font-size="14" letter-spacing="3" fill="#55544F">EVIDENCE HIERARCHY</text>
+  <g font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12.5">
+    <rect x="60" y="516" width="1080" height="44" rx="6" fill="#FFFFFF" stroke="#DBD8CC"/>
+    <text x="84" y="543" font-family="Georgia, serif" font-weight="600" fill="#D97757">E1</text>
+    <text x="120" y="543" fill="#141413">可重放命令（git diff / pytest）</text>
+    <text x="420" y="543" font-family="Georgia, serif" font-weight="600" fill="#D97757">E2</text>
+    <text x="456" y="543" fill="#141413">运行时脚本取证（须含对抗场景）</text>
+    <text x="770" y="543" font-family="Georgia, serif" font-weight="600" fill="#D97757">E3</text>
+    <text x="806" y="543" fill="#141413">静态行号（绑 commit hash）</text>
+  </g>
+  <g font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12.5">
+    <rect x="60" y="568" width="1080" height="44" rx="6" fill="#FFFFFF" stroke="#DBD8CC"/>
+    <text x="84" y="595" font-family="Georgia, serif" font-weight="600" fill="#D97757">E4</text>
+    <text x="120" y="595" fill="#141413">盲区扫描（必须以「发现 N 项」语气报告）</text>
+    <text x="540" y="595" font-family="Georgia, serif" font-weight="600" fill="#55544F">E5</text>
+    <text x="576" y="595" fill="#55544F">推测 / 未执行 —— 禁止出现在审计结论中</text>
+  </g>
+</svg>

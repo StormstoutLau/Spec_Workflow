@@ -1,0 +1,31 @@
+<svg viewBox="0 0 1200 260" width="1200" height="260" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="260" fill="#F0EEE6"/>
+  <rect x="0" y="256" width="1200" height="4" fill="#D97757"/>
+
+  <text x="80" y="78" font-family="Georgia, 'Times New Roman', serif" font-size="15" letter-spacing="4" fill="#55544F">SPEC-DRIVEN DEVELOPMENT · 反幻觉工作流</text>
+  <rect x="80" y="94" width="36" height="3" fill="#D97757"/>
+
+  <text x="80" y="168" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="400" fill="#141413">Spec_Workflow</text>
+  <text x="80" y="210" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#3D3D3A">面向「单人开发者 + LLM Agent」的 Spec 驱动开发规范 —— 系统性排除幻觉与形式化审查表演</text>
+
+  <!-- 10-step dot chain, review gates in crail -->
+  <g>
+    <line x1="880" y1="150" x2="1130" y2="150" stroke="#DBD8CC" stroke-width="1.5"/>
+    <circle cx="880" cy="150" r="5" fill="#141413"/>
+    <circle cx="920" cy="150" r="5" fill="#D97757"/>
+    <circle cx="960" cy="150" r="5" fill="#141413"/>
+    <circle cx="1000" cy="150" r="5" fill="#D97757"/>
+    <circle cx="1040" cy="150" r="5" fill="#141413"/>
+    <circle cx="1080" cy="150" r="5" fill="#D97757"/>
+    <circle cx="1120" cy="150" r="5" fill="#141413"/>
+    <text x="880" y="186" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#55544F">1</text>
+    <text x="920" y="186" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#D97757">2</text>
+    <text x="960" y="186" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#55544F">3</text>
+    <text x="1000" y="186" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#D97757">4</text>
+    <text x="1040" y="186" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#55544F">5</text>
+    <text x="1080" y="186" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#D97757">6</text>
+    <text x="1120" y="186" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#55544F">7</text>
+    <text x="1005" y="122" text-anchor="middle" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" letter-spacing="2" fill="#55544F">10 STEPS · 4 GATES</text>
+    <circle cx="1130" cy="150" r="3" fill="#DBD8CC"/>
+  </g>
+</svg>
