@@ -12,8 +12,9 @@
 | 2 | 2026-08-16 | doc-contract 方案 | 异构双盲 DeepSeek V4 Pro | 12（7P2+5P3） | 0 | PLAN §6 |
 | 3 | 2026-08-17 | ADR-019 决策集（Cpp_Hub） | 探针 + 双盲（pilot） | R2 拦截 1/4；双盲 5/5 TRUE | 1（转述引文） | pilot §5.1 |
 | 4 | 2026-08-16 | GAP_ANALYSIS 报告（本仓） | 同基座独立审计 GLM-5.3 | 4（2P2+2P3） | 2（计数/行号） | AUDIT §3 |
+| 5 | 2026-08-17 | cpp-hub-absorption DESIGN（本仓） | 同基座独立 pass GLM-5.3 | 2P2+6P3 | 1（映射闭合） | DESIGN §10（CHECKLIST 验收时点追加） |
 
-> **追加队列**（验收时点后登记，防验收口径漂移）: ⑤ cpp-hub-absorption DESIGN Step 4 Review（2026-08-17，同基座独立 pass GLM-5.3，2P2+6P3，形态 II 1 处·映射闭合）——设计 §11 验收以"样本表 4 行"为准，本行于 CHECKLIST 验收后追加。⑥ P-004 异基座 S1 复验完成后追加。
+> **追加队列**: ⑥ P-004 异基座 S1 复验完成后追加。样本 ⑤ 已于 CHECKLIST 验收（2026-08-17）时点入表。
 
 ## 2. 形态 II 复发分桶（载体 × 字段类型）
 
