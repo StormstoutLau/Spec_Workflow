@@ -161,10 +161,10 @@ def audit_class_b(assertion, source_evidence, auditor_agent):
     r = auditor_agent(prompt)
     # r.chain 与 claimed_chain 逐步对比:
     #   - 结论不一致           → flag: CONFLICT (进仲裁)
-    #   - 结论一致但步骤数不同   → flag: STEP_GAP (原链可能跳步, 复查差额步)
+    #   - 结论一致但步骤数不同   → flag: 跳步差额 → 判定 STEP_GAP_CLOSED / STEP_GAP_OPEN (见 §4.4-3)
     #   - 完全一致             → PASS (标注 "双盲复核通过")
 
-    # Phase 3: 仲裁 (仅 CONFLICT/STEP_GAP 触发)
+    # Phase 3: 仲裁 (仅 CONFLICT / STEP_GAP_OPEN 触发)
     #   第三 agent 或人工: 只裁决分歧步, 不重跑全链
 ```
 
@@ -172,7 +172,10 @@ def audit_class_b(assertion, source_evidence, auditor_agent):
 
 1. **探针优先于 LLM**: Phase 1 脚本化 (grep/调用图/数值 diff) 零幻觉零成本, 能机械终结的不过 LLM
 2. **双盲是硬条件**: Phase 2 的 auditor 不得接触原推理文本 — 否则锚定效应会把跳步复制一遍 (这正是 v1.1 审计有效的原因: "未采信报告自带引用")
-3. **STEP_GAP 不是通过**: 原链 3 步、重推 5 步且结论相同时, 差额的 2 步正是 CI5 型跳步藏身处, 必须复查
+3. **STEP_GAP 不是通过，判定后必须落两态（v1.3 分型，禁止悬空旧态）**: 原链 3 步、重推 5 步且结论相同时, 差额步正是 CI5 型跳步藏身处:
+   - **STEP_GAP_CLOSED** (gap-closed): 差额步已被一手证据机械闭合 → 无需仲裁, 标注闭合证据（实例: Cpp_Hub pilot B1 轻微跳步被 auditor 全库穷举机械闭合）
+   - **STEP_GAP_OPEN** (gap-open): 差额步未闭合 → 进仲裁
+   - 兼容规则: 原单词态废除, 历史报告中的 STEP_GAP 读作 STEP_GAP_OPEN
 4. **登记制**: B 类断言在调研产出中必须以 4.1 的结构化形式登记 {结论, op, 依赖源, 推理链}, 否则审计脚本无输入
 
 ---
@@ -198,7 +201,7 @@ def audit_class_b(assertion, source_evidence, auditor_agent):
 | 错误拦截位置 | 审计期 (8 处已入报告) | 生成期拦 ~7/8 (A 类), B 类由探针+双盲拦 |
 | 审计成本 | 3 agent × 126 条全量独立重查 | 1 遍机械核验 (脚本) + 1 agent 攻 B 类重推导 + 双源抽查 |
 | 审计输入 | 散文混断言 | 结构化断言表 (可直接喂 4.3 脚本) |
-| 无法消除项 | — | 双方误读同一来源 (→双源规则), 推理型残余 (→STEP_GAP 复查) |
+| 无法消除项 | — | 双方误读同一来源 (→双源规则), 推理型残余 (→STEP_GAP 分型复查) |
 
 ---
 
@@ -259,16 +262,18 @@ R6 假设区每条含 [H#] + 查证路径; 正文出现 FALSIFIED 断言时必�
       --auditor openai --base-url <LM Studio端点> --report <审计输出.md>
 审计结论以 "## 审计结论 (<日期>)" 章节追加回本报告末尾, 逐断言给出:
   | ID | 最终状态 | 证据/分歧 |
-状态词表 (固定, 不得自造):
+状态词表 (固定, 不得自造; v1.3 起 STEP_GAP 分型两态):
   FALSIFIED 机械证伪 / SURVIVED 存活 / CONFLICT 双盲结论相反
-  STEP_GAP 疑跳步 / UNCERTAIN 无法判定 / PENDING 待人工 / NO_PROBE 无机械探针
+  STEP_GAP_CLOSED 疑跳步已闭合 / STEP_GAP_OPEN 疑跳步待仲裁
+  UNCERTAIN 无法判定 / PENDING 待人工 / NO_PROBE 无机械探针
+  (兼容: 历史报告中的旧词 STEP_GAP 读作 STEP_GAP_OPEN)
 ```
 
 ### 7.1 双端词汇对照 (生成端 ↔ 审计端)
 
 | 生成端登记 | 审计端产出 | 闭环动作 |
 |-----------|-----------|---------|
-| 【B#ID】+ registry 行 | verdicts 按 ID 回填 | FALSIFIED → 正文改写; STEP_GAP/CONFLICT → 仲裁 |
+| 【B#ID】+ registry 行 | verdicts 按 ID 回填 | FALSIFIED → 正文改写; STEP_GAP_OPEN/CONFLICT → 仲裁; STEP_GAP_CLOSED → 标注闭合证据 |
 | [单源-待二核] | 双源规则触发记录 | 补第二源或降级假设区 |
 | [H#] 假设区 | 不审计 (无证据) | spec 前须转为 A/B 或清除 |
 
@@ -279,7 +284,7 @@ R6 假设区每条含 [H#] + 查证路径; 正文出现 FALSIFIED 断言时必�
 ## <ID> — <最终状态>
 - 结论: <conclusion>  |  op: <op>
 - **probe** [<状态>]: <detail>            (+证据代码块)
-- **double_blind** [<状态>]: <detail>      (STEP_GAP 时列跳步候选)
+- **double_blind** [<状态>]: <detail>      (STEP_GAP_OPEN 时列差额步候选; CLOSED 标注闭合证据)
 - **arbitration** [NEEDS_ARBITRATION]: <仅分歧步的仲裁任务>
 ## 汇总
 | ID | 最终状态 |
@@ -315,3 +320,4 @@ R6 假设区每条含 [H#] + 查证路径; 正文出现 FALSIFIED 断言时必�
 | v1.0 | 2026-08-16 | 初始版本（随 Spec_Workflow 仓库迁移） |
 | v1.1 | 2026-08-16 | Cpp_Hub 侧演进：合并 Discovery 007 完整发现（错误形态学三类 + NP2 裁决路径 + 工具链守则 + §9 分工声明） |
 | v1.2 | 2026-08-16 | 回吸收 v1.1 全部增量，权威源落位本仓库（ADR-0006 方案 B，用户确认）；§9 路径本地化 + 同步对版本声明 v1.2 |
+| v1.3 | 2026-08-17 | STEP_GAP 分型两态化（STEP_GAP_CLOSED / STEP_GAP_OPEN），原单词态废除（兼容: 历史报告读作 OPEN）。来源: cpp-hub-absorption 设计 D1（Tier1）← Cpp_Hub pilot §5.1-3 提案 + B1 机械闭合实例；同步修改 §4.3 流程注释/§4.4-3/§6 效率账/§7 词表/§7.1 闭环动作/§7.2 报告骨架/§9 同步对声明（007 不随升） |

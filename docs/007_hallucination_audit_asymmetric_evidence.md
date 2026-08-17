@@ -1,7 +1,7 @@
 # Discovery 007: 幻觉点清单自身含幻觉 — LLM 调研产出的不对称证据审计框架
 
 **状态**: RESOLVED (方法论已落地为可执行工具)
-**版本**: v1.2 (2026-08-16; 公共承载 = docs/ASSERTION_EVIDENCE_FRAMEWORK.md v1.2, 两者同步维护; 权威源 = 本仓库, 见 ADR-0006)
+**版本**: v1.2 (2026-08-16; 公共承载 = docs/ASSERTION_EVIDENCE_FRAMEWORK.md, 同步对版本声明见该框架 §9——框架 v1.3 词表分型不触及本发现内容, 007 不随升; 权威源 = 本仓库, 见 ADR-0006)
 **模块**: docs/ASSERTION_EVIDENCE_FRAMEWORK.md + scripts/assertion_audit.py (跨模块方法论)
 **发现日期**: 2026-08-16
 **发现背景**: Phase 7C (v1.7 多变量时序与混频模块) 调研产出经 3 审计 agent 全量独立重查, 发现"排幻觉点"的调研报告自身含 8 处实质错误 — 其中两处 (V8/CI5) 属"把正确事实标成幻觉"型, 对下游 spec 危害大于幻觉本身
