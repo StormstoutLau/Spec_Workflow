@@ -1,6 +1,6 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.2（2026-08-18，P-003 doc-contract 执行批次同步：DC1-DC4 契约落地 / RULE-1~6 冠名 + rules 登记块 / +ADR_TEMPLATE / PLAN v1.5 / 路径与分级差异消解）
+> **Wiki 版本**: v1.3（2026-08-18，P-004 异基座复验批次同步：+S1 复验报告 / M7 样本 ⑥ / §2.4 工作流架构全景图（SVG））
 > **覆盖对象**: 本仓库全部文档（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007、断言证据框架 v1.4、5 个模板（四件套 + ADR）、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×2、spec/ 三 feature 目录）
 > **仓库性质**: 纯文档型方法论仓库 —— 无源代码、无构建系统、无运行时；"运行方式" = 工作流的执行方式（见 §6）
 
@@ -130,6 +130,24 @@ flowchart TD
     S10 -->|P1 清零| DONE([feature 完成])
     S10 -->|发现 P1/P2| S9
 ```
+
+### 2.4 工作流架构全景图
+
+![Spec 工作流架构全景图](../spec/doc-contract/spec_workflow_architecture.svg)
+
+> 上图为 Spec 工作流的完整架构，从 5 阶段流向到文档管道到规则体系到 ADD 审计与 DC1-DC4 文档契约的单页全景。
+
+**5 阶段 × 10 步流程**：
+
+| 阶段 | 步骤 | 角色 | 产出 |
+|------|------|------|------|
+| Phase 1 调研 | Step 1-2 | 用 MCP 工具链（paper-search / english-search / WebSearch）收集证据，标注置信度；Step 2 Review 排除虚构文献、版本号、arXiv 编号 | RESEARCH.md |
+| Phase 2 设计 | Step 3-4 | 架构选择、模块划分、接口定义；Step 4 检查"设计是否基于已验证调研""有无论证驱动归因扭曲" | DESIGN.md |
+| Phase 3 实施 | Step 5-6 | 工程细节：依赖版本、兼容性、接口签名；Step 6 验证 stdlib API 下限、PyPI 版本真实性 | IMPLEMENTATION.md |
+| Phase 4 验收 | Step 7-8 | 编写可测试 Checklist；Step 8 对四文档做两两对齐（RESEARCH↔DESIGN↔IMPLEMENTATION↔CHECKLIST） | CHECKLIST.md |
+| Phase 5 实现 | Step 9-10 | TDD 先写测试再写实现；Step 10 执行 ADD 审计，产出取证矩阵（E1-E5 证据绑定） | 代码 + 审计报告 |
+
+**Review 门禁**：Step 2/4/6/8 的 Review 非"同次生成打勾"——RULE-1 强制独立 pass 执行。Step 2 还包含门禁语义（v1.4，ADR-0008）：FALSIFIED 断言已改写、CONFLICT/STEP_GAP 已仲裁、双源满足，满足前禁止进入 Step 3。
 
 每个 feature 在 `spec/<feature>/` 下产出 4 份文档（RESEARCH → DESIGN → IMPLEMENTATION → CHECKLIST），实现代码在别处（本仓库只管流程不管代码）。
 
