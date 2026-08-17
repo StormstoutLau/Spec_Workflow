@@ -1,7 +1,7 @@
 ---
 id: doc-contract-refactor
 type: design
-version: 1.2
+version: 1.3
 status: final-pending-execution
 date: 2026-08-16
 depends: [SPEC_PROCESS.md, adr/ADR-0004, adr/ADR-0005, docs/DIS-007, docs/ASSERTION_EVIDENCE_FRAMEWORK, spec/templates/*4]
@@ -10,7 +10,7 @@ upstream: null
 
 # 文档规范改造执行方案（v1.2 定稿）
 
-> **性质**: 本文档规范改造的设计+执行方案。type 词表中 `design` 为待定第六类（G2 词表缺口，ADR-0006 定稿时裁决）。
+> **性质**: 本文档规范改造的设计+执行方案。type 词表中 `design` 为待定第六类（G2 词表缺口，ADR-0007 定稿时裁决）。
 > **审计状态**: 同基座自查 10 项发现（2P1+5P2+3P3，`自查·单视角`）→ 异构复审（DeepSeek V4 Pro，双盲）12 项发现（7P2+5P3，`[已复核·异构]`）→ 本版含全部 P1/P2 修正。
 > **执行裁决**: P1=0 / P2=0（已全部融入本版）/ P3=5（见 §8，不阻断）。
 
@@ -21,8 +21,9 @@ upstream: null
 | 版本 | 日期 | 变更 | 依据 |
 |------|------|------|------|
 | v1.0 | 2026-08-16 | 初版方案（27 处修改点） | 本会话 |
-| v1.1 | 2026-08-16 | P1×2 修正：DIS-001~006 改"拆分迁移"登记（探针实证）；P0 改名撤销、消歧入 ADR-0006 | 同基座自查 |
+| v1.1 | 2026-08-16 | P1×2 修正：DIS-001~006 改"拆分迁移"登记（探针实证）；P0 改名撤销、消歧入 ADR-0007 | 同基座自查 |
 | v1.2 | 2026-08-16 | P2×7 修正融入（见 §7 修正记录）；E1 复核修正复审漏计 1 处（DIS-007 L68） | 异构复审 + E1 亲验 |
+| v1.3 | 2026-08-16 | 双份并存差异实证（v1.0 vs v1.1 成对漂移）→ 新增 [ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md)（proposed，方案 B 待确认）；doc-contract 让位为 ADR-0007；P3-9 闭环入 ADR-0006，P3-10 部分缓解 | fc+Read 双侧取证 |
 
 ---
 
@@ -35,7 +36,7 @@ upstream: null
 | 字段 | 语义 | 说明 |
 |------|------|------|
 | `id` | 稳定标识 | 如 SPEC-PROCESS / ADR-0004 / DIS-007 / FWK-ASSERTION |
-| `type` | 文档类别 | 词表：`process-spec / adr / discovery / framework / template`（+待定 `design`，ADR-0006 裁决） |
+| `type` | 文档类别 | 词表：`process-spec / adr / discovery / framework / template`（+待定 `design`，ADR-0007 裁决） |
 | `version` | 语义版本 | 存量文档首登取当前版（如 SPEC-PROCESS v1.3） |
 | `status` | 状态 | 按 type 查 G2 词表 |
 | `date` | 最近修订日期 | |
@@ -52,7 +53,7 @@ upstream: null
 | template 实例 | `draft / in-review / verified` |
 | CHECKLIST 实例 | `pending / accepting / accepted` |
 
-> **双语取舍（P3-8 遗留）**: 上表英文 token 与存量中文状态（草稿/Review 中/已验证）并存，ADR-0006 定稿时三选一：全英 / 全中 / 双语映射表。执行 G1 时暂按"英文 token + 括注原中文"过渡。
+> **双语取舍（P3-8 遗留）**: 上表英文 token 与存量中文状态（草稿/Review 中/已验证）并存，ADR-0007 定稿时三选一：全英 / 全中 / 双语映射表。执行 G1 时暂按"英文 token + 括注原中文"过渡。
 
 ### G3. 引用标注四档（P2-3 修正：三→四档）
 
@@ -63,7 +64,7 @@ upstream: null
 | 3 真悬空 | `[外部·未随迁]` | 三处零命中实证者（ADR-0001~0003、META_AUDIT_*.md） |
 | 4 **本地工具**（P2-3 新增） | `[本地工具·仓库外]` | `scripts/assertion_audit.py`（本地 scripts/ 惯例，不进库） |
 
-### G4. 编号命名空间登记（ADR-0006 附录承载）
+### G4. 编号命名空间登记（ADR-0007 附录承载）
 
 | 命名空间 | 状态 | 备注 |
 |---------|------|------|
@@ -88,7 +89,7 @@ upstream: null
 | S2 | **7 行**（P2-1 修正：L28/38/56/73/107/110/295） | `docs/spec/` → `spec/` 全局替换；执行方式：grep 逐行替换后 `docs/spec/` 零命中复核（E1 闭环） |
 | S3 | L119-173 规则 1-6 | 冠稳定 ID（RULE-1~RULE-6）；文末新增 ` ```rules ` 登记块：`{id, 来源事故, 失效条件, 拦截记录[]}` |
 | S4 | L245 分级 | 正文 P1/P2/P3 不动 |
-| S5 | ~~改名~~ | **已撤销**（P1-2）："P0 审计项"保留原名，消歧入 ADR-0006 术语节 |
+| S5 | ~~改名~~ | **已撤销**（P1-2）："P0 审计项"保留原名，消歧入 ADR-0007 术语节 |
 | S6 | L285 + 正文 M 码首现处 | `docs/adr/` → `adr/`；M1/M2/M6/M7 加命名空间脚注 |
 
 ### adr/ADR-0004（3 处）
@@ -140,9 +141,10 @@ upstream: null
 
 ---
 
-## 3. 配套新增（3 份实体文件）
+## 3. 配套新增（4 份实体文件）
 
-1. **adr/ADR-0006-unified-document-contract.md** —— 文档规范本体（G1-G4 定义 + 全局词表附录 + P0 消歧术语节 + 命名空间登记附录 + M7 数据点留痕）
+0. **adr/ADR-0006-assertion-framework-dual-copy-authority.md** —— 双份并存差异分析 + 权威源决策（proposed，方案 B 待用户确认；已落盘，先于本方案编号产生）
+1. **adr/ADR-0007-unified-document-contract.md** —— 文档规范本体（G1-G4 定义 + 全局词表附录 + P0 消歧术语节 + 命名空间登记附录 + M7 数据点留痕）
 2. **spec/templates/ADR_TEMPLATE.md** —— 从 ADR-0004/0005 提取骨架
 3. **spec/doc-contract/PLAN.md** —— 本方案（已落盘）
 
@@ -150,11 +152,11 @@ upstream: null
 
 | 项 | 内容 |
 |----|------|
-| 头部计数 | 存量 **9** 个文档 → 改造后 **12** 个（+ADR-0006 / +ADR_TEMPLATE / +PLAN） |
+| 头部计数 | 存量 **9** 个文档 → 改造后 **13** 个（+ADR-0006 分歧 / +ADR-0007 / +ADR_TEMPLATE / +PLAN） |
 | §3.3 分级注 | S4/T8 执行后改写（模板 P0 行已删） |
 | §6.4 两处 | 路径差异（已统一 `spec/`）、分级差异（已统一 P1/P2/P3）→ 标记已解决 |
 | §5.2 悬空表 | D7 行 → `[源项目·可解析]`；ADR/META_AUDIT 行 → "三处零命中实证" |
-| 新增 | §2.1 目录树补 spec/doc-contract/ 与 adr/ADR-0006 |
+| 新增 | §2.1 目录树补 spec/doc-contract/ 与 adr/ADR-0007 |
 
 ## 5. 执行顺序
 
@@ -164,13 +166,13 @@ Step B  S2 路径统一（7 行替换 + grep 零命中复核）
 Step C  G1/G2 front-matter 批量（9 存量文档）
 Step D  S4/S5/T8 分级统一（T8a+T8b 联动）
 Step E  S3 rules 登记块
-Step F  新增 3 份（ADR-0006 / ADR_TEMPLATE / PLAN 已在）
+Step F  新增 3 份（ADR-0007 / ADR_TEMPLATE / PLAN 已在）
 Step G  CODE_WIKI 尾随同步
 ```
 
 **完成定义（P3-12 补）**: A-G 全步执行后复核四项 grep 零命中/命中——`docs/spec/`（零）、`RESOLVED` 于 DIS-007（零）、front-matter `id:`（12 文件全命中）、`P0` 于 CHECKLIST（零）。
 
-## 6. M7 数据点留痕（ADR-0006 附录承载）
+## 6. M7 数据点留痕（ADR-0007 附录承载）
 
 | 审计轮 | 基座 | 发现 | 特征 |
 |--------|------|------|------|
@@ -190,10 +192,10 @@ Step G  CODE_WIKI 尾随同步
 | P2-6 | 尾随同步 8→9 更正为 **9→12**（含 PLAN 自身） | 计数级 |
 | P2-7 | D4 扩展 L86 → **L68+L86**（复审漏报 L68，亲验补） | ✅ 3 行实测（L4/L68/L86） |
 
-## 8. 遗留 P3（不阻断，ADR-0006 定稿时处理）
+## 8. 遗留 P3（不阻断，ADR-0007 定稿时处理）
 
 1. G2 双语取舍（全英/全中/映射表）
 2. `design` 是否入 type 词表（本 PLAN 自举暴露的缺口）
-3. upstream 权威源方向待用户确认（F4）
+3. upstream 权威源方向：已由 [ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md) 承载（proposed 方案 B，待用户确认后 F4 落地）
 4. Crucix 消费方的变更通知机制（职责边界声明）
 5. 规则 re-qualification（90 天重审）——学习回路升级独立议题，不在本方案范围
