@@ -1,7 +1,7 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.0（2026-08-16）
-> **覆盖对象**: 本仓库全部 8 个文档（SPEC_PROCESS v1.3、ADR-0004/0005、Discovery 007、断言证据框架、4 个模板）
+> **Wiki 版本**: v1.1（2026-08-17，第二次回流批次后同步：+ADR-0006~0009 / +M7 账本 / +discoveries / +spec 三 feature 目录 / SPEC_PROCESS v1.4 / 框架 v1.4）
+> **覆盖对象**: 本仓库全部文档（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007、断言证据框架 v1.4、4 个模板、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×2、spec/ 三 feature 四件套）
 > **仓库性质**: 纯文档型方法论仓库 —— 无源代码、无构建系统、无运行时；"运行方式" = 工作流的执行方式（见 §6）
 
 ---
@@ -37,6 +37,7 @@
 | v1.2 | 2026-08-01 | 外部对标后：规则 3 升级为隔离四要素、新增规则 5 异质性约束、Step 8 增派生需求项（依据 ADR-0004） |
 | v1.2.1 | 2026-08-16 | **自包含化**：全部教训内联正文，移除对 ADR/元审计报告/本地 skill 路径的内容依赖，可跨项目迁移 |
 | v1.3 | 2026-08-16 | 新增规则 6 审计证据绑定：Step 10 取证矩阵标准化（E1-E5 证据五分类、双向映射、诚实结果列、最高等级绑定、风险分级执行）（依据 ADR-0005） |
+| v1.4 | 2026-08-17 | cpp-hub-absorption Tier2：Step 2 Review 升格**门禁语义**（R4 语义 (a)-(d)，满足前禁止进 Step 3）+ Step 8 增双向引用/断言延续两项 + Step 2/10 发现记录集成点（依据 ADR-0008/0009，第二次回流） |
 
 ---
 
@@ -46,20 +47,29 @@
 
 ```
 f:\Spec_Workflow/
-├── SPEC_PROCESS.md              # ★ 流程宪法：10 步 Spec 流程 + 6 条 Review 规则 + ADD 方法
+├── SPEC_PROCESS.md              # ★ 流程宪法 v1.4：10 步 + 6 规则 + 门禁 + ADD
 ├── CODE_WIKI.md                 # 本 Wiki
-├── adr/                         # 架构决策记录（Architecture Decision Records）
-│   ├── ADR-0004-...quarantine.md    # 对抗审查异质性约束与测试隔离四要素
-│   └── ADR-0005-...binding.md       # 审计证据绑定约束（取证矩阵标准化）
-├── docs/                        # 方法论专题文档
-│   ├── 007_hallucination_audit_asymmetric_evidence.md   # Discovery 007：幻觉审计不对称证据框架
-│   └── ASSERTION_EVIDENCE_FRAMEWORK.md                  # 断言分级证据框架（A/B/C）
+├── adr/                         # 架构决策记录（六份，全 accepted）
+│   ├── ADR-0004-...quarantine.md     # 异质性约束 + 隔离四要素（→ v1.2）
+│   ├── ADR-0005-...binding.md        # 审计证据绑定（→ v1.3）
+│   ├── ADR-0006-...authority.md      # 断言框架双份权威源（回流通道）
+│   ├── ADR-0007-...contract.md       # 统一文档契约（附录 A 命名空间登记权威）
+│   ├── ADR-0008-...gate.md           # Step 2 门禁 + Step 8 双向链路（→ v1.4）
+│   └── ADR-0009-...discoveries.md    # 发现日志机制（学习回路载体）
+├── docs/                        # 方法论层
+│   ├── 007_hallucination_audit_...md     # Discovery 007（toolized）
+│   ├── ASSERTION_EVIDENCE_FRAMEWORK.md   # 断言分级证据框架 v1.4（STEP_GAP 两态 + R7）
+│   ├── M7_EVIDENCE_LOG.md                # M7 证据账本（对比臂数据唯一活载体，ADR-0007 D1）
+│   ├── PROGRESS.md                       # 待办登记（P-001~P-005）
+│   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
+│   ├── discoveries/README.md             # 发现三态索引（DIS-007/008）
+│   └── dev-log/                          # DEV-LOG-001/002（事件叙事）
 └── spec/
-    └── templates/               # 4 个标准文档模板（与 10 步流程的文档产出对应）
-        ├── RESEARCH_TEMPLATE.md         # Step 2 产出模板
-        ├── DESIGN_TEMPLATE.md           # Step 3 产出模板
-        ├── IMPLEMENTATION_TEMPLATE.md   # Step 5 产出模板
-        └── CHECKLIST_TEMPLATE.md        # Step 7 产出模板
+    ├── templates/              # 4 个标准模板
+    ├── doc-contract/PLAN.md    # 文档规范改造方案 v1.4（P-003 待执行）
+    ├── cpp-hub-gap-analysis/   # 差距分析 RESEARCH + AUDIT（第二次回流依据）
+    ├── cpp-hub-absorption/     # 吸收复用四件套（DESIGN v1.1 + IMPL + CHECKLIST，已验收）
+    └── adr0006-pointer/        # ADR-0006 决策 3 调研（P-001 待执行）
 ```
 
 ### 2.2 逻辑架构分层
@@ -75,6 +85,10 @@ flowchart TB
     subgraph L3["决策层（adr/）"]
         A4[ADR-0004 异质性+隔离四要素]
         A5[ADR-0005 审计证据绑定]
+        A6[ADR-0006 双份权威源+回流通道]
+        A7[ADR-0007 文档契约+命名空间]
+        A8[ADR-0008 门禁+双向链路]
+        A9[ADR-0009 发现日志]
     end
     subgraph L2["方法论层（docs/）"]
         D7[Discovery 007 不对称证据审计]
@@ -257,6 +271,10 @@ flowchart TD
 |-----|------|------|--------------------|
 | [ADR-0004](./adr/ADR-0004-adopt-external-benchmark-heterogeneity-quarantine.md) | 2026-08-01 | 采纳外部对标结论（MAD 文献清算 / 业界 quarantine 四要素 / DO-178C RTM 双向追溯），选择性吸收 5 项修订 | 规则 3 升级四要素、规则 5 异质性+单向权限、Step 8 派生需求登记（v1.2） |
 | [ADR-0005](./adr/ADR-0005-audit-evidence-binding-spec-workflow.md) | 2026-08-16 | Step 10 审计报告增设取证矩阵，受 5 条规则约束（证据五分类/双向映射/诚实结果列/最高等级绑定/风险分级） | 规则 6 + 取证矩阵操作模板（v1.3） |
+| [ADR-0006](./adr/ADR-0006-assertion-framework-dual-copy-authority.md) | 2026-08-16 | 断言框架双份并存（本仓 v1.0 vs Cpp_Hub v1.1 同日漂移一代）→ 本仓库为权威源 + 回流通道（人工纪律）；回流频度 <1 次/季度触发重审 | 框架 v1.2 回吸收；2026-08-17 回流通道首次批量使用（P-002） |
+| [ADR-0007](./adr/ADR-0007-unified-document-contract.md) | 2026-08-17 | 统一文档契约五决策：M7_EVIDENCE_LOG 唯一活载体 / G1-G4→DC1-DC4（K8s+SE+ICSE 实证佐证）/ 命名空间登记补全 / design 入 type 词表 / 状态词英文 token | 附录 A 命名空间权威登记 + 附录 B P0 消歧；PLAN v1.5 联动待 P-003 |
+| [ADR-0008](./adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) | 2026-08-17 | Step 2 Review 升格门禁（R4 语义 (a)-(d)，内部 E1 实证三例：pilot 拦截/M6 全绿表演/计数错漏网）+ Step 8 双向引用/断言延续 | SPEC_PROCESS v1.4 门禁块 + Step 8 +2 项 |
+| [ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | 2026-08-17 | Discoveries 三态索引（open/resolved/toolized）+ Step 2/10 双集成点——学习回路"事故→规则"载体；DIS-008 首登（同文件并行 Edit 静默回滚） | docs/discoveries/README.md + SPEC_PROCESS 集成点 ×2 |
 
 **ADR-0005 的范围声明**（重要）: 仅约束 spec 工作流的审查验收环节，**不改变**金融数学推理框架（sixlayer/六层架构/Lean4 验证策略）的任何设计；若 sixlayer L5 要复用须另立 ADR。
 
@@ -321,7 +339,7 @@ def audit_class_b(assertion, source_evidence, auditor_agent):
 | cross_library | "库1 与库2 公式相同" | 同输入两端数值 diff | cmd_a + cmd_b + keys + tol |
 | causal | "因 X 所以 Y" | **无机械探针**，probe 置 null | — |
 
-**审计状态词表**（固定，不得自造）: `FALSIFIED`（机械证伪）/ `SURVIVED`（存活）/ `CONFLICT`（双盲结论相反）/ `STEP_GAP`（疑跳步）/ `UNCERTAIN` / `PENDING`（待人工）/ `NO_PROBE`
+**审计状态词表**（固定，不得自造；框架 v1.3 起 STEP_GAP 分型两态）: `FALSIFIED`（机械证伪）/ `SURVIVED`（存活）/ `CONFLICT`（双盲结论相反）/ `STEP_GAP_CLOSED`（疑跳步已被一手证据机械闭合）/ `STEP_GAP_OPEN`（疑跳步待仲裁）/ `UNCERTAIN` / `PENDING`（待人工）/ `NO_PROBE`
 
 ### 4.2 机读接口: 报告内嵌 ```assertions 登记块
 
@@ -499,7 +517,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | **断言 A/B/C 分级** | 事实类(单点可验证)/推断类(综合多源)/判断类(决策权衡) |
 | **不对称配置** | 生成端强制证据，审计端不信任引文（引文核验只证明"看过该页"） |
 | **双盲重推导** | auditor 只见 {命题, 源证据}，独立推理后与原链比对（防锚定） |
-| **STEP_GAP** | 双盲结论一致但重推导步数更多 → 原链跳步藏身处，须复查差额步（不是通过） |
+| **STEP_GAP / STEP_GAP_CLOSED / STEP_GAP_OPEN** | 双盲结论一致但重推导步数更多 → 原链跳步藏身处（不是通过）；v1.3 起判定必落两态——CLOSED（差额步已被一手证据机械闭合，免仲裁）/ OPEN（未闭合，进仲裁）；历史报告旧词读作 OPEN |
 | **机械反证探针** | 按推理算子生成的脚本化证伪手段（grep/枚举/调用图/数值 diff），零 LLM |
 | **Goodhart 防御** | 约束证据形态而非结论倾向，防规则退化为"每行必须✅"的新形式主义 |
 | **P0 审计项** | 不变式/隔离边界/安全相关的审计项（须全量执行 + E1/E2 证据）；≠ 问题严重性 P0-P3 |
@@ -513,11 +531,24 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 
 | 文件 | 一句话定位 |
 |------|-----------|
-| [SPEC_PROCESS.md](./SPEC_PROCESS.md) | 流程宪法：10 步流程 + 6 条 Review 规则 + ADD + 取证矩阵（v1.3，自包含） |
+| [SPEC_PROCESS.md](./SPEC_PROCESS.md) | 流程宪法：10 步流程 + 6 条 Review 规则 + 门禁 + ADD + 取证矩阵（v1.4，自包含） |
 | [adr/ADR-0004](./adr/ADR-0004-adopt-external-benchmark-heterogeneity-quarantine.md) | 采纳外部对标：异质性约束 + 隔离四要素 + RTM 反向追溯 + 派生需求（→ v1.2） |
 | [adr/ADR-0005](./adr/ADR-0005-audit-evidence-binding-spec-workflow.md) | 审计证据绑定：取证矩阵五规则（→ v1.3） |
+| [adr/ADR-0006](./adr/ADR-0006-assertion-framework-dual-copy-authority.md) | 双份权威源决策 + 回流通道（2026-08-17 首次批量使用） |
+| [adr/ADR-0007](./adr/ADR-0007-unified-document-contract.md) | 统一文档契约五决策 + 命名空间登记权威（附录 A/B） |
+| [adr/ADR-0008](./adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) | Step 2 门禁 + Step 8 双向链路（→ v1.4） |
+| [adr/ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | Discoveries 发现日志机制（学习回路载体） |
 | [docs/007](./docs/007_hallucination_audit_asymmetric_evidence.md) | Discovery 007：幻觉清单自身含幻觉的发现记录（126→8 错误复盘） |
-| [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架：A/B/C + 不对称配置 + B 类三阶段审计 + 报告机读模板 |
+| [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
+| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本 + 形态 II 复发分桶 + 命中率 baseline（唯一活载体） |
+| [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open） |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001/P-003/P-004 pending，P-005 done |
+| [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
+| [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ DEV-LOG-002（cpp-hub-absorption 全链路） |
+| [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.1 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
+| [spec/cpp-hub-gap-analysis/](./spec/cpp-hub-gap-analysis/) | 差距分析 RESEARCH（16A+4B）+ AUDIT（形态 II 三实例谱系） |
+| [spec/doc-contract/PLAN.md](./spec/doc-contract/PLAN.md) | 文档规范改造方案 v1.4（P-003 待执行，含 G→DC 联动） |
+| [spec/adr0006-pointer/](./spec/adr0006-pointer/) | ADR-0006 决策 3 迁移指针调研（P-001 待执行） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |
