@@ -1,7 +1,7 @@
 ---
 id: langgraph-upgrade-RESEARCH
 type: design
-version: 1.0
+version: 1.1
 status: in-review
 date: 2026-08-18
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0005, ADR-0007]
@@ -18,10 +18,12 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |------|------|------|
-| A 事实类 | 14 | 每条附 URL + 可核对引文（WebSearch 取证，2026-08-18） |
+| A 事实类 | 15 | 每条附 URL + 可核对引文（WebSearch 取证，2026-08-18）；v1.0 §2 主体 11 条 + v1.1 §8 补充 4 条 |
 | B 推断类 | 3 | B1-B3，登记于附录 B |
-| C 判断类 | 4 | §6 决策分析 |
-| 假设区 | 3 | H1-H3，未取证声明 |
+| C 判断类 | 6 | §6 决策分析 4 条 + §8.3 补充裁决 2 条 |
+| 假设区 | 6 | H1-H6，未取证声明 |
+
+> **计数修正记录（R7 机械重数，2026-08-18）**: v1.0 初版声明 A=14 系手填错误——`grep -c '【A】'` 实测 v1.0 主体为 **11** 条（虚报 +3）。v1.1 补充 4 条后以 grep 为准登记 15。**形态 II 第五实例**（计数凭印象，同 P2-1/P2-3 模式），发生在"反幻觉方法论自己的调研报告"上——RULE "统计表计数必须脚本生成"（框架 v1.4 R7）再次被实证为必要。候选 M7 样本 ⑦。
 
 **扫描范围声明**: 覆盖 LangGraph 官方文档（interrupt/persistence/thinking-in-langgraph 三页）+ 4 份独立生产复盘 + 1 篇 NeurIPS 2025 论文 + 反框架证据 4 源。未覆盖：LangGraph 源码实测、Pydantic AI 官方文档、本仓库 PoC 实测。
 
@@ -200,6 +202,68 @@ upstream: null
 - [H1] LangGraph 社区活性与 API 稳定性显著优于 LangChain 主库（本报告未单独取证）— 查证路径: GitHub stars/commits 趋势 + CHANGELOG breaking 标记计数
 - [H2] 方案 B 的 ~500-1000 LOC 估算准确（未做 PoC 拆解）— 查证路径: 写 runner 骨架实测
 - [H3] LM Studio 三机端点可直接作为 runner 的异构模型池（SSH_OPENCODE_SETUP.md 佐证但未在 runner 语境实测）— 查证路径: curl /v1/chat/completions 三端点连通性测试
+
+---
+
+## 8. 补充调研：开源组件的最高 ROI 改进（v1.1 新增，2026-08-18）
+
+> **任务来源**: 用户追问"是否有某种最高 ROI 的改进，借助开源社区的组件提升框架性能"
+> **"性能"的界定**: 本仓库是方法论仓库，性能 = **已实证痛点的解除效率**。按 M7 账本与形态 II 分桶排序痛点，对准找组件——不引入无人使用的"能力"，只为已付费的失效模式买单。
+
+### 8.1 候选组件证据（A 类）
+
+【A】pre-commit + front-matter 校验是 2026 社区标准做法，三个独立先例（含"现有验证器全部漏过 YAML 解析错误"的实证）：
+(源: https://github.com/webbertakken/takken.io/pull/239; 引文: "The colon after `work` made YAML treat the next line as a mapping key. Prettier formats this without complaint, so **nothing caught it until the build blew up**" / 源: https://github.com/ievo-ai/skills/issues/119; 引文: "This bug survived **all existing validators and code review** because none of them parse YAML frontmatter")
+
+【A】promptfoo：MIT 开源评测 CLI，声明式 YAML，本地优先（隐私），50+ provider 含本地模型，CI/CD 原生；2026-03 被 OpenAI 收购但承诺保持 MIT + model-agnostic（35 万开发者，Fortune 500 渗透 >25%）：
+(源: https://www.promptfoo.dev/docs/intro/; 引文: "Private: This software runs completely locally... **test-driven LLM development**, not trial-and-error" / 源: https://recatools.com/ai-directory/promptfoo/; 引文: "OpenAI acquired the company in March 2026 but Promptfoo stays **MIT-licensed, model-agnostic**")
+
+【A】LiteLLM：40k stars、100+ provider 统一 OpenAI 兼容接口，SDK 模式零依赖、proxy 模式需 PostgreSQL+Redis；2026-03 曾有供应链安全事件（v1.82.7/1.82.8）：
+(源: https://www.seaflux.tech/blogs/explore-litellm-effortless-ai-projects/; 引文: "**40,000 GitHub stars, 1,300+ contributors, and 240 million Docker pulls**" / "In March 2026, LiteLLM disclosed a **supply chain security incident** affecting versions 1.82.7 and 1.82.8" / 源: https://markaicode.com/architecture/litellm-multi-provider-routing/; 引文: "it's not the right starting point for a small team calling one API directly")
+
+【A】Langfuse：MIT 开源 LLM 可观测平台，自托管 Docker Compose ~5 分钟，OTel 原生，100+ 集成：
+(源: https://langfuse.com/handbook/chapters/why; 引文: "You can self-host it... All product capabilities... are **MIT licensed without any usage limits**" / 源: https://blog.csdn.net/weixin_42681866/article/details/156492088; 引文: "自托管可部署至内网集群，数据本地存储**无云端依赖**")
+
+### 8.2 ROI 矩阵（痛点对准 × 成本 × 身份兼容）
+
+| 组件 | 对准的已实证痛点 | 成本 | 仓库身份兼容 | ROI 判定 |
+|------|----------------|------|-------------|---------|
+| **pre-commit + DC 契约校验器** | 形态 II（M7 实证 11 处，规律③④明说拦截层是 E1 机械枚举而非 LLM 自查）+ DC1-DC4 执行 | ~半天，~100 行 Python + `.pre-commit-config.yaml`，零运行时零部署（本地 hook + GitHub Actions 双跑） | ✅ git 元工具，非应用框架 | **最高** |
+| **promptfoo**（M7 对比臂评测） | S1 异构复验手动切基座（P-004 刚经历）；M7 样本积累慢（N=6，人工登记） | 一个 YAML 配置 + ~半天学习；本地跑，LM Studio 端点可直接当 provider | ✅ 独立 CLI，不侵入仓库 | 高 |
+| **LiteLLM SDK 模式**（非 proxy） | RULE-5 异构模型池统一（三机端点 + 云端 API 一套接口） | ~50 行配置；⚠️ 需 pin 版本（供应链前科） | ⚠️ 引入依赖，属方案 B 配套 | 中 |
+| **Langfuse 自托管** | 取证矩阵 E2 证据自动生成（span 即证据） | Docker 服务常驻 + SDK 装饰器改造 | ❌ 违背纯文档仓库身份 | 中低（后置到方案 B） |
+
+### 8.3 最高 ROI 裁决（C 类判断）
+
+【C】**最高 ROI = pre-commit + DC 契约校验器（含形态 II 计数机械检查）**。理由链：
+
+1. **命中最高频已付费痛点**：形态 II 在 M7 账本登记 11 处、4 条复发规律，且规律③（"拦截层是 E1 机械枚举，非 LLM 自查"）与规律④（"审计修正自身含计数错误"）都是本仓库自己的实证——目前唯一拦截手段是事后人工 grep 重跑（P2-1/P2-3 均由此发现）。校验器把"事后审计发现"前移为"提交瞬间拦截"——OpenMMLab 先例的论证：修复成本在本地 1 秒 vs CI 失败后的 amend/push/协调
+2. **输入已就绪**：P-003 刚完成 DC1-DC4 改造，全仓 21 个文件已带七字段 front-matter——校验器的完整输入刚铺好，边际成本正是最低点
+3. **与最高调的反框架证据完全一致**：Anthropic "no framework" 指引针对的是 agent 编排框架；pre-commit 是 git 层元工具，不引入运行时、不绑定模型、不需要部署——纯文档仓库身份零损耗
+4. **社区已验证的标准模式**：三个 2026 独立先例（takken.io / coograph / ievo-ai skills）证明"front-matter 校验 + markdownlint + 链接检查"三件套是文档仓库的成熟做法
+
+**校验器最小检查集**（直接从仓库既有裁决派生，零新发明）：
+
+```yaml
+检查项（源自）:
+  - front-matter 可解析为 YAML（ievo-ai 先例：现有工具全漏过此错误）
+  - 七字段齐全 + type/status 取值在 DC2 词表（ADR-0007 D4/D5）
+  - id 全仓唯一（DC4）
+  - 统计表计数 = grep 机械重数（框架 v1.4 R7 规则——形态 II 计数检查）
+  - 相对链接可解析 / 断链标 DC3 档位标注（P-003 刚清理完的债）
+```
+
+【C】**次高 ROI = promptfoo 做 M7 对比臂声明式评测**：M7 账本是本仓库独有的方法论资产，但样本积累靠人工（6 样本/4 天）。promptfoo 的 `promptfooconfig.yaml` 把"同一报告 × 同基座/异基座审查"变成声明式测试矩阵，本地直调 LM Studio 端点，结果直接喂 M7 登记——测试驱动开发的哲学与 SPEC_PROCESS 同构（它的口号就是 "test-driven LLM development"）。**触发条件**：M7 样本积累到 ≥10 或 S1 复验频次升到月级时启动。
+
+### 8.4 补充结论对主报告的影响
+
+主报告 §6 判断不变且被加强：方案 B（薄壳 runner）的排序提前于任何框架——因为最高 ROI 改进（pre-commit 校验器）甚至**先于方案 B**，在现状（方案 C）下即可执行，且不与任何未来路径冲突（校验规则即 DC 契约的机器可读定义，runner 与 LangGraph 路线都将复用）。
+
+## 附录 D: 补充调研假设区（v1.1）
+
+- [H4] pre-commit 校验器可在 Trae/主控站 Windows 环境顺畅运行（pre-commit 官方支持 Windows，但未在本机实测）— 查证路径: `pip install pre-commit && pre-commit run --all-files` 实测
+- [H5] promptfoo 的 LM Studio provider（openai-compatible 接入）对审查类长文本 prompt 的成本/延迟可接受（未实测）— 查证路径: 单次 S1 复验场景 PoC
+- [H6] GitHub Actions 免费额度对本仓库的校验器 workload 足够（文档仓库，无构建，预期远低于限额）— 查证路径: 接入后观察一个月
 
 ---
 
