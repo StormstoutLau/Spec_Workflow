@@ -12,6 +12,7 @@
 | P-003 | doc-contract 改造 Step A-G 执行 | [PLAN.md](../spec/doc-contract/PLAN.md) v1.5（verified） | done | Step A-G 全过（2026-08-17/18）：四项 grep 复核语义全过（`P0`@CHECKLIST 零 / `id:` 21 文件 / `docs/spec/`+`RESOLVED` 命中均为改名元描述，复核结论入 PLAN §5）；RULE-1~6 冠名 + rules 登记块；ADR_TEMPLATE 新建；PLAN v1.5（G→DC/§6 指针化/P3-1·2 闭环）；CODE_WIKI v1.2 尾随同步 |
 | P-004 | GAP_ANALYSIS 审计 P2 修正后异基座 S1 复验 | [审计报告 S1 复验](../spec/cpp-hub-gap-analysis/CPP_HUB_GAP_ANALYSIS_AUDIT.md) §7 | done | S1 复验完成（2026-08-18，DeepSeek V4 Pro 异构于 GLM-5.3）：P2-1(A 计数)/P2-2(行号)/P3-2(E1) 修正正确；发现 P2-3（C 计数仍差 1，审计修正自身含错，形态 II 第四实例）→ 已修正 C=2→3；B1-B4 核心结论成立；M7 样本 ⑥ 入表（形态 II 分桶 10→11） |
 | P-005 | 形态 II 复发跟踪指标入 M7 | 审计报告 §4.3 | done | ① 分桶指标 ✅（[M7 §2](M7_EVIDENCE_LOG.md)，4 载体 × 7 字段类型 = 10 处，含映射闭合新桶）；② §0 计数脚本生成规则 ✅ 落 [框架 v1.4 R7](ASSERTION_EVIDENCE_FRAMEWORK.md)（原设想"入 ADR-0007"经评估主题错位改落框架——报告模板规则的权威载体，Tier1 同通道先例） |
+| P-006 | LangGraph 框架化升级调研 | [调研报告](../spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md) v1.0 | done | 14A+3B+4C+3H；主判断：不整体迁移，方法论仓库保持纯文档；若自动化走薄壳纯 Python runner（方案 B），LangGraph 为触发条件后的升级路径（触发条件入报告 §6）；决策待用户 |
 
 ## 已完成（近三项）
 
