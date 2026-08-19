@@ -23,7 +23,7 @@ upstream: null
 | C 判断类 | 6 | §6 决策分析 4 条 + §8.3 补充裁决 2 条 |
 | 假设区 | 6 | H1-H6，未取证声明 |
 
-> **计数修正记录（R7 机械重数，2026-08-18）**: v1.0 初版声明 A=14 系手填错误——`grep -c '【A】'` 实测 v1.0 主体为 **11** 条（虚报 +3）。v1.1 补充 4 条后以 grep 为准登记 15。**形态 II 第五实例**（计数凭印象，同 P2-1/P2-3 模式），发生在"反幻觉方法论自己的调研报告"上——RULE "统计表计数必须脚本生成"（框架 v1.4 R7）再次被实证为必要。候选 M7 样本 ⑦。
+> **计数修正记录（R7 机械重数，2026-08-18）**: v1.0 初版声明 A=14 系手填错误——`grep -c '【A】'` 实测 v1.0 主体为 **11** 条（虚报 +3）。v1.1 补充 4 条后登记 **15**。**形态 II 第五实例**（计数凭印象，同 P2-1/P2-3 模式），发生在"反幻觉方法论自己的调研报告"上——RULE "统计表计数必须脚本生成"（框架 v1.4 R7）再次被实证为必要。候选 M7 样本 ⑦。**复核补记（2026-08-18）**：`grep -c '【A】'` 原始命中 **16**——本行自引用（命令行里的 `【A】` 字符）贡献 +1，剔除此行后为 15。机械重数工具对自引用不免疫，候选 M7 样本 ⑨（[M7 §1 追加队列](../../docs/M7_EVIDENCE_LOG.md)已登记）。
 
 **扫描范围声明**: 覆盖 LangGraph 官方文档（interrupt/persistence/thinking-in-langgraph 三页）+ 4 份独立生产复盘 + 1 篇 NeurIPS 2025 论文 + 反框架证据 4 源。未覆盖：LangGraph 源码实测、Pydantic AI 官方文档、本仓库 PoC 实测。
 
@@ -213,7 +213,7 @@ upstream: null
 ### 8.1 候选组件证据（A 类）
 
 【A】pre-commit + front-matter 校验是 2026 社区标准做法，三个独立先例（含"现有验证器全部漏过 YAML 解析错误"的实证）：
-(源: https://github.com/webbertakken/takken.io/pull/239; 引文: "The colon after `work` made YAML treat the next line as a mapping key. Prettier formats this without complaint, so **nothing caught it until the build blew up**" / 源: https://github.com/ievo-ai/skills/issues/119; 引文: "This bug survived **all existing validators and code review** because none of them parse YAML frontmatter")
+(源: https://github.com/webbertakken/takken.io/pull/239; 引文: "The colon after `work` made YAML treat the next line as a mapping key. Prettier formats this without complaint, so **nothing caught it until the build blew up**" / 源: https://github.com/ievo-ai/skills/issues/119; 引文: "This bug survived **all existing validators and code review** because none of them parse YAML frontmatter" / 源: https://github.com/paullukic/coograph/issues/6; 引文: "every `SKILL.md` ... must have YAML frontmatter with `name` ... and `description`" / "Link checker — `lychee` over all `*.md` files. Validates relative paths exist")
 
 【A】promptfoo：MIT 开源评测 CLI，声明式 YAML，本地优先（隐私），50+ provider 含本地模型，CI/CD 原生；2026-03 被 OpenAI 收购但承诺保持 MIT + model-agnostic（35 万开发者，Fortune 500 渗透 >25%）：
 (源: https://www.promptfoo.dev/docs/intro/; 引文: "Private: This software runs completely locally... **test-driven LLM development**, not trial-and-error" / 源: https://recatools.com/ai-directory/promptfoo/; 引文: "OpenAI acquired the company in March 2026 but Promptfoo stays **MIT-licensed, model-agnostic**")
@@ -237,7 +237,7 @@ upstream: null
 
 【C】**最高 ROI = pre-commit + DC 契约校验器（含形态 II 计数机械检查）**。理由链：
 
-1. **命中最高频已付费痛点**：形态 II 在 M7 账本登记 11 处、4 条复发规律，且规律③（"拦截层是 E1 机械枚举，非 LLM 自查"）与规律④（"审计修正自身含计数错误"）都是本仓库自己的实证——目前唯一拦截手段是事后人工 grep 重跑（P2-1/P2-3 均由此发现）。校验器把"事后审计发现"前移为"提交瞬间拦截"——OpenMMLab 先例的论证：修复成本在本地 1 秒 vs CI 失败后的 amend/push/协调
+1. **命中最高频已付费痛点**：形态 II 在 M7 账本登记 11 处、4 条复发规律，且规律③（"拦截层是 E1 机械枚举，非 LLM 自查"）与规律④（"审计修正自身含计数错误"）都是本仓库自己的实证——目前唯一拦截手段是事后人工 grep 重跑（P2-1/P2-3 均由此发现）。校验器把"事后审计发现"前移为"提交瞬间拦截"——OpenMMLab 先例的论证（源: https://github.com/open-mmlab/pre-commit-hooks）：修复成本在本地 1 秒 vs CI 失败后的 amend/push/协调
 2. **输入已就绪**：P-003 刚完成 DC1-DC4 改造，全仓 21 个文件已带七字段 front-matter——校验器的完整输入刚铺好，边际成本正是最低点
 3. **与最高调的反框架证据完全一致**：Anthropic "no framework" 指引针对的是 agent 编排框架；pre-commit 是 git 层元工具，不引入运行时、不绑定模型、不需要部署——纯文档仓库身份零损耗
 4. **社区已验证的标准模式**：三个 2026 独立先例（takken.io / coograph / ievo-ai skills）证明"front-matter 校验 + markdownlint + 链接检查"三件套是文档仓库的成熟做法

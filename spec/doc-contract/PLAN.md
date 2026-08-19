@@ -1,7 +1,7 @@
 ---
 id: doc-contract-refactor
 type: design
-version: 1.5
+version: 1.6
 status: verified
 date: 2026-08-18
 depends: [SPEC-PROCESS, ADR-0004, ADR-0005, ADR-0006, ADR-0007, DIS-007, FWK-ASSERTION]
@@ -10,7 +10,7 @@ upstream: null
 
 # 文档规范改造执行方案（v1.2 定稿）
 
-> **性质**: 本文档规范改造的设计+执行方案。type 词表中 `design` ~~为待定第六类（G2 词表缺口，ADR-0007 定稿时裁决）~~ 已裁决入词表（[ADR-0007](../../adr/ADR-0007-unified-document-contract.md) D4，状态词表 draft/in-review/verified）。
+> **性质**: 本文档规范改造的设计+执行方案。type 词表中 `design` ~~为待定第六类（G2 词表缺口，ADR-0007 定稿时裁决）~~ 已裁决入词表（[ADR-0007](../../adr/ADR-0007-unified-document-contract.md) D4；状态词表二档——一般设计文档 `draft/in-review/verified`，CHECKLIST 实例 `pending/accepting/accepted`，v1.6 §1 DC2 消歧）。
 > **审计状态**: 同基座自查 10 项发现（2P1+5P2+3P3，`自查·单视角`）→ 异构复审（DeepSeek V4 Pro，双盲）12 项发现（7P2+5P3，`[已复核·异构]`）→ 本版含全部 P1/P2 修正。
 > **执行裁决**: P1=0 / P2=0（已全部融入本版）/ P3=5（见 §8，不阻断）。
 
@@ -26,6 +26,7 @@ upstream: null
 | v1.3 | 2026-08-16 | 双份并存差异实证（v1.0 vs v1.1 成对漂移）→ 新增 [ADR-0006](../../adr/ADR-0006-assertion-framework-dual-copy-authority.md)（proposed，方案 B 待确认）；doc-contract 让位为 ADR-0007；P3-9 闭环入 ADR-0006，P3-10 部分缓解 | fc+Read 双侧取证 |
 | v1.4 | 2026-08-16 | G1 增文件命名规则 `<FEATURE>_<DOCTYPE>.md`；两份调研文档按此重命名（RESEARCH.md → CPP_HUB_GAP_ANALYSIS_RESEARCH.md / ADR0006_POINTER_RESEARCH.md），id 同步 | 用户指令 + 模板 T1/Cpp_Hub 先例 |
 | v1.5 | 2026-08-18 | ① G1-G4 全文改名 DC1-DC4（[ADR-0007](../../adr/ADR-0007-unified-document-contract.md) D2，防 Cpp_Hub 基准门禁 G1-G4 跨仓撞车）；② §6 M7 数据降为指针（D1：账本 `docs/M7_EVIDENCE_LOG.md` 为唯一活载体，两轮样本已迁入）；③ §3 配套新增四份实体全部落盘，条目状态改判；④ §8 P3-1/P3-2 按 ADR-0007 D4/D5 裁决闭环 | ADR-0007 accepted（2026-08-17） |
+| v1.6 | 2026-08-18 | §1 DC2 状态词表消歧（P-007 复验 P2-1 触发）：① 增 `design` 两行（一般设计文档 `draft/in-review/verified`；CHECKLIST 实例 `pending/accepting/accepted`，判别规则 = id 后缀 `-CHECKLIST`）；② 原"template 实例"行改判 `template` type 行（当前全仓零使用，词表保留）；③ DC2 表 v1.5 前一直缺 design 行（词表仅载于头部注 + ADR-0007 D4）一并修复；E1 全仓实证 14 份 design 文档零违规，纯澄清无迁移 | [DESIGN §6.3](../precommit-dc-validator/DESIGN.md) P2-1 + [ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md) 澄清追记 |
 
 ---
 
@@ -49,15 +50,18 @@ upstream: null
 | `depends` | 依赖文档 id 列表 | 替代散落的"相关文档"链接 |
 | `upstream`（P2-4 新增） | **上游权威源声明** | 解决 Cpp_Hub 双份框架并存：本仓库份为权威源时置 `null`；为迁移副本时置源路径。DIS-007 与 FWK-ASSERTION 因源项目有同名文件，**必须**显式声明 |
 
-### DC2. 状态词表（按 type 固定）
+### DC2. 状态词表（type 主轴；`design` 内按文档类别二档——v1.6 消歧）
 
-| type | 词表 |
-|------|------|
-| adr | `proposed / accepted / superseded / deferred` |
-| discovery | `open / resolved / toolized` |
-| process-spec / framework | `active / deprecated` |
-| template 实例 | `draft / in-review / verified` |
-| CHECKLIST 实例 | `pending / accepting / accepted` |
+| type | 文档类别 | 词表 |
+|------|---------|------|
+| adr | — | `proposed / accepted / superseded / deferred` |
+| discovery | — | `open / resolved / toolized` |
+| process-spec / framework | — | `active / deprecated` |
+| template | — | `draft / in-review / verified`（当前全仓零使用，词表保留） |
+| design | 一般设计文档（id 不以 `-CHECKLIST` 结尾：RESEARCH / DESIGN / IMPLEMENTATION / AUDIT / 方案文档） | `draft / in-review / verified` |
+| design | CHECKLIST 实例（id 以 `-CHECKLIST` 结尾，含模板占位符 `<feature-kebab>-CHECKLIST`） | `pending / accepting / accepted` |
+
+> **消歧裁决（v1.6，2026-08-18）**: ① v1.5 及此前该表混轴——"template 实例 / CHECKLIST 实例"两行首列是**文档类别**而非 type 值，且 design 入词表（ADR-0007 D4）后 DC2 表一直缺 design 行（词表仅载于本文件头部注与 ADR）；② 判别规则机械化为 **id 后缀 `-CHECKLIST`**（id 是 front-matter 规范键，判别不依赖文件名，DC 校验器 M2 可直接 grep）；③ E1 全仓实证（2026-08-18）：14 份 `type: design` 文档中 2 份 id 以 `-CHECKLIST` 结尾（status = pending / accepting，均在 CHECKLIST 词表内），其余 12 份 status ∈ {draft, in-review, verified}——**零存量违规**，纯澄清无迁移成本。触发：[P-007 复验 P2-1](../precommit-dc-validator/DESIGN.md)；决策澄清追记：[ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md)。
 
 > **双语取舍（P3-8 遗留，已裁决）**: ~~三选一悬置~~ 终态 = **英文 token 为准**（ADR-0007 D5）；不建双语映射表。
 

@@ -75,6 +75,7 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 
 - 词表定稿: `process-spec / adr / discovery / framework / template / design`
 - design 状态词表: `draft / in-review / verified`（与模板实例同）
+- **澄清追记（2026-08-18，P-007 复验 P2-1 触发）**: design 状态词表按文档类别二档——CHECKLIST 实例（id 以 `-CHECKLIST` 结尾）沿用 `pending / accepting / accepted`，其余沿用 `draft / in-review / verified`；消除 PLAN DC2 表 type/文档类别混轴（该表此前并缺 design 行），契约文本见 [PLAN v1.6 §1 DC2](../spec/doc-contract/PLAN.md)。E1 全仓实证 14 份 design 文档零违规，纯澄清无迁移
 - 依据: 存量三份已事实使用（E1），拒绝入册即制造存量违规
 
 ### D5. G2 双语取舍 = 英文 token 为准
@@ -326,3 +327,4 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | 2026-08-17 | §2.1 页面级 grep 复核（独立 pass）：4/4 引文命中（E1 L61/L87 逐字、E3/E4 arXiv 摘要逐字且 E3 升级为 ICSE'2023 接收、E2 API 级命中 + 反爬拦截如实登记），证据等级升级为页面级/API 级复核 A 类 |
 | 2026-08-17 | proposed → **accepted**（用户确认 D1-D5 整批通过）；DC token 占用检查 E1 闭合（全仓 grep 仅本 ADR 4 处定义性引用，零外部占用）；版本 v1.0 → v1.1；确认优先级节/待验证项同步定版 |
 | 2026-08-17 | D3 落地补全（文档记录合规审计触发）：新增附录 A 编号命名空间登记表（含 Cpp_Hub 三位系列 B4 补全行）+ 附录 B P0 术语消歧节（原 PLAN S5 指派）；docs/adr/README.md 同步登记 0007/0008/0009 并指向本附录为权威载体 |
+| 2026-08-18 | D4 澄清追记（P-007 precommit-dc-validator 复验 P2-1 触发）：design 状态词表按文档类别二档（CHECKLIST 实例 id 后缀判别 → pending/accepting/accepted，其余 → draft/in-review/verified），消除 PLAN DC2 type/文档类别混轴；PLAN 升 v1.6 承载契约文本；E1 全仓 14 份 design 文档零违规 | 复验记录 [DESIGN §6.3](../spec/precommit-dc-validator/DESIGN.md) + 全仓 grep 枚举 |
