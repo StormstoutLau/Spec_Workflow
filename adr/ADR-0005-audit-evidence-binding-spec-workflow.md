@@ -18,7 +18,7 @@ upstream: null
 | 日期 | 2026-08-16 |
 | 状态 | 接受 |
 | 决策者 | Scott (鹏) + Claude GLM-5.3 |
-| 相关文档 | [SPEC_PROCESS.md](../../SPEC_PROCESS.md), [ADR-0004](./ADR-0004-adopt-external-benchmark-heterogeneity-quarantine.md), [META_AUDIT_IMPROVEMENT_REPORT.md]（[外部·未随迁]） |
+| 相关文档 | [SPEC_PROCESS.md](../SPEC_PROCESS.md), [ADR-0004](./ADR-0004-adopt-external-benchmark-heterogeneity-quarantine.md), [META_AUDIT_IMPROVEMENT_REPORT.md]（[外部·未随迁]） |
 | 取代 | 无 |
 
 ## 范围声明（先于一切）

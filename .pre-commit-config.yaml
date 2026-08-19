@@ -1,0 +1,13 @@
+# DC 契约校验器（DC1-DC4 + R7）——repo-local hook
+# 设计：spec/precommit-dc-validator/DESIGN.md §3.1（repo: local + language: system）
+# 安装：pre-commit install
+# 手动：pre-commit run dc-validator --all-files
+# 说明：entry 走 python 前缀（Windows 无 /bin/sh，RESEARCH §2.1 陷阱实证）
+repos:
+  - repo: local
+    hooks:
+      - id: dc-validator
+        name: DC contract validator (DC1-DC4 + R7)
+        entry: python scripts/dc_validator.py
+        language: system
+        files: \.md$

@@ -18,7 +18,7 @@ upstream: null
 | 日期 | 2026-08-01 |
 | 状态 | 接受 |
 | 决策者 | Scott (鹏) + Claude GLM-5.2 |
-| 相关文档 | [META_AUDIT_EXTERNAL_BENCHMARK.md]（[外部·未随迁]）、[META_AUDIT_IMPROVEMENT_REPORT.md]（[外部·未随迁]）、[ADR-0003]（[外部·未随迁]，三处零命中实证 2026-08-16）、[SPEC_PROCESS.md](../../SPEC_PROCESS.md) |
+| 相关文档 | [META_AUDIT_EXTERNAL_BENCHMARK.md]（[外部·未随迁]）、[META_AUDIT_IMPROVEMENT_REPORT.md]（[外部·未随迁]）、[ADR-0003]（[外部·未随迁]，三处零命中实证 2026-08-16）、[SPEC_PROCESS.md](../SPEC_PROCESS.md) |
 | 取代 | 无（扩展 ADR-0003 后的流程决策，不取代任何 ADR） |
 
 ## 背景（Context）
