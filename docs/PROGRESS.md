@@ -18,11 +18,13 @@
 | P-009 | 薄壳纯 Python runner（方案 B，独立仓库） | [调研报告](../spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md) §5/§6 主判断（P-006 裁决方向）+ H2 PoC 查证 | pending | 方向性候选（自动化需求出现时启动）：runner 骨架独立仓库落地——显式 `--gate` 门禁命令物理化 RULE-1 + JSON state + git 持久化 + LM Studio 端点异构审查，零框架依赖（~500-1000 LOC 待 H2 实测）；LangGraph 升级触发条件 (a)/(b)/(c)（调研 §6）随 runner 落地登记复查 |
 | P-010 | promptfoo M7 对比臂声明式评测 | [调研报告](../spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md) §8.2/§8.3（次高 ROI）+ H5 PoC 查证 | pending | 触发条件已满足（M7 样本 11 ≥ 10，样本⑪ 入账后；混轴修正注见 M7 样本⑪③）：promptfooconfig.yaml（LM Studio 本地端点作 provider）+ 首轮声明式对比评测（同一报告 × 同基座/异基座审查）结果入 M7 登记；H5 成本/延迟实测 |
 | P-011 | M7 统计升 ```hits 机读块 + 样本登记脚本化 | [M7 §4](M7_EVIDENCE_LOG.md) 待办挂钩（[CPP_HUB_ABSORPTION_DESIGN](../spec/cpp-hub-absorption/CPP_HUB_ABSORPTION_DESIGN.md) §6 既定）+ [调研报告](../spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md) §6 零成本项 | pending | 学习回路独立议题（不并入其他 feature）：M7 增设 ```hits 机读块（统计可脚本重数/生成）+ 样本追加由手工登记改脚本辅助（`grep -c` 重数先例）；与 dc_validator R7 计数检查衔接 |
+| P-012 | DeepSeek Harness（dsh）调研与吸收复用裁决 | [调研报告](../spec/deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md) v1.0（14A+3B+3C+4H，R7 机械重数一致） | done | 四层裁决：①机制立即吸收（session log 设计思想 + M5 方法论互证入资产）；②P-008 执行形态增 dsh 试点选项（工作站 A + DeepSeek V4 Pro 真异基座 + JSONL 取证，默认仍对话式、试点并行）；③P-009 agent 执行层选型重裁决（dsh SDK vs 裸 API，触发条件已满足，以 H2 实测为输入）；④本体不进仓（纯文档 + 最小工具层定位不变）。待办挂钩：H2/H3/H4 实测挂 P-008/P-009 执行时 |
 
 ## 已完成（近三项）
 
 | 日期 | 事项 | 产出 |
 |------|------|------|
+| 2026-08-20 | P-012 DeepSeek Harness 调研（实体消歧 "j space deepseek hardness"→dsh）：14A+3B+3C+4H，四层吸收裁决（机制吸收/P-008 试点选项/P-009 选型重裁决/本体不进仓）；R7 机械重数一致（A14 独立编号修正记录在案） | spec/deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md v1.0 |
 | 2026-08-19 | 治理收束轮（遗留任务调研 + 收敛）：M7 样本⑩ 补登（分桶 15→16）+ ADR-0009 失效条件首次重审（机制保留）+ DIS-007 v1.3 追记 DR-6 + LANGGRAPH L26 标注收束 + P-009~P-011 登记 + CODE_WIKI v1.5；**dry-run 自查追加样本⑪**（分桶 16→19——收束轮自身产出 3 计数错 + 1 超前断言，人工机械枚举拦截，规律② 最强实例） | DEV-LOG-004；PROGRESS / ADR-0009 / discoveries README / 007 / LANGGRAPH 全收敛 |
 | 2026-08-19 | P-007 Step 5-7（实施+验收）：DC 契约校验器落地 | `scripts/dc_validator.py` + `.pre-commit-config.yaml` + IMPLEMENTATION v1.1 + CHECKLIST v1.0 + M7 样本⑨（分桶 13→15） |
 | 2026-08-18 | P-004/P-005/P-006 收束 + P-007 Step 1-4（调研+设计+复验） | commits 7d0255b / 5a5cbd0（已推送）；RESEARCH v1.1 + DESIGN v1.2 |
