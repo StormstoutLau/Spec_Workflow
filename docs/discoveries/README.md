@@ -20,7 +20,7 @@
 | id | 状态 | 一句话 | 证据锚点 | 潜在论文? |
 |----|------|--------|---------|-----------|
 | DIS-001~006 | [源项目·Cpp_Hub/docs/discoveries/] | BH-FDR 反例 / Heston 分支切割 / PSOR ω / Sobol-BB / AAD checkpointing / 跨编译器浮点确定性 | 源项目现场 | 见源项目统计（6 篇潜在） |
-| [DIS-007](../007_hallucination_audit_asymmetric_evidence.md) | toolized | 幻觉点清单自身含幻觉——验证层必须与生成层独立且结构不同 | 007 全文（Phase 7C 126 条→8 错现场）；公共承载 = [框架 v1.4](../ASSERTION_EVIDENCE_FRAMEWORK.md) | 是（不对称证据审计，方法论） |
+| [DIS-007](../007_hallucination_audit_asymmetric_evidence.md) | toolized | 幻觉点清单自身含幻觉——验证层必须与生成层独立且结构不同 | 007 全文（Phase 7C 126 条→8 错现场）；公共承载 = [框架 v1.4](../ASSERTION_EVIDENCE_FRAMEWORK.md)；**DR-6 追记（2026-08-19）**：dc_validator selftest 硬编码计数错——验证工具自身含形态 II，命题扩展至人写校验工具（[007 §证据 v1.3](../007_hallucination_audit_asymmetric_evidence.md)） | 是（不对称证据审计，方法论） |
 | DIS-008 | open | 同文件多 Edit 并行执行时后发写入以陈旧快照覆盖先发编辑，产生静默回滚——拦截层为事后 grep 终验，非工具自护 | 2026-08-17 Tier1 执行：框架 v1.3 十位点中 6 处被回滚，grep 终验捕获，串行重放修复；**同日复发**：v1.4 批次前 Read 检出 v1.3 头部行 + §9 同步对声明两处残留回滚（首轮流终验 grep 模式未覆盖）——教训升级：终验 grep 模式必须覆盖全部修改行，非抽样。操作缓解 = 同文件编辑严格串行 + 编辑前 Read + 终验全覆盖 | 否（工程工具层；与形态 II 规律三"机械枚举才是可靠拦截层"同构） |
 
 ## 统计
@@ -33,3 +33,4 @@
 - 每条新发现登记成本应 <5 分钟；单发事件不登记，仅"跨 feature/跨仓库复发的系统性模式"或"机制必要性实测样本"入册
 - 状态迁移（open→resolved/toolized）时更新本表 + 原文（如有）
 - 连续 3 个 feature 无新增且无迁移 → 触发 ADR-0009 失效条件重审
+- **首次重审已执行（2026-08-19）**：触发 = DIS-008 后连续 5 feature 零新增零迁移 → 结论**机制保留**（零新增系登记纪律设计结果——期间形态 II 均为 DIS-007 模式复发，入 M7 账本；DR-6 判定为追记而非新 DIS）。计数自本轮重置，详见 [ADR-0009 重审记录](../../adr/ADR-0009-discoveries-log-mechanism.md)

@@ -3,15 +3,15 @@
 ---
 id: DIS-007
 type: discovery
-version: 1.2
+version: 1.3
 status: toolized
-date: 2026-08-16
+date: 2026-08-19
 depends: [FWK-ASSERTION]
 upstream: null
 ---
 
 **状态**: toolized（方法论已落地为可执行工具；原 RESOLVED，DC2 词表化改标）
-**版本**: v1.2 (2026-08-16; 公共承载 = docs/ASSERTION_EVIDENCE_FRAMEWORK.md, 同步对版本声明见该框架 §9——框架 v1.3 词表分型不触及本发现内容, 007 不随升; 权威源 = 本仓库, 见 ADR-0006)
+**版本**: v1.3 (2026-08-19; 追记 DR-6 证据——命题扩展至人写校验工具，见 §证据末条。v1.2 2026-08-16; 公共承载 = docs/ASSERTION_EVIDENCE_FRAMEWORK.md, 同步对版本声明见该框架 §9——框架 v1.3/v1.4 不触及本发现内容, 007 不随升; 权威源 = 本仓库, 见 ADR-0006)
 **模块**: docs/ASSERTION_EVIDENCE_FRAMEWORK.md + `scripts/assertion_audit.py` [本地工具·仓库外] (跨模块方法论)
 **发现日期**: 2026-08-16
 **发现背景**: Phase 7C (v1.7 多变量时序与混频模块) 调研产出经 3 审计 agent 全量独立重查, 发现"排幻觉点"的调研报告自身含 8 处实质错误 — 其中两处 (V8/CI5) 属"把正确事实标成幻觉"型, 对下游 spec 危害大于幻觉本身
@@ -77,6 +77,7 @@ Cpp_Hub 的调研工作流以"幻觉点清单"为核心产出 (Phase 7B 51 项 G
 - **反事实检验**: 7/8 (A 类) 若生成期强制"链接+引文"当场拦截; 唯一 B 类 (CI5) 由探针机械终结 — 分类与工具各自命中设计目标
 - **NP2 裁决闭环** (类型 I 的处置实例): `mcp_scholar-mirror.fetch_by_doi` → Semantic Scholar openAccessPdf 绿色副本 → BC wp369 + AU ng_perron00 双工作稿 pypdf 提取 eq.(12) 逐字一致 → 4 源冻结 β̂₀² 形式
 - **工具自检**: `scripts/assertion_audit.py` [本地工具·仓库外] `demo` 离线 4/4 通过 (CI5 证伪/NP 存活/计数证伪/STEP_GAP 检出), commit c0d1d09
+- **DR-6 追记（2026-08-19, Spec_Workflow）**: `scripts/dc_validator.py`（本仓 P-007 落地的 DC 契约校验器）selftest v1.0 打印 13 行 PASS 汇总却称 "12/12"——硬编码手填计数 vs 13 个 expect 实调。**验证工具自身含形态 II 计数错**：本发现命题（"清单作者与要防的对象是同一类系统"）从 LLM 审查产物扩展到**人写校验工具**；该失效模式预注册于 [precommit-dc-validator DESIGN §10.2](../spec/precommit-dc-validator/DESIGN.md) 风险 1（"校验器自身含计数/分类错误"），实测精确命中；修复 = 计数改由 expect 调用自增（本发现 §方案"计数→枚举全集再数（非记忆计数）"原则应用于工具自身）。现场 = [P-007 IMPLEMENTATION §1 DR-6](../spec/precommit-dc-validator/IMPLEMENTATION.md) + [M7 样本⑨](M7_EVIDENCE_LOG.md)
 
 ## 工具链副发现 (NP2 裁决过程)
 

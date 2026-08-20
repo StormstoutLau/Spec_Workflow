@@ -1,8 +1,8 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.4（2026-08-18，视觉资产统一：§2.4/§3.2 换用 README 同套 Anthropic 风格 SVG（docs/assets/readme/），弃用紫色初版架构图）
-> **覆盖对象**: 本仓库全部文档（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007、断言证据框架 v1.4、5 个模板（四件套 + ADR）、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×2、spec/ 三 feature 目录）
-> **仓库性质**: 纯文档型方法论仓库 —— 无源代码、无构建系统、无运行时；"运行方式" = 工作流的执行方式（见 §6）
+> **Wiki 版本**: v1.5（2026-08-19，治理收束同步：P-006/P-007 收尾状态、M7 样本①-⑪（形态 II 分桶 19 处）、ADR-0009 失效条件首次重审、DC 契约校验器（`scripts/dc_validator.py` + `.pre-commit-config.yaml`）入册、P-008~P-011 待办、DEV-LOG-003/004、spec/ 增至六 feature 目录）
+> **覆盖对象**: 本仓库全部文档与工具（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007 v1.3、断言证据框架 v1.4、5 个模板（四件套 + ADR）、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×4、spec/ 六 feature 目录、`scripts/dc_validator.py` + `.pre-commit-config.yaml`）
+> **仓库性质**: 方法论文档仓库为体、最小工具层为用 —— 唯一可执行件 = DC 契约校验器（零第三方依赖）+ pre-commit hook；其余"运行方式" = 工作流的执行方式（见 §6）
 
 ---
 
@@ -27,6 +27,7 @@
 | 单 agent 既写又审无对抗 | 单视角声明 + 异构第二会话 | `SPEC_PROCESS.md` 规则 4/5 |
 | 审计"全绿表演"（无证据绑定的✅） | 取证矩阵 E1-E5 | `SPEC_PROCESS.md` 规则 6 + ADR-0005 |
 | 测试通过 ≠ 设计落地 | ADD 四阶段审计 | `SPEC_PROCESS.md` Step 10 |
+| 文档契约违规（front-matter 缺失/词表越界/断链/计数手填）逃逸到提交后 | DC1-DC4 契约 + pre-commit 机械拦截（R7 计数重数） | `scripts/dc_validator.py` + `.pre-commit-config.yaml`（P-007） |
 
 ### 1.3 版本演进
 
@@ -49,27 +50,32 @@
 f:\Spec_Workflow/
 ├── SPEC_PROCESS.md              # ★ 流程宪法 v1.4：10 步 + 6 规则 + 门禁 + ADD
 ├── CODE_WIKI.md                 # 本 Wiki
+├── .pre-commit-config.yaml      # repo-local hook（dc-validator，P-007 落地）
 ├── adr/                         # 架构决策记录（六份，全 accepted）
 │   ├── ADR-0004-...quarantine.md     # 异质性约束 + 隔离四要素（→ v1.2）
 │   ├── ADR-0005-...binding.md        # 审计证据绑定（→ v1.3）
 │   ├── ADR-0006-...authority.md      # 断言框架双份权威源（回流通道）
 │   ├── ADR-0007-...contract.md       # 统一文档契约（附录 A 命名空间登记权威）
 │   ├── ADR-0008-...gate.md           # Step 2 门禁 + Step 8 双向链路（→ v1.4）
-│   └── ADR-0009-...discoveries.md    # 发现日志机制（学习回路载体）
+│   └── ADR-0009-...discoveries.md    # 发现日志机制（2026-08-19 首次重审 = 机制保留）
 ├── docs/                        # 方法论层
-│   ├── 007_hallucination_audit_...md     # Discovery 007（toolized）
+│   ├── 007_hallucination_audit_...md     # Discovery 007 v1.3（toolized；追记 DR-6）
 │   ├── ASSERTION_EVIDENCE_FRAMEWORK.md   # 断言分级证据框架 v1.4（STEP_GAP 两态 + R7）
-│   ├── M7_EVIDENCE_LOG.md                # M7 证据账本（对比臂数据唯一活载体，ADR-0007 D1）
-│   ├── PROGRESS.md                       # 待办登记（P-001~P-005）
+│   ├── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-⑪，形态 II 19 处）
+│   ├── PROGRESS.md                       # 待办登记（P-001~P-011）
 │   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
-│   ├── discoveries/README.md             # 发现三态索引（DIS-007/008）
-│   └── dev-log/                          # DEV-LOG-001/002（事件叙事）
+│   ├── discoveries/README.md             # 发现三态索引（DIS-007/008；DR-6 追记）
+│   └── dev-log/                          # DEV-LOG-001~004（事件叙事）
+├── scripts/
+│   └── dc_validator.py         # DC 契约校验器（DC1-DC4 + R7，零第三方依赖，P-007）
 └── spec/
     ├── templates/              # 5 个标准模板（四件套 + ADR_TEMPLATE，P-003 Step F）
-    ├── doc-contract/PLAN.md    # 文档规范改造方案 v1.5（P-003 执行中）
+    ├── doc-contract/PLAN.md    # 文档规范改造方案 v1.6（verified，P-003 done）
     ├── cpp-hub-gap-analysis/   # 差距分析 RESEARCH + AUDIT（第二次回流依据）
     ├── cpp-hub-absorption/     # 吸收复用四件套（DESIGN v1.1 + IMPL + CHECKLIST，已验收）
-    └── adr0006-pointer/        # ADR-0006 决策 3 调研（P-001 依据，已执行）
+    ├── adr0006-pointer/        # ADR-0006 决策 3 调研（P-001 依据，已执行）
+    ├── langgraph-upgrade/      # LangGraph 框架化调研（P-006 done，RESEARCH v1.1）
+    └── precommit-dc-validator/ # DC 契约校验器四件套（P-007 done，独立 pass 见 P-008）
 ```
 
 ### 2.2 逻辑架构分层
@@ -276,7 +282,7 @@ flowchart TD
 
 ### 3.6 [docs/007_hallucination_audit_asymmetric_evidence.md](./docs/007_hallucination_audit_asymmetric_evidence.md) —— Discovery 007
 
-**职责**: 上述框架的**发现过程记录**（研究日志形态），状态 RESOLVED（方法论已落地为工具）。
+**职责**: 上述框架的**发现过程记录**（研究日志形态），状态 toolized（DC2 词表化改标，原 RESOLVED；v1.3 追记 DR-6——命题扩展至人写校验工具，见 §7）。
 
 **核心发现**: 幻觉点清单的作者（调研 agent）与清单要防的对象（弱记忆/凭印象断言）是同一类系统 —— 清单本身必然继承同类缺陷。错误三形态：
 - **I. 无据断言**（全源零命中仍写出）——危害极高
@@ -296,7 +302,7 @@ flowchart TD
 | [ADR-0006](./adr/ADR-0006-assertion-framework-dual-copy-authority.md) | 2026-08-16 | 断言框架双份并存（本仓 v1.0 vs Cpp_Hub v1.1 同日漂移一代）→ 本仓库为权威源 + 回流通道（人工纪律）；回流频度 <1 次/季度触发重审 | 框架 v1.2 回吸收；2026-08-17 回流通道首次批量使用（P-002） |
 | [ADR-0007](./adr/ADR-0007-unified-document-contract.md) | 2026-08-17 | 统一文档契约五决策：M7_EVIDENCE_LOG 唯一活载体 / G1-G4→DC1-DC4（K8s+SE+ICSE 实证佐证）/ 命名空间登记补全 / design 入 type 词表 / 状态词英文 token | 附录 A 命名空间权威登记 + 附录 B P0 消歧；PLAN v1.5 联动待 P-003 |
 | [ADR-0008](./adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) | 2026-08-17 | Step 2 Review 升格门禁（R4 语义 (a)-(d)，内部 E1 实证三例：pilot 拦截/M6 全绿表演/计数错漏网）+ Step 8 双向引用/断言延续 | SPEC_PROCESS v1.4 门禁块 + Step 8 +2 项 |
-| [ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | 2026-08-17 | Discoveries 三态索引（open/resolved/toolized）+ Step 2/10 双集成点——学习回路"事故→规则"载体；DIS-008 首登（同文件并行 Edit 静默回滚） | docs/discoveries/README.md + SPEC_PROCESS 集成点 ×2 |
+| [ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | 2026-08-17 | Discoveries 三态索引（open/resolved/toolized）+ Step 2/10 双集成点——学习回路"事故→规则"载体；DIS-008 首登（同文件并行 Edit 静默回滚）；2026-08-19 失效条件首次重审 = 机制保留（零新增系登记纪律设计结果） | docs/discoveries/README.md + SPEC_PROCESS 集成点 ×2 |
 
 **ADR-0005 的范围声明**（重要）: 仅约束 spec 工作流的审查验收环节，**不改变**金融数学推理框架（sixlayer/六层架构/Lean4 验证策略）的任何设计；若 sixlayer L5 要复用须另立 ADR。
 
@@ -317,7 +323,7 @@ flowchart TD
 
 ## 4. 关键"类与函数"说明（接口契约层）
 
-> 本仓库无源代码。可执行组件 `assertion_audit.py` **有意不进本仓库**（本地 scripts/ 惯例），但其接口契约在 `ASSERTION_EVIDENCE_FRAMEWORK.md` 中完整公开，此处汇总。
+> 本仓库自 P-007 起含**最小工具层**：`scripts/dc_validator.py`（DC 契约校验器，仓库内，见 §4.4）。断言审计器 `assertion_audit.py` 仍**有意不进本仓库**（本地 scripts/ 惯例），但其接口契约在 `ASSERTION_EVIDENCE_FRAMEWORK.md` 中完整公开，此处汇总。
 
 ### 4.1 外部关联工具: `scripts/assertion_audit.py`（B 类断言审计器）
 
@@ -397,6 +403,30 @@ def audit_class_b(assertion, source_evidence, auditor_agent):
 | WebSearch / WebFetch | 通用搜索与页面抓取（引用验证主力） |
 | SearchCodebase | 现有代码库语义搜索 |
 
+### 4.4 仓库内工具: `scripts/dc_validator.py`（DC 契约校验器，P-007）
+
+**职责**: 把 DC1-DC4 文档契约 + R7 计数规则从"事后审计发现"（P2-1/P2-3 均由此暴露）前移为"提交瞬间拦截"。契约的机器可读定义——权威源 = PLAN v1.6 §1 DC1-DC4 + ADR-0007 D4/D5 + 框架 v1.4 R7；五条不变式（只读/确定性/零新规则/单一真值源/异构于生成端，DESIGN §8）。零第三方依赖（stdlib 手写 front-matter 解析），推荐 `python -S -E` 运行。退出码：0 通过 / 1 违规 / 2 工具自身错误。
+
+| 检查模块 | 内容 |
+|---------|------|
+| front-matter（M1） | 可解析（首行式/标题后式两形态）；装饰性 `---` 分隔线不误判（开围栏后首个非空行须为 `key: value` 形态——dry-run 实测误报修复，selftest F10 回归） |
+| 七字段 + 词表（M2/M3） | DC1 字段齐全；DC2 type 六类 / status 二档（词表常量逐字符复制自 DESIGN §6.3，I-4 单一真值源） |
+| 命名空间（M4） | DC4 id 全仓唯一 |
+| 断链（M4） | DC3 档 1 相对链接可解析（档 2-4 外部/源项目标注豁免） |
+| 计数（M5） | §0 统计表计数 = `grep -c` 机械重数（R7——拦截形态 II 手填计数，M7 样本⑨⑩ 的拦截通道） |
+
+**CLI**:
+
+```bash
+python -S -E scripts/dc_validator.py                     # 全仓全检查（默认 --check-all）
+python -S -E scripts/dc_validator.py file1.md file2.md   # 指定文件（pre-commit staged 语义）
+python -S -E scripts/dc_validator.py --check-counting    # 单项组合（--check-frontmatter/--check-namespace/--check-links）
+python -S -E scripts/dc_validator.py --selftest          # 内嵌自测（13 fixture）
+pre-commit run dc-validator --all-files                  # hook 通道（.pre-commit-config.yaml，repo: local）
+```
+
+**selftest 计数惯例**: 计数由 expect 调用自增，不手填——v1.0 曾硬编码"12/12"实调 13 个 expect（DR-6，DESIGN §10.2 风险 1 预注册命中，M7 样本⑨），修复即 R7 原则应用于工具自身。
+
 ---
 
 ## 5. 依赖关系
@@ -457,6 +487,7 @@ flowchart LR
 | Markdown 渲染环境（支持 mermaid 的查看器） | 阅读流程图 | 建议 |
 | MCP 工具集（§4.3） | Step 1 调研、NP2 类 DOI 取文 | Step 1 必需 |
 | `scripts/assertion_audit.py` | B 类断言审计闭环、demo 自检 | 仅调研审计时需要（须从源项目获取） |
+| `scripts/dc_validator.py`（Python 3.12 实测，零依赖） | DC 契约提交瞬间拦截（`python -S -E` 直跑或 pre-commit hook） | 建议（pre-commit 4.6.2 + `pre-commit install` 后自动） |
 | LM Studio 端点（OpenAI 兼容） | assertion_audit 的 auditor 后端 | 可选（有 manual 模式） |
 | pytest / git | Step 9-10 的 E1 级证据生成 | 目标项目侧 |
 
@@ -498,6 +529,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 - **规则 1 的执行纪律**：同一次生成的 review 章节必须标 `[自查·并发]`，事后独立 pass 复核后才能升级 `[已复核]` —— 这是 M6 教训的直接防线
 - **审计者永不自动修复**：任何 review/audit 输出只标记问题，修复由实现者执行后交复审
 - **官方文档不是真值**：关键断言需双源（statsmodels/arch 官方文档均写错过 ZA 1992 刊名）
+- **提交契约拦截（P-007 起）**：`.pre-commit-config.yaml` 已装 repo-local hook（dc-validator，`files: \.md$`）——front-matter/词表/命名空间/断链/计数违规在提交瞬间被机械拦截；绕过 hook 的直接提交前须手动跑 `python -S -E scripts/dc_validator.py`
 
 ---
 
@@ -512,6 +544,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | ADR-0001 案例 | 论证驱动归因扭曲（2008 CDO 多因案例被裁剪为单因） | Step 4 Review 检查项 |
 | ADR-0002 决策 | 职责边界混淆（职责外 vs 能力边界） | Step 4 Review + DESIGN 模板 §2.3 |
 | Phase 7C（126 条→8 错，7A+1B） | 幻觉清单自身含幻觉；类型 III"把正确标成幻觉"不可被链接拦截 | 断言分级框架 + assertion_audit.py |
+| 形态 II 计数复发（M7 样本①-⑪，19 处） | 防幻觉产物自身计数虚报（LANGGRAPH A=14→11；dc_validator selftest 12/12→13/13；ADR0006 A=7→8；治理收束轮 feature 目录 5→6 + 样本数混轴 16→11——收束轮自身产出含错，规律② 至今最强实例） | R7 机械计数规则 + M7 账本分桶 + pre-commit M5 模块（提交瞬间拦截，覆盖 §0 统计表）+ 全仓 grep 机械枚举对账（兜底层，拦截 prose 计数） |
 | NP2 τ_T(k) | λ̂−λ̃ 差形式全源零命中（无据断言）；裁决经 scholar-mirror → Semantic Scholar 绿色副本 → pypdf 提取 eq.(12) 四源冻结 β̂₀² | A 类强制证据规则、双源规则 |
 | EuropePMC 回退 | DOI 查询返回无关 PLOS One 论文（链接有效内容错配） | 证据身份验证规则 |
 
@@ -563,9 +596,9 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [adr/ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | Discoveries 发现日志机制（学习回路载体） |
 | [docs/007](./docs/007_hallucination_audit_asymmetric_evidence.md) | Discovery 007：幻觉清单自身含幻觉的发现记录（126→8 错误复盘） |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
-| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本 + 形态 II 复发分桶 + 命中率 baseline（唯一活载体） |
-| [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open） |
-| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001/P-002/P-005 done，P-003 执行中（2026-08-18），P-004 pending |
+| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-⑪ + 形态 II 复发分桶（19 处/7 字段类型）+ 命中率 baseline（唯一活载体，ADR-0007 D1） |
+| [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized，v1.3 追记 DR-6）/ DIS-008（open）；维护纪律含首次重审记录（2026-08-19） |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-007 done；pending = P-008（P-007 独立 pass）/ P-009（薄壳 runner 方案 B）/ P-010（promptfoo M7 对比臂，触发已满足）/ P-011（M7 hits 机读块） |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
 | [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ DEV-LOG-002（cpp-hub-absorption 全链路） |
 | [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.1 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
