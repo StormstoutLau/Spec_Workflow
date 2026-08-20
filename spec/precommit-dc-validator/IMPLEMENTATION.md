@@ -3,8 +3,8 @@
 ---
 id: precommit-dc-validator-IMPLEMENTATION
 type: design
-version: 1.1
-status: draft
+version: 1.2
+status: verified
 date: 2026-08-19
 depends: [precommit-dc-validator-DESIGN, precommit-dc-validator-RESEARCH]
 upstream: null
@@ -12,11 +12,12 @@ upstream: null
 
 > **Feature**: precommit-dc-validator（PROGRESS P-007）
 > **创建日期**: 2026-08-19
-> **状态**: draft（草稿）
+> **状态**: verified（独立 pass 通过，2026-08-20）
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md) v1.2
 > **基于调研**: [RESEARCH.md](./PRECOMMIT_DC_VALIDATOR_RESEARCH.md) v1.1
-> **审查状态**: `自查（单视角）`（RULE-4）——Step 6 Review 独立 pass 待执行
+> **审查状态**: v1.1 经独立 pass（2026-08-20，DeepSeek V4 Pro **真异基座**——生成端 GLM-5.3，RULE-1 时序独立 + RULE-5 模型异质性双满足）：E1 四通道复核全过（selftest 13/13 重跑 / 全仓 dry-run 39 文件 0 违规 / 双跑逐字节一致 I-2 / pre-commit 通道 Passed）；词表常量与 DESIGN §6.3 逐字符核对一致（I-4）；DR-5/DR-6 修复重验通过。发现 3 P3（§4.3/§4.5 签名声明未覆盖 `root=ROOT` 实施参数 / CHECKLIST §8.1 跨模块映射断言不实 / DESIGN §10.1-4 LOC 核对缺位）→ v1.2 修正注 + DR-7；M7 样本⑬（映射闭合 1 处）
+> **v1.2 变更（2026-08-20）**: 独立 pass 修正——§4.3/§4.5 补 `root=ROOT` 实施参数声明（P3-1）；§10 增 DR-7（LOC 对账登记）；status draft → verified
 
 ---
 
@@ -230,6 +231,7 @@ def check_namespace(files: list[str]) -> list[CheckResult]:
 ```
 
 **签名一致性**: 与 DESIGN §4.3 一致 ✅
+**v1.2 修正注（独立 pass P3-1）**: 实际签名 `check_namespace(files, root=ROOT)` 另含 `root=ROOT` 默认参数（selftest F6 以 `root=tmp` 隔离 fixture 所需）——与 `+text` 同类实施参数，生产缺省即全仓语义、契约不变；v1.1"一致"声明未覆盖该参数，补记
 
 ### 4.4 check_counting（M4）
 
@@ -248,6 +250,7 @@ def check_links(file: str, text: str) -> list[CheckResult]:
 ```
 
 **签名一致性**: 与 DESIGN §4.5 一致（+`text` 参数，同 4.2）✅
+**v1.2 修正注（独立 pass P3-1）**: 实际签名 `check_links(file, text, root=ROOT)` 另含 `root=ROOT` 默认参数（selftest F8b 的 fixture 根解析所需），同类实施参数，v1.1 未声明，补记
 
 ### 4.6 CheckResult / Summary（数据结构）
 
@@ -329,7 +332,7 @@ selftest 输出 `N/N PASS` 或首条失败详情，退出码 0/1。
 
 ## 9. 幻觉排除审查（Step 6 Review）
 
-> 以下 checkbox 按 RULE-1 时序独立要求，**待独立 pass 勾选**，当前自查先行标注。
+> 以下 checkbox 为 2026-08-19 实施自查标注（历史保留）。**独立 pass 已完成（2026-08-20，DeepSeek V4 Pro 真异基座，RULE-1 时序独立 + RULE-5 模型异质性双满足）**：§9.1-§9.4 逐项复核确认；复核证据 = selftest 13/13 重跑 + 全仓 dry-run 39 文件 0 违规 + 双跑逐字节一致（I-2）+ pre-commit 通道 Passed + 词表常量逐字符核对（I-4）。接口签名一项发现 P3-1（`root=ROOT` 实施参数漏声明），已补 §4.3/§4.5 修正注。
 
 ### 9.1 依赖版本验证
 
@@ -361,6 +364,7 @@ selftest 输出 `N/N PASS` 或首条失败详情，退出码 0/1。
 | DR-4 | 自测内嵌 `--selftest` 而非独立测试文件 | 仓库纯文档身份的代码面最小化（§2.3） | 本文档 §8.1 |
 | DR-5 | 修复 2 处存量真断链（ADR-0004/0005 `../../` → `../`）+ 1 处存量计数漏计（ADR0006 A 7→8） | M4/M5 预跑捕获（§1 取证 2/3） | 随本 feature 同 commit 修复；M7 登记见 CHECKLIST |
 | DR-6 | selftest 汇总计数由硬编码 `12/12` 改为 expect 自增机械计数（v1.0 打印 13 行 PASS 却声称 12/12——**计数校验工具自身犯计数错**，形态 II 在审查臂的实例） | Step 6 复验发现（2026-08-19） | 已修复（`total[0] += 1` 自增，R7 同构原则应用于工具自身）；实测 13/13 PASS；M7 登记见 CHECKLIST |
+| DR-7 | 代码量与 DESIGN §10.1-4 "~100 行"估算的核对缺位——独立 pass 实测 **422 行**（selftest 块 ~104 行） | P-008 独立 pass 发现（2026-08-20；DESIGN 约束 4 明示"实施时核对"，v1.1 无 LOC 对账） | 本行即核对登记：膨胀源 = 内嵌 selftest（DR-4）+ CLI 参数矩阵 + 错误处理路径（均有对应验收项承载），功能契约与 I-3 零新规则不受影响；RESEARCH H2 估算按 ~3× 偏差入账，作后续规模估算校准参考 |
 
 ## 11. 实施步骤
 
@@ -388,4 +392,4 @@ selftest 输出 `N/N PASS` 或首条失败详情，退出码 0/1。
 
 ---
 
-**Review 签字**: _________ 日期: _________（待 Step 6 独立 pass）
+**Review 签字**: DeepSeek V4 Pro（真异基座独立 pass：RULE-1 时序独立 + RULE-5 异构于生成端 GLM-5.3，双满足） 日期: 2026-08-20 —— 3 P3 全登记修正（本文件 v1.2），无 P1/P2，验收通过

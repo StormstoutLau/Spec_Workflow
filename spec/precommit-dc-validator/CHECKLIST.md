@@ -3,8 +3,8 @@
 ---
 id: precommit-dc-validator-CHECKLIST
 type: design
-version: 1.0
-status: accepting
+version: 1.1
+status: accepted
 date: 2026-08-19
 depends: [precommit-dc-validator-IMPLEMENTATION, precommit-dc-validator-DESIGN]
 upstream: null
@@ -12,9 +12,10 @@ upstream: null
 
 > **Feature**: precommit-dc-validator（PROGRESS P-007）
 > **创建日期**: 2026-08-19
-> **状态**: 验收中（自查验收完成 + 机械证据齐备；RULE-1 独立 pass 待执行，完成前不升 accepted）
+> **状态**: 已验收（2026-08-20 独立 pass 通过——真异基座 DeepSeek V4 Pro，RULE-1 时序独立 + RULE-5 模型异质性双满足；v1.0"有条件通过"的条件已满足，升 accepted）
+> **v1.1 变更（2026-08-20）**: 独立 pass 修正——§8.1 跨模块契约行映射断言修正（M4 不共享解析器，M7 样本⑬）；§8.2 补录独立轮 3 P3 发现；§10.2/§10.3/§11 落地验收决定与签字
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) v1.1
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) v1.2（独立 pass 审查对象为 v1.1；v1.2 为修正版）
 > **基于设计**: [DESIGN.md](./DESIGN.md) v1.2
 > **验收配置**: 同基座自查（GLM-5.3，既写又审——如实标注；机械证据全部 E1 可重放，非记忆断言）
 
@@ -171,8 +172,8 @@ upstream: null
 | 模块映射 | 1 | M1-M5 ↔ DESIGN §3.2 ↔ IMPLEMENTATION §3 闭合 |
 | 接口契约 | 1 | §4 五接口签名一致（`+text` 差异显式登记） |
 | 修正项 | 1 | P2-1/P3-2（复验轮）+ DR-1~DR-6（实施轮）全部闭合或显式挂起（DR-2 挂起有依据） |
-| 跨模块契约 | 1 | front-matter 解析器为 M2/M3/M4 共享单一实现 |
-| **总分** | 5/5 | **档位**: A（自查；独立 ADD 审计待 Step 10 独立轮） |
+| 跨模块契约 | 1 | front-matter 解析器为 M2/M3 共享单一实现（**v1.1 修正注**：v1.0 作"M2/M3/M4"系映射闭合假象——独立 pass 逐项核对，M4 `check_counting` 独立扫描 §0 节、从不调用 `parse_frontmatter`；M7 样本⑬） |
+| **总分** | 5/5 | **档位**: A（自查 2026-08-19；独立 ADD 审计已完成 2026-08-20——见 §8.2 独立轮 3 P3，全登记修正，档位维持 A） |
 
 ### 8.2 ADD 审计发现
 
@@ -180,6 +181,9 @@ upstream: null
 |--------|------|------|---------|
 | P2 | selftest 汇总计数硬编码 12/12（实调 13 个 expect）——形态 II 于审查工具自身，DESIGN §10.2 风险 1 预注册场景命中 | `.tmp_selftest.txt` 13 行 PASS vs "12/12" | 已修复（DR-6：expect 自增机械计数）；M7 样本⑨登记 |
 | P3 | Linux 兼容性为结构性保证未实机验证 | IMPLEMENTATION §5.4 | 可选：工作站 A/B 跑一次 dry-run 补证实（非阻塞） |
+| P3（独立轮） | IMPLEMENTATION §4.3/§4.5 签名一致性声明未覆盖 `root=ROOT` 实施参数（selftest 隔离所需，同类于已声明 `+text`） | 独立 pass 代码对账（2026-08-20） | 已补 IMPLEMENTATION v1.2 §4.3/§4.5 修正注 |
+| P3（独立轮） | §8.1 跨模块契约行"M2/M3/M4 共享解析器"不实——M4 不调用 `parse_frontmatter`（映射闭合假象，M7 样本⑬） | 独立 pass 逐项核对（2026-08-20） | 本文件 v1.1 §8.1 修正注 |
+| P3（独立轮） | DESIGN §10.1-4 代码量"~100 行（实施时核对）"核对缺位——独立 pass 实测 422 行（selftest 块 ~104 行） | 独立 pass（2026-08-20） | IMPLEMENTATION v1.2 DR-7 登记 |
 
 ### 8.3 ADD Iron Law 检查
 
@@ -218,8 +222,8 @@ upstream: null
 
 ### 10.2 验收决定
 
-- [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：自查全绿 + 机械证据齐备（dry-run 双通道 0 违规 + selftest 13/13）；条件 = RULE-1 时序独立 pass（含 Step 10 ADD 独立审计）完成后升 accepted，与 IMPLEMENTATION v1.1 的"待独立 pass"状态同轴
+- [x] **验收通过**：所有 P1 项通过，无阻塞性问题（2026-08-20 独立 pass：E1 四通道复核全过 + 3 P3 全登记修正，无 P1/P2 遗留）
+- [x] **有条件通过**（2026-08-19 自查时点历史状态）：自查全绿 + 机械证据齐备（dry-run 双通道 0 违规 + selftest 13/13）；条件 = RULE-1 时序独立 pass（含 Step 10 ADD 独立审计）——**已于 2026-08-20 满足**（真异基座 DeepSeek V4 Pro），升 accepted
 - [ ] **验收失败**：
 
 ### 10.3 签字
@@ -227,14 +231,14 @@ upstream: null
 | 角色 | 签字 | 日期 |
 |------|------|------|
 | 实施者 | GLM-5.3（自查，机械证据 E1 可重放） | 2026-08-19 |
-| 审查者 | _________（独立 pass 待执行） | |
+| 审查者 | DeepSeek V4 Pro（真异基座独立 pass：RULE-1 时序独立 + RULE-5 异构于生成端 GLM-5.3，双满足） | 2026-08-20 |
 
 ## 11. 后续行动
 
 | 行动 | 责任人 | 期限 | 状态 |
 |------|--------|------|------|
 | M7 样本⑨登记（2 形态 II 实例：ADR0006 A 漏计 + selftest 硬编码计数；分桶合计 13→15） | 本轮完成 | 2026-08-19 | ✅（docs/M7_EVIDENCE_LOG.md） |
-| RULE-1 独立 pass（IMPLEMENTATION v1.1 + 本 CHECKLIST；真异基座优先） | 待安排 | — | 待办 |
+| RULE-1 独立 pass（IMPLEMENTATION v1.1 + 本 CHECKLIST；真异基座优先） | DeepSeek V4 Pro（对话式默认形态） | 2026-08-20 | ✅ 3 P3 登记修正（IMPLEMENTATION v1.2 修正注 + DR-7 / 本文件 v1.1）；M7 样本⑬ 入账（映射闭合 1 处，分桶 20→21） |
 | DR-2：C 类计数对账启用（待 FWK-ASSERTION 统一 C 类标记格式） | 待 FWK 演进 | — | 挂起 |
 | DR-1：front-matter 检测窗口契约显式化（PLAN DC1 注记） | 另行裁决 | — | 候选 |
 | Linux 实机 dry-run（工作站 A/B） | 可选 | — | 候选 |
