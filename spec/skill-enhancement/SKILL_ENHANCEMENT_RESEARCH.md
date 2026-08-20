@@ -1,7 +1,7 @@
 ---
 id: skill-enhancement-RESEARCH
 type: design
-version: 1.0
+version: 1.1
 status: in-review
 date: 2026-08-20
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0005, ADR-0009, DIS-007, langgraph-upgrade-RESEARCH, deepseek-harness-RESEARCH]
@@ -13,17 +13,18 @@ upstream: null
 > **任务来源**: 用户提问"当前 spec 工作流每一个步骤是否可以被开源社区的 skill 增强细化？比如 review 是否可以复用吸收开源社区的 skill，调研阶段是否可以复用 deep-research 等 skill，实现 skill 与硬规则并存"
 > **方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch + WebFetch 取证（2026-08-20）
 > **审查状态**: `自查（单视角）`（RULE-4）——待独立 pass 或异基座复验
+> **v1.1 补充（2026-08-20）**: §8 MCP 工具层增强调研——任务来源"相比于 skill，增强 MCP 工具使用是否可以提升框架性能、信息真实性（如学术调研用 paper-search MCP、stack-exchange MCP）"。**本节方法升级**：§2 为文献级证据，§8 含 5 组本会话直测（E1 级——MCP 响应即机械证据，恰是本节论题的现场演示）。
 
 ## 0. 断言统计表（必填，审计入口）
 
 | 级别 | 条数 | 说明 |
 |------|------|------|
-| A 事实类 | 16 | 每条附 URL + 可核对来源（GitHub 仓库 / agentskills.io 标准 / skillsmp 页面为主，二手源单独标注）；取证日期 2026-08-20 |
-| B 推断类 | 3 | B1-B3，登记于附录 B |
-| C 判断类 | 3 | §4 吸收裁决 2 条 + §5 风险判断 1 条 |
-| 假设区 | 4 | H1-H4，未取证声明 |
+| A 事实类 | 21 | 每条附 URL + 可核对来源（GitHub 仓库 / agentskills.io 标准 / skillsmp 页面为主，二手源单独标注）；取证日期 2026-08-20；v1.1 §8 新增 5 条（其中 4 条为本会话 MCP 直测 E1 级） |
+| B 推断类 | 4 | B1-B4，登记于附录 B（B4 为 v1.1 新增） |
+| C 判断类 | 4 | §4 吸收裁决 2 条 + §5 风险判断 1 条 + §8.5 MCP/skill 结构裁决 1 条（v1.1） |
+| 假设区 | 6 | H1-H6，未取证声明（H5/H6 为 v1.1 新增） |
 
-> **计数说明（R7 机械重数）**: A 类 16 条（行首 `【A】` 标记，`grep -c '【A】'` 重数）、附录 B 3 条（`"id": "B\d+"` 机读块）、C 类 3 条（`【C】` 标记，DR-2 首版不对账）、假设区 4 条（`[H\d+]` 列表项）。格式契约遵 P-012 门禁拦截实录教训（[DEEPSEEK_HARNESS_RESEARCH](../deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md) §0 计数说明）。**门禁拦截实录（2026-08-20）**: 初稿统计表手填 A=14，dry-run 机械重数 **16**——写作时先填计划数（14），正文展开中新增独立条目（wshobson / swell-agents 各自成条 + oh-rid 拆两条）后未回写统计表，计划数与实际数漂移（少报 +2）。**形态 II 实例，入账 M7 样本⑫**（M5 提交瞬间拦截——样本⑨ 同性质：工具拦截，非 LLM 审查轮）。发生在"调研 skill 增强以反幻觉"的报告上——规律②"防幻觉机制自身不设防"再次实证：即便作者刚复盘完 P-012 的两跳拦截教训，手填计数仍在下一份文档复发，R7 机械重数是唯一可靠拦截层。
+> **计数说明（R7 机械重数）**: A 类 21 条（行首 `【A】` 标记，`grep -c '【A】'` 重数；v1.0 主体 16 + v1.1 §8 新增 5）、附录 B 4 条（`"id": "B\d+"` 机读块；B4 为 v1.1 新增）、C 类 4 条（`【C】` 标记，DR-2 首版不对账）、假设区 6 条（`[H\d+]` 列表项；H5/H6 为 v1.1 新增，登记于 §8.6 补充假设区）。格式契约遵 P-012 门禁拦截实录教训（[DEEPSEEK_HARNESS_RESEARCH](../deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md) §0 计数说明）。**门禁拦截实录（2026-08-20）**: 初稿统计表手填 A=14，dry-run 机械重数 **16**——写作时先填计划数（14），正文展开中新增独立条目（wshobson / swell-agents 各自成条 + oh-rid 拆两条）后未回写统计表，计划数与实际数漂移（少报 +2）。**形态 II 实例，入账 M7 样本⑫**（M5 提交瞬间拦截——样本⑨ 同性质：工具拦截，非 LLM 审查轮）。发生在"调研 skill 增强以反幻觉"的报告上——规律②"防幻觉机制自身不设防"再次实证：即便作者刚复盘完 P-012 的两跳拦截教训，手填计数仍在下一份文档复发，R7 机械重数是唯一可靠拦截层。
 
 ## 1. 实体与范围：什么是 skill
 
@@ -171,6 +172,14 @@ skill 层（软，生成端）──产出──→ 文档/代码
     "basis": "§2.4 本地枚举 × §3 映射矩阵对照",
     "verified": false,
     "depends_on": "H1"
+  },
+  {
+    "id": "B4",
+    "type": "推断",
+    "claim": "MCP 工具响应可直接登记为 RULE-6 取证矩阵 E1 级证据（API 调用可重放、第三方可复核），使 Step 2 引文验证从'WebSearch 快照旁证（E2/E3）'升级为'结构化 API 记录（E1）'——依据 §8.2 直测（返回结构化 paper_id/DOI/摘要字段）与 E1 定义（可重放命令/输出）的组合，尚未在真实 feature 的取证矩阵中实际登记过 MCP 响应",
+    "basis": "§8.2 直测实证 + SPEC_PROCESS 取证矩阵 E1 定义",
+    "verified": false,
+    "depends_on": "H6"
   }
 ]
 ```
@@ -195,6 +204,64 @@ skill 层（软，生成端）──产出──→ 文档/代码
 | S14 | CSDN《Claude Code 中 Superpowers 的使用》+ webreactiva.com superpowers 评测（14 skills 清单） | 二手 | 2026-08-20 |
 | S15 | augmentclaude.com/s/superpowers-obra（TDD/verification 细节） | 二手 | 2026-08-20 |
 | S16 | 本会话 Trae 环境 system prompt skill 枚举 | E1 实测 | 2026-08-20 |
+| S17 | github.com/openags/paper-search-mcp（README 全文 + fork 生态：mtnnn/upascal/BlaineHeffron/its-antony） | 一手 | 2026-08-20 |
+| S18 | 本会话 mcp_paper-search `search_arxiv` 直测（主题查询 + 标题精确检索，两组） | E1 实测 | 2026-08-20 |
+| S19 | 本会话 mcp_stackexchange `search_questions` 直测（默认站点/site 参数/单词宽匹配/多词 AND，四组） | E1 实测 | 2026-08-20 |
+
+---
+
+## 8. 补充调研：MCP 工具层 vs Skill 层（v1.1 新增，2026-08-20）
+
+> **任务来源**: 用户追问"相比于 skill，增强 MCP 工具使用是否可以提升框架性能、信息真实性？比如学术调研使用 paper-search MCP 工具，或者 stack-exchange MCP 工具"
+> **方法差异**: §2 为文献级取证（读 README）；本节对本地已连接的 MCP 工具做**本会话直测**——MCP 响应即机械可重放证据（E1），"用 MCP 调研 MCP"本身是本节论题的现场演示。
+
+### 8.1 本地 MCP 资产现状
+
+SPEC_PROCESS Step 1 已登记四个 MCP：mcp_paper-search / mcp_english-search / mcp_research-tools / mcp_scholar-mirror；本会话另连接 mcp_stackexchange（五工具：search_questions / get_answers / get_question / list_sites / list_pipeline_sites）。**MCP 增强不是引入新事物，而是深化既有配置的使用模式与证据地位**——与 skill 增强（引入新生态）性质不同。
+
+### 8.2 直测实录（E1 级证据）
+
+【A】mcp_paper-search `search_arxiv` 主题查询实测（query="multi-agent debate large language models", max_results=3）：返回 3 条真实 arXiv 论文的**结构化记录**——paper_id / title / authors / abstract / doi / pdf_url / url / source / categories 字段齐全（首条 2511.13930 仿真材料发现，次条 2203.08975 MADRL 综述）【来源：S18】
+
+【A】标题精确检索实测（query="Should we be going MAD? A Look at Multi-Agent Debate Strategies for LLMs"）：**精确命中** arXiv 2311.17371（Smit et al.，含完整摘要与 pdf_url）——Step 2 Review 的"引文验证"场景可直接用 MCP 完成，且命中记录本身即 E1 证据【来源：S18】
+
+【A】mcp_stackexchange `search_questions` 直测：**默认 site = mathoverflow**（CS 查询须显式传 site=stackoverflow）；site 参数生效后（query="python list comprehension"）返回 10 条高相关结构化结果——question_id / title / url / score / answer_count / accepted_answer_id / tags / view_count / owner.reputation 字段齐全【来源：S19】
+
+【A】mcp_stackexchange 召回偏差实测：单词宽匹配（query="hallucination"@stackoverflow）返回 10 条**主题无关**结果（Switch enum 自动填充、UIView 属性等——StackExchange API 文本匹配命中正文/答案而非标题）；多词 AND 匹配（query="LLM hallucination detection"@stackoverflow）**零命中**。结论：**E1 真实性 ≠ 语义相关性**——返回的是真实 API 数据，但可能答非所问【来源：S19】
+
+【A】本地 mcp_paper-search 工具清单（search_papers / search_arxiv / search_pubmed / download_with_fallback / read_arxiv_paper / search_semantic / search_crossref / search_openalex 等 40+ 工具）与开源项目 **openags/paper-search-mcp**（Python，MIT，free-first 原则，两层架构：Layer 1 统一 `search_papers` 多源并发去重 + `download_with_fallback` 顺序回退；Layer 2 平台连接器）完全吻合；该项目有活跃 fork 生态（mtnnn / upascal / BlaineHeffron Rust 重写 / its-antony 服务化重构）——**本地资产即开源社区主流项目的部署实例**【来源：S17】
+
+### 8.3 MCP 与 Skill 的结构对比
+
+| 维度 | Skill（§1-§4 已调研） | MCP 工具（本节） |
+|------|----------------------|-----------------|
+| 本质 | 上下文注入——教模型**怎么做**（策略层） | 工具接口——让模型**能触达什么**（数据层） |
+| 产出证据等级 | **E4**（LLM 判断陈述——skill 再好，"我验证过了"仍是自述） | **E1**（API 响应——结构化、可重放、第三方可复核） |
+| 对信息真实性 | 间接：改变行为 → 希望产出更真 | 直接：返回真实数据，引文可机械核对 |
+| 对框架性能 | 提升搜索策略质量（smart-search 式） | 扩展可达性（30+ 学术库一接口） |
+| 失效模式 | 元断言逃逸（规律②——防幻觉机制自身不设防） | 内容错配（EuropePMC 前科）/ 召回偏差（8.2 实测）/ 镜像差异（scholar-mirror 前科）/ 默认配置陷阱（site=mathoverflow） |
+| 验证责任 | 仍需下游门禁兜底 | 仍需证据身份验证（双源 + 内容核对） |
+| 与硬规则关系 | skill 产出必须流经硬规则漏斗（层 2 铁律） | MCP 响应**本身是漏斗要生产的证据**（E1） |
+
+本仓 MCP 失效前科（E3 级，历史登记）：EuropePMC DOI 查询返回无关 PLOS One 论文（链接有效内容错配，CODE_WIKI 案例库）；scholar-mirror 镜像差异曾致四源冻结裁决（NP2 τ_T(k) 案例）。两条均支持同一结论：**MCP 提高证据的机械真实性，但不豁免内容核验**。
+
+### 8.4 对十步流程的落点
+
+| Step | MCP 增强落点 | 证据升级 |
+|------|------------|---------|
+| 1 调研 | paper-search 统一接口替代散装 WebSearch（多源并发 + 去重） | 覆盖面：30+ 学术库一接口 |
+| 2 RESEARCH + Review | "arXiv 编号已验证"项：WebSearch 快照旁证 → `search_arxiv` 精确命中记录 | **E2/E3 → E1**（B4 推断） |
+| 2（工程域） | stackexchange 补充源（site 显式指定 + 查询公式纪律） | 新增工程问答域 |
+| 10 取证矩阵 | 新行型：取证手段 = "mcp_paper-search search_arxiv（E1）"，结果 = paper_id 命中 | 取证手段扩容 |
+
+### 8.5 裁决（C 类判断）
+
+【C】**主判断：对"信息真实性"目标，MCP 增强结构性优于 skill 增强——因为两者的证据等级由构造决定（E1 vs E4），不是使用水平问题；但对"框架性能"目标两者正交互补（MCP 供数据可达性，skill 供搜索策略），最优形态是"MCP 出证据、skill 出策略、硬规则出裁决"三层分工，与 P-013 主判断（skill 供弹药/硬规则守边界）合并为完整架构：MCP 是弹药的原材料（真数据），skill 是使用弹药的战术（怎么搜），硬规则是开火授权（何时必须验）。**约束不变：MCP 响应的 E1 真实性不豁免证据身份验证（双源规则与内容核对仍适用——8.2 召回偏差实测与本仓 EuropePMC 前科共同证明"真实 API 也返回无关内容"）。
+
+### 8.6 补充假设区（v1.1 新增）
+
+- [H5] mcp_stackexchange 对本仓工程问答域的净增益为正——本仓目前零使用记录，且召回对查询公式敏感（8.2 实测）— 查证路径: 下一个涉及工程实现细节的 feature（如 P-009 runner）Step 1 实测登记命中率
+- [H6] MCP 响应入取证矩阵的登记格式可行且成本可接受（B4 的验证）——取证矩阵目前零 MCP 行 — 查证路径: 下一个 feature 的 Step 10 首次登记 MCP 响应行（含工具名 + 参数 + 关键返回字段）
 
 ---
 
