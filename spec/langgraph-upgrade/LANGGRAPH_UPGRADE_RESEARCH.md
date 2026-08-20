@@ -1,10 +1,10 @@
 ---
 id: langgraph-upgrade-RESEARCH
 type: design
-version: 1.1
+version: 1.2
 status: in-review
-date: 2026-08-18
-depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0005, ADR-0007]
+date: 2026-08-20
+depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0005, ADR-0007, deepseek-harness-RESEARCH]
 upstream: null
 ---
 
@@ -18,10 +18,10 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |------|------|------|
-| A 事实类 | 15 | 每条附 URL + 可核对引文（WebSearch 取证，2026-08-18）；v1.0 §2 主体 11 条 + v1.1 §8 补充 4 条 |
+| A 事实类 | 15 | 每条附 URL + 可核对引文（WebSearch 取证，2026-08-18）；v1.0 §2 主体 11 条 + v1.1 §8 补充 4 条；v1.2 §9 设计规范 0 条新增（dsh 事实经 P-012 调研登记，断言延续引用） |
 | B 推断类 | 3 | B1-B3，登记于附录 B |
-| C 判断类 | 6 | §6 决策分析 4 条 + §8.3 补充裁决 2 条 |
-| 假设区 | 6 | H1-H6，未取证声明 |
+| C 判断类 | 7 | §6 决策分析 4 条 + §8.3 补充裁决 2 条 + §9.5 设计判断 1 条（v1.2） |
+| 假设区 | 7 | H1-H7，未取证声明 |
 
 > **计数修正记录（R7 机械重数，2026-08-18）**: v1.0 初版声明 A=14 系手填错误——`grep -c '【A】'` 实测 v1.0 主体为 **11** 条（虚报 +3）。v1.1 补充 4 条后登记 **15**。**形态 II 第五实例**（计数凭印象，同 P2-1/P2-3 模式），发生在"反幻觉方法论自己的调研报告"上——RULE "统计表计数必须脚本生成"（框架 v1.4 R7）再次被实证为必要。已入账 **M7 样本⑩**（2026-08-19 存量补登——写作时自称候选⑦，惟 ⑦ 已被 precommit-dc-validator 复验占用，治理收束轮裁决实登为⑩）。**复核补记（2026-08-18）**：`grep -c '【A】'` 原始命中 **16**——本行自引用（命令行里的 `【A】` 字符）贡献 +1，剔除此行后为 15。机械重数工具对自引用不免疫——该观察未单列样本，已作为样本⑩ 附随观察入账（[M7 §1](../../docs/M7_EVIDENCE_LOG.md)；⑨ 已被 P-007 实施轮占用，2026-08-19 治理收束裁决）。
 
@@ -259,11 +259,64 @@ upstream: null
 
 主报告 §6 判断不变且被加强：方案 B（薄壳 runner）的排序提前于任何框架——因为最高 ROI 改进（pre-commit 校验器）甚至**先于方案 B**，在现状（方案 C）下即可执行，且不与任何未来路径冲突（校验规则即 DC 契约的机器可读定义，runner 与 LangGraph 路线都将复用）。
 
-## 附录 D: 补充调研假设区（v1.1）
+## 附录 D: 补充调研假设区（v1.1；v1.2 增 H7）
 
 - [H4] pre-commit 校验器可在 Trae/主控站 Windows 环境顺畅运行（pre-commit 官方支持 Windows，但未在本机实测）— 查证路径: `pip install pre-commit && pre-commit run --all-files` 实测
 - [H5] promptfoo 的 LM Studio provider（openai-compatible 接入）对审查类长文本 prompt 的成本/延迟可接受（未实测）— 查证路径: 单次 S1 复验场景 PoC
 - [H6] GitHub Actions 免费额度对本仓库的校验器 workload 足够（文档仓库，无构建，预期远低于限额）— 查证路径: 接入后观察一个月
+- [H7] 事件流状态模型对批处理审查任务适用（dsh session log 面向交互式长会话设计，runner 面向短生命周期批处理审查——负载与生命周期形态不同，设计迁移未 PoC；v1.2 §9 随 P-012 吸收引入）— 查证路径: P-009 骨架落地时对比"事件流派生状态"与"快照直存"两种 state 实现的复杂度与可审计性
+
+---
+
+## 9. P-009 runner 的 session log 设计规范（v1.2 新增，2026-08-20）
+
+> **任务来源**: P-012 层 1 裁决落地——"session log 设计思想（append-only JSONL、装配级请求记录、resume/fork/replay 共享事件流）作为 P-009 薄壳 runner 的 JSON state 设计参考，抄设计不抄代码"（[DEEPSEEK_HARNESS_RESEARCH](../deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md) §4 层 1）
+> **取证说明**: 本节事实均经 P-012 调研登记（该文 §2.1/§2.2），此处只做设计转化，不重复取证（断言延续，A 类 0 条新增）
+> **性质**: 设计规范——C 类判断 1 条（§9.5）+ 假设 1 条（附录 D H7）
+
+### 9.1 七条设计原则（dsh 机制 → runner 规范）
+
+| # | dsh 机制（P-012 锚点） | runner 设计规范 |
+|---|----------------------|----------------|
+| L1 | 仅追加 append-only 会话日志（P-012 §2.1） | state 文件 = JSONL 事件流，运行期禁止原地改写；状态是事件流的派生视图（materialized view），不是被维护的主对象 |
+| L2 | 记录"模型所见"全量：系统提示词/推理/工具调用与结果/子代理调度/每次上下文注入（P-012 §2.1） | 记录口径 = 装配后的模型请求（assembled requests，P-012 §2.2），非逻辑意图——发给模型什么就记什么，取证口径与运行口径合一 |
+| L3 | 未压缩 JSONL（P-012 §2.2） | 可 grep / diff / 重放优先于紧凑性——与 dc_validator 零依赖、R7 机械重数同哲学（M7 规律③：拦截层是机械枚举） |
+| L4 | resume / fork / search / replay 共享同一事件流（P-012 §2.1） | 四操作不建第二套状态：fork = 从事件 i 复制出新流；replay = 按序重放；search = grep |
+| L5 | Trajectory 视图按来源检视（P-012 §2.1） | 每行事件带 `source` 字段（system / user / assistant / tool / gate）——按来源过滤即文本版 Trajectory |
+| L6 | 新 session_id = 独立任务；复用 id = 延续持久会话（P-012 §2.2） | RULE-1 物理化：每轮审查强制新 session_id，会话边界即审查边界——"同会话既写又审"在物理层不可表达 |
+| L7 | dsh 中 session log 本身也是插件（"一切皆插件"） | **反向裁决**：runner 中 log writer 不是可替换件——取证锚必须最小且固定（信任层不可换，否则 E1 证据的可信性随插件而漂移） |
+
+### 9.2 与 SPEC_PROCESS 规则的映射
+
+| 规则 | session log 机制的支撑 |
+|------|----------------------|
+| RULE-1 时序独立 | L6：新 session_id 强制——审查轮次边界物理化 |
+| RULE-5 异质性 | 事件行 `model`/`provider` 字段——审查端/生成端基座可机械追溯，非自查声明 |
+| RULE-6 取证矩阵 | log 即 E1 级证据（可重放机械证据，P-012 推断 B1）——从"手工组装取证"变"运行副产物" |
+| 规则 2 统计溯源 | 事件流计数可 grep 重数——R7 在 runner 语境的原生落点 |
+| ADD Iron Law | replay 同一事件流复现——"测试通过 ≠ 设计落地"的复现验证 |
+
+### 9.3 事件行 schema 草图（最小内核）
+
+```json
+{"ts": "2026-08-20T10:00:00Z", "seq": 42, "session": "p008-review-001",
+ "source": "tool", "model": "deepseek-v4-pro", "provider": "lm-studio-a",
+ "event": "bash", "input": {"cmd": "python -S -E scripts/dc_validator.py"},
+ "output": {"stdout": "0 违规", "exit": 0}, "gate": null}
+```
+
+字段裁决：`seq` 单调递增（append-only 的机械保证，可重放校验）；`model`/`provider` 必填（RULE-5 追溯锚）；`gate` 字段承载门禁裁决（`--gate` 的通过/失败入流，非旁路日志——门禁结论与审查过程同流取证）。
+
+### 9.4 不吸收清单
+
+- **Trajectory Web UI**——可视化层不做，jq/grep 即可（方案 B 明确不含 UI）
+- **插件化 log writer**——见 L7，取证锚不可换
+- **持久 PTY / bash 进程状态延续**（dsh 会话语义的一半）——runner 审查任务是批处理短生命周期，无跨调用 shell 状态需求
+- **dsh 的 Cordis 事件总线机制本身**——只吸收"日志怎么记"，不吸收"插件怎么协作"（后者是运行时架构，超出 runner 范围）
+
+### 9.5 对 §5 方案 B 表的影响（主设计判断）
+
+【C】**方案 B 的"跨会话状态"行升格：`JSON state + git commit` → `append-only JSONL 事件流 + git commit`**（§5 原文保留作历史层，本节为准）。理由：快照模型（含 LangGraph checkpointer）记录状态不记录过程，而取证恰恰需要过程——事件流模型下 E1 证据、RULE-1 边界、R7 重数、ADD 复现全部是同一份数据的四种读法。这也是 dsh 与 LangGraph 路线的本质差异在本仓库的投影：前者是"可取证的运行时"，后者是"可恢复的状态机"——P-009 需要的是前者。落地约束：LOC 估算仍守 §5 的 ~500-1000（事件流写入器 ~100 行内，属 JSON state 实现的替换而非增量）。
 
 ---
 
