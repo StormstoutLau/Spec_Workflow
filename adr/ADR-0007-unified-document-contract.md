@@ -1,7 +1,7 @@
 ---
 id: ADR-0007
 type: adr
-version: 1.1
+version: 1.2
 status: accepted
 date: 2026-08-17
 depends: [doc-contract-refactor, CPP_HUB_GAP_ANALYSIS_RESEARCH, CPP_HUB_ABSORPTION_DESIGN, ADR-0006]
@@ -309,6 +309,8 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | Phase-7B/7C | 外部·Cpp_Hub | 项目阶段编号 |
 | E1-E5 / A/B/C / H#·B#ID | 实例级 | **不入登记表**（入册标准排除） |
 
+> **跨文档引用限定规则（v1.2 增补，2026-08-20，[DIS-009](../docs/discoveries/README.md) 裁决落地，用户确认）**: 实例级编码（H#·B#ID 等）**跨文档引用必须带源文档限定**——推荐形式 `<源文档锚> H<n>`（如 `P-012 H2`、`LG H5`；缩写在聚合文档首次出现处声明）；母文档内引用免限定；**聚合载体**（PROGRESS / M7 等引用多文档实例编码的文档）为强制限定区。依据：D3"撞名由文档语境消解"预设单文档阅读——2026-08-20 优先级裁决首次将三份调研报告 H 集混入 PROGRESS 单表触发边界（DIS-009，M7 样本⑭：2 组硬撞名 + 1 处无指代一致读法的依赖断言）。机械可执行性：裸 H 判定在元描述语境会误报（如消歧注自身含被描述 token），暂不进 dc_validator——复发时再议。
+
 ## 附录 B: P0 术语消歧节（D3 落地，原 PLAN S5 指派）
 
 | 项 | 裁决 |
@@ -328,3 +330,4 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | 2026-08-17 | proposed → **accepted**（用户确认 D1-D5 整批通过）；DC token 占用检查 E1 闭合（全仓 grep 仅本 ADR 4 处定义性引用，零外部占用）；版本 v1.0 → v1.1；确认优先级节/待验证项同步定版 |
 | 2026-08-17 | D3 落地补全（文档记录合规审计触发）：新增附录 A 编号命名空间登记表（含 Cpp_Hub 三位系列 B4 补全行）+ 附录 B P0 术语消歧节（原 PLAN S5 指派）；docs/adr/README.md 同步登记 0007/0008/0009 并指向本附录为权威载体 |
 | 2026-08-18 | D4 澄清追记（P-007 precommit-dc-validator 复验 P2-1 触发）：design 状态词表按文档类别二档（CHECKLIST 实例 id 后缀判别 → pending/accepting/accepted，其余 → draft/in-review/verified），消除 PLAN DC2 type/文档类别混轴；PLAN 升 v1.6 承载契约文本；E1 全仓 14 份 design 文档零违规 | 复验记录 [DESIGN §6.3](../spec/precommit-dc-validator/DESIGN.md) + 全仓 grep 枚举 |
+| 2026-08-20 | 附录 A 增补**跨文档引用限定规则**（DIS-009 裁决落地，用户确认）：实例级编码（H#·B#）跨文档引用须带源文档限定、聚合载体（PROGRESS/M7）为强制限定区——D3"撞名由文档语境消解"的跨文档边界补全；PROGRESS 现存 12 处裸 H 全量限定改写（硬歧义 7 处 + 语境可消歧 5 处，收尾复核修正原枚举口径）+ L54 依赖链重写；M7 样本⑭（L54 指代缺陷 + review 漏检，形态 II 复发 = 0）；版本 v1.1 → v1.2 | 本轮 H 撞名调研（[DIS-009](../docs/discoveries/README.md) 证据锚点：grep 枚举 + 指代消解分析） |

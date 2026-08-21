@@ -22,10 +22,11 @@
 | DIS-001~006 | [源项目·Cpp_Hub/docs/discoveries/] | BH-FDR 反例 / Heston 分支切割 / PSOR ω / Sobol-BB / AAD checkpointing / 跨编译器浮点确定性 | 源项目现场 | 见源项目统计（6 篇潜在） |
 | [DIS-007](../007_hallucination_audit_asymmetric_evidence.md) | toolized | 幻觉点清单自身含幻觉——验证层必须与生成层独立且结构不同 | 007 全文（Phase 7C 126 条→8 错现场）；公共承载 = [框架 v1.4](../ASSERTION_EVIDENCE_FRAMEWORK.md)；**DR-6 追记（2026-08-19）**：dc_validator selftest 硬编码计数错——验证工具自身含形态 II，命题扩展至人写校验工具（[007 §证据 v1.3](../007_hallucination_audit_asymmetric_evidence.md)） | 是（不对称证据审计，方法论） |
 | DIS-008 | open | 同文件多 Edit 并行执行时后发写入以陈旧快照覆盖先发编辑，产生静默回滚——拦截层为事后 grep 终验，非工具自护 | 2026-08-17 Tier1 执行：框架 v1.3 十位点中 6 处被回滚，grep 终验捕获，串行重放修复；**同日复发**：v1.4 批次前 Read 检出 v1.3 头部行 + §9 同步对声明两处残留回滚（首轮流终验 grep 模式未覆盖）——教训升级：终验 grep 模式必须覆盖全部修改行，非抽样。操作缓解 = 同文件编辑严格串行 + 编辑前 Read + 终验全覆盖 | 否（工程工具层；与形态 II 规律三"机械枚举才是可靠拦截层"同构） |
+| DIS-009 | resolved | 实例级编号（H#/B#）跨文档引用无命名空间限定规则——[ADR-0007](../../adr/ADR-0007-unified-document-contract.md) D3"撞名由文档语境消解"预设单文档阅读，聚合载体（PROGRESS 待办表）首次将三份调研报告 H 集混入单表即触发边界：2 组硬撞名（H2: LG↔dsh / H5: LG↔SKL）+ 1 处无指代一致读法的依赖断言（L54） | 2026-08-20 H 撞名调研轮（P-014）：ADR-0007 附录 A 入册标准（D3 原裁决"报告内 B#ID/H# 不入全局登记"）+ PROGRESS L18/L19/L21/L22/L43/L44/L52/L54/L63（grep 枚举 7 处硬歧义裸 H，收尾复核扩至 12 处全量）；修复 = ADR-0007 v1.2 跨文档引用限定规则 + PROGRESS 全量限定改写 + L54 依赖链重写；机械层（dc_validator 裸 H 检查）暂缓——元描述语境会误报（消歧注自身含被描述 token），复发时再议 | 否（文档工程治理；与 ADR-0007 D2 G→DC 改名先例同族——命名空间漂移是文档系统的低语义负载失效模式） |
 
 ## 统计
 
-- 总发现数（本仓）: 2（007 toolized / 008 open）
+- 总发现数（本仓）: 3（007 toolized / 008 open / 009 resolved）
 - 潜在论文: 1
 
 ## 维护纪律
