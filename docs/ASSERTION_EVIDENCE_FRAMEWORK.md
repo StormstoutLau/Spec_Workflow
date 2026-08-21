@@ -3,7 +3,7 @@
 ---
 id: FWK-ASSERTION
 type: framework
-version: 1.4.1
+version: 1.4.2
 status: active
 date: 2026-08-17
 depends: [DIS-007, ADR-0006]
@@ -328,6 +328,12 @@ R7 (v1.4) §0 统计表的每个计数必须由机械枚举生成 (如 `grep -c 
 
 ---
 
+## 10. 与事实核查框架 (FWK-FACT-CHECK) 的分工
+
+本框架（断言级）的下游补充是 [FACT_CHECK_FRAMEWORK.md](FACT_CHECK_FRAMEWORK.md)（id: FWK-FACT-CHECK，事实类型级）。分工红线：断言分级 / B 类推理审计 / E1-E5 证据分级归本框架；数字单位 / 日期起点 / 归属 / 本地状态时点 / 引用活性的逐类核查（FC-#）+ 幻觉模式库（CHK-H#）+ 修正分级（CHK-R#）归下游。A 类事实的"弱记忆填充"与"过度泛化"由下游在写入期拦截；本框架 §4 B 类机械反证仍负责推理跳步。
+
+---
+
 ## 修订历史
 
 | 版本 | 日期 | 变更 |
@@ -338,3 +344,4 @@ R7 (v1.4) §0 统计表的每个计数必须由机械枚举生成 (如 `grep -c 
 | v1.3 | 2026-08-17 | STEP_GAP 分型两态化（STEP_GAP_CLOSED / STEP_GAP_OPEN），原单词态废除（兼容: 历史报告读作 OPEN）。来源: cpp-hub-absorption 设计 D1（Tier1）← Cpp_Hub pilot §5.1-3 提案 + B1 机械闭合实例；同步修改 §4.3 流程注释/§4.4-3/§6 效率账/§7 词表/§7.1 闭环动作/§7.2 报告骨架/§9 同步对声明（007 不随升） |
 | v1.4 | 2026-08-17 | 新增 R7（§0 统计表计数机械枚举规则）+ §3 自检清单 +1 项——P-005 收口。依据: GAP_ANALYSIS_AUDIT §4.3 结构性缺口（元断言不在 A 类拦截网）+ P2-1 实证。**DIS-008 复发修复**: 本版编辑前 Read 检出 v1.3 头部行与 §9 同步对声明两处被 Tier1 批次竞态回滚（当时终验 grep 未覆盖此两行），随本版一并修复——拦截实例再次支撑"破坏性操作后必须 grep 终验且终验模式须覆盖全部修改行" |
 | v1.4.1 | 2026-08-17 | P-003 doc-contract 批量改造（Step C/F1-F4）: +front-matter（id: FWK-ASSERTION, type: framework, DC1 七字段）; §4.3/§7×2 的 assertion_audit.py 标注 [本地工具·仓库外]（F3/DC3 第 4 档）; §7 增全局词表权威声明（F2/DC2）。内容零变更，仅治理层标注 |
+| v1.4.2 | 2026-08-21 | 新增 §10 下游分工声明——互引 [FACT_CHECK_FRAMEWORK.md](FACT_CHECK_FRAMEWORK.md)（FWK-FACT-CHECK，事实类型级核查）。内容零变更，仅分工指针 |

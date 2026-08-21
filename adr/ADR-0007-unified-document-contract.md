@@ -1,7 +1,7 @@
 ---
 id: ADR-0007
 type: adr
-version: 1.2
+version: 1.3
 status: accepted
 date: 2026-08-17
 depends: [doc-contract-refactor, CPP_HUB_GAP_ANALYSIS_RESEARCH, CPP_HUB_ABSORPTION_DESIGN, ADR-0006]
@@ -67,7 +67,7 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 
 ### D3. 命名空间登记表补全（附录随本 ADR 落地）
 
-- **入册标准**（裁决细则）: 仅跨文档复用的稳定 ID（ADR / DIS / RULE / M / Phase / E）入全局登记；实例级编码（PLAN 的 S#/T#/F# 逐文档修改点、报告内 B#ID/H#）**不入**，撞名由文档语境消解
+- **入册标准**（裁决细则）: 仅跨文档复用的稳定 ID（ADR / DIS / RULE / M / Phase / E / FWK）入全局登记；实例级编码（PLAN 的 S#/T#/F# 逐文档修改点、报告内 B#ID/H#）**不入**，撞名由文档语境消解
 - 补全行: 本仓库 ADR-0006~0009；[源项目·Cpp_Hub] ADR-001~019（仅登记编号空间与主题，**不吞并内容**）
 - **P0 术语节**（PLAN S5 指派）: 仓库内唯一 P0 token = "P0 审计项"（SPEC_PROCESS 取证矩阵风险分级语义，保留）；问题分级 ladder 定死 P1/P2/P3（T8a 已删模板 P0 行）
 
@@ -289,7 +289,7 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 
 ## 附录 A: 编号命名空间登记表（D3 落地，2026-08-17）
 
-> **入册标准**（D3 裁决细则）: 仅**跨文档复用的稳定 ID**（ADR / DIS / RULE / M / Phase / E）入全局登记；实例级编码（PLAN 的 S#/T#/F# 逐文档修改点、报告内 B#ID/H#）不入——撞名由文档语境消解。本附录为全局登记**权威载体**；`docs/adr/README.md` 为 ADR 系列的本地索引，指向此处。
+> **入册标准**（D3 裁决细则）: 仅**跨文档复用的稳定 ID**（ADR / DIS / RULE / M / Phase / E / FWK）入全局登记；实例级编码（PLAN 的 S#/T#/F# 逐文档修改点、报告内 B#ID/H#）不入——撞名由文档语境消解。本附录为全局登记**权威载体**；`docs/adr/README.md` 为 ADR 系列的本地索引，指向此处。
 
 | 命名空间 | 状态 | 说明 |
 |---------|------|------|
@@ -305,6 +305,8 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | DIS-007 | 本仓库 | 幻觉点清单自身含幻觉（toolized；文件名不改，id↔文件名映射见 docs/discoveries/README.md） |
 | DIS-008 | 本仓库 | 同文件并行 Edit 静默回滚（open，2026-08-17 实测登记） |
 | RULE-1~6 | 本仓库 | Review 独立性规则（SPEC_PROCESS §Review 检查清单，S3 赋名） |
+| FWK-ASSERTION | 本仓库 | 断言分级证据框架——A/B/C 三分 + B 类机械反证（docs/ASSERTION_EVIDENCE_FRAMEWORK.md，active） |
+| FWK-FACT-CHECK | 本仓库 | 事实核查框架——逐类核查 + 幻觉模式库 + 修正分级（docs/FACT_CHECK_FRAMEWORK.md，active，2026-08-21 新增） |
 | M1-M7 | 外部·元审计里程碑 | 首次出现处加脚注（M7 证据账本: docs/M7_EVIDENCE_LOG.md） |
 | Phase-7B/7C | 外部·Cpp_Hub | 项目阶段编号 |
 | E1-E5 / A/B/C / H#·B#ID | 实例级 | **不入登记表**（入册标准排除） |
@@ -331,3 +333,4 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | 2026-08-17 | D3 落地补全（文档记录合规审计触发）：新增附录 A 编号命名空间登记表（含 Cpp_Hub 三位系列 B4 补全行）+ 附录 B P0 术语消歧节（原 PLAN S5 指派）；docs/adr/README.md 同步登记 0007/0008/0009 并指向本附录为权威载体 |
 | 2026-08-18 | D4 澄清追记（P-007 precommit-dc-validator 复验 P2-1 触发）：design 状态词表按文档类别二档（CHECKLIST 实例 id 后缀判别 → pending/accepting/accepted，其余 → draft/in-review/verified），消除 PLAN DC2 type/文档类别混轴；PLAN 升 v1.6 承载契约文本；E1 全仓 14 份 design 文档零违规 | 复验记录 [DESIGN §6.3](../spec/precommit-dc-validator/DESIGN.md) + 全仓 grep 枚举 |
 | 2026-08-20 | 附录 A 增补**跨文档引用限定规则**（DIS-009 裁决落地，用户确认）：实例级编码（H#·B#）跨文档引用须带源文档限定、聚合载体（PROGRESS/M7）为强制限定区——D3"撞名由文档语境消解"的跨文档边界补全；PROGRESS 现存 12 处裸 H 全量限定改写（硬歧义 7 处 + 语境可消歧 5 处，收尾复核修正原枚举口径）+ L54 依赖链重写；M7 样本⑭（L54 指代缺陷 + review 漏检，形态 II 复发 = 0）；版本 v1.1 → v1.2 | 本轮 H 撞名调研（[DIS-009](../docs/discoveries/README.md) 证据锚点：grep 枚举 + 指代消解分析） |
+| 2026-08-21 | 附录 A 补登 FWK 命名空间两行（FWK-ASSERTION + FWK-FACT-CHECK）——此前 FWK-ASSERTION 已被 SPEC_PROCESS depends 跨文档引用却未登记，属既有缺口；入册标准列举扩展至含 FWK（D3 决策节 + 附录 A 两处同步）。版本 v1.2 → v1.3 |
