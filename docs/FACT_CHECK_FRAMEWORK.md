@@ -10,8 +10,8 @@ depends: [FWK-ASSERTION]
 upstream: null
 ---
 
-> **版本**: v1.0 (2026-08-21; 吸收自 [Open_Data 文档幻觉核查 checklist](file:///f:/Open_Data/文档幻觉核查checklist.md)[仓库外] v1.0——"另类数据转向方案与盲区扫描"审计复盘，4 subagent 独立溯源命中 18 处修正：硬伤 5 / 降级澄清 9 / 本地实测纠正 2 / 失效引用 2)
-> **来源**: 外部实战清单，经裁决以独立文档形态吸收（[ADR-0007](adr/ADR-0007-unified-document-contract.md) DC4 命名空间登记、front-matter 七字段）
+> **版本**: v1.0 (2026-08-21; 吸收自 [外部·Open_Data 文档幻觉核查 checklist](file:///f:/Open_Data/文档幻觉核查checklist.md) v1.0——"另类数据转向方案与盲区扫描"审计复盘，4 subagent 独立溯源命中 18 处修正：硬伤 5 / 降级澄清 9 / 本地实测纠正 2 / 失效引用 2)
+> **来源**: 外部实战清单，经裁决以独立文档形态吸收（[ADR-0007](../adr/ADR-0007-unified-document-contract.md) DC4 命名空间登记、front-matter 七字段）
 > **定位**: [FWK-ASSERTION](ASSERTION_EVIDENCE_FRAMEWORK.md) 的**事实类型级下游补充**——上承断言分级，下探每个事实的内部核查维度
 > **命名约定**: 本框架编号统一以 `CHK-` 前缀 + `FC-`（核查项）标记，避免与仓库既有 `H#`（实例级编码）、`R1-R7`（FWK-ASSERTION 报告模板规则）撞名——撞名处置依据 ADR-0007 v1.2 跨文档引用限定规则
 
@@ -149,4 +149,4 @@ L3 的"时效性"约束是 FWK-ASSERTION E1/E2 未显式强调的增量，落入
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
-| v1.0 | 2026-08-21 | 吸收 [Open_Data 文档幻觉核查 checklist](file:///f:/Open_Data/文档幻觉核查checklist.md) 的逐类核查项 / 幻觉模式库 / 修正分级 / 快速自检；H1-H11→CHK-H1~CHK-H11、R1-R5→CHK-R1~CHK-R5 双层改名避撞（H# 撞仓库实例级、R# 撞 FWK-ASSERTION R1-R7）；C1.1 声明清单化去重（已由 FWK-ASSERTION §7 覆盖）；L1-L3 改写为映射表不重复造词 |
+| v1.0 | 2026-08-21 | 吸收 [外部·Open_Data 文档幻觉核查 checklist](file:///f:/Open_Data/文档幻觉核查checklist.md) 的逐类核查项 / 幻觉模式库 / 修正分级 / 快速自检；H1-H11→CHK-H1~CHK-H11、R1-R5→CHK-R1~CHK-R5 双层改名避撞（H# 撞仓库实例级、R# 撞 FWK-ASSERTION R1-R7）；C1.1 声明清单化去重（已由 FWK-ASSERTION §7 覆盖）；L1-L3 改写为映射表不重复造词 |

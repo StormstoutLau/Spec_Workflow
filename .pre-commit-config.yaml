@@ -11,3 +11,17 @@ repos:
         entry: python scripts/dc_validator.py
         language: system
         files: \.md$
+      # M7 账本统计校验器（P-011，R7 同构：hits 声明 = 机械重数）
+      # 设计：spec/m7-hits-block/M7_HITS_DESIGN.md §3.1（files 收窄至 M7 路径）
+      - id: m7-stats
+        name: M7 ledger hits block validator
+        entry: python scripts/m7_stats.py
+        language: system
+        files: ^docs/M7_EVIDENCE_LOG\.md$
+      # 视图层机械枚举校验器（P-014，DIS-010 处置：声明 = 机械重数外推到视图层）
+      # 设计：spec/repo-stats/REPO_STATS_DESIGN.md §3.4（对账作用域 = 视图载体集 ∪ 真值源集）
+      - id: repo-stats
+        name: View-layer enumeration validator (stats block)
+        entry: python scripts/repo_stats.py
+        language: system
+        files: ^(CODE_WIKI\.md|README(\.en)?\.md|\.pre-commit-config\.yaml|docs/|spec/|adr/|scripts/)

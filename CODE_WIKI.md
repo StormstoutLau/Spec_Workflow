@@ -1,8 +1,8 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.5（2026-08-19，治理收束同步：P-006/P-007 收尾状态、M7 样本①-⑪（形态 II 分桶 19 处）、ADR-0009 失效条件首次重审、DC 契约校验器（`scripts/dc_validator.py` + `.pre-commit-config.yaml`）入册、P-008~P-011 待办、DEV-LOG-003/004、spec/ 增至六 feature 目录）
-> **覆盖对象**: 本仓库全部文档与工具（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007 v1.3、断言证据框架 v1.4、5 个模板（四件套 + ADR）、M7 证据账本、discoveries 索引、PROGRESS、dev-log ×4、spec/ 六 feature 目录、`scripts/dc_validator.py` + `.pre-commit-config.yaml`）
-> **仓库性质**: 方法论文档仓库为体、最小工具层为用 —— 唯一可执行件 = DC 契约校验器（零第三方依赖）+ pre-commit hook；其余"运行方式" = 工作流的执行方式（见 §6）
+> **Wiki 版本**: v1.7.2（2026-08-22 ㉒ 入账批：P-014 收口批独立 review 捕获 PROGRESS 依据列「八度」计数词停旧——repo_stats 边界外首个 post-toolization 复发（review 臂捕获，pattern_lib_version 2 候选议程，[REPO_STATS_AUDIT](spec/repo-stats/REPO_STATS_AUDIT.md)）→ M7 样本㉒ 入账（form2_total 60→61 / view_layer_pct 66%→65%）+ ㉒ 轮 verify 首跑 9 活靶全修正 + 门面快照同步；v1.7.1 于 2026-08-22 P-014 收口：CHECKLIST v1.1 accepting（有条件通过，独立 pass 待触发）+ PROGRESS P-014 done + DEV-LOG-006 + M7 样本㉑（首跑 7 真靶全捕获）+ DIS-010 toolized；v1.7 于 2026-08-22 P-014 落地：视图层机械枚举校验器 `scripts/repo_stats.py`（第三可执行件，**对账器非再生成器**——只报偏差永不代改）+ §10 stats 机读声明块（模式库 21 条数据驱动 / 载体两级 living-facade / 门面快照基准）+ pre-commit hook repo-stats 入册——「声明 = 机械重数」从 M7 账本外推到视图层，[DIS-010](docs/discoveries/README.md) 处置落地；v1.6.2 于 2026-08-22 终值修正：⑳轮捕获⑲轮「修完即绿」8 处实际未写入——修完即绿由模式扫描对账确认；v1.6.1 于 2026-08-22 修正轮：三轮共 22 项漂移修正（样本⑲——**修正轮是「视图的修正视图」**）；v1.6 于 2026-08-21 P-011 落地：M7 §5 hits 机读块 + `scripts/m7_stats.py`（第二可执行件）+ hook m7-stats。当前态：M7 样本①-㉒（形态 II 61 处——样本⑭⑮ 非形态 II）、spec/ 十 feature 目录（repo-stats 新增）、三可执行件三 hook；前版见 git 历史）
+> **覆盖对象**: 本仓库全部文档与工具（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007 v1.3 + DIS-007~010、断言证据框架 v1.4.2 + 事实核查框架 v1.0、5 个模板（四件套 + ADR）、M7 证据账本（含 §5 hits 机读块）、discoveries 索引、PROGRESS、dev-log ×6、spec/ 十 feature 目录、`scripts/dc_validator.py` + `scripts/m7_stats.py` + `scripts/repo_stats.py` + `.pre-commit-config.yaml` 三 hook）
+> **仓库性质**: 方法论文档仓库为体、最小工具层为用 —— 可执行件 = DC 契约校验器 + M7 统计校验器 + 视图层枚举校验器（均零第三方依赖）+ pre-commit 三 hook；其余"运行方式" = 工作流的执行方式（见 §6）
 
 ---
 
@@ -28,6 +28,8 @@
 | 审计"全绿表演"（无证据绑定的✅） | 取证矩阵 E1-E5 | `SPEC_PROCESS.md` 规则 6 + ADR-0005 |
 | 测试通过 ≠ 设计落地 | ADD 四阶段审计 | `SPEC_PROCESS.md` Step 10 |
 | 文档契约违规（front-matter 缺失/词表越界/断链/计数手填）逃逸到提交后 | DC1-DC4 契约 + pre-commit 机械拦截（R7 计数重数） | `scripts/dc_validator.py` + `.pre-commit-config.yaml`（P-007） |
+| M7 账本统计（样本数/分桶算术/跨表对账/P 汇总）手工登记漂移 | hits 机读块（声明 = 机械重数）+ 表算术/跨表不变式校验 + pre-commit 拦截 | `scripts/m7_stats.py` + M7 §5（P-011） |
+| 聚合视图文档手写枚举计数漂移（无失效检测的缓存副本，[DIS-010](docs/discoveries/README.md)） | stats 机读声明块（声明 = 机械重数外推到视图层）+ 模式扫描对账 + 门面快照基准 + pre-commit 拦截 | `scripts/repo_stats.py` + CODE_WIKI §10（P-014） |
 
 ### 1.3 版本演进
 
@@ -50,32 +52,39 @@
 f:\Spec_Workflow/
 ├── SPEC_PROCESS.md              # ★ 流程宪法 v1.4：10 步 + 6 规则 + 门禁 + ADD
 ├── CODE_WIKI.md                 # 本 Wiki
-├── .pre-commit-config.yaml      # repo-local hook（dc-validator，P-007 落地）
+├── .pre-commit-config.yaml      # repo-local 三 hook（dc-validator + m7-stats + repo-stats）
 ├── adr/                         # 架构决策记录（六份，全 accepted）
 │   ├── ADR-0004-...quarantine.md     # 异质性约束 + 隔离四要素（→ v1.2）
 │   ├── ADR-0005-...binding.md        # 审计证据绑定（→ v1.3）
 │   ├── ADR-0006-...authority.md      # 断言框架双份权威源（回流通道）
-│   ├── ADR-0007-...contract.md       # 统一文档契约（附录 A 命名空间登记权威）
+│   ├── ADR-0007-...contract.md       # 统一文档契约（→ v1.3，附录 A 命名空间登记权威）
 │   ├── ADR-0008-...gate.md           # Step 2 门禁 + Step 8 双向链路（→ v1.4）
 │   └── ADR-0009-...discoveries.md    # 发现日志机制（2026-08-19 首次重审 = 机制保留）
 ├── docs/                        # 方法论层
 │   ├── 007_hallucination_audit_...md     # Discovery 007 v1.3（toolized；追记 DR-6）
-│   ├── ASSERTION_EVIDENCE_FRAMEWORK.md   # 断言分级证据框架 v1.4（STEP_GAP 两态 + R7）
-│   ├── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-⑪，形态 II 19 处）
-│   ├── PROGRESS.md                       # 待办登记（P-001~P-011）
+│   ├── ASSERTION_EVIDENCE_FRAMEWORK.md   # 断言分级证据框架 v1.4.2（STEP_GAP 两态 + R7 + §10 下游分工）
+│   ├── FACT_CHECK_FRAMEWORK.md           # 事实核查框架 v1.0（CHK-/FC- 编号，FWK-ASSERTION 下游补充，2026-08-21 吸收）
+│   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉒ + §5 hits 机读块，形态 II 61 处）
+│   ├── PROGRESS.md                       # 待办登记（P-001~P-014，主动队列余 P-010）
 │   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
-│   ├── discoveries/README.md             # 发现三态索引（DIS-007/008；DR-6 追记）
-│   └── dev-log/                          # DEV-LOG-001~004（事件叙事）
+│   ├── discoveries/README.md             # 发现三态索引（DIS-007~010；DR-6 追记）
+│   └── dev-log/                          # DEV-LOG-001~006（事件叙事）
 ├── scripts/
-│   └── dc_validator.py         # DC 契约校验器（DC1-DC4 + R7，零第三方依赖，P-007）
+│   ├── dc_validator.py         # DC 契约校验器（DC1-DC4 + R7，零第三方依赖，P-007）
+│   ├── m7_stats.py             # M7 统计校验器（hits 机读块 + 表算术 + 跨表对账，R7 同构，P-011）
+│   └── repo_stats.py           # 视图层枚举校验器（stats 块 + 模式扫描 + 清单比对，对账器非再生成器，P-014）
 └── spec/
     ├── templates/              # 5 个标准模板（四件套 + ADR_TEMPLATE，P-003 Step F）
     ├── doc-contract/PLAN.md    # 文档规范改造方案 v1.6（verified，P-003 done）
     ├── cpp-hub-gap-analysis/   # 差距分析 RESEARCH + AUDIT（第二次回流依据）
-    ├── cpp-hub-absorption/     # 吸收复用四件套（DESIGN v1.1 + IMPL + CHECKLIST，已验收）
+    ├── cpp-hub-absorption/     # 吸收复用四件套（DESIGN v1.0 + IMPL + CHECKLIST，已验收）
     ├── adr0006-pointer/        # ADR-0006 决策 3 调研（P-001 依据，已执行）
-    ├── langgraph-upgrade/      # LangGraph 框架化调研（P-006 done，RESEARCH v1.1）
-    └── precommit-dc-validator/ # DC 契约校验器四件套（P-007 done，独立 pass 见 P-008）
+    ├── langgraph-upgrade/      # LangGraph 框架化调研（P-006 done，RESEARCH v1.2）
+    ├── deepseek-harness/       # DeepSeek Harness 调研与吸收裁决（P-012 done，RESEARCH v1.0）
+    ├── skill-enhancement/      # 开源 skill 生态增强调研（P-013 done，RESEARCH v1.1）
+    ├── precommit-dc-validator/ # DC 契约校验器四件套（P-007 done，P-008 独立 pass 后 verified/accepted）
+    ├── m7-hits-block/          # M7 hits 机读块四件套（P-011 done，独立 pass 待触发）
+    └── repo-stats/             # 视图层枚举校验器四件套（P-014：repo_stats.py + §10 stats 块 + repo-stats hook）
 ```
 
 ### 2.2 逻辑架构分层
@@ -427,6 +436,49 @@ pre-commit run dc-validator --all-files                  # hook 通道（.pre-co
 
 **selftest 计数惯例**: 计数由 expect 调用自增，不手填——v1.0 曾硬编码"12/12"实调 13 个 expect（DR-6，DESIGN §10.2 风险 1 预注册命中，M7 样本⑨），修复即 R7 原则应用于工具自身。
 
+### 4.5 仓库内工具: `scripts/m7_stats.py`（M7 统计校验器，P-011）
+
+**职责**: 把 M7 证据账本的聚合统计从手工登记变为 **hits 机读块声明 + 机械重数校验**，并把校验前移到提交瞬间（R7 同构——dc_validator 管 §0 统计表，本工具管 M7 账本；两者退出码 0/1/2 语义逐字一致）。权威源 = [M7_HITS_DESIGN](spec/m7-hits-block/M7_HITS_DESIGN.md) §4；六条不变式（默认只读 + 写守卫 / 确定性 / 零新规则 / 单一真值源（表头名序校验防列重排）/ 异构于生成端 / 声明 = 重数）。零第三方依赖。
+
+| 校验面（check_id） | 内容 |
+|---------|------|
+| 样本表（m7-sample） | 编号 1..N 连续 / 列数 7 / 日期合法（P2）/ 形态II复发前导整数 / 发现列 P 标记和 ≤ 前导总数；非标准发现单元格（样本③ 形态）P3 非阻断计入 cells_nonstandard |
+| 分桶表（m7-bucket） | 行算术（小计 = 行和）/ 列算术（合计 = 列和）/ 单元格域 {整数, —} |
+| 跨表（m7-xtable） | 分桶合计 = pre_ledger 基线 + 样本"形态II复发"列和（手工登记"加样本忘加分桶"主失效模式的拦截项） |
+| hits 块（m7-hits） | 块唯一 + JSON 可解析 + 逐字段声明 = 重数 |
+
+**CLI**（登记工作流：手工追加样本行 → `--write` 重生成 → commit 时 hook 复验）:
+
+```bash
+python scripts/m7_stats.py                              # 校验 M7 账本（默认）
+python scripts/m7_stats.py --write                      # 校验先行，重数值重写 §5 hits 块（写守卫：失衡账本拒写）
+python scripts/m7_stats.py --write --seed-pre-ledger 6  # hits 块缺失时 bootstrap（基线人工声明）
+python scripts/m7_stats.py --selftest                   # 内嵌自测（14 fixture，40 断言）
+pre-commit run m7-stats --all-files                     # hook 通道（files 收窄至 M7 路径）
+```
+
+**hits 机读块字段**（M7 §5，无时间态字段——确定性）: samples / form2_by_field（version/section/constant/line/count/quote/mapping）/ form2_total / form2_pre_ledger（声明量，先于账本的 Phase 7C 基线 6）/ form2_from_samples / findings（p1/p2/p3/unlabeled/cells_nonstandard——历史非整齐形态如实容纳，禁止回改）。
+
+### 4.6 仓库内工具: `scripts/repo_stats.py`（视图层枚举校验器，P-014）
+
+**职责**: 把聚合视图文档（CODE_WIKI / discoveries 索引 / README 双语 / evidence.svg）的手写枚举计数从"无失效检测的缓存副本"（[DIS-010](docs/discoveries/README.md)）变为 **stats 机读块声明 + 模式扫描对账**。权威源 = [REPO_STATS_DESIGN](spec/repo-stats/REPO_STATS_DESIGN.md) §4 + CODE_WIKI §10 stats 块（模式库/载体分类/声明/基准的数据唯一登记处，I-4 数据驱动——代码零模式常量）；七条不变式；与 m7_stats 的本质差异 = **对账器非再生成器**（无 --write，prose 位点永不代改，只报偏差）。零第三方依赖。
+
+| 校验面（check_id） | 内容 |
+|---------|------|
+| stats 块（rs-stats） | 块唯一 + JSON schema + 模式可编译 + truth 绑定域 + 载体存在性 |
+| 真值枚举（rs-truth） | 七通道真值（FS/hits/DIS/派生）+ doc_registry front-matter 版本 |
+| 声明对账（rs-decl） | declared 逐键 = 机械重数（P1） |
+| 模式扫描（rs-pattern） | living 载体命中值 = 真值（P2）/ facade 命中值 = 快照基准（P3 非阻断） |
+| 清单比对（rs-list） | §2.1 树 spec/ 子目录双向 + §9 索引行双向 + doc_registry 载体行版本（链接形态定位） |
+
+**CLI**（对账制工作流：真值源前进 → 人工同步 prose 与 stats 声明 → verify 全绿 → commit）:
+
+```bash
+python scripts/repo_stats.py              # verify 全量对账（本地直跑）
+python scripts/repo_stats.py --selftest   # 内嵌自测（20 fixture + F7 双变体 + I-1 只读断言，不触工作树）
+pre-commit run repo-stats --all-files     # hook 通道（作用域 = 视图载体集 ∪ 真值源集，DESIGN §3.4）
+```
+
 ---
 
 ## 5. 依赖关系
@@ -529,7 +581,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 - **规则 1 的执行纪律**：同一次生成的 review 章节必须标 `[自查·并发]`，事后独立 pass 复核后才能升级 `[已复核]` —— 这是 M6 教训的直接防线
 - **审计者永不自动修复**：任何 review/audit 输出只标记问题，修复由实现者执行后交复审
 - **官方文档不是真值**：关键断言需双源（statsmodels/arch 官方文档均写错过 ZA 1992 刊名）
-- **提交契约拦截（P-007 起）**：`.pre-commit-config.yaml` 已装 repo-local hook（dc-validator，`files: \.md$`）——front-matter/词表/命名空间/断链/计数违规在提交瞬间被机械拦截；绕过 hook 的直接提交前须手动跑 `python -S -E scripts/dc_validator.py`
+- **提交契约拦截（P-007 起；P-011 加 m7-stats；P-014 加 repo-stats）**：`.pre-commit-config.yaml` 装 repo-local 三 hook——dc-validator（`files: \.md$`：front-matter/词表/命名空间/断链/计数）+ m7-stats（`files: ^docs/M7_EVIDENCE_LOG\.md$`：hits 块声明 = 重数 + 表算术 + 跨表对账）+ repo-stats（作用域 = 视图载体集 ∪ 真值源集：stats 块声明 = 机械重数 + 模式扫描 + 清单比对）——违规在提交瞬间被机械拦截；绕过 hook 的直接提交前须手动跑 `python -S -E scripts/dc_validator.py` + `python scripts/m7_stats.py` + `python scripts/repo_stats.py`（b541705 教训：绕过 hook 的提交会积累到下一次全量校验才爆）
 
 ---
 
@@ -544,7 +596,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | ADR-0001 案例 | 论证驱动归因扭曲（2008 CDO 多因案例被裁剪为单因） | Step 4 Review 检查项 |
 | ADR-0002 决策 | 职责边界混淆（职责外 vs 能力边界） | Step 4 Review + DESIGN 模板 §2.3 |
 | Phase 7C（126 条→8 错，7A+1B） | 幻觉清单自身含幻觉；类型 III"把正确标成幻觉"不可被链接拦截 | 断言分级框架 + assertion_audit.py |
-| 形态 II 计数复发（M7 样本①-⑪，19 处） | 防幻觉产物自身计数虚报（LANGGRAPH A=14→11；dc_validator selftest 12/12→13/13；ADR0006 A=7→8；治理收束轮 feature 目录 5→6 + 样本数混轴 16→11——收束轮自身产出含错，规律② 至今最强实例） | R7 机械计数规则 + M7 账本分桶 + pre-commit M5 模块（提交瞬间拦截，覆盖 §0 统计表）+ 全仓 grep 机械枚举对账（兜底层，拦截 prose 计数） |
+| 形态 II 计数复发（M7 样本①-㉒，61 处；样本⑭⑮ 非形态 II——格式/撞名类） | 防幻觉产物自身计数虚报（LANGGRAPH A=14→11；dc_validator selftest 12/12→13/13；ADR0006 A=7→8；治理收束轮 feature 目录 5→6 + 样本数混轴 16→11——收束轮自身产出含错，规律② 至今最强实例） | R7 机械计数规则 + M7 账本分桶 + pre-commit M5 模块（提交瞬间拦截，覆盖 §0 统计表）+ **m7_stats hits 块（P-011：账本自身统计也进机械对账——登记计数错误的账本不再裸奔）** + **repo_stats 视图层对账（P-014：视图载体声明=重数——㉒ 首证边界外计数词仍需 review 臂兜底）** + 全仓 grep 机械枚举对账（兜底层，拦截 prose 计数） |
 | NP2 τ_T(k) | λ̂−λ̃ 差形式全源零命中（无据断言）；裁决经 scholar-mirror → Semantic Scholar 绿色副本 → pypdf 提取 eq.(12) 四源冻结 β̂₀² | A 类强制证据规则、双源规则 |
 | EuropePMC 回退 | DOI 查询返回无关 PLOS One 论文（链接有效内容错配） | 证据身份验证规则 |
 
@@ -595,18 +647,90 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [adr/ADR-0008](./adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) | Step 2 门禁 + Step 8 双向链路（→ v1.4） |
 | [adr/ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | Discoveries 发现日志机制（学习回路载体） |
 | [docs/007](./docs/007_hallucination_audit_asymmetric_evidence.md) | Discovery 007：幻觉清单自身含幻觉的发现记录（126→8 错误复盘） |
-| [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
-| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-⑪ + 形态 II 复发分桶（19 处/7 字段类型）+ 命中率 baseline（唯一活载体，ADR-0007 D1） |
-| [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized，v1.3 追记 DR-6）/ DIS-008（open）；维护纪律含首次重审记录（2026-08-19） |
-| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-007 done；pending = P-008（P-007 独立 pass）/ P-009（薄壳 runner 方案 B）/ P-010（promptfoo M7 对比臂，触发已满足）/ P-011（M7 hits 机读块） |
+| [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4.2：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
+| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉒ + 形态 II 复发分桶（61 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
+| [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open）/ DIS-009（resolved）/ DIS-010（toolized）；维护纪律含首次重审记录（2026-08-19） |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-014 全 done（P-014 于 2026-08-22 收口，CHECKLIST 有条件通过）；主动队列 pending = P-010（promptfoo M7 对比臂声明式评测） |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
-| [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ DEV-LOG-002（cpp-hub-absorption 全链路） |
-| [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.1 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
+| [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ 002（cpp-hub-absorption）/ 003（precommit-dc-validator）/ 004（治理收束）/ 005（m7-hits-block）/ 006（repo-stats） |
+| [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.0 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
 | [spec/cpp-hub-gap-analysis/](./spec/cpp-hub-gap-analysis/) | 差距分析 RESEARCH（16A+4B）+ AUDIT（形态 II 三实例谱系） |
-| [spec/doc-contract/PLAN.md](./spec/doc-contract/PLAN.md) | 文档规范改造方案 v1.5（P-003 执行中：DC1-DC4 契约 + §6 M7 账本指针化） |
+| [spec/doc-contract/](./spec/doc-contract/) | 文档规范改造方案（PLAN v1.6，P-003 done：DC1-DC4 契约 + §6 M7 账本指针化） |
 | [spec/adr0006-pointer/](./spec/adr0006-pointer/) | ADR-0006 决策 3 迁移指针调研（P-001 依据，已执行） |
+| [spec/langgraph-upgrade/](./spec/langgraph-upgrade/) | LangGraph 框架化调研 v1.2（P-006 done：不整体迁移，薄壳 runner 方案 B） |
+| [spec/precommit-dc-validator/](./spec/precommit-dc-validator/) | DC 契约校验器四件套（P-007/P-008 done：dc_validator.py + pre-commit hook，verified） |
+| [spec/deepseek-harness/](./spec/deepseek-harness/) | DeepSeek Harness 调研与吸收裁决（P-012 done，RESEARCH v1.0） |
+| [spec/skill-enhancement/](./spec/skill-enhancement/) | 开源 skill 生态增强调研（P-013 done，RESEARCH v1.1） |
+| [spec/m7-hits-block/](./spec/m7-hits-block/) | M7 hits 机读块四件套（P-011 done：m7_stats.py + hits 块 + m7-stats hook） |
+| [spec/repo-stats/](./spec/repo-stats/) | 视图层枚举校验器四件套（P-014 done：repo_stats.py + CODE_WIKI §10 stats 块 + repo-stats hook，对账器非再生成器） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |
 | [spec/templates/CHECKLIST_TEMPLATE.md](./spec/templates/CHECKLIST_TEMPLATE.md) | Step 7 验收 checklist 模板（含 ADD Phase 0 质量门与验收统计） |
 | [spec/templates/ADR_TEMPLATE.md](./spec/templates/ADR_TEMPLATE.md) | ADR 模板（P-003 Step F 新增：元数据/范围声明/背景/决策/替代方案/后果/验证骨架，DC1 front-matter） |
+
+---
+
+## 10. 机读声明块（stats）
+
+> **用途**: `scripts/repo_stats.py`（P-014，[DIS-010](docs/discoveries/README.md) 处置落地）的扫描契约唯一登记处——模式库（数据非代码：正则 / 真值绑定 / 作用域 / 捕获组，I-4）、载体两级分类（living = 阻断；facade = 时点快照 + 真值指针，P3 非阻断）、实体计数声明（声明 = 机械重数，rs-decl）、门面快照基准与误报白名单。运行：`python scripts/repo_stats.py`（verify）；提交瞬间由 pre-commit hook `repo-stats` 复验。
+> **维护工作流（对账制，非再生成制）**: 真值源前进（新样本 / 新 feature 目录 / 新文档 / 新 hook）→ 人工同步视图 prose **与**本块声明 → verify 至全绿 → commit。工具只报偏差、永不代改——与 m7_stats 的 `--write` 再生成制相反（prose 不可机械重建）。
+> **试扫否决记录（pattern_lib_version 1）**: PT-3（DIS 范围对账）否决——T6 真值口径为 discoveries 全文 DIS 编号 min/max（索引含源项目 DIS-001~006 行 → 真值 1-10），与本仓序列声明的 prose 形态语义不同轴，登记必产误报；DIS 范围漂移暂无机械看护（低频位点，人工同步兜底）。
+> **已知未覆盖**: evidence.svg 复发规律数大数节点（TRUTH_KEYS 封闭枚举无对应绑定键）；README.en 词形数字（Five）；§2.1 树 scripts/ 文件级条目（树清单比对契约仅覆盖 spec/ 子目录）；PT-4/PT-8 以负向后顾排除述史/引用形态（PT-4：`(?<!L)` 行号引用「L4 feature 目录」+ `(?<![.\d])` 版本号片段「v1.5 feature 目录」；PT-8：`(?<!扩为)`——历史叙事非当前态声明，不走 suppress 白名单，suppress 为文件粒度会误杀同文件其余位点）。doc_registry 载体行定位 = 链接形态（文件链接或父目录链接），label 子串会误命中叙事行（dev-log 行「002（cpp-hub-absorption）」，F20）。
+
+```stats
+{
+  "pattern_lib_version": 1,
+  "carriers": {
+    "living": ["CODE_WIKI.md", "docs/discoveries/README.md"],
+    "facade": ["README.md", "README.en.md", "docs/assets/readme/evidence.svg"]
+  },
+  "patterns": [
+    {"id": "PT-1", "regex": "形态 II [^。\\n；]{0,20}?(\\d+) 处", "truth": "hits.form2_total"},
+    {"id": "PT-1E", "regex": "(\\d+) logged recurrences", "truth": "hits.form2_total", "scope": ["README.en.md"]},
+    {"id": "PT-2", "regex": "样本 ?①[-–]([①-㉟])", "truth": "hits.samples"},
+    {"id": "PT-2E", "regex": "samples ①[-–]([①-㉟])", "truth": "hits.samples", "scope": ["README.en.md"]},
+    {"id": "PT-4", "regex": "(?<!L)(?<![.\\d])([一二三四五六七八九十]+|\\d+) feature 目录", "truth": "fs.spec_feature_dirs"},
+    {"id": "PT-5", "regex": "dev-log ×(\\d+)", "truth": "fs.dev_logs"},
+    {"id": "PT-5B", "regex": "DEV-LOG-\\d{3}~(\\d{3})", "truth": "fs.dev_logs"},
+    {"id": "PT-6A", "regex": "ADR-(\\d{4})~(\\d{4})\\s*([一二三四五六七八九十\\d]+)份", "truth": "fs.adr_files", "group": 3},
+    {"id": "PT-6B", "regex": "架构决策记录（([一二三四五六七八九十\\d]+)份", "truth": "fs.adr_files", "scope": ["CODE_WIKI.md"]},
+    {"id": "PT-6C", "regex": "架构决策记录 ×(\\d+)", "truth": "fs.adr_files", "scope": ["README.md"]},
+    {"id": "PT-6D", "regex": "decision records ×(\\d+)", "truth": "fs.adr_files", "scope": ["README.en.md"]},
+    {"id": "PT-6E", "regex": "([一二三四五六七八九十\\d]+)份 ADR", "truth": "fs.adr_files", "scope": ["README.md"]},
+    {"id": "PT-7A", "regex": "(\\d+) 个(?:标准)?模板（", "truth": "fs.templates", "scope": ["CODE_WIKI.md"]},
+    {"id": "PT-7B", "regex": "(\\d+) 个模板", "truth": "fs.templates", "scope": ["README.md"]},
+    {"id": "PT-7C", "regex": "(\\d+) templates", "truth": "fs.templates", "scope": ["README.en.md"]},
+    {"id": "PT-7D", "regex": "([一二三四五六七八九十\\d]+)份可直接复制", "truth": "fs.templates", "scope": ["README.md"]},
+    {"id": "PT-8", "regex": "(?<!扩为)(双|两|三|四) hook", "truth": "fs.hooks"},
+    {"id": "PT-9", "regex": "视图层合计 (\\d+) 处", "truth": "derived.view_layer_total"},
+    {"id": "PT-10", "regex": "占形态 II 总量 (\\d+)%", "truth": "derived.view_layer_pct"},
+    {"id": "PT-11", "regex": "P-(\\d{3})~P-(\\d{3})", "truth": "fs.progress_tasks", "group": 2}
+  ],
+  "declared": {
+    "spec_feature_dirs": 10,
+    "adr_files": 6,
+    "dev_logs": 6,
+    "scripts": 3,
+    "templates": 5,
+    "hooks": 3,
+    "progress_tasks": 14
+  },
+  "view_layer_samples": [11, 16, 17, 18, 19, 20, 21],
+  "doc_registry": [
+    {"label": "SPEC_PROCESS.md", "path": "SPEC_PROCESS.md"},
+    {"label": "ASSERTION_EVIDENCE_FRAMEWORK", "path": "docs/ASSERTION_EVIDENCE_FRAMEWORK.md"},
+    {"label": "cpp-hub-absorption", "path": "spec/cpp-hub-absorption/CPP_HUB_ABSORPTION_DESIGN.md"},
+    {"label": "doc-contract", "path": "spec/doc-contract/PLAN.md"},
+    {"label": "langgraph-upgrade", "path": "spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md"},
+    {"label": "deepseek-harness", "path": "spec/deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md"},
+    {"label": "skill-enhancement", "path": "spec/skill-enhancement/SKILL_ENHANCEMENT_RESEARCH.md"}
+  ],
+  "facade_baseline": {
+    "README.md": {"as_of": "2026-08-22", "values": {"hits.samples": 22, "hits.form2_total": 61, "fs.adr_files": 6, "fs.templates": 5}},
+    "README.en.md": {"as_of": "2026-08-22", "values": {"hits.samples": 22, "hits.form2_total": 61, "fs.adr_files": 6, "fs.templates": 5}},
+    "docs/assets/readme/evidence.svg": {"as_of": "2026-08-22", "values": {"hits.samples": 22, "hits.form2_total": 61}}
+  },
+  "suppress": []
+}
+```
