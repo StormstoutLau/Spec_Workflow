@@ -1,6 +1,6 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.7.2（2026-08-22 ㉒ 入账批：P-014 收口批独立 review 捕获 PROGRESS 依据列「八度」计数词停旧——repo_stats 边界外首个 post-toolization 复发（review 臂捕获，pattern_lib_version 2 候选议程，[REPO_STATS_AUDIT](spec/repo-stats/REPO_STATS_AUDIT.md)）→ M7 样本㉒ 入账（form2_total 60→61 / view_layer_pct 66%→65%）+ ㉒ 轮 verify 首跑 9 活靶全修正 + 门面快照同步；v1.7.1 于 2026-08-22 P-014 收口：CHECKLIST v1.1 accepting（有条件通过，独立 pass 待触发）+ PROGRESS P-014 done + DEV-LOG-006 + M7 样本㉑（首跑 7 真靶全捕获）+ DIS-010 toolized；v1.7 于 2026-08-22 P-014 落地：视图层机械枚举校验器 `scripts/repo_stats.py`（第三可执行件，**对账器非再生成器**——只报偏差永不代改）+ §10 stats 机读声明块（模式库 21 条数据驱动 / 载体两级 living-facade / 门面快照基准）+ pre-commit hook repo-stats 入册——「声明 = 机械重数」从 M7 账本外推到视图层，[DIS-010](docs/discoveries/README.md) 处置落地；v1.6.2 于 2026-08-22 终值修正：⑳轮捕获⑲轮「修完即绿」8 处实际未写入——修完即绿由模式扫描对账确认；v1.6.1 于 2026-08-22 修正轮：三轮共 22 项漂移修正（样本⑲——**修正轮是「视图的修正视图」**）；v1.6 于 2026-08-21 P-011 落地：M7 §5 hits 机读块 + `scripts/m7_stats.py`（第二可执行件）+ hook m7-stats。当前态：M7 样本①-㉒（形态 II 61 处——样本⑭⑮ 非形态 II）、spec/ 十 feature 目录（repo-stats 新增）、三可执行件三 hook；前版见 git 历史）
+> **Wiki 版本**: v1.7.4（2026-08-23 m7-hits-block 独立 pass 批：同基座降级审查（DeepSeek V4 Pro，RULE-1 时序独立满足，RULE-5 模型异质性降级标注——生成端/审查端同基座）+ DR-B/C 专项 fixture 补齐（F15/F16，selftest 14→16 项 40→44 断言）+ `scripts/m7_stats.py` LOC 828→845 回填 + 四件套落档（IMPLEMENTATION → verified / CHECKLIST → accepted / RESEARCH audit_status CLOSED）；v1.7.3（2026-08-23 ㉓ 入账批：P-014 真异基座独立 pass（DeepSeek V4 Pro，RULE-1+RULE-5 双满足）捕获 repo_stats 自身文档 fixture 计数词漂移——「19 fixture」4 处停旧（F20 TDD fixture 落地未回写计数词）→ 样本㉓ 入账（form2_total 61→62 / view_layer_pct 65%→64%）+ 四件套落档 accepted/verified + 门面快照同步；v1.7.2（2026-08-22 ㉒ 入账批：P-014 收口批独立 review 捕获 PROGRESS 依据列「八度」计数词停旧——repo_stats 边界外首个 post-toolization 复发（review 臂捕获，pattern_lib_version 2 候选议程，[REPO_STATS_AUDIT](spec/repo-stats/REPO_STATS_AUDIT.md)）→ M7 样本㉒ 入账（form2_total 60→61 / view_layer_pct 66%→65%）+ ㉒ 轮 verify 首跑 9 活靶全修正 + 门面快照同步；v1.7.1 于 2026-08-22 P-014 收口：CHECKLIST v1.1 accepting（有条件通过，独立 pass 待触发）+ PROGRESS P-014 done + DEV-LOG-006 + M7 样本㉑（首跑 7 真靶全捕获）+ DIS-010 toolized；v1.7 于 2026-08-22 P-014 落地：视图层机械枚举校验器 `scripts/repo_stats.py`（第三可执行件，**对账器非再生成器**——只报偏差永不代改）+ §10 stats 机读声明块（模式库 21 条数据驱动 / 载体两级 living-facade / 门面快照基准）+ pre-commit hook repo-stats 入册——「声明 = 机械重数」从 M7 账本外推到视图层，[DIS-010](docs/discoveries/README.md) 处置落地；v1.6.2 于 2026-08-22 终值修正：⑳轮捕获⑲轮「修完即绿」8 处实际未写入——修完即绿由模式扫描对账确认；v1.6.1 于 2026-08-22 修正轮：三轮共 22 项漂移修正（样本⑲——**修正轮是「视图的修正视图」**）；v1.6 于 2026-08-21 P-011 落地：M7 §5 hits 机读块 + `scripts/m7_stats.py`（第二可执行件）+ hook m7-stats。当前态：M7 样本①-㉓（形态 II 62 处——样本⑭⑮ 非形态 II）、spec/ 十 feature 目录（repo-stats 新增）、三可执行件三 hook；前版见 git 历史）
 > **覆盖对象**: 本仓库全部文档与工具（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007 v1.3 + DIS-007~010、断言证据框架 v1.4.2 + 事实核查框架 v1.0、5 个模板（四件套 + ADR）、M7 证据账本（含 §5 hits 机读块）、discoveries 索引、PROGRESS、dev-log ×6、spec/ 十 feature 目录、`scripts/dc_validator.py` + `scripts/m7_stats.py` + `scripts/repo_stats.py` + `.pre-commit-config.yaml` 三 hook）
 > **仓库性质**: 方法论文档仓库为体、最小工具层为用 —— 可执行件 = DC 契约校验器 + M7 统计校验器 + 视图层枚举校验器（均零第三方依赖）+ pre-commit 三 hook；其余"运行方式" = 工作流的执行方式（见 §6）
 
@@ -64,7 +64,7 @@ f:\Spec_Workflow/
 │   ├── 007_hallucination_audit_...md     # Discovery 007 v1.3（toolized；追记 DR-6）
 │   ├── ASSERTION_EVIDENCE_FRAMEWORK.md   # 断言分级证据框架 v1.4.2（STEP_GAP 两态 + R7 + §10 下游分工）
 │   ├── FACT_CHECK_FRAMEWORK.md           # 事实核查框架 v1.0（CHK-/FC- 编号，FWK-ASSERTION 下游补充，2026-08-21 吸收）
-│   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉒ + §5 hits 机读块，形态 II 61 处）
+│   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉓ + §5 hits 机读块，形态 II 62 处）
 │   ├── PROGRESS.md                       # 待办登记（P-001~P-014，主动队列余 P-010）
 │   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
 │   ├── discoveries/README.md             # 发现三态索引（DIS-007~010；DR-6 追记）
@@ -453,7 +453,7 @@ pre-commit run dc-validator --all-files                  # hook 通道（.pre-co
 python scripts/m7_stats.py                              # 校验 M7 账本（默认）
 python scripts/m7_stats.py --write                      # 校验先行，重数值重写 §5 hits 块（写守卫：失衡账本拒写）
 python scripts/m7_stats.py --write --seed-pre-ledger 6  # hits 块缺失时 bootstrap（基线人工声明）
-python scripts/m7_stats.py --selftest                   # 内嵌自测（14 fixture，40 断言）
+python scripts/m7_stats.py --selftest                   # 内嵌自测（16 fixture，44 断言）
 pre-commit run m7-stats --all-files                     # hook 通道（files 收窄至 M7 路径）
 ```
 
@@ -596,7 +596,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | ADR-0001 案例 | 论证驱动归因扭曲（2008 CDO 多因案例被裁剪为单因） | Step 4 Review 检查项 |
 | ADR-0002 决策 | 职责边界混淆（职责外 vs 能力边界） | Step 4 Review + DESIGN 模板 §2.3 |
 | Phase 7C（126 条→8 错，7A+1B） | 幻觉清单自身含幻觉；类型 III"把正确标成幻觉"不可被链接拦截 | 断言分级框架 + assertion_audit.py |
-| 形态 II 计数复发（M7 样本①-㉒，61 处；样本⑭⑮ 非形态 II——格式/撞名类） | 防幻觉产物自身计数虚报（LANGGRAPH A=14→11；dc_validator selftest 12/12→13/13；ADR0006 A=7→8；治理收束轮 feature 目录 5→6 + 样本数混轴 16→11——收束轮自身产出含错，规律② 至今最强实例） | R7 机械计数规则 + M7 账本分桶 + pre-commit M5 模块（提交瞬间拦截，覆盖 §0 统计表）+ **m7_stats hits 块（P-011：账本自身统计也进机械对账——登记计数错误的账本不再裸奔）** + **repo_stats 视图层对账（P-014：视图载体声明=重数——㉒ 首证边界外计数词仍需 review 臂兜底）** + 全仓 grep 机械枚举对账（兜底层，拦截 prose 计数） |
+| 形态 II 计数复发（M7 样本①-㉓，62 处；样本⑭⑮ 非形态 II——格式/撞名类） | 防幻觉产物自身计数虚报（LANGGRAPH A=14→11；dc_validator selftest 12/12→13/13；ADR0006 A=7→8；治理收束轮 feature 目录 5→6 + 样本数混轴 16→11——收束轮自身产出含错，规律② 至今最强实例） | R7 机械计数规则 + M7 账本分桶 + pre-commit M5 模块（提交瞬间拦截，覆盖 §0 统计表）+ **m7_stats hits 块（P-011：账本自身统计也进机械对账——登记计数错误的账本不再裸奔）** + **repo_stats 视图层对账（P-014：视图载体声明=重数——㉒ 首证边界外计数词仍需 review 臂兜底）** + 全仓 grep 机械枚举对账（兜底层，拦截 prose 计数） |
 | NP2 τ_T(k) | λ̂−λ̃ 差形式全源零命中（无据断言）；裁决经 scholar-mirror → Semantic Scholar 绿色副本 → pypdf 提取 eq.(12) 四源冻结 β̂₀² | A 类强制证据规则、双源规则 |
 | EuropePMC 回退 | DOI 查询返回无关 PLOS One 论文（链接有效内容错配） | 证据身份验证规则 |
 
@@ -648,7 +648,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [adr/ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | Discoveries 发现日志机制（学习回路载体） |
 | [docs/007](./docs/007_hallucination_audit_asymmetric_evidence.md) | Discovery 007：幻觉清单自身含幻觉的发现记录（126→8 错误复盘） |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4.2：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
-| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉒ + 形态 II 复发分桶（61 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
+| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉓ + 形态 II 复发分桶（62 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
 | [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open）/ DIS-009（resolved）/ DIS-010（toolized）；维护纪律含首次重审记录（2026-08-19） |
 | [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-014 全 done（P-014 于 2026-08-22 收口，CHECKLIST 有条件通过）；主动队列 pending = P-010（promptfoo M7 对比臂声明式评测） |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
@@ -727,9 +727,9 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
     {"label": "skill-enhancement", "path": "spec/skill-enhancement/SKILL_ENHANCEMENT_RESEARCH.md"}
   ],
   "facade_baseline": {
-    "README.md": {"as_of": "2026-08-22", "values": {"hits.samples": 22, "hits.form2_total": 61, "fs.adr_files": 6, "fs.templates": 5}},
-    "README.en.md": {"as_of": "2026-08-22", "values": {"hits.samples": 22, "hits.form2_total": 61, "fs.adr_files": 6, "fs.templates": 5}},
-    "docs/assets/readme/evidence.svg": {"as_of": "2026-08-22", "values": {"hits.samples": 22, "hits.form2_total": 61}}
+    "README.md": {"as_of": "2026-08-23", "values": {"hits.samples": 23, "hits.form2_total": 62, "fs.adr_files": 6, "fs.templates": 5}},
+    "README.en.md": {"as_of": "2026-08-23", "values": {"hits.samples": 23, "hits.form2_total": 62, "fs.adr_files": 6, "fs.templates": 5}},
+    "docs/assets/readme/evidence.svg": {"as_of": "2026-08-23", "values": {"hits.samples": 23, "hits.form2_total": 62}}
   },
   "suppress": []
 }

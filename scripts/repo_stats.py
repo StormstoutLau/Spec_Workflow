@@ -953,7 +953,7 @@ def _expect(name: str, cond: bool, failures: list[str]) -> int:
 
 
 def run_selftest() -> int:
-    """19 fixture + F7 双变体（SVG 通道/suppress 白名单）+ I-1 只读断言 + 数字转换全区间
+    """20 fixture + F7 双变体（SVG 通道/suppress 白名单）+ I-1 只读断言 + 数字转换全区间
     （expect 计数自增机械计数，DR-6 同构）。"""
     failures: list[str] = []
     passed = 0
@@ -1235,7 +1235,7 @@ def in_scope(files: list[str]) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="repo_stats 视图层机械枚举校验器（对账制，只读）")
-    parser.add_argument("--selftest", action="store_true", help="内嵌自测（19 fixture）")
+    parser.add_argument("--selftest", action="store_true", help="内嵌自测（20 fixture）")
     parser.add_argument("files", nargs="*", help="pre-commit 传入的 staged 文件")
     args = parser.parse_args(argv)
 

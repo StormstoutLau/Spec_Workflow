@@ -3,19 +3,19 @@
 ---
 id: repo-stats-IMPLEMENTATION
 type: design
-version: 1.1
-status: in-review
-date: 2026-08-22
+version: 1.2
+status: verified
+date: 2026-08-23
 depends: [repo-stats-DESIGN, repo-stats-RESEARCH]
 upstream: null
 ---
 
 > **Feature**: repo-stats（PROGRESS P-014，[DIS-010](../../docs/discoveries/README.md) 处置落地）
 > **创建日期**: 2026-08-22
-> **状态**: in-review（Step 9-10 完成：selftest 23/23 + verify 首跑活靶全捕获 + 修正后 exit 0 + 第三 hook 入册 + M7 样本㉑ 登记；自查单视角，独立 pass 待触发）
+> **状态**: verified（Step 10 终验完成：真异基座独立 pass（DeepSeek V4 Pro）双满足 + 三校验器全绿 + CHECKLIST 状态 accepted；自查单视角 → 独立 pass 闭合）
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [REPO_STATS_DESIGN.md](./REPO_STATS_DESIGN.md) v1.1
-> **审查状态**: `自查（单视角）`（RULE-4）——待独立 pass 或异基座复验
+> **审查状态**: `真异基座独立 pass`（RULE-1 时序独立 + RULE-5 模型异质性双满足：生成端 GLM-5.3 / 审查端 DeepSeek V4 Pro——同样本⑬ 双满足形态）
 
 ---
 
@@ -329,7 +329,7 @@ verify 首跑捕获集（活靶全命中证据）入 CHECKLIST §8 验收登记�
 | 1 | 写 `scripts/repo_stats.py` 骨架（RS1 CLI + 常量 + CheckResult/StatsSpec/TruthSet） | import 无错 |
 | 2 | RS3 解析器 + RS2 枚举器 + 数字转换纯函数 | F2-F5/F12-F15 |
 | 3 | RS4 三路对账 + 行号状态机 | F6-F11/F16-F19 |
-| 4 | RS5 selftest（19 fixture 迷你仓） | `--selftest` N/N |
+| 4 | RS5 selftest（20 fixture 迷你仓） | `--selftest` N/N |
 | 5 | CODE_WIKI §10 stats 块人工起草（模式库 PT-1~PT-11 全仓试扫定稿） | verify 首跑捕获 §10.3 全活靶 |
 | 6 | 活靶修正 + CODE_WIKI v1.7 入册 | verify exit 0 |
 | 7 | `.pre-commit-config.yaml` 第三 hook | `pre-commit run repo-stats --all-files` |

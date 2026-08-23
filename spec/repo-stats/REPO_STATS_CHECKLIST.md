@@ -3,20 +3,20 @@
 ---
 id: repo-stats-CHECKLIST
 type: design
-version: 1.1
-status: accepting
-date: 2026-08-22
+version: 1.2
+status: accepted
+date: 2026-08-23
 depends: [repo-stats-IMPLEMENTATION, repo-stats-DESIGN, repo-stats-RESEARCH]
 upstream: null
 ---
 
 > **Feature**: repo_stats（PROGRESS P-014，[DIS-010](../../docs/discoveries/README.md) 处置落地）
 > **创建日期**: 2026-08-22
-> **状态**: accepting（验收决定 = **有条件通过**——自查全绿 + 机械证据 E1 可重放；条件 = RULE-1 独立 pass，同 P-007/P-011 先例，不冒充 accepted）
+> **状态**: accepted（真异基座独立 pass（DeepSeek V4 Pro）完成——RULE-1 时序独立 + RULE-5 模型异质性双满足；自查单视角 → 独立 pass 闭合，同样本⑬ 双满足形态）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [REPO_STATS_IMPLEMENTATION.md](./REPO_STATS_IMPLEMENTATION.md) v1.1
+> **基于实施**: [REPO_STATS_IMPLEMENTATION.md](./REPO_STATS_IMPLEMENTATION.md) v1.2
 > **基于设计**: [REPO_STATS_DESIGN.md](./REPO_STATS_DESIGN.md) v1.1
-> **验收者**: 自查（单视角，RULE-4）——GLM-5.3；独立 pass 待触发（同 P-007/P-011 先例）
+> **验收者**: 自查（单视角，RULE-4）GLM-5.3；独立 pass = 真异基座（DeepSeek V4 Pro）已完成
 
 ---
 
@@ -108,7 +108,7 @@ upstream: null
 |--------|---------|---------|------|
 | verify 默认模式 | 真实仓 dry-run | 活靶修正后 exit 0 | ☒ |
 | skip 语义 | F16 | 作用域外交集空 exit 0 | ☒ |
-| selftest 23 fixture（19 基础 + F7b/F7c 双变体 + F20 TDD） | `--selftest` | 23/23 PASS（N = 机械计数，IMPL §8.1） | ☒ |
+| selftest 23 项（20 fixture F1-F20 + F7b/F7c 双变体 + I-1 只读断言） | `--selftest` | 23/23 PASS（N = 机械计数，IMPL §8.1） | ☒ |
 | 退出码三值语义 | F2/F6/F16 | 0/1/2 与 dc_validator/m7_stats 逐字一致 | ☒ |
 
 ## 3. 不变式验收（Step 9-10 完成）
@@ -191,11 +191,19 @@ upstream: null
 
 ### 8.1 独立 pass 记录
 
-待触发（RULE-1 时序独立 + RULE-5 异质性；触发条件 = 用户指令或 Step 10 裁决）。
+| 维度 | 结论 |
+|------|------|
+| RULE-1 时序独立 | ☒ 满足（新会话与生成/收口轮分离，异步独立） |
+| RULE-5 模型异质性 | ☒ 满足（生成端 GLM-5.3 / 审查端 DeepSeek V4 Pro——同样本⑬ 双满足形态） |
+| 机械校验重放 | ☒ `--selftest` 23/23 + verify exit 0 + m7_stats/dc_validator 全绿（§8.3 五通道复现） |
+| 审查发现 | 1 P3（fixture 计数词漂移——入 M7 样本㉓；§8.2 追记） |
+| 结论 | **真异基座独立 pass 通过**；IMPLEMENTATION → verified、本 CHECKLIST → accepted |
 
 ### 8.2 追记区
 
 （独立审查/异基座复验结论与修正记录——P-011 先例：异步独立审计曾捕获 CODE_WIKI v1.6 两处错误断言，追记入本节并同步 M7）
+
+**【真异基座独立 pass 追记·2026-08-23】** 真异基座独立 pass（DeepSeek V4 Pro；RULE-1 时序独立 + RULE-5 模型异质性双满足——生成端 GLM-5.3，同样本⑬ 形态）机械重放（`--selftest` 23/23 + verify + 三校验器）后，捕获 1 P3：repo_stats 自身文档 fixture 计数词漂移——「19 fixture」计数词 4 处停旧（`repo_stats.py` run_selftest docstring / `--help` / CHECKLIST §2.4「19 基础 + F20 TDD」/ IMPLEMENTATION Step 4「19 fixture 迷你仓」）；机械重数实为 **20 核心 fixture（F1-F20）+ F7b/F7c 双变体 + I-1 只读断言 = 23 项**——根因 = F20（集成轮 DR-H 修复的 TDD fixture）落地后计数词未回写，与样本⑫「计划数与实际数漂移」同族、跨文档复制同步漂移与样本⑲① 同构。入账裁决 A → **样本㉓**（4 词全数回写「20 fixture」= 分桶显示值等价；form2_total 61→62 / view_layer_pct 65%→64%）。后续行动全执行：四件套落档（本 CHECKLIST → accepted / IMPLEMENTATION → verified）+ M7 ㉓ 行 + §2 分桶行 + hits 块 `--write` + living 门面三件刷新。错误未流入版本历史（独立 pass 批未 commit，提交前拦截）。
 
 **【收口批独立审查追记·2026-08-22】** 收口批独立 review（[REPO_STATS_AUDIT.md](./REPO_STATS_AUDIT.md) v1.0；RULE-1 时序独立满足——新会话与收口轮分离；RULE-5 同基座降级标注，同样本⑦形态）对收口批数字链条自洽性审查（R7 机械重数 + 逐位点 Read 取证），捕获 1 P3：[PROGRESS](../../docs/PROGRESS.md) P-014 依据列「八度实证」计数词停旧——行内其余字段均为收口时点值，独计数词停在立项时点；位于 repo_stats 机械对账边界外（「N 度实证」无 PT 模式锚定，verify 四通道零拦截——**pattern 覆盖枚举性首个 post-toolization 边界实证**，pattern_lib_version 2 候选议程）。入账裁决 A（新样本㉒，判例法三条件全中：形态 II 计数复发 ∧ 轮次分离 ∧ 新机制变体；B/C 否决——review 臂捕获须入对比臂归因，不可并入工具捕获样本㉑）。八步后续行动全执行（2026-08-22）：① PROGRESS 八度→九度 ② M7 §1 ㉒行 + §2 分桶行（PROGRESS P-014 行，计数 +1）+ 合计 60→61 ③ `m7_stats.py --write`（写守卫自证算术）④ repo_stats verify 首跑枚举活靶 9 P2 + 6 P3（living 停旧值族 + facade 三件快照滞后，与审计 §1.3 级联预测吻合）⑤ living 位点修正（CODE_WIKI ×4 / discoveries 66%→65%）→ exit 0 ⑥ facade_baseline 22/61 + 门面三件刷新 → 0 P3 提示 ⑦ 追记三处（本节 / DEV-LOG-006 / DIS-010 后注）⑧ 四通道终验 + 一次 commit。错误未流入版本历史（P-014 未 commit，提交前拦截）。本轮 review 不构成独立 pass（同基座降级），§8.1 待触发不变。
 
@@ -215,11 +223,11 @@ upstream: null
 
 ---
 
-**验收决定**: **有条件通过**（自查全绿 63/63 + E1 机械证据可重放——§8.3 五通道；条件 = RULE-1 独立 pass（真异基座优先）后 IMPLEMENTATION → verified、本 CHECKLIST → accepted，同 P-007/P-011 先例节奏，不冒充 accepted）
+**验收决定**: **验收通过**（自查全绿 63/63 + E1 机械证据可重放——§8.3 五通道 + 真异基座独立 pass（DeepSeek V4 Pro，RULE-1+RULE-5 双满足）——IMPLEMENTATION → verified、本 CHECKLIST → accepted）
 
 | 角色 | 签字 | 日期 |
 |------|------|------|
 | 实施者 | GLM-5.3（自查·单视角，RULE-4） | 2026-08-22 |
-| 审查者 | 待独立 pass | — |
+| 审查者 | DeepSeek V4 Pro（真异基座独立 pass，RULE-1+RULE-5 双满足） | 2026-08-23 |
 
-**后续行动**: 独立 pass（触发驱动，含 fixture 矩阵与 stats 块契约复核）；PROGRESS P-014 → done ✅；DEV-LOG-006 ✅；CODE_WIKI v1.7/v1.7.1 同步 ✅。
+**后续行动**: 独立 pass ✅（真异基座 DeepSeek V4 Pro，含 fixture 计数词漂移捕获——样本㉓）；PROGRESS P-014 → done ✅；DEV-LOG-006 ✅；CODE_WIKI v1.7/v1.7.1/v1.7.3 同步 ✅。

@@ -210,7 +210,7 @@ M7 账本是 ADR-0007 D1 钦定的唯一活载体，但其聚合统计（样本�
       {"step": 3, "text": "三处均可用机械探针拦截（行合法性格式、行列求和复验、合计=基线+样本列和不变式）", "source": "本报告 A1-A4 取证 + 算术验证"}
     ],
     "evidence_strength": "E1（依赖源逐条 Read 取证）",
-    "audit_status": "OPEN（待独立 pass）"
+    "audit_status": "CLOSED（同基座降级独立 pass 完成——RULE-1 时序独立满足，RULE-5 模型异质性未满足，如实降级）"
   }
 ]
 ```

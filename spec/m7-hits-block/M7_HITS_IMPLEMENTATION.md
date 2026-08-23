@@ -3,20 +3,21 @@
 ---
 id: m7-hits-block-IMPLEMENTATION
 type: design
-version: 1.1
-status: in-review
-date: 2026-08-21
+version: 1.2
+status: verified
+date: 2026-08-23
 depends: [m7-hits-block-DESIGN, m7-hits-block-RESEARCH]
 upstream: null
 ---
 
 > **Feature**: m7-hits-block（PROGRESS P-011）
 > **创建日期**: 2026-08-21
-> **状态**: in-review（实施完成 + 自查勾选；独立 pass 待触发）
-> **Spec 步骤**: Step 5-6, 9
+> **状态**: verified（Step 10 终验完成：同基座降级独立 pass（RULE-1 时序独立满足，RULE-5 模型异质性未满足——生成端/审查端均为 DeepSeek V4 Pro，如实降级）+ DR-B/C 专项 fixture 补齐（F15/F16，selftest 14→16 项 40→44 断言）+ 三校验器全绿 + CHECKLIST → accepted）
+> **Spec 步骤**: Step 5-6, 9-10
 > **基于设计**: [M7_HITS_DESIGN.md](./M7_HITS_DESIGN.md) v1.0
-> **审查状态**: `自查（单视角）`（RULE-4）——待独立 pass 或异基座复验
+> **审查状态**: `同基座降级独立 pass`（RULE-1 时序独立满足；RULE-5 模型异质性未满足——生成端/审查端均为 DeepSeek V4 Pro，如实降级，同理样本⑦形态）
 > **v1.1 变更（2026-08-21）**: Step 9 实施完成——实际 LOC 828 回填（§10）+ 派生需求 DR-A/B/C 登记 + 实施期拦截实录（M4 标记格式 P1 + M5 断链 P2×3，入 M7 样本⑮）
+> **v1.2 变更（2026-08-23）**: 独立 pass 落档 + DR-B/C 专项 fixture 补齐（F15/F16，selftest 14→16 项 40→44 断言）+ 实际 LOC 828→845 回填 + audit_status OPEN→CLOSED
 
 ---
 
@@ -145,7 +146,7 @@ def serialize_hits(stats: Stats, pre_ledger: int) -> str:
 
 ```python
 def run_selftest() -> int:
-    """14 fixture（§8.1），tempfile 构造于系统临时目录（I-1 变体：不触工作树），
+    """16 fixture（§8.1），tempfile 构造于系统临时目录（I-1 变体：不触工作树），
     expect 计数自增机械计数（DR-6 同构）。"""
 ```
 
@@ -191,7 +192,7 @@ def run_selftest() -> int:
 
 ## 8. 测试策略
 
-### 8.1 selftest fixture 矩阵（14 项）
+### 8.1 selftest fixture 矩阵（16 项）
 
 | # | 场景 | 断言 |
 |---|------|------|
@@ -209,10 +210,12 @@ def run_selftest() -> int:
 | F12 | --write 写守卫（存在 m7-bucket 违规） | 拒绝写入 + 文件字节不变 |
 | F13 | 确定性 | --write 双跑产物逐字节一致 |
 | F14 | P3 非阻断 | 含非标准发现单元格 → exit 0 + [P3] 行打印 |
+| F15 | 发现列空值（DR-B） | P1（行结构损坏——空值非"非标准 P3"亦非可统计形态） |
+| F16 | §5 节无 hits 围栏（DR-C） | --write 拒绝 exit 1 + 报人工修复提示 + 文件字节不变 |
 
 ### 8.2 集成验证（Step 10，E1 级）
 
-1. `python scripts/m7_stats.py --selftest` → N/N PASS
+1. `python scripts/m7_stats.py --selftest` → 44/44 PASS
 2. 真实 M7 dry-run：verify（块缺失预期 P1）→ `--write --seed-pre-ledger 6` → verify exit 0
 3. `python scripts/dc_validator.py --check-all` → 0 违规（两工具共存回归）
 4. `pre-commit run m7-stats --all-files` → M7 通道通过
@@ -255,18 +258,18 @@ def run_selftest() -> int:
 | 5 | M7 bootstrap：头注/§4 更新 + `--write --seed-pre-ledger 6` | verify exit 0 + §8.2 值核对 |
 | 6 | 全仓回归（dc_validator + 两 hook 双通道） | 0 违规 |
 
-**实际 LOC 记录（DESIGN §10.1-3 核对义务）**: **828 行**（预估 ~300±100——**预估口径失误如实登记**：预估仅计核心校验逻辑（~470 行），selftest 十四 fixture 的迷你账本模板串（MINI/HITS_VALID）与写守卫/确定性等闭环断言（~360 行）未计入预估基数；与 P-008 P3 ③ 同族教训：DESIGN LOC 预估须明确口径（核心 vs 含测试））。
+**实际 LOC 记录（DESIGN §10.1-3 核对义务）**: **845 行**（预估 ~300±100——**预估口径失误如实登记**：预估仅计核心校验逻辑（~470 行），selftest 十六 fixture 的迷你账本模板串（MINI/HITS_VALID）与写守卫/确定性等闭环断言（~360 行）未计入预估基数；与 P-008 P3 ③ 同族教训：DESIGN LOC 预估须明确口径（核心 vs 含测试）。v1.2 独立 pass 补 F15/F16 追加 17 行（828→845）。）。
 
 **实施期派生需求登记（Step 8 规则，DESIGN 未显式声明、实施中自行产生）**：
 
 | 派生需求 | 内容 | 验收 |
 |---------|------|------|
 | DR-A 写后内存自检 | --write 落盘前对新文本全量 re-analyze，任何 P1/P2 即拒绝落盘（exit 2 工具错误语义）——比 DESIGN §3.4 写守卫更强的自洽保证：序列化与重数不一致在落盘前拦截 | 结构审查 + F9 修复闭环（写后 verify 过） |
-| DR-B 发现列空值 P1 | 发现列为空 = 行结构损坏报 P1（DESIGN §4.3 未列举——空值既非"非标准 P3"亦非可统计形态，实施期裁定归行结构类） | 代码路径审查（selftest 未设专项 fixture，登记为已知测试缺口） |
-| DR-C §5 节无围栏守卫 | 文件已有 `## 5.` 节却无 hits 围栏时 --write 拒绝（防追加第二个 §5 节），报 P1 提示人工修复 | 代码路径审查（同上，已知测试缺口） |
+| DR-B 发现列空值 P1 | 发现列为空 = 行结构损坏报 P1（DESIGN §4.3 未列举——空值既非"非标准 P3"亦非可统计形态，实施期裁定归行结构类） | F15 专项 fixture（v1.2 独立 pass 补齐，selftest 44/44） |
+| DR-C §5 节无围栏守卫 | 文件已有 `## 5.` 节却无 hits 围栏时 --write 拒绝（防追加第二个 §5 节），报 P1 提示人工修复 | F16 专项 fixture（v1.2 独立 pass 补齐，selftest 44/44） |
 
 **实施期拦截实录（提交前 dry-run，dc_validator M4/M5）**：① M7_HITS_RESEARCH 初稿 A 标记用 `#### 【A】` 标题式（仓内契约 = 行首【A】，LANGGRAPH 先例）→ M4 重数 0 ≠ 声明 11 报 P1，改行首标记后过——**标记格式即机读契约，格式偏离等同计数不可验**；② 上轮 commit b541705（FWK-FACT-CHECK）遗留 3 条 P2 断链（`file:///` 外链缺档 3 `外部·` 标注 ×2 + `adr/` 相对路径应为 `../adr/` ×1）被本轮 M5 提交前拦截——b541705 当次提交未走 hook 通道（现场裁量/绕过），遗留至本轮捕获。两项均入 M7 样本⑮。
 
 ---
 
-**Review 签字**: _________ 日期: _________（自查（单视角）完成，独立 pass 待 Step 10 / 用户触发）
+**Review 签字**: DeepSeek V4 Pro（同基座降级独立 pass，RULE-1 满足） 日期: 2026-08-23（自查单视角 → 同基座降级独立 pass 闭合；RULE-5 异质性待异基座升级复验）

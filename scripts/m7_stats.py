@@ -15,7 +15,7 @@
   python scripts/m7_stats.py                              # 校验 docs/M7_EVIDENCE_LOG.md
   python scripts/m7_stats.py --write                      # 校验先行，重数值重写 hits 块
   python scripts/m7_stats.py --write --seed-pre-ledger 6  # hits 块缺失时的 bootstrap
-  python scripts/m7_stats.py --selftest                   # 内嵌自测（14 fixture）
+  python scripts/m7_stats.py --selftest                   # 内嵌自测（16 fixture）
   pre-commit：传入 staged 文件名，非 M7 账本目标即 skip
 """
 from __future__ import annotations
@@ -575,7 +575,7 @@ def main(argv=None):
                     help="校验先行，以机械重数值重写 hits 块（写守卫）")
     ap.add_argument("--seed-pre-ledger", type=int, default=None, metavar="N",
                     help="hits 块缺失时 bootstrap 所需历史基线（= 先于账本的分桶小计合计）")
-    ap.add_argument("--selftest", action="store_true", help="内嵌自测（14 fixture）")
+    ap.add_argument("--selftest", action="store_true", help="内嵌自测（16 fixture）")
     ap.add_argument("files", nargs="*",
                     help="目标文件（缺省 = docs/M7_EVIDENCE_LOG.md；pre-commit 传入 staged 列表）")
     args = ap.parse_args(argv)
@@ -670,7 +670,7 @@ HITS_VALID = """```hits
 
 
 def run_selftest():
-    """十四 fixture（IMPLEMENTATION §8.1 F1-F14），tempfile 构造于系统临时目录。"""
+    """十六 fixture（IMPLEMENTATION §8.1 F1-F16），tempfile 构造于系统临时目录。"""
     import contextlib
     import io
     import shutil
@@ -814,6 +814,23 @@ def run_selftest():
             code = main([f14])
         expect(code == 0, "F14 非标准单元格不阻断（exit 0）")
         expect("[P3]" in buf.getvalue(), "F14 [P3] 行打印可见")
+
+        # F15 DR-B 发现列空值 → P1（行结构损坏）
+        f15 = w("f15.md", MINI.replace("| 异构双盲 | 2P2+6P3 |", "| 异构双盲 |  |")
+                + "\n" + HITS_VALID + "\n")
+        res, _, _, _, _ = analyze("f15.md", _read(f15))
+        expect(any(r.severity == "P1" and "发现列为空" in r.message for r in res),
+               "F15 发现列空值报 P1")
+
+        # F16 DR-C §5 节无 hits 围栏 → --write 拒绝（防追加第二个 §5）
+        f16 = w("f16.md", MINI + "\n## 5. 机读统计块（hits）\n\n（围栏块被误删，须人工修复）\n")
+        before16 = open(f16, "rb").read()
+        buf16 = io.StringIO()
+        with contextlib.redirect_stdout(buf16):
+            code16 = main([f16, "--write", "--seed-pre-ledger", "0"])
+        expect(code16 == 1, "F16 §5 无围栏 --write 拒绝 exit 1")
+        expect("存在 §5 节却无 hits 围栏" in buf16.getvalue(), "F16 报人工修复提示")
+        expect(open(f16, "rb").read() == before16, "F16 拒绝写入文件字节不变")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
