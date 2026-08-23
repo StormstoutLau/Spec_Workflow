@@ -31,6 +31,7 @@
 | 21 | 2026-08-22 | CODE_WIKI v1.6.2（本仓，P-014 实施轮 repo_stats verify 首跑活靶批） | 实施轮机械验证（repo_stats 首跑报 10 项 P2，语义甄别 = 7 项真实漂移 + 3 项工具侧误报（2 处 PT-4 负向后顾缺失误命中行号/版本片段 + 1 处 doc_registry label 子串定位误命中叙事行——工具自身缺陷，F20 TDD 先红后绿修复，不入发现账）；非 LLM 审查轮，拦截层 = 工具自身，与样本⑨ 同性质如实标注） | 7 P2（① §9 缺 spec/repo-stats/ 索引行 ②③④ §9 三处版本号停旧值：断言框架 v1.4（实 v1.4.2）/PLAN v1.5（实 v1.6）/LANGGRAPH v1.1（实 v1.2）——样本⑲发现③遗留批 ⑤ §2.1 树缺 repo-stats/ 条目 ⑥ L67/L630「P-001~P-013」停旧值（实 P-014）⑦ L4/L5/L54「双 hook」停旧值（实三 hook）） | 7（版本号×3 + 计数×4——②③④ 版本号即⑲发现③遗留批：四连残留链⑰→⑱→⑲→⑳ 之外的第五环，**发现声明与修正执行的分离在发现条目粒度上复发**（⑳轮只核对⑲发现①②④）；①⑤ 为 spec 流程产生活漂移（repo-stats 目录建于 Step 1 视图未同步）、⑥⑦ 为计数滞后。**工具有效性双向实证：真靶全捕获（漏报 0）+ 误报 3 项不姑息（fixture 化修复）**；规律② 第六层收束——校验器落地批自身产出（v1.7 改写 + stats 块起草）首次被同轮首跑看护，DIS-010「视图同步无触发器」自此有机械触发器） | 本轮 P-014 集成轮 verify 首跑记录（IMPLEMENTATION §10.3 活靶表 + 修正实录） |
 | 22 | 2026-08-22 | PROGRESS P-014 依据列「八度实证」计数词（本仓，P-014 收口批——repo_stats 机械对账边界外位点） | 收口批独立审查 review（GLM-5.3，RULE-1 时序独立满足——新会话与收口轮分离；RULE-5 异质性未满足如实降级标注，同样本⑦「同基座复验降级」形态；[REPO_STATS_AUDIT](../spec/repo-stats/REPO_STATS_AUDIT.md)） | 1 P3（「八度」计数词停旧——P-014 行其余字段均为收口时点值（40 处/66%/㉑ 收口时点），独「八度」停在立项时点；行内已并列「立项时点 33 处/62%」作区分却漏推计数词本身；错误未流入版本历史——P-014 未 commit，提交前拦截） | 1（计数——「N 度实证」计数词无任何 PT 模式锚定，repo_stats verify 四通道全绿零拦截（模式库覆盖枚举性边界），由 review 臂捕获——**repo_stats 落地后首个工具边界外复发数据点，pattern_lib_version 2 候选议程**；DIS-010 九度口径不动——PROGRESS 非视图载体（RE_VIEW_CARRIER 三模式不匹配），视图实证度数与 view_layer_total 40 均不增） | [REPO_STATS_AUDIT](../spec/repo-stats/REPO_STATS_AUDIT.md) §1/§2（入账裁决 A：形态 II 复发 + 轮次分离 + 新机制变体三条件全中，B/C 否决） |
 | 23 | 2026-08-23 | repo_stats.py selftest 文档字符串 + `--help` + REPO_STATS_CHECKLIST §2.4 selftest 项 + REPO_STATS_IMPLEMENTATION Step 4（本仓，P-014 独立 pass 审查对象） | 真异基座独立 pass DeepSeek V4 Pro（生成端 GLM-5.3——RULE-1 时序独立 + RULE-5 模型异质性双满足，同样本⑬ 双满足形态） | 1 P3（fixture 计数漂移——「19 fixture」计数词 4 处停旧：repo_stats.py run_selftest docstring + `--help` + CHECKLIST §2.4（「19 基础 + F20 TDD」）+ IMPLEMENTATION Step 4（「19 fixture 迷你仓」）；机械重数实为 20 核心 fixture（F1-F20）+ F7b/F7c 双变体 + I-1 只读断言 = 23 项——根因 = F20（集成轮 DR-H 修复的 TDD fixture）落地后计数词未回写） | 1（计数——「19 fixture」计数词与机械计数 20 脱节、4 处跨文档复制同步漂移，F20 落地未回写计数词，与样本⑫「计划数与实际数漂移」同族、跨文档复制同步漂移与样本⑲① 同构） | 本轮 P-014 独立 pass（[REPO_STATS_CHECKLIST](../spec/repo-stats/REPO_STATS_CHECKLIST.md) §8.1/§8.2） |
+| 24 | 2026-08-23 | PROMPTFOO_M7_EVAL_RESEARCH v1.0 附录 A/H 标记 + promptfooconfig.yaml + scripts/pf_m7_eval.py v1.0（本仓，P-010 实施轮 review 批） | review 批混合拦截（P1×2 由 dc_validator 全量首跑 55 文件 M4 机械拦截——非 LLM 审查轮，同样本⑨⑫⑮ 工具拦截性质如实标注；P2×3/P3×3 由逐行代码 review 捕获——上轮验收只单文件验了 CHECKLIST，新增 4 文件未逐个过契约致逃逸） | 8（2P1+3P2+3P3——P1：RESEARCH 附录 A 标记 `**A1**` 粗体非行首【A】契约 + H 标记 `**H1**` 非 `[H1]` 方括号契约（M4 重数 0≠声明 5/2）；P2：config 缺异基座臂 provider（DESIGN §4.2 双臂只落一臂）/ promptfoo 未安装兜底未实施（FileNotFoundError 裸抛）/ 顶层 try/except 兜底未实施；P3：env_prefix 死参数 / tempfile 未用 import / record 旗标 --input≠DESIGN §3.1 的 --results） | 0（格式契约违规非形态 II——标记格式与样本⑮ 同族、设计-实施偏差非低语义载荷字段错值，如实 0 登记，不入 §2 分桶，与样本⑭⑮同处置） | [IMPLEMENTATION §10.3 拦截实录](../spec/promptfoo-m7-eval/PROMPTFOO_M7_EVAL_IMPLEMENTATION.md)（v1.1） |
 
 > **追加队列**: ⑬ 已由 P-008 独立 pass 入账（2026-08-20，上行）；⑭ 已裁决入账（2026-08-20 用户确认，上行）——**原候选登记范围低估，如实修正**：撞名实际面 = PROGRESS 7 处裸 H / 2 组硬撞名（H2: LG↔dsh、H5: LG↔SKL）/ 1 处实际缺陷（L54 依赖链断言无指代一致读法）；原登记"未造成实际计数/引证错误"表述被同日调研推翻（该 review 仅做有源可溯检查、未做指代唯一性检查）。**收尾复核再修正（同轮提交前 grep 复验）**：裸 H 全量口径 = 12 处（硬歧义 7 处 + 语境可消歧 5 处——P-012 行 dsh 位 + 裁决节 L43/L44/L52/L63 位），原枚举 7 处系硬歧义口径漏计 5 处；首轮改写覆盖待办表格区后裁决节 4 处限定 + L54 重写执行遗漏，由收尾复验捕获补全——提交前拦截未流入版本历史，如实修正各登记处数字，不入新样本。裁决分流：撞名风险条件 → [DIS-009](../docs/discoveries/README.md)（新裂缝类型——无错误值，不入形态 II 分桶以免稀释统计纯度）+ [ADR-0007](../adr/ADR-0007-unified-document-contract.md) v1.2 跨文档引用限定规则（修复落地）；L54 缺陷 + review 漏检 → 样本⑭（语义级 P3，形态 II 复发 = 0）；⑮ 起后续审查轮次顺延追加。**独立 review 追记（2026-08-21，异步 + 异基座）**：收尾复核"grep 裸 H 清零"仍漏 1 处——L21 P-012 行"以 H2 实测为输入"未限定为 `dsh H2`（与 L18 同句"dsh H2"写法不一致）；根因 = grep 输出长行 `[Omitted long matching line]`，复核未逐行 Read 核实，假阳性清零——机械枚举盲区新实例（与样本⑩"grep -c 自引用 +1"同族）。已补 `dsh` 前缀。
 
@@ -84,7 +85,7 @@
 
 ```hits
 {
-  "samples": 23,
+  "samples": 24,
   "form2_by_field": {
     "version": 7,
     "section": 2,
@@ -98,9 +99,9 @@
   "form2_pre_ledger": 6,
   "form2_from_samples": 56,
   "findings": {
-    "p1": 6,
-    "p2": 32,
-    "p3": 43,
+    "p1": 8,
+    "p2": 35,
+    "p3": 46,
     "unlabeled": 1,
     "cells_nonstandard": 1
   }

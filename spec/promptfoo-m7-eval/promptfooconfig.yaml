@@ -1,0 +1,43 @@
+# P-010 promptfoo 对比臂评测矩阵模板（P-010）
+#
+# 用法（端点就绪后）:
+#   python scripts/pf_m7_eval.py run --config spec/promptfoo-m7-eval/promptfooconfig.yaml \
+#       --endpoint http://192.168.1.11:1234 --model base-model
+#
+# 设计依据: PROMPTFOO_M7_EVAL_DESIGN.md §4（providers 阵列 = 同一报告 × 同基座/异基座对比臂）
+# 端点占位策略: 不硬编码 IP，由 pf_m7_eval.py run 时经 --endpoint/--model 注入（I-1 可移植性）
+
+prompts:
+  - "你对以下节点做复核，给出发现与严重性分级（P1/P2/P3）。报告片段:\n{{body}}"
+
+# 同基座/异基座对比臂由两个 provider + 运行时注入端点构成（DESIGN §4.2 双臂矩阵）。
+# 实际 base_url/apiKey 由 run 注入：--endpoint/--model（同基座臂）+ --endpoint2/--model2（异基座臂）。
+# 双臂须指向不同端点/模型才有对比意义（同端点会得同 provider id）。
+providers:
+  - id: openai-compatible:${endpoint}
+    label: base-model
+    config:
+      apiHost: ${endpoint}
+      apiKey: "${apiKey}"
+      models:
+        - "${model}"
+  - id: openai-compatible:${endpoint2}
+    label: cross-model
+    config:
+      apiHost: ${endpoint2}
+      apiKey: "${apiKey}"
+      models:
+        - "${model2}"
+
+# 声明式测试用例：vars 注入报告片段，assert 机械判定。
+tests:
+  - vars:
+      body: "（placeholder）节点 X 表单二计数 = 42"
+    assert:
+      - type: contains
+        value: "计数"
+  - vars:
+      body: "（placeholder）节点 Y 链接存在"
+    assert:
+      - type: contains
+        value: "存在"

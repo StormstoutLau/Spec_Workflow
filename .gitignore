@@ -1,0 +1,6 @@
+# Python
+__pycache__/
+*.pyc
+
+# promptfoo 沙箱目录（P-010：env 重定向的 SQLite/缓存落点，非版本库资产）
+.promptfoo/
