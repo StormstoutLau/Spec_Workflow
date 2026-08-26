@@ -35,6 +35,7 @@
 | 25 | 2026-08-23 | SEMANTICA_ABSORPTION_RESEARCH v1.0（本仓，Semantica 调研 Step 1-2） | Step 2 Review 机械复验（dc_validator M4 全量首跑拦截——非 LLM 审查轮，拦截层 = 工具自身，同样本⑨⑫⑮ 性质如实标注） | 1 P1（§0 断言统计表 A 类声明 14 实为 15——写作时填计划数 14，正文展开实际 15 条行首【A】后未回写统计表；M4 机械重数当场拦截） | 1（计数——同样本⑫「计划数与实际数漂移」失效模式：手填统计表声明值与机械重数脱节；同为 §0 统计表计数字段复发，与⑩⑫ 构成该载体第三例） | 本文档 §0 计数说明拦截实录（M4 首跑拦截，声明 14 实为 15，已修正为 15） |
 | 26 | 2026-08-23 | SEMANTICA_ABSORPTION_RESEARCH v1.0（本仓，P-015 调研报告 review 深度审计轮——用户指令「深度审计并执行盲区扫描」） | 同基座深度 review（GLM-5.3，RULE-1 时序独立——新会话与撰写轮分离；RULE-5 未满足如实降级标注，同样本⑦ 降级形态；扫描面 = Iron Law 四类盲区 + 证据分级 + 环境维度 + R7 全级别重数） | 10（1P1+3P2+6P3——P1：§0 C 类计数声明 3 实为 4（方向 A/B/C 三条【C】+ 风险一条，声明漏计方向 B）——**【C】不参与 R7 机械对账，M4 无覆盖，review 臂人工重数捕获**；P2：消歧段「Hawksight-AI=semantica-agi 前身组织」实质断言未分级未附源（fork 网络未证两组织直接关系）/ 版本成熟度维度缺失（README doctor 示例 0.6.5，0.x 阶段对结合决策的影响未评估）/ 环境兼容性盲区（三机 Win10/Ubuntu × faiss/torch 依赖，试点第一道门槛未评估——Iron Law 边界条件盲区命中）；P3：B1/B2 basis 编号引用悬空错位（A 类无编号体系却引「A2/A6」/「A5」）/ H2「24 个样本」自指涉停旧（㉕ 入账后=25）/「pattern_lib_version 2 同向」语义拉伸（议程实为模式锚定扩展非语义跃迁）/「125 open issues」字段语义（open_issues_count 含 PR）/ 用户裁决「暂不结合」未回写报告头部 / A 类证据强度未分级+自查验证表深度不足+PyPI 包名归属未查证） | 4（计数×2——①C 类声明 3→4：同⑫㉕ 计划-实际漂移，§0 统计表同载体第四例且**同一份报告两轮各错一次**（㉕ A 类 14→15 + ㉖ C 类 3→4），A 类有 M4 门禁当轮拦截、C 类机械看护边界外由 review 臂捕获——覆盖不对称实证 ②H2 停旧 24→25：同㉓ 落地未回写，且为**自指涉变体**——报告触发的样本㉕ 使报告自身假设陈述漂移；锚点编号×2——③④B1/B2 basis 凭印象填 A 序号（B1「A2/A6」、B2「A5」按位置序推算亦错位）：章节号族新变体——**锚点体系不存在（A 类无编号）+ 序号错位双重失效**，引用字段凭印象可填的又一实证） | [RESEARCH §5.3 review 深度审计实录](../spec/semantica-absorption/SEMANTICA_ABSORPTION_RESEARCH.md)（v1.1，10 项同轮修正） |
 | 27 | 2026-08-26 | SEMANTICA_ABSORPTION_RESEARCH v1.2 §2.5 + FWK-DECISION-RECORD v1.0 §3 + decision-schema DESIGN v1.0（本仓，P-016 B 方案契约批独立 pass 审查对象——用户指令「好的，执行独立 pass」） | 独立 pass（异步独立子代理审计——盲区扫描 + 对齐核验双视角，新会话与实施轮分离；**主臂源码复核双通道交汇**——context_graph.py L4227-4303/L4791-4806/L5007-5031 + decision_query.py L267-330 直读确认；RULE-1 满足，异基座子代理） | 1 P2（「find_similar_decisions 检索消费 reasoning_embedding 余弦」机制归属错位——RESEARCH v1.2 L97 A 类断言称「委托 decision_query.py / EmbeddingGenerator 余弦」：实读源码 find_similar_decisions（L5007）委托 **context_graph.py 自带 find_precedents_by_scenario**（词袋 Jaccard L4796-4802 + 可选图结构 L4291），`reasoning_embedding` 余弦仅存在于 **decision_query.py find_precedents_hybrid 分支**（_find_precedents_enhanced_graph L288-296）——两条检索路径均不消费 confidence（P-016 D2 无损分流裁决不受影响，仅论据表述更正）；连带修正 H3（中文召回核心变量归属——默认路径 Jaccard 对中文近乎失效 / 余弦仅 hybrid 专属）+ B2 basis 分路径化）；2 P3（CHECKLIST §2「每载体逐字段映射」对 ADR/PROGRESS 表过度声明——全字段权威表实为 DESIGN §3，§2.2/§2.3 只列可映射列 / 契约 front-matter `depends` 未含 RESEARCH 而正文引作签名依据——编译为设计选择维持现状） | 1（转述引文——机制归属错位：A 类断言把 decision_query.py 的嵌入检索机制转述到 find_similar_decisions 名下，行号锚点（L5007/L288-330）正确而**语义归属错位**——「精确-looking 源码引用」内容与真实代码路径不符；同㉖ 锚点引用凭印象可填的转述变体，quote 字段第二例、本仓此字段首例） | 本轮 P-016 独立 pass（CHECKLIST §8.2 独立审计追记 + RESEARCH v1.3→v1.4 / 契约 v1.0→v1.1 / DESIGN v1.0→v1.1 版本化修正） |
+| 28 | 2026-08-26 | SPEC_RUNNER_RESEARCH v1.0 附录 C（本仓，P-009 设计批 Step 2——触发驱动转正式执行首个产出） | Step 2 机械复验（dc_validator M4 全量首跑拦截——非 LLM 审查轮，拦截层 = 工具自身，同样本⑨⑫⑮ ㉔ ㉕ 性质如实标注；「新增 spec 文件必须全量首跑」纪律当日执行） | 1 P1（附录 C 假设区 H 标记用 `[LG-H2]`/`[LG-H3]`/`[dsh-H2]` 带前缀连字符形态——M4 的 H 标记契约只认 `[H#]` 方括号形态，重数 0 ≠ 声明 3 当场拦截；同㉔「`**H1**` 非 `[H1]`」标记形态族：引用源文档假设时前缀直嵌入标记体内，忽视本地编号 + 源限定分离的契约形态） | 0（格式契约违规非形态 II——标记格式与样本⑭⑮ ㉔ 同处置，如实 0 登记，不入 §2 分桶；修正 = 本地编号 [H1]/[H2]/[H3] + 源限定移入括号注（ADR-0007 v1.2 限定规则的标记层应用）） | 本文档附录 C 修正实录（M4 首跑拦截，已修正为本地编号 + 源限定形态） |
 
 > **追加队列**: ⑬ 已由 P-008 独立 pass 入账（2026-08-20，上行）；⑭ 已裁决入账（2026-08-20 用户确认，上行）——**原候选登记范围低估，如实修正**：撞名实际面 = PROGRESS 7 处裸 H / 2 组硬撞名（H2: LG↔dsh、H5: LG↔SKL）/ 1 处实际缺陷（L54 依赖链断言无指代一致读法）；原登记"未造成实际计数/引证错误"表述被同日调研推翻（该 review 仅做有源可溯检查、未做指代唯一性检查）。**收尾复核再修正（同轮提交前 grep 复验）**：裸 H 全量口径 = 12 处（硬歧义 7 处 + 语境可消歧 5 处——P-012 行 dsh 位 + 裁决节 L43/L44/L52/L63 位），原枚举 7 处系硬歧义口径漏计 5 处；首轮改写覆盖待办表格区后裁决节 4 处限定 + L54 重写执行遗漏，由收尾复验捕获补全——提交前拦截未流入版本历史，如实修正各登记处数字，不入新样本。裁决分流：撞名风险条件 → [DIS-009](../docs/discoveries/README.md)（新裂缝类型——无错误值，不入形态 II 分桶以免稀释统计纯度）+ [ADR-0007](../adr/ADR-0007-unified-document-contract.md) v1.2 跨文档引用限定规则（修复落地）；L54 缺陷 + review 漏检 → 样本⑭（语义级 P3，形态 II 复发 = 0）；⑮ 起后续审查轮次顺延追加。**独立 review 追记（2026-08-21，异步 + 异基座）**：收尾复核"grep 裸 H 清零"仍漏 1 处——L21 P-012 行"以 H2 实测为输入"未限定为 `dsh H2`（与 L18 同句"dsh H2"写法不一致）；根因 = grep 输出长行 `[Omitted long matching line]`，复核未逐行 Read 核实，假阳性清零——机械枚举盲区新实例（与样本⑩"grep -c 自引用 +1"同族）。已补 `dsh` 前缀。
 
@@ -91,7 +92,7 @@
 
 ```hits
 {
-  "samples": 27,
+  "samples": 28,
   "form2_by_field": {
     "version": 7,
     "section": 4,
@@ -105,7 +106,7 @@
   "form2_pre_ledger": 6,
   "form2_from_samples": 62,
   "findings": {
-    "p1": 10,
+    "p1": 11,
     "p2": 39,
     "p3": 54,
     "unlabeled": 1,
