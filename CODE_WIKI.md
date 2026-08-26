@@ -688,7 +688,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [spec/m7-hits-block/](./spec/m7-hits-block/) | M7 hits 机读块四件套（P-011 done：m7_stats.py + hits 块 + m7-stats hook） |
 | [spec/repo-stats/](./spec/repo-stats/) | 视图层枚举校验器四件套（P-014 done：repo_stats.py + CODE_WIKI §10 stats 块 + repo-stats hook，对账器非再生成器） |
 | [spec/promptfoo-m7-eval/](./spec/promptfoo-m7-eval/) | promptfoo 对比臂评测四件套 + config 模板（P-010 done：pf_m7_eval.py 评测运行器 + 双臂矩阵 + 方案 Z 端点门控，CHECKLIST accepting） |
-| [spec/semantica-absorption/](./spec/semantica-absorption/) | Semantica（semantica-agi）图原生决策溯源框架调研（P-015 done：RESEARCH v1.2，结论 = 暂不结合，先例检索补位候选议程；v1.1 = review 深度审计批 10 项修正；v1.2 = 源码补充核验批——9 条源码直读级 A 类断言，H1/H5 解除） |
+| [spec/semantica-absorption/](./spec/semantica-absorption/) | Semantica（semantica-agi）图原生决策溯源框架调研（P-015 done：RESEARCH v1.3，结论 = 暂不结合，先例检索补位候选议程；v1.1 = review 深度审计批 / v1.2 = 源码补充核验批（9 条源码直读级断言）/ v1.3 = A+B 联合实现分析（契约-实现分层，候选议程完整规格）） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |
