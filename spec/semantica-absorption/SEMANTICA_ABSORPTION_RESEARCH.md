@@ -1,14 +1,14 @@
 ---
 id: semantica-absorption-RESEARCH
 type: design
-version: 1.1
+version: 1.2
 status: in-review
 date: 2026-08-23
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0005]
 upstream: null
 ---
 
-# Semantica（semantica-agi）调研：图原生决策溯源基础设施——与本框架的同构分析与结合可能评估 v1.1 (2026-08-23)
+# Semantica（semantica-agi）调研：图原生决策溯源基础设施——与本框架的同构分析与结合可能评估 v1.2 (2026-08-23)
 
 > **任务来源**: 用户提问"调研一下 gitHub Semantica 项目，分析此项目与本框架的联系，是否有结合可能"
 > **实体消歧**: GitHub 存在多个同名 "Semantica"。用户确认目标 = **semantica-agi/semantica**（"The Open Source Palantir for AI Agents"，2025-06 建仓）。同名异实的另外两个：Hawksight-AI/semantica（语义智能框架——fork 网络仅显示第三方 fork 各自指向两组织，**semantica-agi 与 Hawksight-AI 的组织关系未查证**，v1.1 修正：原文"前身组织"系无源断言）、jean-bovet/Semantica（macOS 本地文档语义搜索 app，与本框架无关）。本调研证据全部指向 semantica-agi/semantica。
@@ -16,17 +16,18 @@ upstream: null
 > **审查状态**: `自查（单视角）` + `同基座深度 review（RULE-1 时序独立，RULE-5 未满足如实降级标注）`——v1.1 review 深度审计轮完成（发现 1P1+3P2+6P3，形态 II=4 处，见 §5.3）；独立 pass 待触发
 > **裁决记录（2026-08-23 用户裁决，先于本轮审计）**: **暂不结合，登记候选**——方向 A（先例检索补位）为候选议程，方向 C 否决；登记于 [PROGRESS P-015](../../docs/PROGRESS.md)。本报告 §4 的"推荐"为裁决前调研结论，以裁决记录为准。
 > **v1.1 变更（review 深度审计轮）**: §0 C 类计数 3→4（方向 B 漏计，机械看护边界外 review 臂捕获）/ 消歧段"前身组织"无源断言降级 / 补版本成熟度 A 类断言（0.6.5）/ H2 样本数 25 自指涉修正 + 新增 H4/H5 环境假设 / B1/B2 basis 锚点修正（编号引用悬空）/ "125 open issues"字段语义修正 / §5.2 技术声明验证表补全 + 证据强度分级
+> **v1.2 变更（源码补充核验轮）**: 用户下载源码至 F:\semantica-main，README 自述级证据升级为**源码直读级**——新增 §2.5（9 条源码核验 A 类断言）；版本修正 0.6.5→**0.6.6**（pyproject.toml 直读，v1.1 的 0.6.5 系 README 示例值，证据升级非形态 II）；**H1 解除**（依赖树声明已核实——重量级：torch/transformers/spacy/faiss-cpu/opencv/librosa 等约 40 包为核心依赖）；**H5 解除**（包名 semantica 声明 + 仓库 URL 自洽）；H4 部分解除（OS Independent 分类器 + 全依赖有 Windows wheel 属声明级，安装实测仍未做）；record_decision 实际签名超 README 展示（valid_from/valid_until bi-temporal）——B1 字段对应加强；find_similar_decisions 机制源码确认（embedding 余弦 + 词法回退）——B2 依据升级；§6 方向 A 试点成本评估上修（依赖树多 GB，建议工作站而非主控站）
 
 ## 0. 断言统计表（必填，审计入口）
 
 | 级别 | 条数 | 说明 |
 |------|------|------|
-| A 事实类 | 16 | 每条附 URL + 可核对来源（GitHub README / GitHub API 为主）；取证日期 2026-08-23；v1.1 增版本断言 1 条 |
+| A 事实类 | 25 | 每条附 URL/源码路径 + 可核对来源；取证日期 2026-08-23；v1.2 增源码直读级 9 条（§2.5） |
 | B 推断类 | 2 | 登记于附录 B |
 | C 判断类 | 4 | §4 结合方向评估 3 条（方向 A/B/C）+ 风险判断 1 条——v1.1 修正：原声明 3 漏计方向 B |
-| 假设区 | 5 | H1-H5，未取证声明 |
+| 假设区 | 5 | H1-H5（v1.2 后：H1/H5 已解除，H4 部分解除，H2/H3 待实测——编号保留） |
 
-> **计数说明（R7 机械重数，两轮拦截/捕获实录）**: A 类 16 条（行首 `【A】` 标记——v1.0 首跑 M4 拦截声明 14 实为 15；v1.1 review 轮补版本断言 1 条后 16）；附录 B 2 条（`"id": "B\d+"` 机读块）；C 类 4 条（`【C】` 标记——**v1.0 声明 3 实为 4，【C】不参与 R7 机械对账，M4 无覆盖，由 v1.1 review 深度审计人工重数捕获**——A 类有 M4 门禁而 C 类裸奔的覆盖不对称实证）；假设区 5 条（`[H\d+]` 列表项——v1.1 新增 H4/H5）。
+> **计数说明（R7 机械重数，两轮拦截/捕获实录）**: A 类 25 条（行首 `【A】` 标记——v1.0 首跑 M4 拦截声明 14 实为 15；v1.1 review 轮补 1 条后 16；v1.2 源码核验轮新增 §2.5 共 9 条后 25）；附录 B 2 条（`"id": "B\d+"` 机读块）；C 类 4 条（`【C】` 标记——**v1.0 声明 3 实为 4，【C】不参与 R7 机械对账，M4 无覆盖，由 v1.1 review 深度审计人工重数捕获**——A 类有 M4 门禁而 C 类裸奔的覆盖不对称实证）；假设区 5 条（`[H\d+]` 列表项）。
 
 ## 1. 实体定位：它是什么，不是什么
 
@@ -42,7 +43,7 @@ upstream: null
 
 【A】活跃度：created_at = 2025-06-25；pushed_at = 2026-08-22（API 快照时点为 2026-08-23，即约一天前仍有推送）——活跃维护中。【来源：https://api.github.com/repos/semantica-agi/semantica 字段 created_at / pushed_at】
 
-【A】版本成熟度（v1.1 补）：README Quick Start 的 `semantica doctor` 示例输出显示 "semantica 0.6.5 pass"——**示例值非 PyPI 实查**，但可推断项目处于 0.x 阶段（接口稳定性无承诺，对照 dsh v0.1 明示 breaking changes 的先例，方向 A 试点须锁定版本）。【来源：https://github.com/semantica-agi/semantica/blob/main/README.md §Quick Start】
+【A】版本成熟度（v1.2 源码修正）：**version = 0.6.6**（pyproject.toml `[project] version` 字段直读——v1.1 的 0.6.5 系 README Quick Start 的 doctor 示例输出值，源码为权威）。项目处于 0.x 阶段（接口稳定性无承诺，对照 dsh v0.1 明示 breaking changes 的先例，方向 A 试点须锁定版本）。【来源：F:\semantica-main\pyproject.toml L7（本地源码副本，2026-08-23 下载）】
 
 【A】核心定位句：README 标题与副标题为 "Graph-Native Infrastructure for Context and Accountable AI Systems"，副标题 "The Open Source Palantir for AI Agents"——公开领域自查合法性：引号内为原文照引，非虚构。【来源：https://github.com/semantica-agi/semantica/blob/main/README.md L31-33】
 
@@ -77,6 +78,28 @@ upstream: null
 【A】Polyglot 存储：原生 RDF（嵌入式 Oxigraph、Blazegraph、Apache Jena、Eclipse RDF4J 经 SPARQL）+ Labeled Property Graph（Neo4j、FalkorDB、Apache AGE、AWS Neptune 经 Cypher）+ 向量库，可切换不碰代码。【来源：https://github.com/semantica-agi/semantica/blob/main/README.md §What Semantica Gives You】
 
 【A】接入面：原生 Agno 与 CrewAI 支持、full-featured MCP server、CLI、REST API；企业数据平台连接器（Databricks Unity Catalog、Snowflake）。【来源：https://github.com/semantica-agi/semantica/blob/main/README.md §What Semantica Gives You / §Enterprise Data Platforms】
+
+### 2.5 源码补充核验（v1.2，2026-08-23——本地源码副本 F:\semantica-main，README 自述级证据升级为源码直读级）
+
+【A】包身份与运行要求：PyPI 包名 `semantica`，requires-python = ">=3.8"，classifier 声明 "Operating System :: OS Independent" 与 "Development Status :: 5 - Production/Stable"；入口点 5 个（semantica / semantica-server / semantica-worker / semantica-explorer / semantica-mcp）；Repository URL 自洽指向 github.com/semantica-agi/semantica——**H5 解除（声明级）**。【来源：F:\semantica-main\pyproject.toml L6/L15/L17-35/L92-98/L260-265】
+
+【A】核心依赖树为**重量级**（H1 解除——比 v1.1 假设更重）：核心 dependencies 约 40 包，含 **torch ≥1.13.1、transformers ≥4.20.0、sentence-transformers ≥2.2.0、spacy ≥3.4.0、faiss-cpu ≥1.7.0、opencv-python、librosa、umap-learn、gensim、scikit-learn、scipy、networkx、rdflib、matplotlib、plotly、pyarrow**——重 ML 栈是**核心依赖而非可选 extra**；pyoxigraph 属可选（extra `tripletstore-oxigraph`），Neo4j/Qdrant/weaviate/pinecone/milvus/pgvector 等存储后端全部为可选 extra。安装体积量级 = 多 GB（torch+transformers+spacy 模型）。附带发现：numpy 约束 ">=2.0.2" 实际不兼容 requires-python ">=3.8"（numpy 2.x 最低 3.9）——打包元数据自不一致（轻微，不影响 3.10+ 环境）。【来源：F:\semantica-main\pyproject.toml L46-90 / L100-257】
+
+【A】ContextGraph 规模与 API 全定位：`semantica/context/context_graph.py` 单文件 **4,781 行**；README 声明的 8 个 API 全部在源码定位——get_neighbors（L936）/ state_at（L3485）/ add_causal_relationship（L3629）/ record_decision（L4078）/ find_similar_decisions（L5007）/ analyze_decision_impact（L5033）/ trace_decision_chain（L5063）/ check_decision_rules（L5087）。semantica/ 包共 **354 个 Python 文件**，模块目录与 README pipeline 声明一一对应（ingest/parse/normalize/split/semantic_extract/conflicts/dedup/kg/context/reasoning/provenance/export/graph_store/triplet_store/vector_store/ontology/pipeline/embeddings/visualization/explorer/mcp）。【来源：F:\semantica-main\semantica\context\context_graph.py 行号直读 + 目录枚举】
+
+【A】record_decision 实际签名**超 README 展示**：`record_decision(category, scenario, reasoning, outcome, confidence, entities=None, decision_maker=None, metadata=None, valid_from=None, valid_until=None, **kwargs)`——README 示例只展示 6 参，实际还有 entities（关联实体）、decision_maker（决策者）、**valid_from/valid_until（bi-temporal 有效期）**；带输入校验（category ≤100 字符 / scenario ≤5000 / reasoning ≤10000 / outcome ≤1000，超限 ValueError）。【来源：F:\semantica-main\semantica\context\context_graph.py L4078-4132】
+
+【A】因果关系类型与别名归一化：add_causal_relationship 接受 CAUSED / INFLUENCED / PRECEDENT_FOR 三型，且做别名归一化（小写 "causes" 等映射到规范大写形式），无效输入 ValueError；两端节点须为 decision 类型节点否则静默跳过。【来源：F:\semantica-main\semantica\context\context_graph.py L3629-3673】
+
+【A】state_at 是真实 bi-temporal 实现：按 `node.is_active(at_time)` 与 `edge.is_active(at_time)` 过滤活跃节点/边后输出快照（含 valid_from/valid_until 字段），非简单日志回放。【来源：F:\semantica-main\semantica\context\context_graph.py L3485-3524】
+
+【A】find_similar_decisions 的语义检索机制确认：委托 `find_precedents_by_scenario`（decision_query.py）——查询侧 EmbeddingGenerator 生成 embedding，与 decision 节点的 `reasoning_embedding` 做**余弦相似度**，embedding 不可用时回退词法/结构评分（含 Node2Vec 结构嵌入通道）——**B2 依据从 README 自述升级为源码确认**。【来源：F:\semantica-main\semantica\context\decision_query.py L288-330 + context_graph.py L5007-5031】
+
+【A】推理引擎文件全在：reasoning/ 目录含 rete_engine.py / datalog_reasoner.py / sparql_reasoner.py / deductive_reasoner.py / abductive_reasoner.py / graph_reasoner.py + explanation_generator.py——README "Rete/Datalog/SPARQL" 声明对应真实模块文件。【来源：F:\semantica-main\semantica\reasoning\ 目录枚举】
+
+【A】安全工程痕迹（补充观察）：conflicts/ 模块独立成体系（detector/resolver/analyzer/investigation_guide/provenance）；仓库含 CodeQL workflow / SSRF 防护测试（test_ssrf_protection.py）/ Cypher 注入测试（test_cypher_injection.py）/ 依赖审计门（pyproject 注明 crewai 因 chromadb CVE-2026-45829 被排除出 `all` extra）——工程成熟度高于典型 0.x 项目。【来源：F:\semantica-main\.github\workflows\ + tests\ + pyproject.toml L249-257】
+
+
 
 ## 3. 综合分析
 
@@ -134,14 +157,16 @@ Semantica 与本框架（Spec_Workflow 方法论文档仓库）在**哲学与机
 | semantica-agi/semantica README（74.5KB） | WebFetch 全文抓取核对（2026-08-23） | ✅ |
 | GitHub API 仓库元数据（license/stars/created_at） | WebFetch https://api.github.com/repos/semantica-agi/semantica 字段直读 | ✅ |
 | 实体消歧（同名项目） | WebSearch 多结果比对（Hawksight-AI / jean-bovet / semantica-agi） | ✅（组织间关系除外——见消歧段 v1.1 修正） |
+| 源码副本 F:\semantica-main（v1.2） | 用户下载；pyproject.toml / context_graph.py / decision_query.py / reasoning\ / 目录结构 Read+Grep 直读核验（2026-08-23） | ✅（9 条 A 类断言，§2.5） |
 
-### 5.2 技术声明验证（v1.1 补——证据强度分级）
+### 5.2 技术声明验证（v1.1 补——证据强度分级；v1.2 增源码直读级）
 
 | 声明组 | 证据等级 | 说明 |
 |--------|---------|------|
-| stars/forks/issues/license/created_at/pushed_at/homepage（API 字段） | **API 元数据级**（最高） | GitHub API 直读，真实性由 API 保证 |
-| §2 能力断言（record_decision 签名/PROV-O/Rete/Datalog/state_at/polyglot/冲突检测） | **README 自述级**（文档存在性已验证，**源码行为未验证**） | README 确实如此声明（可 grep），但项目方营销文档——§4.2 风险条款适用：引入前必须 clone + 实测 |
-| 版本 0.6.5 | **README 示例级**（doctor 输出示例值） | 非 PyPI 实查，非权威版本声明 |
+| §2.5 源码核验 9 条（版本/依赖树/API 行号/签名/机制） | **源码直读级**（最高，v1.2） | 本地源码副本文件与行号直读，可重复核验 |
+| stars/forks/issues/license/created_at/pushed_at/homepage（API 字段） | **API 元数据级**（v1.0） | GitHub API 直读，真实性由 API 保证 |
+| §2 能力断言（record_decision 签名/PROV-O/Rete/Datalog/state_at/polyglot/冲突检测） | **README 自述级 → 核心子集已源码确认**（v1.2） | README 声明已验证存在；其中 ContextGraph 8 API / 推理引擎文件 / 语义检索机制已升源码直读级（§2.5）；其余（PROV-O 导出/polyglot 切换/冲突检测行为）仍为自述级——引入前实测条款仍然适用 |
+| 版本 0.6.6 | **源码直读级**（v1.2；v1.1 时为 README 示例级 0.6.5） | pyproject.toml `[project] version` |
 | 引文照引（"They store embeddings, not meaning" 等四处） | **原文 grep 级** | 抓取文本逐字比对一致 |
 
 ### 5.3 v1.1 review 深度审计实录（盲区扫描）
@@ -167,14 +192,16 @@ Semantica 与本框架（Spec_Workflow 方法论文档仓库）在**哲学与机
 
 - [x] v1.0 遗留：方向 A 试点的假设需 clone + 实测解除（H1-H5，v1.1 扩充）
 - [x] v1.1 review 轮 10 项发现全部同轮修正（本节实录）
+- [x] v1.2 源码补充核验：H1/H5 解除（声明级）、H4 部分解除、版本 0.6.5→0.6.6 修正、B1/B2 依据升级（§2.5 实录）；剩余待实测 = pip install 安装行为（H4 残余）+ 导入适配（H2）+ 召回质量（H3）——均为试点执行时点事项，非文档修正项
 
 ## 6. 对设计的输入
 
 ### 6.1 可用技术方案
 
-- 方案 A1：M7 样本 → Context Graph 节点（category=载体，scenario=发现，outcome=处置，confidence=严重性），决策链 = 样本→分桶→规律锚点边
+- 方案 A1：M7 样本 → Context Graph 节点（category=载体，scenario=发现，outcome=处置，confidence=严重性，metadata=来源，valid_from=样本日期），决策链 = 样本→分桶→规律锚点边（v1.2：bi-temporal 字段可用 valid_from 映射样本日期）
 - 方案 A2：ADR → 决策节点 + PRECEDENT_FOR 边（修订历史链映射）
-- 方案 B1：decision_record 模板吸收 Semantica schema（scenario/reasoning/outcome/confidence + 关系类型枚举）
+- 方案 B1：decision_record 模板吸收 Semantica schema（scenario/reasoning/outcome/confidence + 关系类型枚举 + valid_from/valid_until 时点字段）
+- **成本注（v1.2 源码核验后上修）**：方向 A 试点须先安装多 GB 重依赖栈（torch/transformers/spacy/faiss-cpu 为核心依赖不可裁剪）——建议落工作站 A/B（Ubuntu + 128G 统一内存）而非主控站（Win10 32G 可行但吃紧）；导入用 25 样本 × record_decision 输入校验限制（scenario ≤5000 / reasoning ≤10000 字符）对本仓样本行长度无压力
 
 ### 6.2 关键约束
 
@@ -184,11 +211,11 @@ Semantica 与本框架（Spec_Workflow 方法论文档仓库）在**哲学与机
 
 ### 6.3 风险（假设区）
 
-- [H1] Semantica 实际安装体积与依赖树（faiss/pyoxigraph 等）未核实——需 clone + pip install 实测
+- [H1] ~~Semantica 实际安装体积与依赖树未核实~~ **已解除（v1.2 源码核验，声明级）**：核心依赖约 40 包、重 ML 栈为核心依赖（torch/transformers/spacy/faiss-cpu/opencv/librosa），安装体积量级多 GB——**解除方向为"比假设更重"**，方向 A 试点成本相应上修；剩余未验 = pip install 实际安装行为（与 H4 合并）
 - [H2] Context Graph 导入 25 个样本的适配成本（中文内容 + 自定义字段映射）未实测（v1.1 修正：原"24"系写作时点值，㉕ 入账后停旧——报告触发的样本使自身假设陈述漂移，自指涉时点案例）
-- [H3] 先例检索的召回质量在"方法论裁决语义"（非企业合规语义）上未经验证——领域漂移风险
-- [H4] 环境兼容性（v1.1 review 轮新增，Iron Law 边界盲区）：三机环境（Win10 主控站 + Ubuntu 工作站 A/B）× Semantica 依赖树（faiss/PyTorch/pyoxigraph）——Windows 下 faiss/torch 安装是经典坑，方向 A 试点第一道实际门槛未评估；需 pip install 实测确认可运行平台
-- [H5] PyPI 包名占用（v1.1 新增）：README 称 `pip install semantica`，但 PyPI 上 "semantica" 名称是否指向本项目（而非同名占位/无关包）未查证——试点前须核 PyPI 页面归属
+- [H3] 先例检索的召回质量在"方法论裁决语义"（非企业合规语义）上未经验证——领域漂移风险（v1.2 补：检索机制已源码确认 = reasoning_embedding 余弦——中文 reasoning 字段的 embedding 质量是本假设的核心变量）
+- [H4] 环境兼容性（v1.1 review 轮新增，Iron Law 边界盲区）：**部分解除（v1.2）**——pyproject 声明 OS Independent，且 torch/faiss-cpu/opencv 等核心依赖在 PyPI 均有 Windows wheel（声明级）；剩余未验 = 三机实际 pip install + import 冒烟（Win10 主控站 32G 内存对多 GB 栈可行但吃紧，建议试点落工作站 A/B——Ubuntu + 128G 统一内存）
+- [H5] ~~PyPI 包名占用未查证~~ **已解除（v1.2 源码核验，声明级）**：pyproject `name = "semantica"` + Repository URL 自洽指向 semantica-agi/semantica；剩余未验 = PyPI 实际发布页与声明一致性（低风险，源码仓库即权威）
 
 ## 7. 参考文献
 
@@ -201,8 +228,8 @@ Semantica 与本框架（Spec_Workflow 方法论文档仓库）在**哲学与机
 ## 附录 B：B 推断类登记
 
 ```json
-{"id": "B1", "level": "B", "claim": "Semantica 决策记录 schema 与本框架 ADR/M7 样本行字段结构几乎逐列对应", "basis": "§2.1 决策智能断言（record_decision 签名）与本仓 M7 样本行列结构逐字段比对（category↔载体、scenario↔发现、outcome↔处置、confidence↔严重性）——v1.1 修正：原 basis 引'A2/A6'编号，A 类无编号体系，属悬空锚点", "confidence": "高"}
-{"id": "B2", "level": "B", "claim": "find_similar_decisions 可填补本框架历史先例语义召回空白（当前仅 grep 机械匹配）", "basis": "§2.1 决策智能（find_similar_decisions 语义检索）+ §2.2 Context Graph 遍历能力 + §3.3 空白 1 分析——v1.1 修正：原 basis 引'A5'编号，同属悬空锚点", "confidence": "中"}
+{"id": "B1", "level": "B", "claim": "Semantica 决策记录 schema 与本框架 ADR/M7 样本行字段结构几乎逐列对应（v1.2 加强：bi-temporal 字段亦对应）", "basis": "§2.1 record_decision 签名（v1.2 源码直读级）与本仓 M7 样本行列结构逐字段比对：category↔载体、scenario↔发现、outcome↔处置、confidence↔严重性、metadata↔来源列；**valid_from/valid_until ↔ 本框架 front-matter date + facade_baseline as_of 时点语义**（双向时点化是 schema 级同构，超出 v1.0 预期）", "confidence": "高（源码确认）"}
+{"id": "B2", "level": "B", "claim": "find_similar_decisions 可填补本框架历史先例语义召回空白（当前仅 grep 机械匹配）", "basis": "§2.5 源码确认：find_precedents_by_scenario 用 EmbeddingGenerator 查询 embedding vs decision.reasoning_embedding 余弦相似度 + 词法回退——机制真实存在（v1.0 时为 README 自述级，v1.2 升源码直读级）；剩余不确定 = 中文方法论语义的召回质量（H3）", "confidence": "中高（机制确认，效果待测）"}
 ```
 
 ---
