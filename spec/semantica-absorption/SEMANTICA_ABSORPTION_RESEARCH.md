@@ -1,23 +1,24 @@
 ---
 id: semantica-absorption-RESEARCH
 type: design
-version: 1.3
+version: 1.4
 status: in-review
 date: 2026-08-23
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0005]
 upstream: null
 ---
 
-# Semantica（semantica-agi）调研：图原生决策溯源基础设施——与本框架的同构分析与结合可能评估 v1.3 (2026-08-23)
+# Semantica（semantica-agi）调研：图原生决策溯源基础设施——与本框架的同构分析与结合可能评估 v1.4 (2026-08-23)
 
 > **任务来源**: 用户提问"调研一下 gitHub Semantica 项目，分析此项目与本框架的联系，是否有结合可能"
 > **实体消歧**: GitHub 存在多个同名 "Semantica"。用户确认目标 = **semantica-agi/semantica**（"The Open Source Palantir for AI Agents"，2025-06 建仓）。同名异实的另外两个：Hawksight-AI/semantica（语义智能框架——fork 网络仅显示第三方 fork 各自指向两组织，**semantica-agi 与 Hawksight-AI 的组织关系未查证**，v1.1 修正：原文"前身组织"系无源断言）、jean-bovet/Semantica（macOS 本地文档语义搜索 app，与本框架无关）。本调研证据全部指向 semantica-agi/semantica。
 > **方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch + WebFetch 双通道取证（2026-08-23）。主证据源 = 仓库 README（74.5KB，已全文抓取核实）+ GitHub API 元数据。
-> **审查状态**: `自查（单视角）` + `同基座深度 review（RULE-1 时序独立，RULE-5 未满足如实降级标注）`——v1.1 review 深度审计轮完成（发现 1P1+3P2+6P3，形态 II=4 处，见 §5.3）；独立 pass 待触发
+> **审查状态**: `自查（单视角）` + `同基座深度 review（RULE-1 时序独立，RULE-5 未满足如实降级标注）`——v1.1 review 深度审计轮完成（发现 1P1+3P2+6P3，形态 II=4 处，见 §5.3）；**独立 pass 已完成（2026-08-26，异步独立子代理审计 + 主臂源码复核双通道——发现 1P2，形态 II=1 处，M7 样本㉗ 入账）**
 > **裁决记录（2026-08-23 用户裁决，先于本轮审计）**: **暂不结合，登记候选**——方向 A（先例检索补位）为候选议程，方向 C 否决；登记于 [PROGRESS P-015](../../docs/PROGRESS.md)。本报告 §4 的"推荐"为裁决前调研结论，以裁决记录为准。**B 层激活（2026-08-23，用户指令「按照 spec 工作流 启动 B 方案」）**：裁决推进为「**分层结合**」（v1.3 §4.3 路径）——B 契约层落地 = [FWK-DECISION-RECORD](../../docs/DECISION_RECORD_CONTRACT.md)（P-016，八字段 + 三载体映射 + I-1~I-4，severity 无损分流否决本报告 §4.3 有损编码 sketch）；A 试点层维持触发驱动（工作站落点 + H2/H3/H4 待实测）。
 > **v1.1 变更（review 深度审计轮）**: §0 C 类计数 3→4（方向 B 漏计，机械看护边界外 review 臂捕获）/ 消歧段"前身组织"无源断言降级 / 补版本成熟度 A 类断言（0.6.5）/ H2 样本数 25 自指涉修正 + 新增 H4/H5 环境假设 / B1/B2 basis 锚点修正（编号引用悬空）/ "125 open issues"字段语义修正 / §5.2 技术声明验证表补全 + 证据强度分级
 > **v1.2 变更（源码补充核验轮）**: 用户下载源码至 F:\semantica-main，README 自述级证据升级为**源码直读级**——新增 §2.5（9 条源码核验 A 类断言）；版本修正 0.6.5→**0.6.6**（pyproject.toml 直读，v1.1 的 0.6.5 系 README 示例值，证据升级非形态 II）；**H1 解除**（依赖树声明已核实——重量级：torch/transformers/spacy/faiss-cpu/opencv/librosa 等约 40 包为核心依赖）；**H5 解除**（包名 semantica 声明 + 仓库 URL 自洽）；H4 部分解除（OS Independent 分类器 + 全依赖有 Windows wheel 属声明级，安装实测仍未做）；record_decision 实际签名超 README 展示（valid_from/valid_until bi-temporal）——B1 字段对应加强；find_similar_decisions 机制源码确认（embedding 余弦 + 词法回退）——B2 依据升级；§6 方向 A 试点成本评估上修（依赖树多 GB，建议工作站而非主控站）
 > **v1.3 变更（A+B 联合实现补充分析轮）**: 用户提问「方向 A B 是否可以都实现」——新增 §4.3：结论**可以且互补**（契约-实现分层：B 的 schema 吸收产物即 A 的导入字段映射契约，A 试点反测 B 映射质量）；字段映射质量预检表（ADR 映射干净 / M7「发现」列拆分非平凡 / severity→confidence 有损编码须显式契约）；B 先行（半天零环境成本）→ A 后行（工作站 1-2 天）时序；不改变现行「暂不结合」裁决——联合方案作为候选议程完整规格登记
+> **v1.4 变更（独立 pass 修正轮）**: P-016 独立 pass（异步独立子代理审计 + 主臂源码复核）捕获 §2.5 一处 A 类断言**机制归属错位**——L97「find_similar_decisions ... 委托 decision_query.py / EmbeddingGenerator 余弦」不实：实际委托 **context_graph.py 自带 find_precedents_by_scenario**（词袋 Jaccard，L4796-4802），`reasoning_embedding` 余弦仅存在于 **decision_query.py find_precedents_hybrid 分支**（_find_precedents_enhanced_graph，L288-296）——修正为分路径准确表述；连带修正 H3（v1.2 补注的核心变量归属）与 B2 basis；**核心结论「检索不消费 confidence」两路径均成立（P-016 D2 无损分流裁决不受影响）**；独立 pass 触发 = 用户指令「好的，执行独立 pass」（2026-08-26）
 
 ## 0. 断言统计表（必填，审计入口）
 
@@ -94,7 +95,7 @@ upstream: null
 
 【A】state_at 是真实 bi-temporal 实现：按 `node.is_active(at_time)` 与 `edge.is_active(at_time)` 过滤活跃节点/边后输出快照（含 valid_from/valid_until 字段），非简单日志回放。【来源：F:\semantica-main\semantica\context\context_graph.py L3485-3524】
 
-【A】find_similar_decisions 的语义检索机制确认：委托 `find_precedents_by_scenario`（decision_query.py）——查询侧 EmbeddingGenerator 生成 embedding，与 decision 节点的 `reasoning_embedding` 做**余弦相似度**，embedding 不可用时回退词法/结构评分（含 Node2Vec 结构嵌入通道）——**B2 依据从 README 自述升级为源码确认**。【来源：F:\semantica-main\semantica\context\decision_query.py L288-330 + context_graph.py L5007-5031】
+【A】find_similar_decisions 的检索机制核正（v1.4 独立 pass 修正——原 v1.2 断言「委托 decision_query.py / EmbeddingGenerator 余弦」系机制归属错位）：`find_similar_decisions`（L5007-5031）实际委托 **context_graph.py 自带 `find_precedents_by_scenario`**（L4227-4303）——相似度 = **词袋 Jaccard**（`_calculate_decision_content_similarity`，L4791-4806：scenario/reasoning/entities 词集交并）+ 可选图结构相似度（advanced_analytics 时 0.7×content + 0.3×structural，L4291）；**`reasoning_embedding` 余弦仅存在于 `decision_query.py` 的 `find_precedents_hybrid` 分支**（`_find_precedents_enhanced_graph`，L288-296：EmbeddingGenerator 查询 embedding vs reasoning_embedding 余弦 + Node2Vec 结构通道；`_find_precedents_basic` L327-328 亦生成查询 embedding）——**B2 机制确认维持，但归属修正：默认检索路径 = 词袋 Jaccard（不消费 embedding），余弦为 hybrid 增强分支专属；两条路径均不消费 confidence（P-016 D2 论据不受影响）**。【来源：F:\semantica-main\semantica\context\context_graph.py L4227-4303/L4791-4806/L5007-5031 + F:\semantica-main\semantica\context\decision_query.py L267-330】
 
 【A】推理引擎文件全在：reasoning/ 目录含 rete_engine.py / datalog_reasoner.py / sparql_reasoner.py / deductive_reasoner.py / abductive_reasoner.py / graph_reasoner.py + explanation_generator.py——README "Rete/Datalog/SPARQL" 声明对应真实模块文件。【来源：F:\semantica-main\semantica\reasoning\ 目录枚举】
 
@@ -248,7 +249,7 @@ Semantica 与本框架（Spec_Workflow 方法论文档仓库）在**哲学与机
 
 - [H1] ~~Semantica 实际安装体积与依赖树未核实~~ **已解除（v1.2 源码核验，声明级）**：核心依赖约 40 包、重 ML 栈为核心依赖（torch/transformers/spacy/faiss-cpu/opencv/librosa），安装体积量级多 GB——**解除方向为"比假设更重"**，方向 A 试点成本相应上修；剩余未验 = pip install 实际安装行为（与 H4 合并）
 - [H2] Context Graph 导入 25 个样本的适配成本（中文内容 + 自定义字段映射）未实测（v1.1 修正：原"24"系写作时点值，㉕ 入账后停旧——报告触发的样本使自身假设陈述漂移，自指涉时点案例）
-- [H3] 先例检索的召回质量在"方法论裁决语义"（非企业合规语义）上未经验证——领域漂移风险（v1.2 补：检索机制已源码确认 = reasoning_embedding 余弦——中文 reasoning 字段的 embedding 质量是本假设的核心变量）
+- [H3] 先例检索的召回质量在"方法论裁决语义"（非企业合规语义）上未经验证——领域漂移风险（v1.2 补 + v1.4 归属修正：透明展示两路径——默认路径 find_similar_decisions = 词袋 Jaccard（对本仓**中文** content 近乎失效——Jaccard 按空格分词，中文无空格切分，词集退化）；语义路径 embedding 余弦仅存在于 decision_query.py find_precedents_hybrid 增强分支（L288-296，EmbeddingGenerator 对中文 embedding 的质量才是本假设的核心变量）。**方向 A 试点必须显式选择检索 API（默认 vs hybrid）并实测中文召回**）
 - [H4] 环境兼容性（v1.1 review 轮新增，Iron Law 边界盲区）：**部分解除（v1.2）**——pyproject 声明 OS Independent，且 torch/faiss-cpu/opencv 等核心依赖在 PyPI 均有 Windows wheel（声明级）；剩余未验 = 三机实际 pip install + import 冒烟（Win10 主控站 32G 内存对多 GB 栈可行但吃紧，建议试点落工作站 A/B——Ubuntu + 128G 统一内存）
 - [H5] ~~PyPI 包名占用未查证~~ **已解除（v1.2 源码核验，声明级）**：pyproject `name = "semantica"` + Repository URL 自洽指向 semantica-agi/semantica；剩余未验 = PyPI 实际发布页与声明一致性（低风险，源码仓库即权威）
 
@@ -264,9 +265,9 @@ Semantica 与本框架（Spec_Workflow 方法论文档仓库）在**哲学与机
 
 ```json
 {"id": "B1", "level": "B", "claim": "Semantica 决策记录 schema 与本框架 ADR/M7 样本行字段结构几乎逐列对应（v1.2 加强：bi-temporal 字段亦对应）", "basis": "§2.1 record_decision 签名（v1.2 源码直读级）与本仓 M7 样本行列结构逐字段比对：category↔载体、scenario↔发现、outcome↔处置、confidence↔严重性、metadata↔来源列；**valid_from/valid_until ↔ 本框架 front-matter date + facade_baseline as_of 时点语义**（双向时点化是 schema 级同构，超出 v1.0 预期）", "confidence": "高（源码确认）"}
-{"id": "B2", "level": "B", "claim": "find_similar_decisions 可填补本框架历史先例语义召回空白（当前仅 grep 机械匹配）", "basis": "§2.5 源码确认：find_precedents_by_scenario 用 EmbeddingGenerator 查询 embedding vs decision.reasoning_embedding 余弦相似度 + 词法回退——机制真实存在（v1.0 时为 README 自述级，v1.2 升源码直读级）；剩余不确定 = 中文方法论语义的召回质量（H3）", "confidence": "中高（机制确认，效果待测）"}
+{"id": "B2", "level": "B", "claim": "find_similar_decisions 可填补本框架历史先例语义召回空白（当前仅 grep 机械匹配）", "basis": "§2.5 源码确认（v1.4 机制归属修正）：语义先例检索两路径真实存在——默认 find_similar_decisions → context_graph.py find_precedents_by_scenario 词袋 Jaccard（+可选图结构分）；语义增强路径 = decision_query.py find_precedents_hybrid（reasoning_embedding 余弦，L288-296）——机制存在性不因路径归属修正动摇（v1.0 时为 README 自述级，v1.2 升源码直读级）；剩余不确定 = 中文方法论语义的召回质量（H3）——方向 A 试点须显式选择检索 API", "confidence": "中高（机制确认，效果待测）"}
 ```
 
 ---
 
-**Review 签字**: _________ 日期: _________（自查（单视角）完成，独立 pass 待触发）
+**Review 签字**: _________ 日期: _________（自查完成 + v1.1 深度 review 完成 + **独立 pass 完成（2026-08-26，P-016，M7 样本㉗）**）

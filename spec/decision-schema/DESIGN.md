@@ -3,18 +3,19 @@
 ---
 id: decision-schema-DESIGN
 type: design
-version: 1.0
+version: 1.1
 status: in-review
 date: 2026-08-23
 depends: [semantica-absorption-RESEARCH, ADR-0007, FWK-ASSERTION]
 upstream: null
 ---
 
-> **Feature**: decision-schema（PROGRESS P-016，依据 [SEMANTICA_ABSORPTION_RESEARCH](../semantica-absorption/SEMANTICA_ABSORPTION_RESEARCH.md) v1.3 §4.3 B 先行时序）
+> **Feature**: decision-schema（PROGRESS P-016，依据 [SEMANTICA_ABSORPTION_RESEARCH](../semantica-absorption/SEMANTICA_ABSORPTION_RESEARCH.md) v1.4 §4.3 B 先行时序）
 > **创建日期**: 2026-08-23
-> **状态**: in-review（自查完成 + 机械校验全绿；独立 pass 待触发，同 P-014/P-010 收口先例）
+> **状态**: in-review（自查完成 + 机械校验全绿 + **独立 pass 完成（2026-08-26，v1.1 修正 D2 依据表述，M7 样本㉗）**）
 > **Spec 步骤**: Step 3-4（设计）+ Step 9-10（执行与收口，见 §7 实施规格）
-> **调研依据**: SEMANTICA_ABSORPTION_RESEARCH v1.3——§2.5 源码直读级签名（record_decision 十参 + bi-temporal）+ §4.3 联合实现分析（B 是 A 的数据契约层）
+> **调研依据**: SEMANTICA_ABSORPTION_RESEARCH v1.4——§2.5 源码直读级签名（record_decision 十参 + bi-temporal）+ §4.3 联合实现分析（B 是 A 的数据契约层）
+> **v1.1 变更（独立 pass 修正轮，2026-08-26）**: D2 依据二表述改准——原「find_similar_decisions 检索消费 reasoning_embedding 余弦」系机制归属错位（v1.2 断言），更正为分路径表述（默认 = 词袋 Jaccard + 图结构；余弦仅属 decision_query.py hybrid 分支）。D2 裁决不变，仅论据更正
 
 ---
 
@@ -42,7 +43,7 @@ upstream: null
 v1.3 曾提出「severity→confidence 编码（如 P1=0.9/P2=0.5/P3=0.3）须显式契约」。本设计**否决有损编码本身**，改无损分流：
 
 - **依据一（语义）**：Semantica `confidence` 语义 = 决策者对决策的置信度；本框架 P1/P2/P3 = 发现严重性。两者不同轴——编码即语义污染（高严重性发现 ≠ 高置信度决策）
-- **依据二（源码，§2.5）**：find_similar_decisions 的检索相似度消费的是 `reasoning_embedding` 余弦，**不消费 confidence**——有损编码对检索质量零贡献，纯损失
+- **依据二（源码，§2.5）**：检索相似度各路径均不消费 confidence——默认检索（find_similar_decisions → context_graph.py find_precedents_by_scenario）= 词袋 Jaccard + 图结构分；语义增强路径（decision_query.py find_precedents_hybrid）= reasoning_embedding 余弦（v1.1 修正：原「find_similar_decisions 消费 reasoning_embedding 余弦」系机制归属错位，见 RESEARCH v1.4)）——有损编码对检索质量零贡献，纯损失
 - **裁决**：`severity` 以字符串原值入 `metadata`（"P1"/"P2"/"P3"——无损可逆）；`confidence` 登记固定占位值 0.9 + 契约注记（「已裁决」标记位语义，非质量度量——本框架无决策置信度数据源，不虚构）
 
 ### D3. 小流程裁剪：DESIGN + CHECKLIST 两件套（RESEARCH/IMPLEMENTATION 裁剪）
@@ -113,4 +114,4 @@ v1.3 sketch 曾把「载体→category」。源码语义核正：Semantica `enti
 
 ---
 
-**Review 签字**: _________ 日期: _________（自查（单视角）完成；独立 pass 待触发）
+**Review 签字**: _________ 日期: _________（自查（单视角）完成；**独立 pass 完成（2026-08-26，v1.1）**）

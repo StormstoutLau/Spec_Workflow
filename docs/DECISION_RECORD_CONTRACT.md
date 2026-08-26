@@ -3,14 +3,14 @@
 ---
 id: FWK-DECISION-RECORD
 type: framework
-version: 1.0
+version: 1.1
 status: active
 date: 2026-08-23
 depends: [FWK-ASSERTION, ADR-0007]
 upstream: null
 ---
 
-> **版本**: v1.0 (2026-08-23; P-016 B 方案契约批——吸收自 [Semantica](https://github.com/semantica-agi/semantica)（semantica-agi，MIT）决策记录 schema，签名依据 = [SEMANTICA_ABSORPTION_RESEARCH §2.5 源码直读级核验](../spec/semantica-absorption/SEMANTICA_ABSORPTION_RESEARCH.md)（semantica 0.6.6，context_graph.py L4078）)
+> **版本**: v1.1 (2026-08-26; 独立 pass 修正——§3 D2 论据表述修正:检索机制路径从「find_similar_decisions 余弦」改准为「分路径」;P-016 独立 pass 捕获 M7 样本㉗)
 > **来源**: 外部框架 schema 吸收，经裁决以独立契约文档形态落地（[ADR-0007](../adr/ADR-0007-unified-document-contract.md) DC4 命名空间登记、front-matter 七字段）
 > **定位**: 本仓决策记录的**结构化字段视角契约**——双用途：① 当下为 ADR / M7 样本行 / PROGRESS 裁决提供规范化字段自查视角；② 方向 A（Context Graph 导入）触发时的**唯一字段映射权威**
 > **设计裁决**: 落点 / severity 无损分流 / category-entities 分工等关键决策见 [decision-schema DESIGN](../spec/decision-schema/DESIGN.md)（D1-D4）
@@ -98,7 +98,7 @@ upstream: null
 
 ## 3. 关键裁决注记（继承 DESIGN D1-D4）
 
-- **severity 无损分流（D2）**：P1/P2/P3 以字符串原值入 `metadata.severity`，**禁止浮点编码**——Semantica confidence 语义 = 决策置信度 ≠ 发现严重性；且 find_similar_decisions 检索消费 reasoning_embedding 余弦，不消费 confidence（有损编码对检索零贡献）。`confidence` 本仓固定 0.9 占位（「已裁决」标记位语义，非质量度量——本框架无决策置信度数据源，不虚构）
+- **severity 无损分流（D2）**：P1/P2/P3 以字符串原值入 `metadata.severity`，**禁止浮点编码**——Semantica confidence 语义 = 决策置信度 ≠ 发现严重性；且**检索相似度各路径均不消费 confidence**：默认检索（find_similar_decisions → context_graph.py find_precedents_by_scenario）为词袋 Jaccard + 图结构分，语义增强路径（decision_query.py find_precedents_hybrid）为 reasoning_embedding 余弦——两路径均与 confidence 无关（有损编码对检索零贡献）。`confidence` 本仓固定 0.9 占位（「已裁决」标记位语义，非质量度量——本框架无决策置信度数据源，不虚构）
 - **category-entities 分工（D4）**：category = 记录类型枚举（m7_sample/adr/progress_ruling），载体入 entities——源码语义：entities 即 Related entities
 - **M7「发现」列拆分（非平凡）**：导入时发现列须拆为 scenario（严重性概要）/ reasoning（归因）/ metadata.severity（无损）三路，非整列直拷——方向 A 试点分 ADR 先行（映射干净）/ M7 后行（拆分解析）两批
 
@@ -114,3 +114,4 @@ upstream: null
 | 日期 | 版本 | 变更 |
 |------|------|------|
 | 2026-08-23 | v1.0 | 初版——schema 八字段 + 三载体映射表 + 关系类型 + I-1~I-4（P-016 B 方案契约批；依据 Semantica 0.6.6 源码签名核验） |
+| 2026-08-26 | v1.1 | 独立 pass 修正（M7 样本㉗）——§3 D2 论据表述改准：原「find_similar_decisions 检索消费 reasoning_embedding 余弦」改为分路径准确表述（默认 = 词袋 Jaccard + 图结构，语义增强 = hybrid 余弦；两路径均不消费 confidence）。D2 裁决本身不变，仅论据更正（I-3 版本化） |
