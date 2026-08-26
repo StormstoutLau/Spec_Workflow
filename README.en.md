@@ -40,7 +40,7 @@ A system of distrust. Five layers, each answered by a mechanism:
 
 <img src="docs/assets/readme/evidence.svg" alt="M7 self-verification data" width="840">
 
-The workflow measures itself. Every review or audit round appends a sample to [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md). As of 2026-08-23: samples ①–㉔ span both LLM review arms (same-base self-review / heterogeneous double-blind / true heterogeneous independent pass) and mechanical interception arms (pre-commit / dry-run recounts), with 62 logged recurrences of Pattern II and four induced recurrence laws — the fourth, *"a correction to an audit can itself contain a counting error,"* was caught by an independent heterogeneous re-run of the grep probes, directly confirming the empirical basis of RULE-5. The figures here are point-in-time snapshots; the M7 ledger is the source of truth.
+The workflow measures itself. Every review or audit round appends a sample to [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md). As of 2026-08-23: samples ①–㉕ span both LLM review arms (same-base self-review / heterogeneous double-blind / true heterogeneous independent pass) and mechanical interception arms (pre-commit / dry-run recounts), with 63 logged recurrences of Pattern II and four induced recurrence laws — the fourth, *"a correction to an audit can itself contain a counting error,"* was caught by an independent heterogeneous re-run of the grep probes, directly confirming the empirical basis of RULE-5. The figures here are point-in-time snapshots; the M7 ledger is the source of truth.
 
 ## Repository Layout
 

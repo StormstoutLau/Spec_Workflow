@@ -9,13 +9,13 @@
   <!-- Three big numbers -->
   <g font-family="Georgia, 'Times New Roman', serif">
     <rect x="60" y="170" width="340" height="220" rx="8" fill="#FFFFFF" stroke="#DBD8CC"/>
-    <text x="84" y="268" font-size="88" fill="#141413">24</text>
+    <text x="84" y="268" font-size="88" fill="#141413">25</text>
     <text x="84" y="304" font-size="16" fill="#141413">个审查样本</text>
     <text x="84" y="330" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#55544F">LLM 审查臂：自查 / 双盲 / 异基座独立 pass</text>
     <text x="84" y="350" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#55544F">机械拦截臂：pre-commit / dry-run 重数</text>
 
     <rect x="430" y="170" width="340" height="220" rx="8" fill="#FFFFFF" stroke="#D97757" stroke-width="1.5"/>
-    <text x="454" y="268" font-size="88" fill="#D97757">62</text>
+    <text x="454" y="268" font-size="88" fill="#D97757">63</text>
     <text x="454" y="304" font-size="16" fill="#141413">处形态 II 复发</text>
     <text x="454" y="330" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#55544F">弱记忆填充：版本号 / 章节号 / 行号 / 计数</text>
     <text x="454" y="350" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#55544F">「看起来精确、凭印象可填」的字段</text>
