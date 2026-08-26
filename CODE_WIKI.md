@@ -1,7 +1,7 @@
 # Spec_Workflow Code Wiki
 
-> **Wiki 版本**: v1.9.1（2026-08-23 P-015 review 深度审计批：SEMANTICA_ABSORPTION_RESEARCH v1.0→v1.1——同基座深度 review（RULE-1 时序独立，RULE-5 降级标注）+ 盲区扫描（Iron Law 四类 + 证据分级 + 环境维度）捕获 1P1+3P2+6P3：P1 = §0 C 类计数声明 3 实为 4（【C】不参与 R7 机械看护边界外，review 臂重数捕获——与㉕ A 类 14→15 构成**同一报告两轮各错一次**，A 类有 M4 门禁/C 类裸奔的覆盖不对称实证）；P2 = 消歧段"Hawksight-AI 前身"无源断言降级 + 版本成熟度缺失（补 0.6.5 断言）+ Win10×faiss 环境门槛盲区（H4）；形态 II=4（计数×2 + B 类 basis 锚点编号×2——章节号族新变体：A 类无编号体系却引"A2/A6"）→ 样本㉖ 入账（form2_total 63→67 / samples 25→26）；v1.9（2026-08-23 P-015 semantica-absorption 调研收束批：Semantica（semantica-agi）图原生决策溯源基础设施调研——15A+2B+3C+3H，结论「暂不结合，先例检索补位为候选议程」（方向 A 价值最高：M7/ADR 决策导入 Context Graph 获 find_similar_decisions 式语义先例召回，稀侵入不违零依赖不变式；方向 C 位置冲突否决）；dc_validator M4 全量首跑拦截 §0 声明计数（A=14 实为 15）→ 样本㉕ 入账（形态 II=1 计数入分桶，form2_total 62→63 / samples 24→25）；v1.8（2026-08-23 P-010 promptfoo M7 对比臂声明式评测落地批：`scripts/pf_m7_eval.py`（第四可执行件，run/record/selftest 三子命令，275 行 selftest 13/13——**非 hook**，评测运行器与三校验器分工不同）+ `spec/promptfoo-m7-eval/`（第 11 个 feature 目录，四件套 + promptfooconfig.yaml 双臂矩阵模板）+ 方案 Z 端点门控（三机 LM Studio 实测不可达——不可达即 exit 1 不调 promptfoo，首轮评测 + LG H5 实测端点就绪触发）+ Review 轮 P1×2/P2×3/P3×3 修复实录 → M7 样本㉔ 入账（形态 II=0 同⑮ 处置，samples 23→24 / form2_total 62 不变）+ CHECKLIST v1.1 accepting（35/35 有条件通过，独立 pass 待触发）+ PROGRESS P-010 done（主动队列清空）+ DEV-LOG-007 + 门面快照同步；v1.7.4（2026-08-23 m7-hits-block 独立 pass 批：同基座降级审查（DeepSeek V4 Pro，RULE-1 时序独立满足，RULE-5 模型异质性降级标注——生成端/审查端同基座）+ DR-B/C 专项 fixture 补齐（F15/F16，selftest 14→16 项 40→44 断言）+ `scripts/m7_stats.py` LOC 828→845 回填 + 四件套落档（IMPLEMENTATION → verified / CHECKLIST → accepted / RESEARCH audit_status CLOSED）；v1.7.3（2026-08-23 ㉓ 入账批：P-014 真异基座独立 pass（DeepSeek V4 Pro，RULE-1+RULE-5 双满足）捕获 repo_stats 自身文档 fixture 计数词漂移——「19 fixture」4 处停旧（F20 TDD fixture 落地未回写计数词）→ 样本㉓ 入账（form2_total 61→62 / view_layer_pct 65%→64%）+ 四件套落档 accepted/verified + 门面快照同步；v1.7.2（2026-08-22 ㉒ 入账批：P-014 收口批独立 review 捕获 PROGRESS 依据列「八度」计数词停旧——repo_stats 边界外首个 post-toolization 复发（review 臂捕获，pattern_lib_version 2 候选议程，[REPO_STATS_AUDIT](spec/repo-stats/REPO_STATS_AUDIT.md)）→ M7 样本㉒ 入账（form2_total 60→61 / view_layer_pct 66%→65%）+ ㉒ 轮 verify 首跑 9 活靶全修正 + 门面快照同步；v1.7.1 于 2026-08-22 P-014 收口：CHECKLIST v1.1 accepting（有条件通过，独立 pass 待触发）+ PROGRESS P-014 done + DEV-LOG-006 + M7 样本㉑（首跑 7 真靶全捕获）+ DIS-010 toolized；v1.7 于 2026-08-22 P-014 落地：视图层机械枚举校验器 `scripts/repo_stats.py`（第三可执行件，**对账器非再生成器**——只报偏差永不代改）+ §10 stats 机读声明块（模式库 21 条数据驱动 / 载体两级 living-facade / 门面快照基准）+ pre-commit hook repo-stats 入册——「声明 = 机械重数」从 M7 账本外推到视图层，[DIS-010](docs/discoveries/README.md) 处置落地；v1.6.2 于 2026-08-22 终值修正：⑳轮捕获⑲轮「修完即绿」8 处实际未写入——修完即绿由模式扫描对账确认；v1.6.1 于 2026-08-22 修正轮：三轮共 22 项漂移修正（样本⑲——**修正轮是「视图的修正视图」**）；v1.6 于 2026-08-21 P-011 落地：M7 §5 hits 机读块 + `scripts/m7_stats.py`（第二可执行件）+ hook m7-stats。当前态：M7 样本①-㉖（形态 II 67 处——样本⑭⑮㉔ 非形态 II）、spec/ 十二 feature 目录（semantica-absorption 新增）、四可执行件三 hook；前版见 git 历史）
-> **覆盖对象**: 本仓库全部文档与工具（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007 v1.3 + DIS-007~010、断言证据框架 v1.4.2 + 事实核查框架 v1.0、5 个模板（四件套 + ADR）、M7 证据账本（含 §5 hits 机读块）、discoveries 索引、PROGRESS、dev-log ×7、spec/ 十二 feature 目录、`scripts/dc_validator.py` + `scripts/m7_stats.py` + `scripts/repo_stats.py` + `scripts/pf_m7_eval.py` + `.pre-commit-config.yaml` 三 hook）
+> **Wiki 版本**: v1.10（2026-08-23 P-016 决策记录 schema 吸收（B 方案契约批）：**`docs/DECISION_RECORD_CONTRACT.md`（FWK-DECISION-RECORD v1.0）落地**——Semantica（semantica-agi，MIT）决策 schema 吸收为独立契约（ADR-0007 附录 A 入册，v1.3→v1.4）：八字段（锚定源码级 record_decision 签名 + bi-temporal）+ 三载体映射（M7/ADR/PROGRESS）+ 关系类型（CAUSED/INFLUENCED/PRECEDENT_FOR）+ I-1~I-4 不变式；**D2 severity 无损分流否决有损编码**（confidence=决策置信度≠严重性 + 检索不消费 confidence）；双用途 = 决策记录结构化自查视角（即刻）+ 方向 A 导入唯一映射权威（触发时）；spec/decision-schema/ 两件套（DESIGN D1-D4 + CHECKLIST 22/22 accepting）；RESEARCH v1.3 裁决推进「暂不结合」→「分层结合」（B 层激活）；无新增 M7 样本（契约批无计数声明位点，dc_validator/repo_stats 首跑即过）；v1.9.1（2026-08-23 P-015 review 深度审计批：SEMANTICA_ABSORPTION_RESEARCH v1.0→v1.1——同基座深度 review（RULE-1 时序独立，RULE-5 降级标注）+ 盲区扫描（Iron Law 四类 + 证据分级 + 环境维度）捕获 1P1+3P2+6P3：P1 = §0 C 类计数声明 3 实为 4（【C】不参与 R7 机械看护边界外，review 臂重数捕获——与㉕ A 类 14→15 构成**同一报告两轮各错一次**，A 类有 M4 门禁/C 类裸奔的覆盖不对称实证）；P2 = 消歧段"Hawksight-AI 前身"无源断言降级 + 版本成熟度缺失（补 0.6.5 断言）+ Win10×faiss 环境门槛盲区（H4）；形态 II=4（计数×2 + B 类 basis 锚点编号×2——章节号族新变体：A 类无编号体系却引"A2/A6"）→ 样本㉖ 入账（form2_total 63→67 / samples 25→26）；v1.9（2026-08-23 P-015 semantica-absorption 调研收束批：Semantica（semantica-agi）图原生决策溯源基础设施调研——15A+2B+3C+3H，结论「暂不结合，先例检索补位为候选议程」（方向 A 价值最高：M7/ADR 决策导入 Context Graph 获 find_similar_decisions 式语义先例召回，稀侵入不违零依赖不变式；方向 C 位置冲突否决）；dc_validator M4 全量首跑拦截 §0 声明计数（A=14 实为 15）→ 样本㉕ 入账（形态 II=1 计数入分桶，form2_total 62→63 / samples 24→25）；v1.8（2026-08-23 P-010 promptfoo M7 对比臂声明式评测落地批：`scripts/pf_m7_eval.py`（第四可执行件，run/record/selftest 三子命令，275 行 selftest 13/13——**非 hook**，评测运行器与三校验器分工不同）+ `spec/promptfoo-m7-eval/`（第 11 个 feature 目录，四件套 + promptfooconfig.yaml 双臂矩阵模板）+ 方案 Z 端点门控（三机 LM Studio 实测不可达——不可达即 exit 1 不调 promptfoo，首轮评测 + LG H5 实测端点就绪触发）+ Review 轮 P1×2/P2×3/P3×3 修复实录 → M7 样本㉔ 入账（形态 II=0 同⑮ 处置，samples 23→24 / form2_total 62 不变）+ CHECKLIST v1.1 accepting（35/35 有条件通过，独立 pass 待触发）+ PROGRESS P-010 done（主动队列清空）+ DEV-LOG-007 + 门面快照同步；v1.7.4（2026-08-23 m7-hits-block 独立 pass 批：同基座降级审查（DeepSeek V4 Pro，RULE-1 时序独立满足，RULE-5 模型异质性降级标注——生成端/审查端同基座）+ DR-B/C 专项 fixture 补齐（F15/F16，selftest 14→16 项 40→44 断言）+ `scripts/m7_stats.py` LOC 828→845 回填 + 四件套落档（IMPLEMENTATION → verified / CHECKLIST → accepted / RESEARCH audit_status CLOSED）；v1.7.3（2026-08-23 ㉓ 入账批：P-014 真异基座独立 pass（DeepSeek V4 Pro，RULE-1+RULE-5 双满足）捕获 repo_stats 自身文档 fixture 计数词漂移——「19 fixture」4 处停旧（F20 TDD fixture 落地未回写计数词）→ 样本㉓ 入账（form2_total 61→62 / view_layer_pct 65%→64%）+ 四件套落档 accepted/verified + 门面快照同步；v1.7.2（2026-08-22 ㉒ 入账批：P-014 收口批独立 review 捕获 PROGRESS 依据列「八度」计数词停旧——repo_stats 边界外首个 post-toolization 复发（review 臂捕获，pattern_lib_version 2 候选议程，[REPO_STATS_AUDIT](spec/repo-stats/REPO_STATS_AUDIT.md)）→ M7 样本㉒ 入账（form2_total 60→61 / view_layer_pct 66%→65%）+ ㉒ 轮 verify 首跑 9 活靶全修正 + 门面快照同步；v1.7.1 于 2026-08-22 P-014 收口：CHECKLIST v1.1 accepting（有条件通过，独立 pass 待触发）+ PROGRESS P-014 done + DEV-LOG-006 + M7 样本㉑（首跑 7 真靶全捕获）+ DIS-010 toolized；v1.7 于 2026-08-22 P-014 落地：视图层机械枚举校验器 `scripts/repo_stats.py`（第三可执行件，**对账器非再生成器**——只报偏差永不代改）+ §10 stats 机读声明块（模式库 21 条数据驱动 / 载体两级 living-facade / 门面快照基准）+ pre-commit hook repo-stats 入册——「声明 = 机械重数」从 M7 账本外推到视图层，[DIS-010](docs/discoveries/README.md) 处置落地；v1.6.2 于 2026-08-22 终值修正：⑳轮捕获⑲轮「修完即绿」8 处实际未写入——修完即绿由模式扫描对账确认；v1.6.1 于 2026-08-22 修正轮：三轮共 22 项漂移修正（样本⑲——**修正轮是「视图的修正视图」**）；v1.6 于 2026-08-21 P-011 落地：M7 §5 hits 机读块 + `scripts/m7_stats.py`（第二可执行件）+ hook m7-stats。当前态：M7 样本①-㉖（形态 II 67 处——样本⑭⑮㉔ 非形态 II）、spec/ 十三 feature 目录（decision-schema 新增）、四可执行件三 hook；前版见 git 历史）
+> **覆盖对象**: 本仓库全部文档与工具（宪法 SPEC_PROCESS v1.4、ADR-0004~0009 六份、Discovery 007 v1.3 + DIS-007~010、断言证据框架 v1.4.2 + 事实核查框架 v1.0 + 决策记录契约 v1.0、5 个模板（四件套 + ADR）、M7 证据账本（含 §5 hits 机读块）、discoveries 索引、PROGRESS、dev-log ×7、spec/ 十三 feature 目录、`scripts/dc_validator.py` + `scripts/m7_stats.py` + `scripts/repo_stats.py` + `scripts/pf_m7_eval.py` + `.pre-commit-config.yaml` 三 hook）
 > **仓库性质**: 方法论文档仓库为体、最小工具层为用 —— 可执行件 = DC 契约校验器 + M7 统计校验器 + 视图层枚举校验器（三校验器）+ promptfoo 评测运行器（均 Python 侧零第三方依赖；pf_m7_eval 调外部 promptfoo CLI）+ pre-commit 三 hook；其余"运行方式" = 工作流的执行方式（见 §6）
 
 ---
@@ -64,8 +64,9 @@ f:\Spec_Workflow/
 │   ├── 007_hallucination_audit_...md     # Discovery 007 v1.3（toolized；追记 DR-6）
 │   ├── ASSERTION_EVIDENCE_FRAMEWORK.md   # 断言分级证据框架 v1.4.2（STEP_GAP 两态 + R7 + §10 下游分工）
 │   ├── FACT_CHECK_FRAMEWORK.md           # 事实核查框架 v1.0（CHK-/FC- 编号，FWK-ASSERTION 下游补充，2026-08-21 吸收）
+│   ├── DECISION_RECORD_CONTRACT.md       # 决策记录契约 v1.0（FWK-DECISION-RECORD：schema 八字段 + 三载体映射 + I-1~I-4，Semantica schema 吸收，P-016）
 │   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉖ + §5 hits 机读块，形态 II 67 处）
-│   ├── PROGRESS.md                       # 待办登记（P-001~P-015 全 done，主动队列清空；P-009 触发驱动悬置）
+│   ├── PROGRESS.md                       # 待办登记（P-001~P-016 全 done，主动队列清空；P-009 触发驱动悬置）
 │   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
 │   ├── discoveries/README.md             # 发现三态索引（DIS-007~010；DR-6 追记）
 │   └── dev-log/                          # DEV-LOG-001~007（事件叙事）
@@ -87,7 +88,8 @@ f:\Spec_Workflow/
     ├── m7-hits-block/          # M7 hits 机读块四件套（P-011 done，独立 pass 待触发）
     ├── repo-stats/             # 视图层枚举校验器四件套（P-014：repo_stats.py + §10 stats 块 + repo-stats hook）
     ├── promptfoo-m7-eval/      # promptfoo 对比臂评测四件套 + config 模板（P-010：pf_m7_eval.py + 双臂矩阵 + 方案 Z 门控）
-    └── semantica-absorption/   # Semantica（semantica-agi）图原生决策溯源框架调研（P-015：RESEARCH 结论 = 暂不结合登记候选，先例检索补位为候选议程）
+    ├── semantica-absorption/   # Semantica（semantica-agi）图原生决策溯源框架调研（P-015：RESEARCH 结论 = 暂不结合登记候选，先例检索补位为候选议程）
+    └── decision-schema/        # 决策记录 schema 吸收 B 方案契约批（P-016：DESIGN D1-D4 + CHECKLIST，产出 FWK-DECISION-RECORD）
 ```
 
 ### 2.2 逻辑架构分层
@@ -672,9 +674,10 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [adr/ADR-0009](./adr/ADR-0009-discoveries-log-mechanism.md) | Discoveries 发现日志机制（学习回路载体） |
 | [docs/007](./docs/007_hallucination_audit_asymmetric_evidence.md) | Discovery 007：幻觉清单自身含幻觉的发现记录（126→8 错误复盘） |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4.2：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
+| [docs/DECISION_RECORD_CONTRACT.md](./docs/DECISION_RECORD_CONTRACT.md) | 决策记录契约 v1.0（FWK-DECISION-RECORD）：Semantica schema 吸收——八字段 + 三载体映射（M7/ADR/PROGRESS）+ 关系类型 + I-1~I-4（severity 无损分流；方向 A 导入唯一映射权威） |
 | [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉖ + 形态 II 复发分桶（67 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
 | [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open）/ DIS-009（resolved）/ DIS-010（toolized）；维护纪律含首次重审记录（2026-08-19） |
-| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-015 全 done（P-010 于 2026-08-23 收口，CHECKLIST accepting；P-015 semantica-absorption 调研 2026-08-23 收口，暂不结合登记候选；主动队列清空，P-009 触发驱动悬置） |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-016 全 done（P-016 决策记录 schema 吸收 B 方案契约批 2026-08-23 收口，FWK-DECISION-RECORD 落地；主动队列清空，P-009 触发驱动悬置） |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
 | [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ 002（cpp-hub-absorption）/ 003（precommit-dc-validator）/ 004（治理收束）/ 005（m7-hits-block）/ 006（repo-stats）/ 007（promptfoo-m7-eval） |
 | [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.0 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
@@ -689,6 +692,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [spec/repo-stats/](./spec/repo-stats/) | 视图层枚举校验器四件套（P-014 done：repo_stats.py + CODE_WIKI §10 stats 块 + repo-stats hook，对账器非再生成器） |
 | [spec/promptfoo-m7-eval/](./spec/promptfoo-m7-eval/) | promptfoo 对比臂评测四件套 + config 模板（P-010 done：pf_m7_eval.py 评测运行器 + 双臂矩阵 + 方案 Z 端点门控，CHECKLIST accepting） |
 | [spec/semantica-absorption/](./spec/semantica-absorption/) | Semantica（semantica-agi）图原生决策溯源框架调研（P-015 done：RESEARCH v1.3，结论 = 暂不结合，先例检索补位候选议程；v1.1 = review 深度审计批 / v1.2 = 源码补充核验批（9 条源码直读级断言）/ v1.3 = A+B 联合实现分析（契约-实现分层，候选议程完整规格）） |
+| [spec/decision-schema/](./spec/decision-schema/) | 决策记录 schema 吸收 B 方案契约批（P-016 done：DESIGN v1.0（D1-D4 决策）+ CHECKLIST v1.0（22/22 accepting）——产出 FWK-DECISION-RECORD v1.0） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |
@@ -734,13 +738,13 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
     {"id": "PT-11", "regex": "P-(\\d{3})~P-(\\d{3})", "truth": "fs.progress_tasks", "group": 2}
   ],
   "declared": {
-    "spec_feature_dirs": 12,
+    "spec_feature_dirs": 13,
     "adr_files": 6,
     "dev_logs": 7,
     "scripts": 4,
     "templates": 5,
     "hooks": 3,
-    "progress_tasks": 15
+    "progress_tasks": 16
   },
   "view_layer_samples": [11, 16, 17, 18, 19, 20, 21],
   "doc_registry": [
@@ -751,7 +755,8 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
     {"label": "langgraph-upgrade", "path": "spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md"},
     {"label": "deepseek-harness", "path": "spec/deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md"},
     {"label": "skill-enhancement", "path": "spec/skill-enhancement/SKILL_ENHANCEMENT_RESEARCH.md"},
-    {"label": "semantica-absorption", "path": "spec/semantica-absorption/SEMANTICA_ABSORPTION_RESEARCH.md"}
+    {"label": "semantica-absorption", "path": "spec/semantica-absorption/SEMANTICA_ABSORPTION_RESEARCH.md"},
+    {"label": "decision-schema", "path": "spec/decision-schema/DESIGN.md"}
   ],
   "facade_baseline": {
     "README.md": {"as_of": "2026-08-23", "values": {"hits.samples": 26, "hits.form2_total": 67, "fs.adr_files": 6, "fs.templates": 5}},

@@ -1,7 +1,7 @@
 ---
 id: ADR-0007
 type: adr
-version: 1.3
+version: 1.4
 status: accepted
 date: 2026-08-17
 depends: [doc-contract-refactor, CPP_HUB_GAP_ANALYSIS_RESEARCH, CPP_HUB_ABSORPTION_DESIGN, ADR-0006]
@@ -307,6 +307,7 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | RULE-1~6 | 本仓库 | Review 独立性规则（SPEC_PROCESS §Review 检查清单，S3 赋名） |
 | FWK-ASSERTION | 本仓库 | 断言分级证据框架——A/B/C 三分 + B 类机械反证（docs/ASSERTION_EVIDENCE_FRAMEWORK.md，active） |
 | FWK-FACT-CHECK | 本仓库 | 事实核查框架——逐类核查 + 幻觉模式库 + 修正分级（docs/FACT_CHECK_FRAMEWORK.md，active，2026-08-21 新增） |
+| FWK-DECISION-RECORD | 本仓库 | 决策记录契约——schema 八字段 + 三载体映射 + I-1~I-4（docs/DECISION_RECORD_CONTRACT.md，active，2026-08-23 新增，P-016 B 方案契约批；Semantica schema 吸收） |
 | M1-M7 | 外部·元审计里程碑 | 首次出现处加脚注（M7 证据账本: docs/M7_EVIDENCE_LOG.md） |
 | Phase-7B/7C | 外部·Cpp_Hub | 项目阶段编号 |
 | E1-E5 / A/B/C / H#·B#ID | 实例级 | **不入登记表**（入册标准排除） |
@@ -334,3 +335,4 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | 2026-08-18 | D4 澄清追记（P-007 precommit-dc-validator 复验 P2-1 触发）：design 状态词表按文档类别二档（CHECKLIST 实例 id 后缀判别 → pending/accepting/accepted，其余 → draft/in-review/verified），消除 PLAN DC2 type/文档类别混轴；PLAN 升 v1.6 承载契约文本；E1 全仓 14 份 design 文档零违规 | 复验记录 [DESIGN §6.3](../spec/precommit-dc-validator/DESIGN.md) + 全仓 grep 枚举 |
 | 2026-08-20 | 附录 A 增补**跨文档引用限定规则**（DIS-009 裁决落地，用户确认）：实例级编码（H#·B#）跨文档引用须带源文档限定、聚合载体（PROGRESS/M7）为强制限定区——D3"撞名由文档语境消解"的跨文档边界补全；PROGRESS 现存 12 处裸 H 全量限定改写（硬歧义 7 处 + 语境可消歧 5 处，收尾复核修正原枚举口径）+ L54 依赖链重写；M7 样本⑭（L54 指代缺陷 + review 漏检，形态 II 复发 = 0）；版本 v1.1 → v1.2 | 本轮 H 撞名调研（[DIS-009](../docs/discoveries/README.md) 证据锚点：grep 枚举 + 指代消解分析） |
 | 2026-08-21 | 附录 A 补登 FWK 命名空间两行（FWK-ASSERTION + FWK-FACT-CHECK）——此前 FWK-ASSERTION 已被 SPEC_PROCESS depends 跨文档引用却未登记，属既有缺口；入册标准列举扩展至含 FWK（D3 决策节 + 附录 A 两处同步）。版本 v1.2 → v1.3 |
+| 2026-08-23 | 附录 A 补登 FWK-DECISION-RECORD（决策记录契约，P-016 B 方案契约批）——Semantica（semantica-agi，MIT）决策 schema 吸收：八字段 + 三载体（M7/ADR/PROGRESS）映射 + I-1~I-4 不变式（docs/DECISION_RECORD_CONTRACT.md，active）。版本 v1.3 → v1.4 | [decision-schema DESIGN](../spec/decision-schema/DESIGN.md)（D1 落点裁决：独立契约文档入 FWK 族） |
