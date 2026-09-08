@@ -703,7 +703,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [spec/spec-runner/](./spec/spec-runner/) | Spec_Runner 薄壳 runner（P-009 done：RESEARCH v1.0 + DESIGN v1.0（D1-D7）+ IMPLEMENTATION v1.0（verified，锚 Spec_Runner commit 4ea703d）+ CHECKLIST v1.0（22/22 accepting）——runner 已可用，LG H2 解除；LG H3/dsh H2 随端点解锁） |
 | [spec/community-ecosystem/](./spec/community-ecosystem/) | 社区同类框架生态调研（P-018 done：COMMUNITY_ECOSYSTEM_RESEARCH v1.2（25A+3B+12C+4H）——四簇盘点 + 分层吸收判定待用户裁决 + §2.5 步骤级工具盘点 + §2.6 兼容矩阵 + §3.5 强制决策产物管线裁定可行且优先（P-019 采纳路径，编号被占用顺延 P-020））；v1.2 吃狗粮审计轮（M7 样本 ㉙）） |
 | [spec/spec-runner-homing/](./spec/spec-runner-homing/) | Spec_Runner 归巢（P-019 done：RESEARCH v1.1（6A+2B+3C+2H）——依赖面取证 = 零代码依赖；v1.1 用户裁决修正 C1 改判采纳并入（A6 实证 Spec_Runner 无 remote/全 commit 服务本仓）→ 实施批：8 文件并入 tools/spec_runner/（hash 核对）+ 上游修订注三处 + 四件套齐 + CHECKLIST 独立 pass 7/7 accepted） |
-| [spec/step-gate/](./spec/step-gate/) | P-020 决策产物管线三问门禁验收（ADR-0010 首例：STEP_GATE_CHECKLIST v1.0 pending——P-018 §3.5 采纳路径可执行化；三问门禁 8 子项验收，通过 = P-020 获准立项） |
+| [spec/step-gate/](./spec/step-gate/) | P-020 决策产物管线三问门禁验收（ADR-0010 首例：STEP_GATE_CHECKLIST v1.1 pending——P-018 §3.5 采纳路径可执行化；三问门禁 8 子项验收 + 边界声明（审 step-gate 候选物，非调研报告本体），通过 = P-020 获准立项） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |

@@ -1,9 +1,9 @@
-# P-020 三问门禁验收检查清单：决策产物管线（step-gate）作为 ADR-0010 首例 v1.0 (2026-09-08)
+# P-020 三问门禁验收检查清单：决策产物管线（step-gate）作为 ADR-0010 首例 v1.1 (2026-09-08)
 
 ---
 id: step-gate-CHECKLIST
 type: design
-version: 1.0
+version: 1.1
 status: pending
 date: 2026-09-08
 depends: [ADR-0010, community-ecosystem-RESEARCH, FWK-DECISION-RECORD, spec-runner-DESIGN]
@@ -13,6 +13,7 @@ upstream: null
 > **Feature**: step-gate（PROGRESS P-020——决策产物管线：Spec_Runner 增 `decision` 事件类型 + `step-gate` 命令）
 > **来源**: P-018 §3.5 裁定「可行且优先」+ ADR-0010 验收条件「首个候选吸收（P-020）完整走三问」（2026-09-08 accepted）
 > **本清单职责**: **仅验收"三问门禁"**（ADR-0010 决策节）——P-020 以首例身份通过三问、获准从"登记候选"转入"正式立项"；不覆盖 P-020 自身实现验收（那属于 P-020 实施批的 DESIGN/IMPL/CHECKLIST）
+> **边界声明（v1.1 消歧）**: 本清单验收的对象 = **候选吸收物 step-gate**（P-020 待引入的具体功能）——**不是** COMMUNITY_ECOSYSTEM_RESEARCH.md 等调研报告本体（那是候选清单的载体，Layer-0 文档，质量问题由 Step 2 Review / 独立 pass 管辖，不过三问门禁）。即 "审引入什么（step-gate），不审提案怎么写（CER）"。
 
 ---
 
@@ -83,3 +84,4 @@ ADR-0010（accepted 2026-09-08）决策节确立**候选吸收三问门禁**：
 | 日期 | 变更 |
 |------|------|
 | 2026-09-08 | v1.0 创建——三问门禁操作化为 8 子项验收表；判定逻辑 + 核对约束 + 验证节落档 |
+| 2026-09-08 | v1.0 → v1.1：新增头部边界声明（对齐 ADR-0010 v1.2 消歧）——本清单验收对象 = step-gate 候选物，非调研报告本体 |

@@ -1,7 +1,7 @@
 ---
 id: ADR-0010
 type: adr
-version: 1.1
+version: 1.2
 status: accepted
 date: 2026-09-08
 depends: [SPEC-PROCESS, ADR-0007, community-ecosystem-RESEARCH, spec-runner-homing-RESEARCH]
@@ -62,6 +62,8 @@ COMMUNITY_ECOSYSTEM_RESEARCH v1.2 候选池（§3/§4）：
 > 3. **未激活副作用 = 0？** 不 import / 不启动 / 不扫描 / 文档层无感知（Layer-1 单向依赖 Layer-0）
 
 判定：三问通过 → 进候选池；**未激活零副作用不成立** → 直接否决（如引入重依赖的 Langfuse：按 D6 零依赖先例否决，见 §4 备选 A 记录）。
+
+> **边界声明（2026-09-08 消歧）**: 本门禁的适用对象 = **候选吸收物**（社区框架 / skill / MCP / 外部服务 / 本仓新增工具——即提案中列出的、有待引入的具体事物），**不适用 = 调研报告/提案文档本体**（如 COMMUNITY_ECOSYSTEM_RESEARCH.md 这类生成端调研产物，属 Layer-0 文档，质量由 Step 2 Review / 独立 pass 管辖）。启发式：被三问审问的是"引入什么"（候选物），不是"提案怎么写"（报告文档）。调研报告本身是候选清单的载体而非候选本身。
 
 **适用位点（3 处）**：
 - SPEC_PROCESS 吸收/并入裁决（Step 2 调研收束处的候选判定）
@@ -160,3 +162,4 @@ COMMUNITY_ECOSYSTEM_RESEARCH v1.2 候选池（§3/§4）：
 | 2026-09-08 | 初始版本（proposed）：懒加载从 P-019 具体实现退役误解中澄清 → 升格为候选吸收三问门禁；备选 A/B/C/D 评估；失效条件登记 |
 | 2026-09-08 | 独立审计修正轮（subagent 深入审计 + 盲区扫描，conditional 判定）：P1-1 Langfuse 判例归因修正（D6 零依赖重依赖 ≠ 零副作用）；P2-1 验证表两行 E1→E4（判断类）；P2-2 引文节定位修正（§4→§3.2/§3.4/§5.3/§5.4）；P2-3 D6 引源修正（SPEC_PROCESS→SPEC_RUNNER_DESIGN）；P2-4 决策节补 P-009 L1-L7 分工声明；P3-1 "~15 行小改"版本来源标注；P3-2 失效阈值 8 补派生理据；P3-3 方案 C 消除"机械可回答"自相矛盾（Q3 弱否定标准）。版本 v1.0 → v1.1 |
 | 2026-09-08 | **proposed → accepted**（用户确认「ADR-0010 v1.1 接受并 proposed → accepted」）：状态升格；docs/adr/README + ADR-0007 附录 A 同步；COMMUNITY_ECOSYSTEM_RESEARCH 待补"分层归属"列 + P-020 首例走三问（验收条件，下次编辑时执行） |
+| 2026-09-08 | 边界声明消歧（用户提问「ADR-0010 处理对象是否为调研报告」）：决策节补边界声明——门禁对象 = **候选吸收物**（提案中列出的待引入事物），**非调研报告/提案文档本体**（Layer-0 文档，Step 2 Review/独立 pass 管辖）；启发式 = "审引入什么，不审提案怎么写"。版本 v1.1 → v1.2 |
