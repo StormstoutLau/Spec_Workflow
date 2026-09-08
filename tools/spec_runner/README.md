@@ -81,6 +81,11 @@ python spec_runner.py selftest   # 26 项内置自测（stdlib mock server）
 - adapter 开放结构：`NativeHTTPAdapter`（默认，OpenAI 兼容 API 裸调）；
   dsh SDK 为实测后升级候选（换 adapter 不动核心）
 - 与 Spec_Workflow 双向零依赖：本 runner 不内置其路径；其校验器不调用本 runner
+- **git 快照 = opt-in（P-022 懒加载，默认关）**：`gate`/`run` 后的事件流持久化
+  提交需显式设 `SR_GIT_AUTOCOMMIT=1` 才激活；激活后**只提交本次实际写入的
+  `<sid>.jsonl` 单文件**（不再整目录清扫），提交带 `--no-verify`（透明快照不被
+  仓级 pre-commit 中间态打断）。会话目录不在 git 仓内 → 静默跳过。未激活时
+  持久化由仓库既有 pre-commit + 人工 commit 承担（事件流文件本身已落盘）
 
 ## 其他项目接入（模板）
 

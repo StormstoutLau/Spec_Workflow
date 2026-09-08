@@ -23,7 +23,7 @@ upstream: null
 把本仓 spec 工作流的三个已实证痛点物理化为可执行件（独立仓库 `F:\Spec_Runner`，零框架依赖，~550-850 行预算）：
 
 1. **门禁物理化**：RULE-1（时序独立）与流程门禁从「靠纪律」变为 `--gate` 命令 + 派生视图检查——审查 gate 未过，实施不可启动
-2. **跨会话状态持久化**：append-only JSONL 事件流 + git commit——状态是事件流的派生视图（§9.5），会话压缩不再丢态
+2. **跨会话状态持久化**：append-only JSONL 事件流 + git commit（**P-022 修订：opt-in，`SR_GIT_AUTOCOMMIT=1` 显式激活，默认关**）——状态是事件流的派生视图（§9.5），会话压缩不再丢态
 3. **取证副产物化**：E1 证据（RULE-6）从「手工组装」变为运行副产物——log 即证据，replay 即复现
 
 **非目标**（不做清单，承 §9.4 + 方案 B 边界）：Web UI / 可视化（grep/jq 即可）；插件化 log writer（L7 信任层不可换）；持久 PTY / bash 进程状态延续（审查任务是批处理短生命周期）；Cordis 事件总线；多 worker / 水平扩展（单用户用不到——LANGGRAPH §6 理由 4）；LangGraph 迁移本身（触发条件复查制，见 §8）。
@@ -133,17 +133,17 @@ flowchart LR
     GATE --> SUB[subprocess 执行]
     CLI --> ST[status/replay/fork]
     ST --> FS
-    GIT[git 持久化薄封装] -.gate 后自动 commit.-> FS
+    GIT[git 持久化薄封装] -.opt-in（SR_GIT_AUTOCOMMIT=1）gate/run 后提交单文件.-> FS
 ```
 
 | 模块 | LOC 预算 | 职责 |
 |------|---------|------|
 | 事件流写入器 | ~100-150 | D2/L1-L3/L7；schema 校验；唯一写路径 |
-| gate 执行器 | ~80-120 | D3；exit 透传；gate 后 git commit 钩子 |
+| gate 执行器 | ~80-120 | D3；exit 透传；gate 后 git 快照钩子（P-022：opt-in 默认关） |
 | adapter 接口 + NativeHTTP | ~120-180 | D4/D5；预检门控；超时重试（2 次） |
 | CLI 入口 + 命令分发 | ~60-100 | D7 五命令 |
 | status/replay/fork 派生件 | ~60-90 | L4；replay 校验 |
-| git 持久化封装 | ~40-60 | subprocess 薄封装（add+commit，gate 后触发） |
+| git 持久化封装 | ~40-60 | subprocess 薄封装（add+commit，gate/run 后触发；P-022：门控默认关 + 精确 sid 单文件 + 会话目录 git 根派生 + --no-verify） |
 | selftest | ~150-250 | 零依赖断言式（三校验器先例形态） |
 | **合计** | **~550-850** | 落入 LANGGRAPH §5 的 500-1000 区间（RESEARCH B1） |
 

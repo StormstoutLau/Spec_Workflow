@@ -22,7 +22,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -33,11 +33,14 @@ LLM_EVENTS = ("llm_request", "llm_response")  # model/provider 必填非空
 SID_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 GATE_STDOUT_TAIL = 2000
 EXIT_USAGE, EXIT_GATE_MISSING, EXIT_ENDPOINT = 2, 3, 1
+# P-022 懒加载门控：会话目录注入 + git 快照 opt-in（ADR-0010 Q3 借懒加载原则）
+SESSIONS_ENV = "SR_SESSIONS_DIR"
+GIT_AUTOCOMMIT_ENV = "SR_GIT_AUTOCOMMIT"
 
 
 def sessions_dir() -> Path:
     """会话目录：env SR_SESSIONS_DIR 可注入（selftest 用），默认 <repo>/sessions。"""
-    return Path(os.environ.get("SR_SESSIONS_DIR", ROOT / "sessions"))
+    return Path(os.environ.get(SESSIONS_ENV, ROOT / "sessions"))
 
 
 def now_iso() -> str:
@@ -103,15 +106,45 @@ class EventWriter:
         return rows
 
 
-# ---- 模块 6：git 持久化薄封装（gate 后自动 commit；无 git 仓静默跳过） ----
-def git_snapshot(message: str):
+# ---- 模块 6：git 持久化薄封装（P-022 A+B 修复——opt-in 默认关 + 精确 sid 文件 + 会话目录所在 git 根） ----
+def _git_root() -> Path | None:
+    """会话目录所在 git 根（P-022 F1 修复：从 sessions_dir 而非 ROOT 派生，隔离天然成立）。"""
     try:
-        subprocess.run(["git", "add", "-A", "sessions"], cwd=ROOT,
-                       capture_output=True, timeout=30)
-        subprocess.run(["git", "commit", "-m", message, "--quiet"], cwd=ROOT,
-                       capture_output=True, timeout=30)
+        p = subprocess.run(["git", "-C", str(sessions_dir()), "rev-parse",
+                            "--show-toplevel"], capture_output=True, text=True,
+                           timeout=30)
     except Exception:
-        pass  # 非 git 环境（selftest 临时目录）——事件流文件本身已是持久化
+        return None
+    if p.returncode != 0:
+        return None
+    out = p.stdout.strip()
+    return Path(out) if out else None
+
+
+def git_snapshot(sid: str, message: str):
+    """gate/run 后事件流持久化快照（P-022 A+B）。
+
+    - A 门控：`SR_GIT_AUTOCOMMIT != "1"` 即早退——未激活零副作用（借 ADR-0010 Q3）
+    - B 范围：只 add 本次实际写入的 `<sid>.jsonl`（相对会话目录所在 git 根）；
+      会话目录不在 git 仓内 → 静默跳过（注释与行为一致）
+    - commit 带 `--no-verify`：透明持久化快照不被仓级 pre-commit 三校验器的中间态打断
+    """
+    if os.environ.get(GIT_AUTOCOMMIT_ENV) != "1":
+        return
+    try:
+        root = _git_root()
+        if root is None:
+            return  # 非 git 环境——事件流文件本身已是持久化
+        target = sessions_dir() / f"{sid}.jsonl"
+        rel = target.resolve().relative_to(root.resolve())  # 越界即 ValueError → 跳过
+        add = subprocess.run(["git", "add", "--", str(rel)], cwd=root,
+                             capture_output=True, timeout=30)
+        if add.returncode != 0:
+            return
+        subprocess.run(["git", "commit", "-m", message, "--quiet", "--no-verify"],
+                       cwd=root, capture_output=True, timeout=30)
+    except Exception:
+        pass
 
 
 # ---- 模块 2：gate 执行器（D3——verdict = exit code 机械映射，无 LLM 判断） ----
@@ -127,7 +160,7 @@ def cmd_gate(args) -> int:
              output={"stdout_tail": stdout_tail, "exit": proc.returncode},
              gate={"name": args.name, "cmd": args.cmd, "exit": proc.returncode,
                    "verdict": verdict, "stdout_tail": stdout_tail})
-    git_snapshot(f"gate:{args.name}:{verdict} (session {args.session})")
+    git_snapshot(args.session, f"gate:{args.name}:{verdict} (session {args.session})")
     print(f"gate[{args.name}] verdict={verdict} exit={proc.returncode}")
     return proc.returncode  # 透传（可嵌套 pre-commit/CI）
 
@@ -305,7 +338,7 @@ def cmd_run(args) -> int:
     except Exception:
         text = json.dumps(resp, ensure_ascii=False)
     print(text)
-    git_snapshot(f"run:{sid} (session appended)")
+    git_snapshot(sid, f"run:{sid} (session appended)")
     return 0
 
 
@@ -464,7 +497,10 @@ def run_selftest() -> int:
               + (f" — {detail}" if detail else ""))
 
     tmp = Path(tempfile.mkdtemp(prefix="sr_selftest_"))
-    env = dict(os.environ, SR_SESSIONS_DIR=str(tmp))
+    # P-022 修正：子进程 env 显式剥离 SR_GIT_AUTOCOMMIT——父环境即使已导也不泄漏
+    # （审查 §1.4：L467 env=dict(os.environ,...) 整体拷贝是绕过点）
+    env = {k: v for k, v in os.environ.items() if k != GIT_AUTOCOMMIT_ENV}
+    env[SESSIONS_ENV] = str(tmp)
     me = str(Path(__file__).resolve())
 
     def run_cli(*argv):
@@ -611,6 +647,42 @@ def run_selftest() -> int:
             "evidence": [{"grade": "E1", "anchor": "spec/x.md"}]}})
         p_sg_badd = run_cli("step-gate", "--session", "st-badd")
         check("F24 step_id 非法 → exit 1", p_sg_badd.returncode == 1)
+
+        # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
+        git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))
+        sdir = git_tmp / "sessions"
+        sdir.mkdir()
+        (sdir / "real-001.jsonl").write_text("a\n", encoding="utf-8")
+        (sdir / "real-002.jsonl").write_text("b\n", encoding="utf-8")
+        for c in (["init", "-q"], ["config", "user.email", "t@t"],
+                  ["config", "user.name", "t"]):
+            subprocess.run(["git", *c], cwd=git_tmp, capture_output=True)
+        sv, ac = os.environ.get(SESSIONS_ENV), os.environ.get(GIT_AUTOCOMMIT_ENV)
+        os.environ[SESSIONS_ENV] = str(sdir)
+        os.environ.pop(GIT_AUTOCOMMIT_ENV, None)
+        git_snapshot("real-001", "m1")  # 默认关 → 零提交
+        cnt0 = subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=git_tmp,
+                              capture_output=True, text=True)
+        check("F25 git_snapshot 默认关零提交", cnt0.returncode != 0)
+        os.environ[GIT_AUTOCOMMIT_ENV] = "1"
+        git_snapshot("real-001", "m1")  # 显式激活 → 只提交 real-001
+        os.environ.pop(GIT_AUTOCOMMIT_ENV, None)
+        cnt1 = subprocess.run(["git", "rev-list", "--count", "HEAD"], cwd=git_tmp,
+                              capture_output=True, text=True)
+        files_p = subprocess.run(["git", "show", "--name-only", "--format=", "HEAD"],
+                                 cwd=git_tmp, capture_output=True, text=True)
+        files = [l for l in files_p.stdout.splitlines() if l.strip()]
+        msg_p = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=git_tmp,
+                               capture_output=True, text=True)
+        check("F26 git_snapshot 精确提交单文件+消息一致",
+              cnt1.returncode == 0 and cnt1.stdout.strip() == "1"
+              and files == ["sessions/real-001.jsonl"]
+              and msg_p.stdout.strip() == "m1")
+        if sv is not None:
+            os.environ[SESSIONS_ENV] = sv
+        else:
+            os.environ.pop(SESSIONS_ENV, None)
+        shutil.rmtree(git_tmp, ignore_errors=True)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

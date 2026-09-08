@@ -3,15 +3,15 @@
 ---
 id: defect-fixes-DESIGN
 type: design
-version: 1.1
-status: draft
+version: 1.2
+status: verified
 date: 2026-09-08
 depends: [SPEC-PROCESS, ADR-0010, ADR-0009, spec-runner-DESIGN, step-gate-CHECKLIST]
 upstream: null
 ---
 
 > **Feature**: P-022 缺陷修复批——两个缺陷均来自 P-020 吃狗粮全流程活体实证（2026-09-08，commit 90040fb）
-> **状态**: 方案落档（draft），auto-commit 部分 subagent 审查完成（§1.4，结论 = A+B 修正后采纳）→ 待用户决策；DIS-008 部分待用户决策
+> **状态**: 定稿（v1.2）——用户裁决 D1 = A+B 修正后采纳 / D2 = 规则化+追记；实施批完成（spec_runner v1.2.0 + selftest 28/28 + 文档四处 + CHECKLIST_FUNC v1.0 accepting）
 > **来源**: ① gate auto-commit 缺陷 = P-019 独立 pass 登记的 P3 观察项（P-020 候选）在 P-020 吃狗粮中活体复现（selftest 触发 gate 自动提交把真实 session finalize 行卷入 `gate:always-pass:pass` 噪音 commit，已软重置回并）；② DIS-008 竞态 = P-020 收束批 CODE_WIKI 同文件 6 并行 Edit 竞态复发（4 处回滚，串行重放修复）
 
 ---
@@ -86,10 +86,20 @@ Edit 工具对同一文件无「基于最新版本」的乐观并发控制：bat
    - 落档：PROGRESS P-022 + CODE_WIKI + 三校验器全绿
 3. 无新增 M7 样本预期（修复为编程变更非文档声明错误）
 
-## 4. 待决策项
+## 4. 决策记录（v1.2，2026-09-08 用户裁决 + 实施批）
 
-| # | 决策项 | 选项 |
-|---|--------|------|
-| D1 | auto-commit 修复粒度 | A 门控 / A+B 组合（推荐）/ B 范围 / 暂不修复 |
-| D2 | AGENTS.md 规则化 | 双做（规则+追记，推荐）/ 仅追记 / 仅规则 |
-| D3 | 编号登记 | P-022 立项（推荐）/ 挂 P-020 后候选项延后 |
+| # | 决策项 | 裁决 | 实施落点 |
+|---|--------|------|---------|
+| D1 | auto-commit 修复粒度 | **A+B 修正后采纳**（含审查修正项：B 路径源自 sessions_dir / selftest pop env / --no-verify） | spec_runner.py v1.2.0：`git_snapshot(sid, message)` 门控默认关 + 精确单文件 + 会话目录 git 根派生；selftest F25/F26 |
+| D2 | AGENTS.md 规则化 | **双做**（规则化 + DIS-008 追记） | AGENTS.md 禁止事项两条；docs/discoveries/README.md DIS-008 第 4/5 次复发追记 |
+| D3 | 编号登记 | **P-022 立项**（方案落档即登记 in-progress，随本批 done） | PROGRESS P-022 |
+
+**实施批产物**：DESIGN v1.2 verified + CHECKLIST_FUNC v1.0 accepting（13/13 + selftest 28/28 + 三通道全绿）；文档四处（README / SPEC_RUNNER_DESIGN / AGENTS.md / DIS-008）。
+
+## 5. 修订历史
+
+| 日期 | 变更 |
+|------|------|
+| 2026-09-08 | v1.0 创建——缺陷根因分析（F1/F2/F3）+ 修复三选项 A/B/C 推荐 A+B + DIS-008 复发与规则化方案 |
+| 2026-09-08 | v1.1 —— subagent 技术审查结果回填（§1.4：A+B 修正后采纳无否决项；实施警惕点 = sessions_dir 派生路径 / --no-verify 裁定 / selftest pop env） |
+| 2026-09-08 | v1.2 —— 用户裁决 D1/D2/D3 记录（§4）+ 实施批完成 → 状态 verified |
