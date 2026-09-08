@@ -156,7 +156,7 @@ def function_name(
 
 [基于不变式的属性测试]
 
-## 9. 幻觉排除审查（Step 6 Review）
+## 9. 幻觉抑制审查（Step 6 Review）
 
 ### 9.1 依赖版本验证
 

@@ -134,7 +134,7 @@ class StructureName:
 1. <不变式 1>
 2. <不变式 2>
 
-## 9. 幻觉排除审查（Step 4 Review）
+## 9. 幻觉抑制审查（Step 4 Review）
 
 ### 9.1 设计基于已验证的调研结论
 

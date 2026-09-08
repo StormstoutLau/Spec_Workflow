@@ -6,7 +6,7 @@
   <rect x="80" y="94" width="36" height="3" fill="#D97757"/>
 
   <text x="80" y="168" font-family="Georgia, 'Times New Roman', serif" font-size="62" font-weight="400" fill="#141413">Spec_Workflow</text>
-  <text x="80" y="210" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#3D3D3A">面向「单人开发者 + LLM Agent」的 Spec 驱动开发规范 —— 系统性排除幻觉与形式化审查表演</text>
+  <text x="80" y="210" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#3D3D3A">面向「单人开发者 + LLM Agent」的 Spec 驱动开发规范 —— 系统性抑制幻觉与形式化审查表演</text>
 
   <!-- 10-step dot chain, review gates in crail -->
   <g>

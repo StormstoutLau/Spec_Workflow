@@ -82,7 +82,7 @@ upstream: null
 
 [本次调研发现的、本 feature 可填补的空白]
 
-## 5. 幻觉排除审查（Step 2 Review）
+## 5. 幻觉抑制审查（Step 2 Review）
 
 ### 5.1 文献验证
 

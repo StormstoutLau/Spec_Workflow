@@ -48,7 +48,7 @@
       <rect x="60" y="204" width="204" height="34" rx="5" fill="#FAF9F5" stroke="#DBD8CC"/>
       <text x="162" y="226" text-anchor="middle" fill="#3D3D3A">Step 1 · MCP 多工具调研</text>
       <rect x="60" y="244" width="204" height="34" rx="5" fill="#FDF4EF" stroke="#D97757"/>
-      <text x="162" y="266" text-anchor="middle" fill="#B4552F">Step 2 · Review 幻觉排除 ⌾</text>
+      <text x="162" y="266" text-anchor="middle" fill="#B4552F">Step 2 · Review 幻觉抑制 ⌾</text>
     </g>
     <g>
       <rect x="288" y="204" width="204" height="34" rx="5" fill="#FAF9F5" stroke="#DBD8CC"/>

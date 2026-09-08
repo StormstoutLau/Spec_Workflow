@@ -6,7 +6,7 @@
 
 ---
 
-Spec_Workflow is a **documentation-only methodology**: no source code, no build system, no runtime. It defines a 10-step spec process with a matching review apparatus for the "solo developer + LLM agent" workflow. Its core objective is to **systematically eliminate hallucinations and performative review from LLM-generated content** — including reviews written by the LLM itself.
+Spec_Workflow is a **documentation-only methodology**: no source code, no build system, no runtime. It defines a 10-step spec process with a matching review apparatus for the "solo developer + LLM agent" workflow. Its core objective is to **suppress hallucinations and performative review in LLM-generated content as far as possible** — no agent framework can eliminate hallucinations outright, only suppress them to some degree; this framework makes suppression detectable, interceptable, and accountable through evidence grading, mechanical reconciliation, and process gates — including reviews written by the LLM itself.
 
 > This system was not designed on a whiteboard. It grew out of real failure cases from the math-finance-reasoning project: the M2 statistics fabrication, the M6 concurrent self-review, and Phase 7C's hallucination checklist that contained hallucinations of its own. Every rule registers its originating incident and its failure conditions — and the methodology itself is under continuous measurement (see [Self-verification](#self-verification)).
 
