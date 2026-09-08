@@ -12,6 +12,7 @@
 | [ADR-0007](../../adr/ADR-0007-unified-document-contract.md) | 统一文档契约——命名空间消歧与 M7 证据账本权威载体 | accepted（2026-08-17，D1-D5 整批） | M7_EVIDENCE_LOG 唯一活载体 / G1-G4→DC1-DC4 / design 入词表 / 英文 token |
 | [ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) | SPEC_PROCESS v1.4——Step 2 门禁语义与 Step 8 双向链路检查 | accepted（2026-08-17，D4+D6 双决策） | R4 语义门禁 (a)-(d) + 双向引用/断言延续两项 |
 | [ADR-0009](../../adr/ADR-0009-discoveries-log-mechanism.md) | Discoveries 发现日志机制——学习回路"事故→规则"的载体 | accepted（2026-08-17） | 三态索引 + Step 2/10 双集成点；DIS-008 首登 |
+| [ADR-0010](../../adr/ADR-0010-lazy-loading-architecture-gate.md) | 懒加载架构原则——Layer-0/Layer-1 分层作为候选吸收的强制门禁 | accepted（2026-09-08，用户确认） | 候选吸收三问（放哪层/激活条件/零副作用）+ 与 D6 互补防过重 |
 
 ## 编号空间登记
 
