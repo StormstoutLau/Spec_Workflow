@@ -34,9 +34,9 @@ upstream: null
 
 | 候选 | 裁决 | 理由 |
 |------|------|------|
-| **独立仓库 + spec 留本仓（采纳）** | ✅ | LANGGRAPH §6 主判断明文「独立仓库」；本仓身份 = 纯文档 + 最小工具层，runner 是执行器不是文档契约——三校验器（dc_validator/m7_stats/repo_stats）是本仓契约的机械化，runner 是工作流的机械化，两类可执行件分属两仓；spec 四件套留本仓保证 P-009 与十步流程同轨治理 |
-| 代码进本仓 scripts/ | ❌ | 违反「纯文档 + 最小工具层」定位的扩张方向；runner 有独立生命周期（自身版本、自身 git 历史、可能推送远程） |
-| spec 文档随代码仓 | ❌ | P-009 的 spec 治理（dc_validator DC1-DC4 / M7 登记 / PROGRESS 挂钩）依赖本仓工具链，搬走即脱离看护 |
+| **独立仓库 + spec 留本仓（原采纳，P-019 修订）** | ✅➡️➡️ | 原理由：LANGGRAPH §6 主判断明文「独立仓库」；本仓身份 = 纯文档 + 最小工具层，runner 是执行器不是文档契约——三校验器（dc_validator/m7_stats/repo_stats）是本仓契约的机械化，runner 是工作流的机械化，两类可执行件分属两仓；spec 四件套留本仓保证 P-009 与十步流程同轨治理。**P-019 修订（2026-09-08）**：用户裁决并入本仓 `tools/spec_runner/`——外仓 27 天运行实证（无 remote/全 commit 服务本仓）推翻「独立生命周期」论据；管理便利 + 事件流证据同仓。详见 [SPEC_RUNNER_HOMING_DESIGN](../spec-runner-homing/SPEC_RUNNER_HOMING_DESIGN.md) D1 |
+| 代码进本仓 scripts/ | ❌ | 违反「纯文档 + 最小工具层」定位的扩张方向；runner 有独立生命周期（自身版本、自身 git 历史、可能推送远程）——**P-019 修订：后两项论据经实证不成立；但「独立仓库存放形态」仍被修订为 tools/spec_runner/（独立工具目录，非 scripts/ 混放）** |
+| spec 文档随代码仓 | ❌ | P-009 的 spec 治理（dc_validator DC1-DC4 / M7 登记 / PROGRESS 挂钩）依赖本仓工具链，搬走即脱离看护（不变） |
 
 **E1 取证回流**：runner 事件流文件（`sessions/<session_id>.jsonl`）= 审查轮次的 E1 级证据（LANGGRAPH §9.2「log 即 E1 级证据」）；M7 样本行「来源」列可指向事件流路径 + seq 区间。**双向零依赖**：本仓三校验器不调 runner（本仓验证端不依赖外部工具——P-013「硬规则出裁决」约束）；runner 不依赖本仓任何文件（`--gate` 命令串由调用方注入，runner 只执行记录不内置本仓路径）。
 

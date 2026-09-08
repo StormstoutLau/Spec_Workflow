@@ -14,6 +14,7 @@ upstream: null
 > **代码仓**: `F:\Spec_Runner`（独立仓库，commit **`4ea703d`**——双仓漂移防线锚，DESIGN §5.3）
 > **实施日期**: 2026-08-27
 > **对照设计**: [SPEC_RUNNER_DESIGN.md](./SPEC_RUNNER_DESIGN.md) v1.0（D1-D7 + §4 LOC 预算 + §6 五步清单）
+> **P-019 归巢追记（2026-09-08，spec-runner-homing 实施批）**: 双仓漂移防线锚（commit `4ea703d`）**退役**——runner 已按 P-019 修订并入本仓 `tools/spec_runner/`（8 文件 hash 逐字节核对一致），代码归本仓统一版本化；外仓 `F:\Spec_Runner` 冻结存档（git 历史 5 commit 完整保留可回溯）。本表原指外仓路径的交付物（spec_runner.py/README/sessions/selftest 复验）已在新路径复测通过：selftest 21/21、`p019-homing-verify-1` gate 入流 replay OK、adapter dry-run 命令装配正确。
 
 ---
 
