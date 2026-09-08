@@ -137,6 +137,12 @@ spec/<feature>/
 1. **[RULE-1] 时序独立**：Review checkbox 只能在对应文档**完稿之后的独立 pass** 勾选，
    禁止与正文同一次写入。同一次生成的 review 章节必须标注 `[自查·并发]`，
    并在后续独立 pass 复核后升级为 `[已复核]` 或记录发现。
+   - **RULE-1 补 · 独立 pass 取证清单（P-025，ADR-0011 出路 C 增补）**：独立 pass 审查输入 =
+     ① 事件流（session JSONL，含 decision 事件）② `verify-anchor --session <sid>` 取证输出
+     ③ git diff/status 系统状态对照。锚点真实性以 verify-anchor 输出为准，不信自报形态通过；
+     纯登记型批次（零代码变更）查证范围 = 锚点文档存在 + 章节真实 + session 内容与文档状态一致
+     （如声称版本与 front-matter version 匹配），**无 diff 为合法态不判违规**；verify-anchor
+     只验证「锚点位置可达」，不验证「断言内容对错」——语义真实性由 RULE-5 异基座审查把关。
 2. **[RULE-2] 统计溯源**：验收统计（CHECKLIST §10.1 类汇总）只能来自**逐项核对表**
    （每行附测试名/实测值证据），禁止从测试通过总数推算分项通过数。
 3. **[RULE-3] 环境确定性与测试隔离（v1.2 升级为 quarantine 四要素）**：验收测试不得依赖

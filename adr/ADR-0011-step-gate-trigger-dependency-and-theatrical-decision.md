@@ -1,7 +1,7 @@
 ---
 id: ADR-0011
 type: adr
-version: 1.5
+version: 1.6
 status: accepted
 date: 2026-09-09
 depends: [ADR-0007, ADR-0010, step-gate-DESIGN, community-ecosystem-RESEARCH, FWK-DECISION-RECORD]
@@ -195,3 +195,4 @@ P-023（drift-gate 概念吸收，2026-09-09）按 spec 工作流走完 RESEARCH
 | 2026-09-09 | 复核修复（用户指令「复核上一轮结果 执行修复」，E1 机械取证）：**发现 P1 事实错误**——上轮例证「P-021 走 / P-022 走」与实测不符（sessions 仅 p020 系列两文件含 decision = 4+5 条，P-021/P-022/P-023 均无 session）→ 真实实证 = **4 应走批次仅 1 走 3 未走**（值守失效为系统性，强化出路 A）；修正六处（L30 精确化「仅 p020 系列」/ L41 结论改三连批 / L75 诊断确认改三连批根因 / L115 例证重写 + 判定准则适用限定「P-020 起新批次，历史不追溯」/ L142 后果改三连批 / L163 E1 枚举补全 P-021/022）+ 补「机械可核」定义（P3-2 残留，L77）。版本 v1.2 → v1.3 |
 | 2026-09-09 | **用户裁决收口（用户指令「ADR-0011 决策为A + C 组合收口」）**：决策 = **A + C 组合**（A 流程强制根治缺口 1 触发依赖 + C 独立验证根治缺口 2 表演性决策；B 排除暂缓）；**proposed → accepted**；**失效条件命中登记**（P-021/022/023 三连批应走未走，90 日窗口，E1 实证 + 样本㉚）→ A 为下一候选实施批待用户独立指令、C 待 A 落地后触发；原「登记不实施」废止为「决策收口 + 触发驱动实施」；docs/adr/README + ADR-0007 附录 A + CODE_WIKI 状态同步。版本 v1.3 → v1.4 |
 | 2026-09-09 | **P-024 实施追记（用户指令「开启后续吃狗粮spec工作流」）**：出路 A 落地 = pre-commit **第四 hook `step-enforce`**（files 收窄 spec/ 四文档）+ **spec_runner.py v1.3.0**（`step-enforce --pid` 前缀定位 specwf-p0xx-* session + 复用 cmd_gate_step；selftest 31/31 = 28 + F27-F29）+ `scripts/step_enforce.py`（feature→P 映射，缺位 exit 2）；**批次级强制**（存在 + decision 非空）+ **只读零副作用**（P-022 教训）；**吃狗粮自证** = P-024 session 过 step-enforce exit 0；三通道全绿。**C 待 A 落地后触发**（下一候选，用户裁决或后续批次暴露表演空间时）。版本 v1.4 → v1.5 |
+| 2026-09-09 | **P-025 实施追记（用户指令「按照吃狗粮执行出路 C」）**：出路 C 落地 = spec_runner **v1.4.0**（`verify-anchor --session` 子命令——decision 锚点真实性机械核查：文件存在 + 章节标题**精确匹配**（标题首 token 去尾点，`4.` 命中 §4 不命中 4.1）+ 行号上界，URL soft exit 2；selftest **38/38** = 31 + F30-F36）+ **SPEC_PROCESS RULE-1 补独立 pass 取证清单**（审查输入 = 事件流 + verify-anchor + git 状态；纯登记型无 diff 合法；只验位置可达不验断言对错）；吃狗粮自证 = P-025 session 决策链 3 步过 step-gate exit 0 + 自身锚点 3 条过 verify-anchor exit 0；历史 session 取证（p020 v2 6 锚点含行号 / p023 2 / p024 1）全真实；三通道全绿；**B 仍暂缓**（C 落地后重评——后续批次暴露自报空间时评估）。版本 v1.5 → v1.6 |

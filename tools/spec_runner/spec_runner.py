@@ -258,6 +258,89 @@ def cmd_step_enforce(args) -> int:
     return cmd_gate_step(argparse.Namespace(session=sid, expect=None))
 
 
+# ---- 模块 2d：verify-anchor 锚点真实性取证（P-025，ADR-0011 出路 C——只读取证：文件存在 + 章节精确匹配 + 行号上界） ----
+ROOT_REPO = ROOT.parent.parent  # 仓库根（锚点路径相对仓库根解析；spec_runner 在 tools/spec_runner/）
+
+
+def _resolve_anchor(anchor: str):
+    """锚点解析 → (kind, path, loc)。kind ∈ section/line/url/unresolved。"""
+    m = re.match(r"^([A-Za-z0-9_./\-]+\.(?:md|py|jsonl))\s*§([0-9.]+)$", anchor)
+    if m:
+        return ("section", m.group(1), m.group(2))
+    m = re.match(r"^([A-Za-z0-9_./\-]+\.(?:md|py|jsonl))#L(\d+)$", anchor)
+    if m:
+        return ("line", m.group(1), int(m.group(2)))
+    if anchor.startswith(("http://", "https://")):
+        return ("url", anchor, None)
+    return ("unresolved", anchor, None)
+
+
+def _check_anchor(path, kind, loc):
+    """真实性核查 → None（真实）/ 硬性错误字符串 / 'soft'（URL 不可本地核）。"""
+    if kind == "url":
+        return "soft"
+    if kind == "unresolved":
+        return f"锚点形态不可解析: {path[:60]!r}"
+    full = ROOT_REPO / path
+    if not full.is_file():
+        return f"文件不存在: {path}"
+    text = full.read_text(encoding="utf-8", errors="replace")
+    if kind == "section":
+        # 章节标题精确匹配：标题首 token（去尾点，`4.` → `4`）== 锚点 N；
+        # §3.5 只命中 token 3.5，不命中 3.5.1 或 3
+        tok = loc.rstrip(".")
+        pat = re.compile(r"^#{1,6}\s+(\S+)")
+        if not any(m and m.group(1).rstrip(".") == tok
+                   for m in (pat.match(line) for line in text.splitlines())):
+            return f"章节不存在: {path} §{loc}"
+    else:  # line
+        total = len(text.splitlines())
+        if loc > total:
+            return f"行号越界: {path}#L{loc}（总行数 {total}）"
+    return None
+
+
+def cmd_verify_anchor(args) -> int:
+    """审查取证：session 内 decision 锚点真实性核查——只读零副作用（P-022 教训）。
+
+    exit 0 = 全部锚点真实；1 = 硬性（文件/章节/行号缺失）；2 = 软性（URL 或不可解析）。
+    """
+    w = EventWriter(sessions_dir())
+    decisions = [r for r in w.read(args.session) if r.get("event") == "decision"]
+    if not decisions:
+        print(f"verify-anchor[{args.session}]: 无 decision 事件（无可验锚点）")
+        return 1
+    hard, soft, ok = [], [], 0
+    for r in decisions:
+        inp = r.get("input") if isinstance(r.get("input"), dict) else {}
+        md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
+        for ev in md.get("evidence") or []:
+            anchor = ev.get("anchor") if isinstance(ev, dict) else str(ev)
+            if not anchor:
+                continue
+            kind, path, loc = _resolve_anchor(anchor)
+            res = _check_anchor(path, kind, loc)
+            if res == "soft":
+                soft.append(f"seq{r.get('seq')} {anchor[:60]!r}（外部证据，本地不可核）")
+            elif res:
+                hard.append(f"seq{r.get('seq')} {res}")
+            else:
+                ok += 1
+    for m in hard:
+        print(f"  [HARD] {m}")
+    for m in soft:
+        print(f"  [SOFT] {m}")
+    print(f"verify-anchor[{args.session}]: 锚点 {ok} 真实 / {len(hard)} 硬性 / {len(soft)} 软性")
+    if hard:
+        print(f"verify-anchor[{args.session}]: → exit 1（硬性违规——自报锚点指向不真实位置）")
+        return 1
+    if soft:
+        print(f"verify-anchor[{args.session}]: → exit 2（软性存疑，人工复核）")
+        return 2
+    print(f"verify-anchor[{args.session}]: 全部锚点真实 → exit 0")
+    return 0
+
+
 # ---- 模块 3：adapter 接口 + NativeHTTP（D4/D5——stdlib urllib，预检门控 + 重试） ----
 class LLMAdapter:
     """协议面（D4 开放结构单点）：chat / endpoint_ready。"""
@@ -467,6 +550,9 @@ def build_parser() -> argparse.ArgumentParser:
     se = sub.add_parser("step-enforce", help="批次级流程强制（P-024：定位 specwf-p0xx-* session + 决策流校验，只读）")
     se.add_argument("--pid", required=True, help="P 编号（如 P-024）——session 前缀锚点")
     se.set_defaults(func=cmd_step_enforce)
+    va = sub.add_parser("verify-anchor", help="锚点真实性取证（P-025，ADR-0011 出路 C：文件存在 + 章节/行号核查，只读）")
+    va.add_argument("--session", required=True, help="目标 session")
+    va.set_defaults(func=cmd_verify_anchor)
     st = sub.add_parser("selftest", help="内置自测（stdlib mock server）")
     st.set_defaults(func=lambda a: run_selftest())
     return p
@@ -685,6 +771,35 @@ def run_selftest() -> int:
                          "evidence": [{"grade": "E1", "anchor": "spec/step-gate-enforcement/DESIGN.md §4"}]}})
         p_se2 = run_cli("step-enforce", "--pid", "P-999")
         check("F29 step-enforce 合法链 → exit 0", p_se2.returncode == 0, p_se2.stdout[-80:])
+
+        # F30-F35: verify-anchor 锚点真实性取证（P-025，ADR-0011 出路 C——只读零副作用）
+        w_va = EventWriter(tmp)
+        def _va_d(anchor):
+            return {"category": "c", "scenario": "s", "reasoning": "r",
+                    "outcome": "o", "confidence": 0.9,
+                    "metadata": {"step_id": "research", "step_seq": 1,
+                                 "evidence": [{"grade": "E1", "anchor": anchor}]}}
+        w_va.append("va-real", "assistant", "decision", input_=_va_d("spec/step-gate/DESIGN.md §4"))
+        p_va0 = run_cli("verify-anchor", "--session", "va-real")
+        check("F30 verify-anchor 真实锚点 → exit 0", p_va0.returncode == 0, p_va0.stdout[-80:])
+        w_va.append("va-nofile", "assistant", "decision", input_=_va_d("spec/no-such-feature-xyz/NO.md §1"))
+        p_va1 = run_cli("verify-anchor", "--session", "va-nofile")
+        check("F31 verify-anchor 文件不存在 → exit 1", p_va1.returncode == 1)
+        w_va.append("va-nosec", "assistant", "decision", input_=_va_d("spec/step-gate/DESIGN.md §99"))
+        p_va2 = run_cli("verify-anchor", "--session", "va-nosec")
+        check("F32 verify-anchor 章节不存在 → exit 1", p_va2.returncode == 1)
+        w_va.append("va-noline", "assistant", "decision", input_=_va_d("spec/step-gate/DESIGN.md#L999999"))
+        p_va3 = run_cli("verify-anchor", "--session", "va-noline")
+        check("F33 verify-anchor 行号越界 → exit 1", p_va3.returncode == 1)
+        w_va.append("va-url", "assistant", "decision", input_=_va_d("https://example.com/x"))
+        p_va4 = run_cli("verify-anchor", "--session", "va-url")
+        check("F34 verify-anchor URL soft → exit 2", p_va4.returncode == 2)
+        w_va.append("va-sec5", "assistant", "decision", input_=_va_d("spec/independent-verify/RESEARCH.md §5"))
+        p_va5 = run_cli("verify-anchor", "--session", "va-sec5")
+        check("F35 verify-anchor §5 精确命中 → exit 0", p_va5.returncode == 0, p_va5.stdout[-80:])
+        w_va.append("va-sec53", "assistant", "decision", input_=_va_d("spec/independent-verify/RESEARCH.md §5.3"))
+        p_va6 = run_cli("verify-anchor", "--session", "va-sec53")
+        check("F36 verify-anchor §5.3 精确命中子章节 → exit 0", p_va6.returncode == 0, p_va6.stdout[-80:])
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))
