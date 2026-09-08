@@ -1,7 +1,7 @@
 ---
 id: ADR-0010
 type: adr
-version: 1.3
+version: 1.4
 status: accepted
 date: 2026-09-08
 depends: [SPEC-PROCESS, ADR-0007, community-ecosystem-RESEARCH, spec-runner-homing-RESEARCH]
@@ -146,7 +146,7 @@ COMMUNITY_ECOSYSTEM_RESEARCH v1.2 候选池（§3/§4）：
 ### 验收条件（approved 后）
 
 - docs/adr/README.md 索引出现 ADR-0010 ✓
-- community-ecosystem §4 补"分层归属"列（下次编辑时）
+- community-ecosystem §4 补"分层归属"列 ✓（2026-09-08 CER v1.3 落地：6 候选分层 + 不复用组标不适用）
 - 首个候选吸收（P-020）完整走三问
 
 ### 失效条件（何时重审）
@@ -169,3 +169,4 @@ COMMUNITY_ECOSYSTEM_RESEARCH v1.2 候选池（§3/§4）：
 | 2026-09-08 | **proposed → accepted**（用户确认「ADR-0010 v1.1 接受并 proposed → accepted」）：状态升格；docs/adr/README + ADR-0007 附录 A 同步；COMMUNITY_ECOSYSTEM_RESEARCH 待补"分层归属"列 + P-020 首例走三问（验收条件，下次编辑时执行） |
 | 2026-09-08 | 边界声明消歧（用户提问「ADR-0010 处理对象是否为调研报告」）：决策节补边界声明——门禁对象 = **候选吸收物**（提案中列出的待引入事物），**非调研报告/提案文档本体**（Layer-0 文档，Step 2 Review/独立 pass 管辖）；启发式 = "审引入什么，不审提案怎么写"。版本 v1.1 → v1.2 |
 | 2026-09-08 | 连锁否决辨析（用户确认「懒加载 = 评估工具/功能加入可行性，提案依赖被拒则间接拒绝提案」）：决策节追加辨析——间接否决成立（依赖候选被拒 → 提案默认连带否决，除非替代路径）+ 两点不自动成立（多候选路径 / 思想可留工具可拒先例）；梳理红线 = 间接否决只管"实现依赖"不蔓延"概念参考"。版本 v1.2 → v1.3 |
+| 2026-09-08 | **验收条件之二闭环**（用户指令「执行补列」）：CER v1.2→v1.3 §3.4 补"分层归属（ADR-0010 Q1）"列——6 候选分层（AGENTS.md 桥 L0 / 决策产物管线 L1 / drift-gate L0 / ARC L1 / DeepEval+调研链 L1 / ADR 三层 L0）+ 不复用组标"不适用"（已按 D6 先例否决）。版本 v1.3 → v1.4 |
