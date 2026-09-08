@@ -1,7 +1,7 @@
 ---
 id: ADR-0011
 type: adr
-version: 1.6
+version: 1.7
 status: accepted
 date: 2026-09-09
 depends: [ADR-0007, ADR-0010, step-gate-DESIGN, community-ecosystem-RESEARCH, FWK-DECISION-RECORD]
@@ -196,3 +196,4 @@ P-023（drift-gate 概念吸收，2026-09-09）按 spec 工作流走完 RESEARCH
 | 2026-09-09 | **用户裁决收口（用户指令「ADR-0011 决策为A + C 组合收口」）**：决策 = **A + C 组合**（A 流程强制根治缺口 1 触发依赖 + C 独立验证根治缺口 2 表演性决策；B 排除暂缓）；**proposed → accepted**；**失效条件命中登记**（P-021/022/023 三连批应走未走，90 日窗口，E1 实证 + 样本㉚）→ A 为下一候选实施批待用户独立指令、C 待 A 落地后触发；原「登记不实施」废止为「决策收口 + 触发驱动实施」；docs/adr/README + ADR-0007 附录 A + CODE_WIKI 状态同步。版本 v1.3 → v1.4 |
 | 2026-09-09 | **P-024 实施追记（用户指令「开启后续吃狗粮spec工作流」）**：出路 A 落地 = pre-commit **第四 hook `step-enforce`**（files 收窄 spec/ 四文档）+ **spec_runner.py v1.3.0**（`step-enforce --pid` 前缀定位 specwf-p0xx-* session + 复用 cmd_gate_step；selftest 31/31 = 28 + F27-F29）+ `scripts/step_enforce.py`（feature→P 映射，缺位 exit 2）；**批次级强制**（存在 + decision 非空）+ **只读零副作用**（P-022 教训）；**吃狗粮自证** = P-024 session 过 step-enforce exit 0；三通道全绿。**C 待 A 落地后触发**（下一候选，用户裁决或后续批次暴露表演空间时）。版本 v1.4 → v1.5 |
 | 2026-09-09 | **P-025 实施追记（用户指令「按照吃狗粮执行出路 C」）**：出路 C 落地 = spec_runner **v1.4.0**（`verify-anchor --session` 子命令——decision 锚点真实性机械核查：文件存在 + 章节标题**精确匹配**（标题首 token 去尾点，`4.` 命中 §4 不命中 4.1）+ 行号上界，URL soft exit 2；selftest **38/38** = 31 + F30-F36）+ **SPEC_PROCESS RULE-1 补独立 pass 取证清单**（审查输入 = 事件流 + verify-anchor + git 状态；纯登记型无 diff 合法；只验位置可达不验断言对错）；吃狗粮自证 = P-025 session 决策链 3 步过 step-gate exit 0 + 自身锚点 3 条过 verify-anchor exit 0；历史 session 取证（p020 v2 6 锚点含行号 / p023 2 / p024 1）全真实；三通道全绿；**B 仍暂缓**（C 落地后重评——后续批次暴露自报空间时评估）。版本 v1.5 → v1.6 |
+| 2026-09-09 | **P-027 盲区修复追记（用户指令「登记并修复 step-enforce 的盲区」）**：出路 A 实施物（step-enforce hook）暴露**覆盖盲区**——v1.0 files 正则仅收四文档精确名，不匹配 P-003 前遗留前缀命名（COMMUNITY_ECOSYSTEM_RESEARCH.md / STEP_GATE_CHECKLIST.md）→ **P-026 批次实际未被 hook 门禁强制**（手动吃狗粮掩盖）→ **M7 样本 ㉛ 入账**（1 P2，形态 II = 0 不入分桶）；修复 = FEATURE_RE/files 扩展 `[A-Z0-9_]+_` 前缀四文档 + **历史批次豁免（P-020 前不追溯）**（新纳入 15 feature 中 13 个为 P-020 前批次豁免，step-gate P-020 / community-ecosystem P-026 纳入强制且均有 session）；step-gate-enforcement DESIGN v1.0→v1.1 追记；三通道全绿 + 五场景验收；**A+C 两路闭环后新增机制自身盲区已修复**——B 仍暂缓。版本 v1.6 → v1.7 |

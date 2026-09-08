@@ -3,7 +3,7 @@
 ---
 id: step-gate-enforcement-DESIGN
 type: design
-version: 1.0
+version: 1.1
 status: verified
 date: 2026-09-09
 depends: [step-gate-enforcement-RESEARCH, ADR-0011, ADR-0010, step-gate-DESIGN, SPEC-PROCESS]
@@ -98,10 +98,10 @@ python tools/spec_runner/spec_runner.py step-enforce --pid P-0xx [--session-name
   name: Step decision-stream enforcement (P-024, ADR-0011 A)
   entry: python scripts/step_enforce.py
   language: system
-  files: ^spec/[a-z0-9-]+/(RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(_FUNC)?)\.md$
+  files: ^spec/[a-z0-9-]+/(?:[A-Z0-9_]+_)?(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(?:_FUNC)?)\.md$
 ```
 
-- `files` 收窄：仅四文档（RESEARCH/DESIGN/IMPLEMENTATION/CHECKLIST*）——纯文档批、spec/ 下非四文档（如 CHANGELOG）不触发
+- `files` 收窄：仅四文档（RESEARCH/DESIGN/IMPLEMENTATION/CHECKLIST*，v1.1 起含 `[A-Z0-9_]+_` 前缀——P-003 命名约定前遗留的非标准命名文档，如 `COMMUNITY_ECOSYSTEM_RESEARCH.md` / `STEP_GATE_CHECKLIST.md`，均属应走管线交付物）——纯文档批、spec/ 下非四文档（如 CHANGELOG / `*_TEMPLATE.md` / `*_AUDIT.md` / PLAN）不触发
 - entry 脚本逻辑：
   1. `sys.argv[1:]`（pre-commit 传入匹配文件）→ 提取 feature 名（`spec/<feature>/` 第二段）
   2. 读 `docs/PROGRESS.md`，正则提取 `P-(\d{3})` 行内是否含 `spec/<feature>/` 链接 → feature↔P 映射
@@ -163,6 +163,22 @@ python tools/spec_runner/spec_runner.py step-enforce --pid P-0xx [--session-name
 - selftest 增 F2x：step-enforce 四场景（无 session / 空链 / 合法 / 软性）
 - 三通道复跑：dc-validator / m7-stats / repo-stats 全绿（hook 新增 = .pre-commit-config.yaml 变更 → repo-stats 对账）
 - **吃狗粮实证**：本批（P-024）自身 commit 走 step-enforce 门禁——RESEARCH.md 首 commit 即要求 session 存在 → 自证
+
+## 9. 追记（P-027 盲区修复，2026-09-09）
+
+> 用户指令「登记并修复 step-enforce 的盲区」。
+
+### 9.1 盲区登记（M7 样本 ㉛）
+
+- **失效面**：v1.0 `files` 正则仅收四文档**精确名**（`RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(_FUNC)?\.md$`），不匹配 P-003 命名约定前遗留的 `*_四文档` 前缀形态（`COMMUNITY_ECOSYSTEM_RESEARCH.md` / `STEP_GATE_CHECKLIST.md` 等）——**P-026 批次实际未被 hook 门禁强制**（吃狗粮手动补跑 step-gate 掩盖），应走管线批次可静默绕过门禁。
+- **根因**：v1.0「files 收窄仅四文档」假设非四文档均非管线交付物，忽略遗留前缀命名；「四文档」判定以文件名精确匹配实现而非语义类型（RESEARCH/DESIGN/IMPLEMENTATION/CHECKLIST）匹配。
+- **修复**：files 正则 + FEATURE_RE 扩展 `[A-Z0-9_]+_` 前缀（语义类型匹配）；**历史批次豁免**（P-020 前批次不追溯强制——决策流纪律 P-020 起建立，早于 P-020 的 feature 无 specwf session，强制即误伤）。
+- **覆盖核对**：新纳入 15 feature 中 13 个为 P-020 前历史批次（豁免），仅 step-gate（P-020）/ community-ecosystem（P-026）纳入强制且均有 session（五场景验收 §8.2 见 P-027 记录）。
+- **形态 II = 0**：机制覆盖盲区非字段级错误值，不入分桶（同 DIS-009 处置逻辑）。
+
+### 9.2 版本说明
+
+v1.0 → v1.1（§4.2 files 收窄说明 + 本追记）。PROGRESS P-024 行 / CODE_WIKI v1.27 历史叙事不回溯改写，P-027 行登记修复事实。
 
 ---
 

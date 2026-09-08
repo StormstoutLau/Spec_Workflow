@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """step-enforce hook 入口（P-024，ADR-0011 出路 A——批次级流程强制）。
 
-pre-commit 传入匹配文件（files: ^spec/<feature>/(RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST*).md$），
+pre-commit 传入匹配文件（files: ^spec/<feature>/([A-Z0-9_]+_)?(四文档).md$——含非标准前缀命名），
 本脚本：① 提取 feature 名 → ② 读 PROGRESS.md 映射 P 编号 → ③ 调用 spec_runner step-enforce。
 只读零副作用（P-022 教训：不创建/修改/提交任何文件）。
 exit 0 = 全部应走批次决策流就绪；1 = 任一缺失（阻断）；2 = 映射缺位（提示，不阻断）。
+历史豁免（P-027 盲区修复，2026-09-09）：P-020 前批次（决策流纪律建立前）不追溯强制。
 """
 import re
 import subprocess
@@ -16,11 +17,17 @@ PROGRESS = ROOT / "docs" / "PROGRESS.md"
 RUNNER = ROOT / "tools" / "spec_runner" / "spec_runner.py"
 
 P_ROW_RE = re.compile(r"^\|\s*(P-\d{3})\s*\|.*?spec/([a-z0-9-]+)/")
-FEATURE_RE = re.compile(r"^spec/([a-z0-9-]+)/(RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(?:_FUNC)?)\.md$")
+# P-003 命名约定前遗留的前缀命名（COMMUNITY_ECOSYSTEM_RESEARCH.md / STEP_GATE_CHECKLIST.md 等）纳入扫描；
+# 模板（*_TEMPLATE.md）/ PLAN / *_AUDIT.md 非管线交付物，不触发。
+FEATURE_RE = re.compile(r"^spec/([a-z0-9-]+)/(?:[A-Z0-9_]+_)?(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(?:_FUNC)?)\.md$")
 
 
 def build_feature_pid_map():
-    """PROGRESS.md → {feature: P-0xx} 映射（行内 spec/<feature>/ 链接定位）。"""
+    """PROGRESS.md → {feature: P-0xx} 映射（行内 spec/<feature>/ 链接定位）。
+
+    语义 = 最后一行引用胜出（latest batch 拥有 feature——P-026 覆盖 P-018）；
+    故后续 P 行应避免跨 feature 链接引用，防止劫持映射（P-027 五场景实测捕获）。
+    """
     if not PROGRESS.exists():
         return {}
     mapping = {}
@@ -44,6 +51,11 @@ def main(argv) -> int:
         if not pid:
             print(f"step-enforce: {feat} 无对应 P 行（PROGRESS 映射缺位）→ exit 2 提示")
             return 2
+        # P-020 前历史批次豁免（P-027 盲区修复）：决策流纪律 P-020 起建立，
+        # 早于 P-020 的 feature（遗留前缀命名为主）无 specwf session，不追溯强制。
+        if int(pid.split("-")[1]) < 20:
+            print(f"step-enforce: {feat} ({pid}) 为 P-020 前历史批次 → 豁免（不追溯强制）")
+            continue
         r = subprocess.run([sys.executable, str(RUNNER), "step-enforce",
                             "--pid", pid], capture_output=True, text=True)
         if r.stdout:

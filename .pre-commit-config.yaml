@@ -26,9 +26,10 @@ repos:
         language: system
         files: ^(CODE_WIKI\.md|README(\.en)?\.md|\.pre-commit-config\.yaml|docs/|spec/|adr/|scripts/)
       # 批次级流程强制校验器（P-024，ADR-0011 出路 A——应走管线批次提交门禁：session 存在 + 决策流非空）
-      # 设计：spec/step-gate-enforcement/DESIGN.md §4.2（files 收窄至四文档；只读零副作用 P-022 教训）
+      # 设计：spec/step-gate-enforcement/DESIGN.md §4.2（files 收窄至四文档 + 遗留前缀命名；只读零副作用 P-022 教训）
+      # P-027（2026-09-09）：files 正则扩展 [A-Z0-9_]+_ 前缀——P-003 命名约定前遗留的非标准命名文档纳入扫描
       - id: step-enforce
         name: Step decision-stream enforcement (P-024, ADR-0011 A)
         entry: python scripts/step_enforce.py
         language: system
-        files: ^spec/[a-z0-9-]+/(RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(_FUNC)?)\.md$
+        files: ^spec/[a-z0-9-]+/(?:[A-Z0-9_]+_)?(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(?:_FUNC)?)\.md$
