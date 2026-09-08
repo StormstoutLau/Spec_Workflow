@@ -1,20 +1,20 @@
 ---
 id: community-ecosystem-RESEARCH
 type: design
-version: 1.1
+version: 1.2
 status: in-review
 date: 2026-09-08
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0007]
 upstream: null
 ---
 
-# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.1 (2026-09-08)
+# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.2 (2026-09-08)
 
 > **任务来源**: 用户提问「调研分析社区当前类似优秀的开源框架 是否可以补强复用」+ 补充提问「当前工作流规定了流程 但每个步骤比如调研 审查 设计方案 实施方案等具体步骤 社区是否有类似的框架 skill MCP工具可以补强 同时当前是否可以强制要求每个步骤给出决策 引用信息依据 提供给下一轮审查」
 > **调研方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch 六轮取证（2026-09-08，四方向 + 本轮步骤级工具两方向）。
 > **审查状态**: `自查（单视角）`——调研收束轮，同 P-012/P-013/P-015 先例（RESEARCH-only，无独立 pass）。
-> **v1.1 变更（补充调研轮）**: 用户补充提问触发——新增 §2.5 步骤级工具盘点（A-17~A-25，第二轮 WebSearch：deep research 链 / 跨 agent skill 安装 / ADR 强制门禁）+ §3.5「强制决策产物管线」设计裁定（C-08~C-10：十步流程每步产出 Decisions+引用依据事件入 Spec_Runner 流，gate 机械校验缺失，供下一轮 RULE-1/RULE-5 审查臂读取——与 FWK-DECISION-RECORD + M7 + 证据分级 + Spec_Runner gate 已有资产直接咬合）；A 类 16→25、B 类 2→3、C 类 7→10、假设区 3→4（新增 H4）。核心结论不变（分层吸收判定），新增「强制决策产物管线」**可行且优先**——社区已有独立演化佐证（adr-governance enforcement loop / ADR Kit 三层 enforcement / ADR 侵食三层防御）。
-> **裁决建议**: **分层吸收——生成端互操作立即做（AGENTS.md 桥）、验证端概念吸收登记候选（drift-gate / 意图图-证据图）、决策溯源轻量候选（ARC 作方向 A 先导）、重依赖平台不复用**；**「强制每步决策+引用依据」裁定 = 可行且优先（零新依赖，直接咬合 Spec_Runner gate + FWK-DECISION-RECORD，见 §3.5）**。待用户裁决（P-018 登记）。
+> **v1.2 变更（吃狗粮 review 深度审计轮，用户指令「以本次开发为例进行吃狗粮测试 按 spec 流程盲区扫描 可行性 版本 兼容」）**: 对本报告自身做同基座深度 review（RULE-1 时序独立/self-dogfooding，盲区扫描 = 计数/版本/兼容/一致性四维）捕获 **1P1 + 2P2 + 8P3**：P1 = **C 类计数声明 10 实为 12**（§3 实际【C】12 条：3.1×2 + 3.2×4 + 3.3×3 + 3.5×3——v1.1 全文重写时重数漏 2，dc_validator 不覆盖 C 类边界外，同 P-015 ㉖ 族）→ **M7 样本 ㉙ 入账**（计数声明错误）；P2 = C-10 编号引用错位（佐证实为 C-12）+ §4.2 验证表未同步 v1.1 新增断言 5 行（Alibaba/u14app/Agent Leaderboard/adr-governance/ADR 侵食）；P3 = §2.5「三类」实为两类措辞过度 / 版本成熟度缺失族（gpt-researcher MCP v1.0.0@2026-05-22 补入、u14app/Alibaba/AAT/adr-governance/ADR Kit 无版本号标注）/「G2」自造编号悬空去除 / §3.5 的 step 与 evidence 落点精化（metadata.evidence + metadata.step_id）/ **兼容矩阵缺失（新增 §2.6：gpt-researcher 官方支持 OPENAI_BASE_URL 本地 OpenAI 兼容端点→三机 LM Studio 可直接接、搜索轴可切 duckduckgo/searx 免 Tavily key、多代理流水线含 Reviewer「研究-审核-修正」循环=第三同构佐证补入 C-12）**。核心结论与 §3.5 裁定不受影响（v1.2 修正全部为表述/版本/兼容取证精化）。A/B/C/H 计数不变（25/3/12/4——C 由 10 修正为实际 12）。
+> **裁决建议**: 不变（分层吸收 + §3.5 强制决策产物管线可行且优先）。待用户裁决（P-018 登记）。
 
 ## 0. 断言统计表（必填，审计入口）
 
@@ -22,10 +22,10 @@ upstream: null
 |------|------|------|
 | A 事实类 | 25 | 每条附 URL 来源；取证日期 2026-09-08（v1.1 +9 条步骤级工具） |
 | B 推断类 | 3 | 登记于附录 B |
-| C 判断类 | 10 | §3.5 强制决策产物管线裁定 3 条 + §4 补强评估 7 条 |
+| C 判断类 | 12 | §3.5 强制决策产物管线裁定 3 条 + §4 补强评估 9 条（v1.2 修正：v1.1 声明 10 实为 12，M7 样本 ㉙） |
 | 假设区 | 4 | H1-H4（全部待实测——读取兼容 / 导入可行性 / 评测价值 / MCP 服务形态） |
 
-> **计数说明（R7 机械重数）**: A 类 25 条（行首 `【A】` 标记）；附录 B 3 条（`"id": "B\d+"` 机读块）；C 类 10 条（`【C】` 标记——不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 新增 3 条同轮人工重数）；假设区 4 条（`[H\d+]` 列表项）。
+> **计数说明（R7 机械重数）**: A 类 25 条（行首 `【A】` 标记）；附录 B 3 条（`"id": "B\d+"` 机读块）；C 类 12 条（`【C】` 标记——**不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 声明 10 实为 12 由 v1.2 吃狗粮 review 重数捕获（M7 样本 ㉙）**）；假设区 4 条（`[H\d+]` 列表项）。
 
 ## 1. 调研目标与实体盘点
 
@@ -98,11 +98,11 @@ upstream: null
 
 ### 2.5 步骤级工具盘点（v1.1 新增：答题主问「每步骤的具体执行」）
 
-社区对「步骤级执行」的补强可分三类（A-17~A-25）：
+社区对「步骤级执行」的补强可分两大类（A-17~A-25；v1.2 修正措辞——v1.1 写"三类"但只列两类，§2.5 原审缺失）：
 
 #### 调研/发现步骤（Step 1 调研 → 弹药层）
 
-【A】**gpt-researcher**（github.com/assafelovic/gpt-researcher，29.2k 星）——开源深度研究代理：**规划者-执行者架构**（planner 生成研究问题 → 爬虫执行代理收集 → publisher 汇总）；生成带引用（20+ 来源汇总）的客观报告；提供 MCP server 形态（GTP Researcher MCP，规划者-执行者 + 上下文优化）。【来源：https://github.com/topics/deepresearch ; https://cloud.tencent.com/developer/mcp/server/11518】
+【A】**gpt-researcher**（github.com/assafelovic/gpt-researcher，29.2k 星 2026-09 主题页快照 / 27.2k 星 mcpgee 快照；MCP 侧版本 **v1.0.0、2026-05-22 更新、维护状态 active**）——开源深度研究代理：**规划者-执行者架构**（planner 生成研究问题 → 爬虫执行代理收集 → publisher 汇总；多代理流水线含 **Reviewer「研究-审核-修正」循环**——材料不达标打回，v1.2 补取证）；生成带引用（20+ 来源汇总）的客观报告；提供 MCP server 形态（GTP Researcher MCP，规划者-执行者 + 上下文优化）。**兼容取证（v1.2，直接答本仓可行性）**：官方文档明确支持自定义 OpenAI 兼容端点（`OPENAI_BASE_URL` 指向本地 OpenAI 兼容服务 + `FAST_LLM/SMART_LLM/STRATEGIC_LLM=openai:*`）→ **三机 LM Studio（OpenAI 兼容，P-009/P-010 已实测）可直接接**；搜索轴 `TAVILY_API_KEY` 可替换为 duckduckgo/google/bing/searchapi/serper/**searx**（含本地 SearXNG，免商业 key）；运行门槛 Python 3.11+。【来源：https://github.com/topics/deepresearch ; https://cloud.tencent.com/developer/mcp/server/11518 ; https://docs.gptr.dev/docs/gpt-researcher/llms（OPENAI_BASE_URL） ; https://www.mcpgee.com/servers/gpt-researcher（v1.0.0/27,217★）】
 
 【A】**Alibaba-NLP/DeepResearch**（github.com/Alibaba-NLP/DeepResearch，19.9k 星）——Tongyi Deep Research，开源深度研究 agent（信息检索式，web-agent）。【来源：https://github.com/topics/deepresearch】
 
@@ -132,6 +132,21 @@ upstream: null
 | Step 5-7 实施+校验 | TDD + IMPLEMENTATION/CHECKLIST + 三校验器 + pre-commit hook | Superpowers TDD skill 形态（生成端）、ADR Kit 三层 hook 分阶段（候选） |
 | Step 8-10 独立 pass+收束 | RULE-1/RULE-5 审查臂 + Spec_Runner gate | spec-reviewer 子代理（同构印证）、promptfoo/DeepEval 评测臂（候选） |
 
+### 2.6 兼容与可行性矩阵（v1.2 新增：答「可行性 版本 兼容」盲区）
+
+| 工具 | 三机 LM Studio OpenAI 兼容端点 | 搜索轴要求 | 版本/维护 | 环境门槛 | 可行性判定 |
+|------|------------------------------|-----------|-----------|---------|-----------|
+| gpt-researcher | ✅ **官方支持**（OPENAI_BASE_URL，A-17 v1.2 取证） | Tavily（免费额）或 duckduckgo/searx+ 等（可免商业 key） | MCP v1.0.0 / 2026-05-22 / active | Python 3.11+ | **可行（触发驱动，H4 实测后接）** |
+| Gigaxity Deep Research | ✅（local-inference 分支换 vLLM/SGLang/llama.cpp，OpenAI 兼容） | 默认 OpenRouter（云端 key）；本地分支可 | 53★ / MIT（版本号未见） | Python 3.11+ / FastAPI | 可行但默认云端 key，本地分支待实测 |
+| u14app/deep-research | 未证（宣称任意 LLM） | — | 4.7k★（版本号未见） | Node/JS | H4 待测 |
+| Alibaba DeepResearch | 未证 | — | 19.9k★（版本号未见） | — | H4 待测 |
+| AAT | n/a（只装 skills+MCP，不跑 LLM） | n/a | MIT（版本号未见） | **Python 3.11+ + uv** | 环境门槛高，候选 |
+| ARC | n/a（CLI 图查询） | n/a | MIT（版本号未见） | 任意 OS 单文件二进制 | 轻量可行 |
+| adr-governance / ADR Kit | n/a | n/a | MIT（版本号未见） | git hooks / Python | 模式印证（不强引） |
+| promptfoo（P-010） | ✅（双臂模板端点运行时注入，已实测） | n/a | 24.9k★ / 并入 OpenAI / MIT | CLI | 已落地 |
+
+> v1.2 版本盲区登记：除 gpt-researcher（MCP v1.0.0）/promptfoo（星数）/Superpowers（报道数）外，u14app/Alibaba/AAT/ARC/adr-governance/ADR Kit/Gigaxity **均未标注版本号**——采纳任一候选前须 P-015 v1.2 式源码/API 直读核验（§4.3 局限 5）。
+
 ## 3. 补强可行性评估（候选议程明细）
 
 ### 3.1 立即做（零依赖、生成端互操作）
@@ -148,11 +163,11 @@ upstream: null
 
 【C】**gpt-researcher / Gigaxity / AAT 调研链候选（v1.1 新增）**——调研步骤弹药层补强：gpt-researcher（29.2k★，规划者-执行者 + 引用报告）与 Gigaxity（MCP、引用绑定 + 矛盾检测 + 质量门）为候选登记；AAT 的「跨 agent 统一安装 skills+MCP」形态本身印证 AGENTS.md 桥方向。均触发驱动（H4 端点/服务形态实测后）；**不引入重依赖**——gpt-researcher 本体是独立服务，接入形态 = MCP 调用而非库依赖。【来源：A-17/A-20/A-21】
 
-【C】**ADR 三层 enforcement 模式吸收候选（v1.1 新增）**——「ADR 禁止事项显式化 → 静态检查 → CI/hook 自动执行 + 提交自查清单」三层防御与本框架「文档声明 → 校验器 → pre-commit hook」同构，且提供两个补强点：① 禁止事项标识符级显式化（本框架 Spec_Runner gate 的 cmd 是正例命令，缺"禁止性"负例通道的显式登记位点）；② 分阶段 hook（pre-commit 快查/pre-push 慢查）——登记为 gate 演进候选（G2），不改现状。
+【C】**ADR 三层 enforcement 模式吸收候选（v1.1 新增）**——「ADR 禁止事项显式化 → 静态检查 → CI/hook 自动执行 + 提交自查清单」三层防御与本框架「文档声明 → 校验器 → pre-commit hook」同构，且提供两个补强点：① 禁止事项标识符级显式化（本框架 Spec_Runner gate 的 cmd 是正例命令，缺"禁止性"负例通道的显式登记位点）；② 分阶段 hook（pre-commit 快查/pre-push 慢查）——登记为 gate 演进候选（先不编号，挂 §3.5 P-019 采纳路径一并设计，v1.2 去除自造编号）。
 
 ### 3.3 不复用（明确否决）
 
-【C】**Superpowers / SpecKit 本体不复用**——流程技能形态软（LLM 遵循式，无机械门禁），本框架已用更硬的手段实现同一目标（Spec_Runner gate + pre-commit 三 hook）；其设计思想（brainstorming 强制产出 / 子代理审查）已在本框架十步流程中对应存在。唯一吸收 = 社区同构佐证（见 C-10）。
+【C】**Superpowers / SpecKit 本体不复用**——流程技能形态软（LLM 遵循式，无机械门禁），本框架已用更硬的手段实现同一目标（Spec_Runner gate + pre-commit 三 hook）；其设计思想（brainstorming 强制产出 / 子代理审查）已在本框架十步流程中对应存在。唯一吸收 = 社区同构佐证（见 C-12，v1.2 修正编号错位）。
 
 【C】**Langfuse 不复用**——自托管重平台，违反零依赖不变式（D6、P-009 L7）；Spec_Runner 事件流保持 stdlib-only。仅登记其事件模型为 L7 schema 演进参考（观察项，不阻塞）。
 
@@ -174,11 +189,11 @@ upstream: null
 
 **裁定：可行且优先——已具备全部基础资产，零新依赖，社区独立演化佐证方向。**
 
-【C】**管线形态**——十步流程每步完成时，强制产出一条「**决策记录事件**」（复用 FWK-DECISION-RECORD 八字段契约：category/scenario/reasoning/outcome/confidence/entities/decision_maker/metadata）写入 Spec_Runner 事件流（`event: "decision"`，十字段 schema 扩展）；每条必须携带**引用依据**（evidence 字段 = 该步声明的来源锚点：URL / 源码路径 / 文件行号 + 证据等级 E1-E4，复用 FWK-ASSERTION 分级）。`step gate`（新 gate 名）机械校验：① 决策记录 schema 字段完整性 ② 引用依据非空且锚点可解析 ③ 声明连续性（每步恰一条，防跳步）——不满足即 exit 非 0 阻止进入下一步。**下一轮审查（RULE-1 时序独立臂 / RULE-5 异基座臂）以事件流为唯一输入**——审查对象 = 预览步骤的决策 + 引用，而非全文重读——这是"声明=重数"从文档层推广到**流程执行层**。
+【C】**管线形态**——十步流程每步完成时，强制产出一条「**决策记录事件**」（复用 FWK-DECISION-RECORD 契约）写入 Spec_Runner 事件流（`event: "decision"`；**step 标识 = `metadata.step_id`（如 "research-1"/"design"/"review"），evidence 锚点数组 = `metadata.evidence`（URL / 源码路径 / 文件行号 + 证据等级 E1-E4）——v1.2 精化：FWK-DECISION-RECORD 八字段本身无 evidence/step，落在通用 `metadata: Dict` 通道（P-016 severity 同通道先例）**）。`step-gate`（新 gate 名）机械校验：① 决策记录 schema 字段完整 ② evidence 非空（E1-E4 等级标注存在 + 锚点非空）③ **步骤连续性（该 session 内每个已登记 step_id 恰一条 decision 事件 + 按 step 序单调递增——v1.2 精化："每步恰一条"的 step 概念 = step_id 显式标识，无需在 runner 引入新状态**）——不满足即 exit 非 0 阻止进入下一步。**下一轮审查（RULE-1 时序独立臂 / RULE-5 异基座臂）以事件流为唯一输入**——审查对象 = 前置步骤的决策 + 引用，而非全文重读——这是"声明=重数"从文档层推广到**流程执行层**。
 
 【C】**与已有资产咬合**——① 格式 = FWK-DECISION-RECORD（已有，免新契约）；② 校验 = Spec_Runner gate（已有 execute 骨架，新增 decision 事件类型 + 校验规则，LOC 增量小）；③ 审查管线 = RULE-1/RULE-5 已物理化（特异session + 异基座），只差"决策事件是否每个步骤都有"的强制；④ 引用分级 = FWK-ASSERTION E1-E4 + M7 既有的行号/源码锚点纪律——**本方案是本框架全部核心机制（决策契约 + 事件流 + 门禁 + 证据分级 + 时序独立）的一次组合落地**，不引入任何新概念。
 
-【C】**社区佐证**——adr-governance"ADL = 机器可读 spec + CI 强制执行"（决策与代码闭合循环）、ADR Kit"三层 enforcement + 质量门拒绝模糊决策 + supersede 不编辑"、ADR 侵食"禁止事项显式化 + 机械检测 + 清单自查"——三个独立项目演化出与本方案同构的「决策产物化 + 机械强制」模式；差异 = 本方案更进一步：把决策产物绑定到**流程步骤粒度**（每步一行）并作为**下一轮审查的唯一输入**（时序独立审查），社区方案停留在仓库级 ADR 强制。
+【C】**社区佐证**——adr-governance"ADL = 机器可读 spec + CI 强制执行"（决策与代码闭合循环）、ADR Kit"三层 enforcement + 质量门拒绝模糊决策 + supersede 不编辑"、ADR 侵食"禁止事项显式化 + 机械检测 + 清单自查"——三个独立项目演化出与本方案同构的「决策产物化 + 机械强制」模式；**v1.2 补第四佐证：gpt-researcher 多代理流水线原生含 Reviewer「研究-审核-修正」循环（材料不达标打回重查，A-17 取证）——审查闭环在生成端的又一独立实现**；差异 = 本方案更进一步：把决策产物绑定到**流程步骤粒度**（每步一行）并作为**下一轮审查的唯一输入**（时序独立审查），社区方案停留在仓库级 ADR 强制。
 
 **采纳路径（若用户裁决）**：P-019 feature（小流程）：Spec_Runner 增 `decision` 事件类型 + `step-gate` 命令（机械校验）→ DESIGN/IMPL/CHECKLIST 三件套 → 本仓首个真实运行 = 一个 feature 全流程每步决策事件入流。
 
@@ -211,9 +226,14 @@ upstream: null
 | SGE drift gate 阻塞合并 | arXiv 摘要/全文 | ✅ 已验证 |
 | AGENTS.md 23 工具支持 + 就近优先 | gitcode 指南 + TechSpokes 规范 | ✅ 已验证（双向来源） |
 | gpt-researcher 规划者-执行者 + 引用报告 | MCP 广场 README | ✅ 已验证 |
+| gpt-researcher **OPENAI_BASE_URL 自定义 OpenAI 兼容端点**（v1.2 增） | docs.gptr.dev LLM 配置页 | ✅ 已验证（官方文档，含 llama.cpp 本地端点示例） |
+| gpt-researcher 多代理流水线含 Reviewer 修正循环（v1.2 增） | gitcode 指南（multi_agents reviewer.py） | ✅ 已验证（文章级 + 目录结构佐证） |
 | Gigaxity 引用绑定 + 矛盾检测 + CRAG 质量门 | MCP 广场 README | ✅ 已验证 |
 | AAT 一命令多 agent 安装 + 20+ 学术源 MCP | 仓库 README | ✅ 已验证 |
 | ADR Kit 三层 enforcement + lint 从 ADR 生成 + supersede 不编辑 | 仓库 README FAQ | ✅ 已验证 |
+| adr-governance ADL 机器可读 + CI 强制执行闭环（v1.2 补 4.2 表缺行） | 仓库 README | ✅ 已验证 |
+| ADR 侵食三层防御 禁止事项显式化→差分静态检查→CI（v1.2 补 4.2 表缺行） | wakatchi.dev 文章 | ✅ 已验证 |
+| Alibaba DeepResearch / u14app / Agent Leaderboard（v1.2 补 4.2 表缺行） | github topics / 仓库 README | ⚠️ 声明级（星数为快照，功能细节未展开） |
 | 三起事故 / 星数 / 采用数 | 见 4.1 标注 | ⚠️ 声明级 |
 
 ### 4.3 已知局限
@@ -222,6 +242,8 @@ upstream: null
 2. Superpowers / SpecKit / gpt-researcher 星数为第三方报道或主题页快照，非 API 快照；锁引用时须复核。
 3. 三起事故描述来自中文综述转述，个别细节未经官方确认——仅作动机佐证。
 4. ADR Kit 的 LOC/接口细节未核验（README 级）——采纳其模式时须 P-015 式源码直读。
+5. **版本成熟度盲区（v1.2 新增）**：除 gpt-researcher（MCP v1.0.0）/promptfoo（并 OpenAI）外，u14app/Alibaba DeepResearch/AAT/ARC/adr-governance/ADR Kit/Gigaxity/Superpowers/SpecKit 均未标注版本号——采纳任一候选前须源码/API 直读核验（P-015 v1.2 先例；H4 触发时一并执行）。
+6. **兼容性盲区部分解除（v1.2）**：gpt-researcher 与 OpenAI 兼容端点兼容性已官方文档确认（OPENAI_BASE_URL）——三机实测仍待 H4；Gigaxity 默认 OpenRouter 云端 key、本地分支待实测。
 
 ## 5. 对设计的输入
 
@@ -255,7 +277,7 @@ upstream: null
 - [H1] AGENTS.md 桥文件对主流工具（Cursor/Copilot/Codex 等）的读取兼容性——本仓为方法论文档仓，工具读取价值场景有限——若采纳登记则须实测确认收益非零
 - [H2] ARC 对 M7/ADR 决策的导入可行性——字段映射 / 关系类型差异（复用 FWK-DECISION-RECORD 映射契约）——待触发时源码直读 + 试跑实测
 - [H3] promptfoo redteam 模块对本仓 M7 语料的安全评测价值——待首轮评测（端点就绪）后评估
-- [H4] 调研链 MCP（gpt-researcher/Gigaxity/AAT Paper Search）三机端点兼容性与服务形态——OpenAI 兼容端点实测 + 本地/远程服务形态确认 + 引用绑定质量抽样（v1.1 新增）
+- [H4] 调研链 MCP（gpt-researcher/Gigaxity/AAT Paper Search）三机端点兼容性与服务形态——**v1.2 部分解除：gpt-researcher 对 OpenAI 兼容端点的兼容性已官方文档确认（OPENAI_BASE_URL，省略 Tavily 换 searx/duckduckgo 亦可）**；剩余待实测 = 三机 LM Studio 实际接入 + Gigaxity 本地分支 + AAT uv/Python3.11 环境（v1.1 新增，v1.2 精化）
 
 ## 6. 参考文献
 
@@ -276,7 +298,9 @@ upstream: null
 - SDD 中文综述（Spec+Harness 三层）：https://juejin.cn/post/7663320939287347246
 - ADR-Tools（先例工具）：https://gitcode.com/gh_mirrors/ad/adr-tools
 - deepresearch 主题（gpt-researcher / Alibaba DeepResearch / u14app）：https://github.com/topics/deepresearch
-- GPT Researcher MCP：https://cloud.tencent.com/developer/mcp/server/11518
+- GOP Researcher MCP：https://cloud.tencent.com/developer/mcp/server/11518
+- gpt-researcher LLM 配置（OPENAI_BASE_URL 自定义端点）：https://docs.gptr.dev/docs/gpt-researcher/llms
+- gpt-researcher MCP 目录页（v1.0.0/27,217★）：https://www.mcpgee.com/servers/gpt-researcher
 - Gigaxity Deep Research：https://mcprepository.com/yoloshii/gigaxity-deep-research
 - Academic Agent Toolkit：https://github.com/JhonHander/academic-agent-toolkit
 - Agent Leaderboard：https://github.com/jaychempan/Agent-Leaderboard
@@ -305,13 +329,13 @@ upstream: null
 [
   {"id": "B1", "inference": "社区 spec 宪法类框架与本框架流程同构（Constitution≙SPEC_PROCESS、drift gate≙对账制、spec-reviewer≙独立 pass）", "basis": "A-02/A-04/SGE 能力清单归纳"},
   {"id": "B2", "inference": "AGENTS.md 桥文件可获工具互操作性收益（主流工具原生识别，进入本仓即行为对齐）", "basis": "A-05/A-06 标准事实归纳"},
-  {"id": "B3", "inference": "每步决策产物管线可行（基础资产齐备 + 社区三项目独立演化同构模式）", "basis": "C-08/C-09/C-10 + A-23/A-24/A-25"}
+  {"id": "B3", "inference": "每步决策产物管线可行（基础资产齐备 + 社区三项目独立演化同构模式）", "basis": "C-10/C-11/C-12 + A-23/A-24/A-25（v1.2 修正 basis 编号同步至 C-12 体系）"}
 ]
 ```
 
 ### 附录 C：C 类判断复盘
 
-- C-01 至 C-10：见 §3 各 `【C】` 行；§0 声明 10 条（人工重数先行——P-011 教训：先小数再写声明）。
+- C-01 至 C-12：见 §3 各 `【C】` 行；§0 声明 12 条（v1.2 吃狗粮 review 重数修正自 v1.1 的 10——P-011 教训的 reverse：声明写少漏计 2，M7 样本 ㉙）。
 
 ---
 
