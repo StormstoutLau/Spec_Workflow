@@ -3,7 +3,7 @@
 ---
 id: defect-fixes-DESIGN
 type: design
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-09-08
 depends: [SPEC-PROCESS, ADR-0010, ADR-0009, spec-runner-DESIGN, step-gate-CHECKLIST]
@@ -11,7 +11,7 @@ upstream: null
 ---
 
 > **Feature**: P-022 缺陷修复批——两个缺陷均来自 P-020 吃狗粮全流程活体实证（2026-09-08，commit 90040fb）
-> **状态**: 方案落档（draft），auto-commit 部分待 subagent 详细审查 → 用户决策；DIS-008 部分待用户决策
+> **状态**: 方案落档（draft），auto-commit 部分 subagent 审查完成（§1.4，结论 = A+B 修正后采纳）→ 待用户决策；DIS-008 部分待用户决策
 > **来源**: ① gate auto-commit 缺陷 = P-019 独立 pass 登记的 P3 观察项（P-020 候选）在 P-020 吃狗粮中活体复现（selftest 触发 gate 自动提交把真实 session finalize 行卷入 `gate:always-pass:pass` 噪音 commit，已软重置回并）；② DIS-008 竞态 = P-020 收束批 CODE_WIKI 同文件 6 并行 Edit 竞态复发（4 处回滚，串行重放修复）
 
 ---
@@ -46,6 +46,21 @@ upstream: null
 - README 命令面补充 `SR_GIT_AUTOCOMMIT` 说明
 - 既有 selftest F1-F19 不受影响（门控默认关）
 
+### 1.4 subagent 技术审查结果（v1.1 增补，2026-09-08，general-purpose 只读审查）
+
+**审查裁定：A+B 组合可采纳（修正后采纳），无否决项。**
+
+| 审查项 | 裁定 | 要点 |
+|--------|------|------|
+| 根因 F1/F2/F3 准确性 | ✅ 全成立 | 提交 f39f29b（st-001）与真实 session 同处 sessions/ 实证；selftest L467 仅注入 SR_SESSIONS_DIR=tmp 但 git 在真实仓操作；F3 的 commit 无 --no-verify，pre-commit 三校验器会跑 |
+| 方案 A 门控充分性 | ✅ 默认关可根除 | ⚠️ 小绕过：selftest `env=dict(os.environ,...)` 拷贝父环境——若宿主已导 `SR_GIT_AUTOCOMMIT=1` 仍会提交 → **实施需在 selftest fixture 显式 pop 该变量**（与 C 自然衔接） |
+| 方案 B 技术细节 | ✅ 正确，1 处关键 | **文件路径必须取自 `sessions_dir()`（与 EventWriter 同 base），不得硬编码 ROOT/"sessions"**，否则 tmp 隔离失效复发；rev-parse 起始 cwd 仍是 ROOT |
+| 设计一致性 | ✅ | SPEC_RUNNER_DESIGN 四处需修订：§2 目标(2)「+ git commit」/ §4「gate 后 git commit 钩子」/ mermaid「gate 后自动 commit」/ LOC 表「gate 后触发」→ 均改「opt-in（SR_GIT_AUTOCOMMIT=1）默认关」；**ADR-0010 宜表述为"借懒加载原则"而非门禁强制项**（Q1-Q3 对象 = 候选吸收物，本修复是既有工具改造） |
+| 边界/遗漏 | ⚠️ 2 项 | B 只提交单文件 = 行为比既往"全目录清扫"收窄，需文档声明；激活路径是否加 `--no-verify` 未决策（保留为实施时裁定项） |
+| 过度工程 | ✅ A+B 不算过度 | A 单用已足以关闭事故；B 为激活路径加固 + 结构性修 F1，成本极低 |
+
+**实施最需警惕 2 点**：① B 的文件路径必须源自 `sessions_dir()`；② 决定激活路径是否 `--no-verify` + selftest 显式 pop `SR_GIT_AUTOCOMMIT`。
+
 ## 2. 缺陷二：DIS-008 并行 Edit 竞态（工具行为缺陷）
 
 ### 2.1 复发记录
@@ -64,7 +79,7 @@ Edit 工具对同一文件无「基于最新版本」的乐观并发控制：bat
 
 ## 3. 验收路线（待决策后进入实施批小流程）
 
-1. 本方案落档（本文件）→ **subagent 详细审查（auto-commit 部分）** → 用户决策
+1. 本方案落档（本文件）→ **subagent 详细审查完成（v1.1，§1.4：auto-commit 方案 = A+B 修正后采纳，无否决项）** → 用户决策（D1/D2/D3）
 2. 决策通过 → 实施批（DESIGN 定稿 + CHECKLIST 两件套，P-016/P-020 小流程先例）：
    - 代码：spec_runner.py git_snapshot 门控 + 范围绑定；selftest 增补 fixture
    - 文档：SPEC_RUNNER_DESIGN 追记 + README + AGENTS.md 规则 + DIS-008 追记
