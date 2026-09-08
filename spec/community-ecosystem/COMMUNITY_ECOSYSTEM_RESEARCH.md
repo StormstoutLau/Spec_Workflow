@@ -1,14 +1,14 @@
 ---
 id: community-ecosystem-RESEARCH
 type: design
-version: 1.5
+version: 1.6
 status: in-review
 date: 2026-09-08
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0007, ADR-0010]
 upstream: null
 ---
 
-# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.5 (2026-09-08)
+# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.6 (2026-09-08)
 
 > **任务来源**: 用户提问「调研分析社区当前类似优秀的开源框架 是否可以补强复用」+ 补充提问「当前工作流规定了流程 但每个步骤比如调研 审查 设计方案 实施方案等具体步骤 社区是否有类似的框架 skill MCP工具可以补强 同时当前是否可以强制要求每个步骤给出决策 引用信息依据 提供给下一轮审查」
 > **调研方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch 六轮取证（2026-09-08，四方向 + 本轮步骤级工具两方向）。
@@ -17,6 +17,7 @@ upstream: null
 > **v1.3 变更（ADR-0010 验收条件之二落地轮，用户指令「好的，执行补列」）**: §3.4 补强判定矩阵新增**「分层归属（ADR-0010 Q1）」列**——依 ADR-0010 三问门禁 Q1 对候选池批量预演（6 候选分层 + 不复用组标"不适用"）：AGENTS.md 桥 Layer-0 / 决策产物管线 Layer-1（契约 FWK-DECISION-RECORD 复用 Layer-0）/ drift-gate Layer-0 / ARC Layer-1 / DeepEval 臂+调研链 MCP Layer-1 / ADR 三层 Layer-0；附批量预演注（分层 = 事实判定不随裁决改变；不复用组已按 D6 先例否决不过门禁）——**闭环 ADR-0010 验收条件之二**。核心裁定与 §3.5 不变；断言计数不变（25/3/12/4，无新增断言）。
 > **v1.4 变更（Ponytail 补充调研批，用户指令「社区同类框架生态调研 补充调研 代码实现阶段 ponytail 框架 是否可复用」）**: §2.5 新增**「代码实现步骤（Step 5-7 实施）→ 生成端防过度工程」**子节 + A-26（Ponytail v4.8.4 MIT——"懒惰资深开发者"规则集+插件，7 级决策阶梯：YAGNI→库内复用→stdlib→平台原生→已装依赖→一行→最少代码；基准 -54% 代码/-22% token；阶梯在理解后运行+根因修复+安全不可偷懒）；判定 C = **插件/规则集本体不复用**（同 Superpowers 先例）+ **7 级阶梯概念吸收候选（Layer-0）**——它是 ADR-0010 三问门禁的**生成端镜像**（方法论方向第 N 独立印证）；矩阵 + 十步映射 Step 5-7 行同步；A 25→26 / C 12→13（人工重数核对）；depends 补 ADR-0010。
 > **v1.5 变更（候选池深入调研批，用户指令「§3.4 补强判定矩阵 候选项目需要执行深入调研 能够清晰化给出建议」）**: §3.4 后新增**§3.4.1 候选逐项深入调研与清晰建议**——对候选池逐项 WebSearch 核验最新快照（2026-09-08）：**ARC 重大演进**（npm @kegesch/arc **v0.8.0**/161 commits/0 依赖单文件二进制；实体 9 型 + 关系 14+；命令扩展 arc next/context；D-045 "Arc answers questions agents cannot answer themselves" + ledger-to-driver 路线图 issue #20——**建议升级为优先候选**，P-020 落地后触发）；**ADR Kit 双仓独立演化确认**（kschlt/adr-kit 195 commits + policy 块自动生成 lint 规则 + MCP + ContractRelations/supersession chains/scenario taxonomy；rvdbreemen/adr-kit 539 commits——**模式吸收点更新**：禁止性负例通道并入 P-020 设计）；**Ponytail v4.8.3 核验**（ponytail: 注释=技术债账本，与本仓 DEV-LOG 同构——登记 pattern 演进候选）；**AGENTS.md 规则源传播生态观察**（ARC/ponytail/ADR Kit 均以规则文件+agent 适配为标准形态）；decision-records 生态同族小体量观察（phodal/adr/watercooler/repo-seed，不入候选池）。A-10（ARC）就地更新快照；**A/B/C 计数不变（26/3/13/4）——无新增行首 A/C 断言**（深入调研事实以内联 URL 登记于 §3.4.1）。
+> **v1.6 变更（§3.4/§3.4.1 吃狗粮审计轮，用户指令「3.4 补强判定矩阵 3.4.1 候选逐项深入调研与清晰建议 进行一次吃狗粮审计」）**: 对本报告 §3.4 矩阵 + §3.4.1 子节做同基座深度 review（盲区扫描 = 计数/版本/兼容/一致性四维，同 v1.2 先例）捕获 **6 P2 + 5 P3，无 P1**：P2 = ① Ponytail 版本号内部分裂（A-26 行/§2.6 v4.8.4 vs §3.4.1 v1.5 核验 v4.8.3——统一锁 v4.8.x 区间声明）② ARC 建议状态矩阵未同步（矩阵仍"候选议程/触发驱动" vs §3.4.1/§2.6"升级优先候选"）③ 附录 B B3 basis C 编号错位（v1.4 插入 ponytail 致编号 +1，§3.5 三裁定实为 C-11/12/13，表版 C-08/09/10 与 JSON 版 C-10/11/12 均未同步）④ §3.5 采纳路径 P-019 过时（编号已顺延 P-020 未回写）⑤ §3.4.1 ADR 三层行 A-13 引用错位（A-13 实为 Langfuse，rvdbreemen/adr-kit 应为 A-08）⑥ §2.6 盲区登记 + §4.3 局限 5 未随 v1.5 快照更新（仍称 ARC/adr-kit/Ponytail"未标版本号"）；P3 = G2 悬空编号残留（矩阵/§5.1）/ 计数说明未记 v1.5+1.6 重数 / ARC「19 天前」时点相对值 / ADR 三层矩阵行未标 v1.5 注 / §3.4.1 内联取证形态偏移观察。**核心裁定不变**；计数不变（26/3/13/4，无新增断言）。修正全部为同步/编号/版本精化。
 > **裁决建议**: 不变（分层吸收 + §3.5 强制决策产物管线可行且优先；v1.5 增补：ARC 升级为优先候选待用户裁决）。待用户裁决（P-018 登记）。
 
 ## 0. 断言统计表（必填，审计入口）
@@ -28,7 +29,7 @@ upstream: null
 | C 判断类 | 13 | §3.1-3.3 补强评估 10 条 + §3.5 强制决策产物管线裁定 3 条（v1.2 修正：v1.1 声明 10 实为 12，M7 样本 ㉙；v1.4 +1 Ponytail 判定） |
 | 假设区 | 4 | H1-H4（全部待实测——读取兼容 / 导入可行性 / 评测价值 / MCP 服务形态） |
 
-> **计数说明（R7 机械重数）**: A 类 26 条（行首 `【A】` 标记）；附录 B 3 条（`"id": "B\d+"` 机读块）；C 类 13 条（`【C】` 标记——**不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 声明 10 实为 12 由 v1.2 吃狗粮 review 重数捕获（M7 样本 ㉙）；v1.4 +1 C（ponytail 判定）人工重数核对**）；假设区 4 条（`[H\d+]` 列表项）。
+> **计数说明（R7 机械重数）**: A 类 26 条（行首 `【A】` 标记）；附录 B 3 条（`"id": "B\d+"` 机读块）；C 类 13 条（`【C】` 标记——**不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 声明 10 实为 12 由 v1.2 吃狗粮 review 重数捕获（M7 样本 ㉙）；v1.4 +1 C（ponytail 判定）人工重数核对；v1.5 + v1.6 无新增行首断言，重数 26/13/4 复核通过（v1.6 吃狗粮审计轮机械复核）**）；假设区 4 条（`[H\d+]` 列表项）。
 
 ## 1. 调研目标与实体盘点
 
@@ -127,7 +128,7 @@ upstream: null
 
 #### 代码实现步骤（Step 5-7 实施 → 生成端防过度工程）
 
-【A】**Ponytail**（github.com/DietrichGebert/ponytail，**v4.8.4**，MIT，147 commits，2026-06-26 活跃）——**"懒惰资深开发者"规则集 + 插件形态**（非模型/非独立工具/非框架）：跨 16+ AI 代理平台（Claude Code/Cursor/Copilot/Codex/Gemini/OpenCode/Windsurf/Pi…）工作。核心 = **7 级决策阶梯**——写代码前停在第一个成立的阶梯：① YAGNI（这东西需要存在吗？不需要就跳过）→ ② 代码库已有？复用之 ← ③ 标准库能做？用它 → ④ 原生平台功能？用它 → ⑤ 已装依赖能解？用它 → ⑥ 一行能搞定？一行 → ⑦ 以上都不行才写最少能工作的代码。**关键纪律 = 阶梯在理解问题之后运行（对解决方案懒惰，对阅读理解从不懒惰）**；Bug 修复 = 根因而非症状（修前 grep 每个调用者）；安全/信任边界/数据丢失处理/可访问性 = 不可偷懒区。附带 5+1 skills（`ponytail` 懒惰模式 / `ponytail-review` 过度工程审查 / `ponytail-audit` 全仓库过度工程审计 / `ponytail-debt` 技术债收集）+ 3 lifecycle hooks + MCP 形态（ponytail-mcp 高级）。**基准测试**（真实 Claude Code headless，编辑 tiangolo/full-stack-fastapi-template，12 功能任务，Haiku 4.5，n=4）：代码量 **-54%**（最高 -94%）、token -22%、成本 -20%、速度 -27%、安全性 100%（vs 基线 95%）。**与本框架同构度**：7 级阶梯 = 本框架「纯文档 + 最小工具层」哲学 + ADR-0010 懒加载门禁（Layer-0 优先于 Layer-1 的生成端镜像）+ CODE_WIKI「薄壳不膨胀」；ponytail-review/audit = 本框架独立 pass / repo_stats 对账的生成端对照（审查过度工程）；ponytail-debt = DEV-LOG 技术债登记形态。【来源：https://github.com/DietrichGebert/ponytail ; https://blog.csdn.net/yanceyxin/article/details/162553680 ; https://openclawapi.org/en/blog/2026-06-21-ponytail-overengineering-fix】
+【A】**Ponytail**（github.com/DietrichGebert/ponytail，**v4.8.x**（v1.4 记录 v4.8.4 / v1.5 核验 release v4.8.3@2026-06-24——多源差异，锁区间声明），MIT，147 commits，2026-06-26 活跃）——**"懒惰资深开发者"规则集 + 插件形态**（非模型/非独立工具/非框架）：跨 16+ AI 代理平台（Claude Code/Cursor/Copilot/Codex/Gemini/OpenCode/Windsurf/Pi…）工作。核心 = **7 级决策阶梯**——写代码前停在第一个成立的阶梯：① YAGNI（这东西需要存在吗？不需要就跳过）→ ② 代码库已有？复用之 ← ③ 标准库能做？用它 → ④ 原生平台功能？用它 → ⑤ 已装依赖能解？用它 → ⑥ 一行能搞定？一行 → ⑦ 以上都不行才写最少能工作的代码。**关键纪律 = 阶梯在理解问题之后运行（对解决方案懒惰，对阅读理解从不懒惰）**；Bug 修复 = 根因而非症状（修前 grep 每个调用者）；安全/信任边界/数据丢失处理/可访问性 = 不可偷懒区。附带 5+1 skills（`ponytail` 懒惰模式 / `ponytail-review` 过度工程审查 / `ponytail-audit` 全仓库过度工程审计 / `ponytail-debt` 技术债收集）+ 3 lifecycle hooks + MCP 形态（ponytail-mcp 高级）。**基准测试**（真实 Claude Code headless，编辑 tiangolo/full-stack-fastapi-template，12 功能任务，Haiku 4.5，n=4）：代码量 **-54%**（最高 -94%）、token -22%、成本 -20%、速度 -27%、安全性 100%（vs 基线 95%）。**与本框架同构度**：7 级阶梯 = 本框架「纯文档 + 最小工具层」哲学 + ADR-0010 懒加载门禁（Layer-0 优先于 Layer-1 的生成端镜像）+ CODE_WIKI「薄壳不膨胀」；ponytail-review/audit = 本框架独立 pass / repo_stats 对账的生成端对照（审查过度工程）；ponytail-debt = DEV-LOG 技术债登记形态。【来源：https://github.com/DietrichGebert/ponytail ; https://blog.csdn.net/yanceyxin/article/details/162553680 ; https://openclawapi.org/en/blog/2026-06-21-ponytail-overengineering-fix】
 
 #### 与十步流程的映射
 
@@ -150,10 +151,10 @@ upstream: null
 | AAT | n/a（只装 skills+MCP，不跑 LLM） | n/a | MIT（版本号未见） | **Python 3.11+ + uv** | 环境门槛高，候选 |
 | ARC | n/a（CLI 图查询） | n/a | **v0.8.0 / 161 commits / 0 依赖（v1.5 快照核验）** | 任意 OS 单文件二进制 | 升级为优先候选（P-020 后触发） |
 | adr-governance / ADR Kit | n/a | n/a | kschlt/adr-kit v0.2.x（CHANGELOG 0.2.7 锚，声明级） | git hooks / Python | 模式印证（不强引；吸收点并入 P-020） |
-| Ponytail（v1.4） | n/a（规则集无需端点） | n/a | **v4.8.4 / MIT / 147 commits / 2026-06-26 active** | 跨 16+ agent 平台规则（无运行时依赖） | **概念吸收（Layer-0）——插件本体不引入** |
+| Ponytail（v1.4） | n/a（规则集无需端点） | n/a | **v4.8.x / MIT / 147 commits / 2026-06-26 active**（v1.5 核验：release v4.8.3@06-24，v1.6 统一锁区间） | 跨 16+ agent 平台规则（无运行时依赖） | **概念吸收（Layer-0）——插件本体不引入** |
 | promptfoo（P-010） | ✅（双臂模板端点运行时注入，已实测） | n/a | 24.9k★ / 并入 OpenAI / MIT | CLI | 已落地 |
 
-> v1.2 版本盲区登记：除 gpt-researcher（MCP v1.0.0）/promptfoo（星数）/Superpowers（报道数）外，u14app/Alibaba/AAT/ARC/adr-governance/ADR Kit/Gigaxity **均未标注版本号**——采纳任一候选前须 P-015 v1.2 式源码/API 直读核验（§4.3 局限 5）。
+> v1.6 更新版盲区登记：v1.5 快照已核验 **ARC（v0.8.0）/ kschlt-adr-kit（v0.2.x）/ Ponytail（v4.8.x）** 版本；其余 u14app/Alibaba/AAT/adr-governance/Gigaxity **仍无版本号标注**——采纳任一前须 P-015 v1.2 式源码/API 直读核验（§4.3 局限 5）。
 
 ## 3. 补强可行性评估（候选议程明细）
 
@@ -192,9 +193,9 @@ upstream: null
 | AGENTS.md 桥 | 低（一个文件） | 零 | 中（工具互操作） | 双源漂移须登记 | **立即做（候选）** | **Layer-0**（单一文件，零激活成本） |
 | **每步决策产物管线**（§3.5，v1.1） | 中（gate 扩展 + 契约） | 零 | **高**（决策全程可追溯/审查有输入） | 契约 & 机械校验须定义 | **优先裁定（候选）** | **Layer-1**（扩展 tools/spec_runner；契约 Layer-0 = FWK-DECISION-RECORD 复用） |
 | drift-gate 概念 | 近零 | 零 | 低（方法论强化） | 仅登记 | 登记候选 | **Layer-0**（概念吸收，仅登记 repo_stats 演进候选） |
-| ARC 先导 | 中（导入试点） | 轻（单文件 CLI） | 中-高（决策图谱） | 触发驱动 | 候选议程 | **Layer-1**（外部 CLI 工具） |
+| ARC 先导 | 中（导入试点） | 零（v1.5 核验 0 依赖） | 中-高（决策图谱） | **P-020 落地后触发**（v1.6 同步 §3.4.1） | **升级优先候选**（v1.5） | **Layer-1**（外部 CLI 工具） |
 | DeepEval 臂 / 调研链 MCP | 中 | 中（评测/服务） | 中 | 端点/服务形态 | 候选议程 | **Layer-1**（外部服务/依赖） |
-| ADR 三层 enforcement | 低（模式吸收） | 零 | 中（禁止性通道 + 分阶段 hook） | 登记为 G2 | 候选议程 | **Layer-0**（纯模式吸收，无运行时） |
+| ADR 三层 enforcement | 低（模式吸收） | 零 | 中（禁止性通道 + 分阶段 hook） | （v1.2 去 G2 编号；吸收点并入 P-020 设计面） | 模式吸收候选 | **Layer-0**（纯模式吸收，无运行时） |
 | **Ponytail 7 级阶梯**（v1.4） | 近零（概念吸收） | 零 | 中（生成端防过度工程纪律） | 插件本体不复用（同 Superpowers 先例） | 概念吸收候选 | **Layer-0**（方法论思想吸收；插件 = 外部 agent 平台资产不入本仓） |
 | Superpowers/SpecKit/Langfuse/gpt-researcher 本体 | — | — | — | 软形态/重依赖 | 不复用 | 不适用（已按 D6 等先例否决，不过门禁） |
 
@@ -207,9 +208,9 @@ upstream: null
 | AGENTS.md 桥 | 生态持续扩大（60k+ 仓库/23 工具/Linux 基金会托管）；**本轮观察 = "规则文件 + agent 适配"已成社区默认传播形态**：ARC 自带 AGENTS.md + skill file、Ponytail 规则源即根 AGENTS.md（~20 行）、ADR Kit 含 CLAUDE.md + .mcp.json + skills。【内联来源：ARC/ponytail/adr-kit 仓库页】 | **立即做（Layer-0）**——本仓 SPEC_PROCESS 宪法以相同姿态工作，AGENTS.md 桥 = 该姿态的工具生态入口；零依赖零校验器改动。下一步 = 登记命名空间 + ledger 指涉（§3.1 已列，待实施批准）。 |
 | 每步决策产物管线（step-gate，P-020） | **三方独立收敛**：ARC ledger-to-driver 路线图（#20：arc next "what should I work on next"，把决策图谱当 agent 驱动源，Phase 1 P0，agent surface = CLI+JSON+skill）；ADR Kit adr_planning_context 的 scenario taxonomy（strategic_planning/focused_implementation/pre_decision/supersession_impact 四场景）+ ContractRelations（supersedes 链/depends_on/related_to 双向索引）；本框架 §3.5 决策事件流。【内联来源：github.com/kegesch/arc/issues/20 ; github.com/kschlt/adr-kit CANONICAL+CHANGELOG】 | **优先实施（Layer-1，契约 FWK-DECISION-RECORD 为 Layer-0）**——"决策记录从档案提升为驱动执行的输入"方向获三项目独立印证，P-020 即本框架实例化。下一步 = STEP_GATE_CHECKLIST 三问门禁验收（through = 获准立项）。 |
 | drift-gate 概念 | SGE 双图校验（无 v1.5 新信息，arXiv 稳定）。 | 登记候选（Layer-0）不变——repo_stats 演进候选（意图→证据→缺口闭环）。下一步 = 无（仅登记）。 |
-| ARC 先导 | **重大演进**（2026-09-08 核验）：npm @kegesch/arc v0.8.0（19 天前）/161 commits/**0 依赖**单文件二进制；实体 9 型、关系 14+；命令 arc init/add/trace/impact/check/**next/context**/list；D-045 "Arc answers questions agents cannot answer themselves"；**明确否决 MCP 与插件系统（#3/#11/#13），agent surface = CLI+JSON+skill file**——与本框架"薄壳 CLI + 纯文档 + 生成端自由"身份高度契合；`arc import --from-adr` 支持 ADR 导入（反向工程#15 关闭=由 agent 导入）。【内联来源：npm @kegesch/arc 页；issues #20/#15；README】 | **升级为优先候选（Layer-1，外部 CLI 非依赖）**：① 零依赖单文件二进制 = 与本仓零依赖不变式兼容；② 其 graph-query（trace/impact/check）+ driver（next/gaps）= P-015 方向 A 的**轻量替代**（vs Semantica 多 GB 重栈，增量成本近零）；③ 结构化图查询非语义检索 → **H3 中文召回风险不适用**（比 Semantica 更适配本仓中文语料）。**触发条件 = P-020 落地后**（决策事件流 → ARC 导入的预处理面已就绪）。下一步 = 待用户裁决（并入 P-020 或独立 P 编号）；试点限定 ADR 簇（映射最干净，P-015 §4.3 先例）。 |
+| ARC 先导 | **重大演进**（2026-09-08 核验）：npm @kegesch/arc v0.8.0（2026-08 下旬发布）/161 commits/**0 依赖**单文件二进制；实体 9 型、关系 14+；命令 arc init/add/trace/impact/check/**next/context**/list；D-045 "Arc answers questions agents cannot answer themselves"；**明确否决 MCP 与插件系统（#3/#11/#13），agent surface = CLI+JSON+skill file**——与本框架"薄壳 CLI + 纯文档 + 生成端自由"身份高度契合；`arc import --from-adr` 支持 ADR 导入（反向工程#15 关闭=由 agent 导入）。【内联来源：npm @kegesch/arc 页；issues #20/#15；README】 | **升级为优先候选（Layer-1，外部 CLI 非依赖）**：① 零依赖单文件二进制 = 与本仓零依赖不变式兼容；② 其 graph-query（trace/impact/check）+ driver（next/gaps）= P-015 方向 A 的**轻量替代**（vs Semantica 多 GB 重栈，增量成本近零）；③ 结构化图查询非语义检索 → **H3 中文召回风险不适用**（比 Semantica 更适配本仓中文语料）。**触发条件 = P-020 落地后**（决策事件流 → ARC 导入的预处理面已就绪）。下一步 = 待用户裁决（并入 P-020 或独立 P 编号）；试点限定 ADR 簇（映射最干净，P-015 §4.3 先例）。 |
 | DeepEval 臂 | 15.6k 星（2026-05 快照）；无 v1.5 重大变更信息。 | 候选议程（Layer-1）不变——首轮评测（端点就绪）后作 M7 评测矩阵第二臂（pytest-native 补 promptfoo CLI 盲区）。下一步 = 触发驱动。 |
-| ADR 三层 enforcement | **双仓独立演化确认**：kschlt/adr-kit（195 commits、MADR、policy 块自动生成 ESLint/Ruff/import-linter/mypy/tsconfig 规则、MCP adr_preflight/create/approve/planning_context、ContractRelations+supersession chains+scenario taxonomy）；rvdbreemen/adr-kit（CER A-13 原记录，dev 539 commits）。两仓独立实现同一"ADR=可执行 guardrail"模式 = 方向已获竞争性验证。【内联来源：kschlt/adr-kit README/TECHNICAL；decision-records 话题页 2026-07-28 快照】 | **模式吸收候选（Layer-0）不变，吸收点更新**：禁止性负例通道（require/forbid 显式化）+ 分阶段 hook（pre-commit 快查/pre-push 慢查）**并入 P-020 采纳路径一并设计**（不与 step-gate 并列编号）。下一步 = 随 P-020。 |
+| ADR 三层 enforcement | **双仓独立演化确认**：kschlt/adr-kit（195 commits、MADR、policy 块自动生成 ESLint/Ruff/import-linter/mypy/tsconfig 规则、MCP adr_preflight/create/approve/planning_context、ContractRelations+supersession chains+scenario taxonomy）；rvdbreemen/adr-kit（CER A-08 原记录，v1.6 修正：A-13 实为 Langfuse；dev 539 commits）。两仓独立实现同一"ADR=可执行 guardrail"模式 = 方向已获竞争性验证。【内联来源：kschlt/adr-kit README/TECHNICAL；decision-records 话题页 2026-07-28 快照】 | **模式吸收候选（Layer-0）不变，吸收点更新**：禁止性负例通道（require/forbid 显式化）+ 分阶段 hook（pre-commit 快查/pre-push 慢查）**并入 P-020 采纳路径一并设计**（不与 step-gate 并列编号）。下一步 = 随 P-020。 |
 | Ponytail 7 级阶梯 | star 多源声明级差异大（5w+ juejin 2026-06-23 / 16k+ pyshine / 84k+ awesome-prompts——不锁单值）；v4.8.3（2026-06-24 release）+ 147 commits（活跃 06-26）；**ponytail: 注释 = 技术债账本**（/ponytail-debt 收集防"later means never"）；AGENTS.md 即规则源（~20 行）。【内联来源：github.com/DietrichGebert/ponytail；juejin/pyshine/awesome-prompts 评测文】 | **概念吸收（Layer-0）不变**——7 级阶梯 = ADR-0010 生成端镜像（v1.4 已判）；**唯一补强点位登记**：`ponytail:` 注释约定（有意简化的机械可收集标记）可借鉴为本仓生成端"有意简化"登记形态（与 repo_stats 扫描位点兼容），登记为 pattern 演进候选，**不实施**。下一步 = 无（触发驱动）。 |
 | 不复用组 + 生态观察 | Superpowers/SpecKit（流程技能软形态）/Langfuse（重平台）/gpt-researcher 本体（服务）——v1.5 维持否决；**新观察**：decision-records 话题同族小体量项目（phodal/adr 271★ 轻量 ADR CLI / watercooler 13★ MCP 共享推理层 / repo-seed 8★ "self-governing repos：AGENTS.md+MADR+deterministic gates+pre-commit hooks"——与本框架门禁物理化同构度最高但未成熟）。【内联来源：github.com/topics/decision-records 2026-09-08 快照】 | 不复用（D6 先例，不过门禁）；repo-seed 等登记为生态观察（不入候选池——体量 <10★，待其成熟再评估）。下一步 = 无。 |
 
@@ -223,7 +224,7 @@ upstream: null
 
 【C】**社区佐证**——adr-governance"ADL = 机器可读 spec + CI 强制执行"（决策与代码闭合循环）、ADR Kit"三层 enforcement + 质量门拒绝模糊决策 + supersede 不编辑"、ADR 侵食"禁止事项显式化 + 机械检测 + 清单自查"——三个独立项目演化出与本方案同构的「决策产物化 + 机械强制」模式；**v1.2 补第四佐证：gpt-researcher 多代理流水线原生含 Reviewer「研究-审核-修正」循环（材料不达标打回重查，A-17 取证）——审查闭环在生成端的又一独立实现**；差异 = 本方案更进一步：把决策产物绑定到**流程步骤粒度**（每步一行）并作为**下一轮审查的唯一输入**（时序独立审查），社区方案停留在仓库级 ADR 强制。
 
-**采纳路径（若用户裁决）**：P-019 feature（小流程）：Spec_Runner 增 `decision` 事件类型 + `step-gate` 命令（机械校验）→ DESIGN/IMPL/CHECKLIST 三件套 → 本仓首个真实运行 = 一个 feature 全流程每步决策事件入流。
+**采纳路径（若用户裁决）**：P-020 feature（小流程，v1.6 修正：编号原 P-019 被 spec-runner-homing 占用顺延）：Spec_Runner 增 `decision` 事件类型 + `step-gate` 命令（机械校验）→ DESIGN/IMPL/CHECKLIST 三件套 → 本仓首个真实运行 = 一个 feature 全流程每步决策事件入流。
 
 ## 4. 幻觉排除审查（Step 2 Review）
 
@@ -277,7 +278,7 @@ upstream: null
 2. Superpowers / SpecKit / gpt-researcher 星数为第三方报道或主题页快照，非 API 快照；锁引用时须复核。
 3. 三起事故描述来自中文综述转述，个别细节未经官方确认——仅作动机佐证。
 4. ADR Kit 的 LOC/接口细节未核验（README 级）——采纳其模式时须 P-015 式源码直读。
-5. **版本成熟度盲区（v1.2 新增）**：除 gpt-researcher（MCP v1.0.0）/promptfoo（并 OpenAI）外，u14app/Alibaba DeepResearch/AAT/ARC/adr-governance/ADR Kit/Gigaxity/Superpowers/SpecKit 均未标注版本号——采纳任一候选前须源码/API 直读核验（P-015 v1.2 先例；H4 触发时一并执行）。
+5. **版本成熟度盲区（v1.2 新增，v1.6 更新）**：v1.5 快照已核验 ARC（v0.8.0）/kschlt-adr-kit（v0.2.x）/Ponytail（v4.8.x）版本；u14app/Alibaba DeepResearch/AAT/adr-governance/Gigaxity/Superpowers/SpecKit 仍无版本号标注——采纳任一候选前须源码/API 直读核验（P-015 v1.2 先例；H4 触发时一并执行）。
 6. **兼容性盲区部分解除（v1.2）**：gpt-researcher 与 OpenAI 兼容端点兼容性已官方文档确认（OPENAI_BASE_URL）——三机实测仍待 H4；Gigaxity 默认 OpenRouter 云端 key、本地分支待实测。
 
 ## 5. 对设计的输入
@@ -286,9 +287,9 @@ upstream: null
 
 1. **AGENTS.md 桥**（立即、零依赖）——根 `AGENTS.md` = 操作摘要 + 指针；登记命名空间（ADR-0007 附录 A 或 CODE_WIKI doc_registry）。
 2. **每步决策产物管线（§3.5）**（优先候选、零新依赖）——Spec_Runner `decision` 事件 + `step-gate` 机械校验；复用 FWK-DECISION-RECORD 八字段 + evidence 引用（E1-E4）。
-3. **ARC 决策图谱先导**（触发驱动）——M7/ADR 决策 → ARC 图，验证 trace/impact/check 价值；成功则升级方向 A。
+3. **ARC 决策图谱先导**（v1.5 升级优先候选，P-020 落地后触发）——M7/ADR 决策 → ARC 图，验证 trace/impact/check 价值；成功则升级方向 A（轻量替代 Semantica，见 §3.4.1）。
 4. **DeepEval 评测臂 / 调研链 MCP（gpt-researcher/Gigaxity/AAT）**（触发驱动）——首轮评测后 / H4 服务形态实测后。
-5. **ADR 三层 enforcement 模式**（登记候选 G2）——禁止性负例通道显式位点 + pre-commit/pre-push 分阶段 hook。
+5. **ADR 三层 enforcement 模式**（登记候选，v1.6 去 G2 残留编号）——禁止性负例通道显式位点 + pre-commit/pre-push 分阶段 hook（吸收点并入 P-020 设计，见 §3.4.1）。
 
 ### 5.2 关键约束
 
@@ -363,13 +364,13 @@ upstream: null
 |----|------|-------|
 | B1 | 社区 spec 宪法类框架与本框架流程同构（Constitution≙SPEC_PROCESS、drift gate≙对账制、spec-reviewer≙独立 pass） | A-02/A-04/SGE 能力清单归纳 |
 | B2 | AGENTS.md 桥文件可获工具互操作性收益（主流工具原生识别，进入本仓即行为对齐） | A-05/A-06 标准事实归纳 |
-| B3 | 「每步决策产物管线」（§3.5）可行——已具备全部基础资产（FWK-DECISION-RECORD 格式 + Spec_Runner 事件流/gate + FWK-ASSERTION 证据分级 + RULE-1/RULE-5 审查臂），且社区三独立项目（adr-governance/ADR Kit/ADR 侵食防御）已演化出同构「决策产物化 + 机械强制」模式 | C-08/C-09/C-10 裁定 + A-23/A-24/A-25 佐证归纳 |
+| B3 | 「每步决策产物管线」（§3.5）可行——已具备全部基础资产（FWK-DECISION-RECORD 格式 + Spec_Runner 事件流/gate + FWK-ASSERTION 证据分级 + RULE-1/RULE-5 审查臂），且社区三独立项目（adr-governance/ADR Kit/ADR 侵食防御）已演化出同构「决策产物化 + 机械强制」模式 | C-11/C-12/C-13 裁定 + A-23/A-24/A-25 佐证归纳（v1.6 修正：v1.4 插入 ponytail 致 §3.5 三裁定编号 +1，表版 C-08/09/10 与 JSON 版 C-10/11/12 均为旧编号） |
 
 ```json
 [
   {"id": "B1", "inference": "社区 spec 宪法类框架与本框架流程同构（Constitution≙SPEC_PROCESS、drift gate≙对账制、spec-reviewer≙独立 pass）", "basis": "A-02/A-04/SGE 能力清单归纳"},
   {"id": "B2", "inference": "AGENTS.md 桥文件可获工具互操作性收益（主流工具原生识别，进入本仓即行为对齐）", "basis": "A-05/A-06 标准事实归纳"},
-  {"id": "B3", "inference": "每步决策产物管线可行（基础资产齐备 + 社区三项目独立演化同构模式）", "basis": "C-10/C-11/C-12 + A-23/A-24/A-25（v1.2 修正 basis 编号同步至 C-12 体系）"}
+  {"id": "B3", "inference": "每步决策产物管线可行（基础资产齐备 + 社区三项目独立演化同构模式）", "basis": "C-11/C-12/C-13 + A-23/A-24/A-25（v1.6 修正：§3.5 三裁定编号同步至 C-13 体系）"}
 ]
 ```
 

@@ -94,7 +94,7 @@ f:\Spec_Workflow/
     ├── semantica-absorption/   # Semantica（semantica-agi）图原生决策溯源框架调研（P-015：RESEARCH 结论 = 暂不结合登记候选，先例检索补位为候选议程）
     ├── decision-schema/        # 决策记录 schema 吸收 B 方案契约批（P-016：DESIGN D1-D4 + CHECKLIST，产出 FWK-DECISION-RECORD）
     ├── spec-runner/            # Spec_Runner 薄壳 runner 四件套（P-009 done：RESEARCH + DESIGN D1-D7 + IMPL + CHECKLIST——独立仓库 F:\Spec_Runner commit 4ea703d）
-    ├── community-ecosystem/    # 社区同类框架生态调研（P-018 done：26A+3B+13C+4H，v1.5 候选池深入调研——ARC 升优先候选待裁决，分层吸收判定）
+    ├── community-ecosystem/    # 社区同类框架生态调研（P-018 done：26A+3B+13C+4H，v1.6 吃狗粮审计轮——6P2+5P3 修正，ARC 升优先候选待裁决）
     ├── spec-runner-homing/     # Spec_Runner 归巢调研（P-019 done：外部路径依赖面取证 = 零代码依赖，三方案裁决 C1 维持双仓 / C2 懒加载分层 / C3 编号协调）
     └── step-gate/              # P-020 决策产物管线三问门禁验收清单（ADR-0010 首例：step-gate-CHECKLIST v1.0 pending——decision 事件 + step-gate 命令立项验收）
 ```
@@ -701,7 +701,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [spec/semantica-absorption/](./spec/semantica-absorption/) | Semantica（semantica-agi）图原生决策溯源框架调研（P-015 done：RESEARCH v1.4，结论 = 暂不结合，先例检索补位候选议程；v1.1 = review 深度审计批 / v1.2 = 源码补充核验批（9 条源码直读级断言）/ v1.3 = A+B 联合实现分析（契约-实现分层，候选议程完整规格）/ v1.4 = 独立 pass 机制归属修正（find_similar_decisions 检索两路径分述）） |
 | [spec/decision-schema/](./spec/decision-schema/) | 决策记录 schema 吸收 B 方案契约批（P-016 done：DESIGN v1.1（D1-D4 决策）+ CHECKLIST v1.1（22/22 通过，独立 pass 完成）——产出 FWK-DECISION-RECORD v1.1） |
 | [spec/spec-runner/](./spec/spec-runner/) | Spec_Runner 薄壳 runner（P-009 done：RESEARCH v1.0 + DESIGN v1.0（D1-D7）+ IMPLEMENTATION v1.0（verified，锚 Spec_Runner commit 4ea703d）+ CHECKLIST v1.0（22/22 accepting）——runner 已可用，LG H2 解除；LG H3/dsh H2 随端点解锁） |
-| [spec/community-ecosystem/](./spec/community-ecosystem/) | 社区同类框架生态调研（P-018 done：COMMUNITY_ECOSYSTEM_RESEARCH v1.5（26A+3B+13C+4H）——四簇盘点 + 分层吸收判定待用户裁决 + §2.5 步骤级工具盘点 + §2.6 兼容矩阵 + §3.5 强制决策产物管线裁定可行且优先（P-019 采纳路径，编号被占用顺延 P-020）；v1.2 吃狗粮审计轮（M7 样本 ㉙）；v1.3 §3.4 补"分层归属（ADR-0010 Q1）"列（闭环 ADR-0010 验收条件之二）；v1.4 ponytail 补充调研批（7 级决策阶梯 = ADR-0010 生成端镜像，概念吸收 Layer-0）；**v1.5 候选池深入调研批**（§3.4.1 候选逐项建议：ARC 重大演进 v0.8.0/0 依赖/ledger-to-driver 路线图——升级为优先候选待裁决；ADR Kit 双仓独立演化确认——吸收点并入 P-020；ponytail: 注释=技术债账本登记 pattern 演进候选；不复用组+生态观察；A/B/C 计数不变）） |
+| [spec/community-ecosystem/](./spec/community-ecosystem/) | 社区同类框架生态调研（P-018 done：COMMUNITY_ECOSYSTEM_RESEARCH v1.6（26A+3B+13C+4H）——四簇盘点 + 分层吸收判定待用户裁决 + §2.5 步骤级工具盘点 + §2.6 兼容矩阵 + §3.5 强制决策产物管线裁定可行且优先（P-019 采纳路径，编号被占用顺延 P-020）；v1.2 吃狗粮审计轮（M7 样本 ㉙）；v1.3 §3.4 补"分层归属（ADR-0010 Q1）"列（闭环 ADR-0010 验收条件之二）；v1.4 ponytail 补充调研批（7 级决策阶梯 = ADR-0010 生成端镜像，概念吸收 Layer-0）；v1.5 候选池深入调研批（§3.4.1 候选逐项建议：ARC 重大演进 v0.8.0/0 依赖/ledger-to-driver 路线图——升级为优先候选待裁决；ADR Kit 双仓独立演化确认——吸收点并入 P-020；ponytail: 注释=技术债账本登记 pattern 演进候选；不复用组+生态观察；A/B/C 计数不变）；**v1.6 §3.4/§3.4.1 吃狗粮审计轮**（6P2+5P3 修正：Ponytail 版本锁 v4.8.x / ARC 矩阵状态同步 / B3 basis C 编号同步至 C-13 / 采纳路径 P-019→P-020 / A-08 引用修正 / 盲区登记更新；核心裁定不变）） |
 | [spec/spec-runner-homing/](./spec/spec-runner-homing/) | Spec_Runner 归巢（P-019 done：RESEARCH v1.1（6A+2B+3C+2H）——依赖面取证 = 零代码依赖；v1.1 用户裁决修正 C1 改判采纳并入（A6 实证 Spec_Runner 无 remote/全 commit 服务本仓）→ 实施批：8 文件并入 tools/spec_runner/（hash 核对）+ 上游修订注三处 + 四件套齐 + CHECKLIST 独立 pass 7/7 accepted） |
 | [spec/step-gate/](./spec/step-gate/) | P-020 决策产物管线三问门禁验收（ADR-0010 首例：STEP_GATE_CHECKLIST v1.1 pending——P-018 §3.5 采纳路径可执行化；三问门禁 8 子项验收 + 边界声明（审 step-gate 候选物，非调研报告本体），通过 = P-020 获准立项） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
