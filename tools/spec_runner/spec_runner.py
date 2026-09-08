@@ -22,7 +22,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -239,6 +239,25 @@ def cmd_gate_step(args) -> int:
     return 0
 
 
+# ---- 模块 2c：step-enforce 批次级流程强制（P-024，ADR-0011 出路 A——只读校验：session 存在 + 决策流非空） ----
+def cmd_step_enforce(args) -> int:
+    """批次级流程强制：按 P 编号前缀定位 specwf-p0xx-* session，复用 step-gate 校验。
+
+    只读零副作用（P-022 教训：不创建/修改/提交任何文件）。
+    exit 0 = 决策流存在且通过 step-gate 基础校验；1 = 无 session / 空链 / 硬性违规；2 = 软性存疑。
+    """
+    w = EventWriter(sessions_dir())
+    prefix = f"specwf-{args.pid.lower().replace('-', '')}-"
+    matches = sorted(p.name for p in w.base.glob(f"{prefix}*.jsonl"))
+    if not matches:
+        print(f"step-enforce[{args.pid}]: 无 session 匹配 {prefix}*"
+              "（决策记录纪律未执行——需先创建 session 并写入 ≥1 decision）")
+        return 1
+    sid = matches[-1][:-len(".jsonl")]  # 取最新（文件名排序末位）
+    print(f"step-enforce[{args.pid}]: session 定位 {sid}")
+    return cmd_gate_step(argparse.Namespace(session=sid, expect=None))
+
+
 # ---- 模块 3：adapter 接口 + NativeHTTP（D4/D5——stdlib urllib，预检门控 + 重试） ----
 class LLMAdapter:
     """协议面（D4 开放结构单点）：chat / endpoint_ready。"""
@@ -445,6 +464,9 @@ def build_parser() -> argparse.ArgumentParser:
     sg.add_argument("--expect", nargs="*", default=None,
                     help="期望完整链 step_id 列表（缺省 = 仅校验已登记链内部一致性）")
     sg.set_defaults(func=cmd_gate_step)
+    se = sub.add_parser("step-enforce", help="批次级流程强制（P-024：定位 specwf-p0xx-* session + 决策流校验，只读）")
+    se.add_argument("--pid", required=True, help="P 编号（如 P-024）——session 前缀锚点")
+    se.set_defaults(func=cmd_step_enforce)
     st = sub.add_parser("selftest", help="内置自测（stdlib mock server）")
     st.set_defaults(func=lambda a: run_selftest())
     return p
@@ -647,6 +669,22 @@ def run_selftest() -> int:
             "evidence": [{"grade": "E1", "anchor": "spec/x.md"}]}})
         p_sg_badd = run_cli("step-gate", "--session", "st-badd")
         check("F24 step_id 非法 → exit 1", p_sg_badd.returncode == 1)
+
+        # F27-F29: step-enforce 批次级强制（P-024，ADR-0011 出路 A——只读零副作用）
+        p_se0 = run_cli("step-enforce", "--pid", "P-999")
+        check("F27 step-enforce 无 session → exit 1", p_se0.returncode == 1)
+        w_se = EventWriter(tmp)
+        w_se.append("specwf-p999-a", "system", "session_start")  # 有 session 无 decision
+        p_se1 = run_cli("step-enforce", "--pid", "P-999")
+        check("F28 step-enforce 空链（无 decision）→ exit 1", p_se1.returncode == 1,
+              p_se1.stdout[-80:])
+        w_se.append("specwf-p999-b", "assistant", "decision", input_={
+            "category": "feature-design", "scenario": "s", "reasoning": "r",
+            "outcome": "o", "confidence": 0.9,
+            "metadata": {"step_id": "research", "step_seq": 1,
+                         "evidence": [{"grade": "E1", "anchor": "spec/step-gate-enforcement/DESIGN.md §4"}]}})
+        p_se2 = run_cli("step-enforce", "--pid", "P-999")
+        check("F29 step-enforce 合法链 → exit 0", p_se2.returncode == 0, p_se2.stdout[-80:])
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))

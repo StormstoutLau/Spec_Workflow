@@ -25,3 +25,10 @@ repos:
         entry: python scripts/repo_stats.py
         language: system
         files: ^(CODE_WIKI\.md|README(\.en)?\.md|\.pre-commit-config\.yaml|docs/|spec/|adr/|scripts/)
+      # 批次级流程强制校验器（P-024，ADR-0011 出路 A——应走管线批次提交门禁：session 存在 + 决策流非空）
+      # 设计：spec/step-gate-enforcement/DESIGN.md §4.2（files 收窄至四文档；只读零副作用 P-022 教训）
+      - id: step-enforce
+        name: Step decision-stream enforcement (P-024, ADR-0011 A)
+        entry: python scripts/step_enforce.py
+        language: system
+        files: ^spec/[a-z0-9-]+/(RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(_FUNC)?)\.md$
