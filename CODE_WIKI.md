@@ -67,7 +67,7 @@ f:\Spec_Workflow/
 │   ├── FACT_CHECK_FRAMEWORK.md           # 事实核查框架 v1.0（CHK-/FC- 编号，FWK-ASSERTION 下游补充，2026-08-21 吸收）
 │   ├── DECISION_RECORD_CONTRACT.md       # 决策记录契约 v1.1（FWK-DECISION-RECORD：schema 八字段 + 三载体映射 + I-1~I-4，Semantica schema 吸收，P-016）
 │   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉙ + §5 hits 机读块，形态 II 69 处）
-│   ├── PROGRESS.md                       # 待办登记（P-001~P-019 登记在册——P-001 至 P-018 全 done + P-019 in-progress；主动队列清空，剩触发驱动项与 P-019 实施批）
+│   ├── PROGRESS.md                       # 待办登记（P-001~P-020 登记在册 20 项——P-001 至 P-019 全 done + P-020 step-gate 候审 + P-021 AGENTS.md 桥 done；主动队列清空，剩触发驱动项）
 │   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
 │   ├── discoveries/README.md             # 发现三态索引（DIS-007~010；DR-6 追记）
 │   └── dev-log/                          # DEV-LOG-001~007（事件叙事）
@@ -96,7 +96,8 @@ f:\Spec_Workflow/
     ├── spec-runner/            # Spec_Runner 薄壳 runner 四件套（P-009 done：RESEARCH + DESIGN D1-D7 + IMPL + CHECKLIST——独立仓库 F:\Spec_Runner commit 4ea703d）
     ├── community-ecosystem/    # 社区同类框架生态调研（P-018 done：26A+3B+13C+4H，v1.6 吃狗粮审计轮——6P2+5P3 修正，ARC 升优先候选待裁决）
     ├── spec-runner-homing/     # Spec_Runner 归巢调研（P-019 done：外部路径依赖面取证 = 零代码依赖，三方案裁决 C1 维持双仓 / C2 懒加载分层 / C3 编号协调）
-    └── step-gate/              # P-020 决策产物管线三问门禁验收清单（ADR-0010 首例：step-gate-CHECKLIST v1.0 pending——decision 事件 + step-gate 命令立项验收）
+    ├── step-gate/              # P-020 决策产物管线三问门禁验收清单（ADR-0010 首例：step-gate-CHECKLIST v1.0 pending——decision 事件 + step-gate 命令立项验收）
+    └── agents-md-bridge/       # AGENTS.md 桥文件生成（P-021，CER C-01：根 AGENTS.md = SPEC_PROCESS 操作摘要桥，ADR-0010 三问审核通过，Layer-0）
 ```
 
 ### 2.2 逻辑架构分层
@@ -684,7 +685,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [docs/DECISION_RECORD_CONTRACT.md](./docs/DECISION_RECORD_CONTRACT.md) | 决策记录契约 v1.1（FWK-DECISION-RECORD）：Semantica schema 吸收——八字段 + 三载体映射（M7/ADR/PROGRESS）+ 关系类型 + I-1~I-4（severity 无损分流；方向 A 导入唯一映射权威） |
 | [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉙ + 形态 II 复发分桶（69 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
 | [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open）/ DIS-009（resolved）/ DIS-010（toolized）；维护纪律含首次重审记录（2026-08-19） |
-| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-019 在册（P-001 至 P-018 已全部收口、P-019 为 in-progress spec-runner-homing 调研批——三方案裁决待用户确认后进实施批；主动队列清空） |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-020 在册 20 项（P-001 至 P-019 已全部收口、P-020 step-gate 候审、P-021 AGENTS.md 桥 done；主动队列清空） |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
 | [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ 002（cpp-hub-absorption）/ 003（precommit-dc-validator）/ 004（治理收束）/ 005（m7-hits-block）/ 006（repo-stats）/ 007（promptfoo-m7-eval） |
 | [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.0 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
@@ -704,6 +705,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [spec/community-ecosystem/](./spec/community-ecosystem/) | 社区同类框架生态调研（P-018 done：COMMUNITY_ECOSYSTEM_RESEARCH v1.6（26A+3B+13C+4H）——四簇盘点 + 分层吸收判定待用户裁决 + §2.5 步骤级工具盘点 + §2.6 兼容矩阵 + §3.5 强制决策产物管线裁定可行且优先（P-019 采纳路径，编号被占用顺延 P-020）；v1.2 吃狗粮审计轮（M7 样本 ㉙）；v1.3 §3.4 补"分层归属（ADR-0010 Q1）"列（闭环 ADR-0010 验收条件之二）；v1.4 ponytail 补充调研批（7 级决策阶梯 = ADR-0010 生成端镜像，概念吸收 Layer-0）；v1.5 候选池深入调研批（§3.4.1 候选逐项建议：ARC 重大演进 v0.8.0/0 依赖/ledger-to-driver 路线图——升级为优先候选待裁决；ADR Kit 双仓独立演化确认——吸收点并入 P-020；ponytail: 注释=技术债账本登记 pattern 演进候选；不复用组+生态观察；A/B/C 计数不变）；**v1.6 §3.4/§3.4.1 吃狗粮审计轮**（6P2+5P3 修正：Ponytail 版本锁 v4.8.x / ARC 矩阵状态同步 / B3 basis C 编号同步至 C-13 / 采纳路径 P-019→P-020 / A-08 引用修正 / 盲区登记更新；核心裁定不变）） |
 | [spec/spec-runner-homing/](./spec/spec-runner-homing/) | Spec_Runner 归巢（P-019 done：RESEARCH v1.1（6A+2B+3C+2H）——依赖面取证 = 零代码依赖；v1.1 用户裁决修正 C1 改判采纳并入（A6 实证 Spec_Runner 无 remote/全 commit 服务本仓）→ 实施批：8 文件并入 tools/spec_runner/（hash 核对）+ 上游修订注三处 + 四件套齐 + CHECKLIST 独立 pass 7/7 accepted） |
 | [spec/step-gate/](./spec/step-gate/) | P-020 决策产物管线三问门禁验收（ADR-0010 首例：STEP_GATE_CHECKLIST v1.1 pending——P-018 §3.5 采纳路径可执行化；三问门禁 8 子项验收 + 边界声明（审 step-gate 候选物，非调研报告本体），通过 = P-020 获准立项） |
+| [spec/agents-md-bridge/](./spec/agents-md-bridge/) | AGENTS.md 桥文件生成（P-021 done，CER C-01 落地：DESIGN v1.0 verified + CHECKLIST v1.0 accepted 20/20 + 独立 pass 4/4——根 AGENTS.md = SPEC_PROCESS 操作摘要桥（五段，零可漂移声明 I-1）；ADR-0010 三问懒加载审核正式执行（Layer-0/生成即激活/副作用 0，通过）；doc_registry + repo_stats 同步） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |
@@ -749,13 +751,13 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
     {"id": "PT-11", "regex": "P-(\\d{3})~P-(\\d{3})", "truth": "fs.progress_tasks", "group": 2}
   ],
   "declared": {
-    "spec_feature_dirs": 17,
+    "spec_feature_dirs": 18,
     "adr_files": 7,
     "dev_logs": 7,
     "scripts": 4,
     "templates": 5,
     "hooks": 3,
-    "progress_tasks": 19
+    "progress_tasks": 20
   },
   "view_layer_samples": [11, 16, 17, 18, 19, 20, 21],
   "doc_registry": [
@@ -771,7 +773,8 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
     {"label": "spec-runner", "path": "spec/spec-runner/SPEC_RUNNER_DESIGN.md"},
     {"label": "community-ecosystem", "path": "spec/community-ecosystem/COMMUNITY_ECOSYSTEM_RESEARCH.md"},
     {"label": "spec-runner-homing", "path": "spec/spec-runner-homing/SPEC_RUNNER_HOMING_RESEARCH.md"},
-    {"label": "step-gate", "path": "spec/step-gate/STEP_GATE_CHECKLIST.md"}
+    {"label": "step-gate", "path": "spec/step-gate/STEP_GATE_CHECKLIST.md"},
+    {"label": "agents-md-bridge", "path": "spec/agents-md-bridge/DESIGN.md"}
   ],
   "facade_baseline": {
     "README.md": {"as_of": "2026-08-23", "values": {"hits.samples": 26, "hits.form2_total": 67, "fs.adr_files": 6, "fs.templates": 5}},
