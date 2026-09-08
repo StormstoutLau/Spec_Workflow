@@ -1,32 +1,33 @@
 ---
 id: community-ecosystem-RESEARCH
 type: design
-version: 1.3
+version: 1.4
 status: in-review
 date: 2026-09-08
-depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0007]
+depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0007, ADR-0010]
 upstream: null
 ---
 
-# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.3 (2026-09-08)
+# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.4 (2026-09-08)
 
 > **任务来源**: 用户提问「调研分析社区当前类似优秀的开源框架 是否可以补强复用」+ 补充提问「当前工作流规定了流程 但每个步骤比如调研 审查 设计方案 实施方案等具体步骤 社区是否有类似的框架 skill MCP工具可以补强 同时当前是否可以强制要求每个步骤给出决策 引用信息依据 提供给下一轮审查」
 > **调研方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch 六轮取证（2026-09-08，四方向 + 本轮步骤级工具两方向）。
 > **审查状态**: `自查（单视角）`——调研收束轮，同 P-012/P-013/P-015 先例（RESEARCH-only，无独立 pass）。
 > **v1.2 变更（吃狗粮 review 深度审计轮，用户指令「以本次开发为例进行吃狗粮测试 按 spec 流程盲区扫描 可行性 版本 兼容」）**: 对本报告自身做同基座深度 review（RULE-1 时序独立/self-dogfooding，盲区扫描 = 计数/版本/兼容/一致性四维）捕获 **1P1 + 2P2 + 8P3**：P1 = **C 类计数声明 10 实为 12**（§3 实际【C】12 条：3.1×2 + 3.2×4 + 3.3×3 + 3.5×3——v1.1 全文重写时重数漏 2，dc_validator 不覆盖 C 类边界外，同 P-015 ㉖ 族）→ **M7 样本 ㉙ 入账**（计数声明错误）；P2 = C-10 编号引用错位（佐证实为 C-12）+ §4.2 验证表未同步 v1.1 新增断言 5 行（Alibaba/u14app/Agent Leaderboard/adr-governance/ADR 侵食）；P3 = §2.5「三类」实为两类措辞过度 / 版本成熟度缺失族（gpt-researcher MCP v1.0.0@2026-05-22 补入、u14app/Alibaba/AAT/adr-governance/ADR Kit 无版本号标注）/「G2」自造编号悬空去除 / §3.5 的 step 与 evidence 落点精化（metadata.evidence + metadata.step_id）/ **兼容矩阵缺失（新增 §2.6：gpt-researcher 官方支持 OPENAI_BASE_URL 本地 OpenAI 兼容端点→三机 LM Studio 可直接接、搜索轴可切 duckduckgo/searx 免 Tavily key、多代理流水线含 Reviewer「研究-审核-修正」循环=第三同构佐证补入 C-12）**。核心结论与 §3.5 裁定不受影响（v1.2 修正全部为表述/版本/兼容取证精化）。A/B/C/H 计数不变（25/3/12/4——C 由 10 修正为实际 12）。
 > **v1.3 变更（ADR-0010 验收条件之二落地轮，用户指令「好的，执行补列」）**: §3.4 补强判定矩阵新增**「分层归属（ADR-0010 Q1）」列**——依 ADR-0010 三问门禁 Q1 对候选池批量预演（6 候选分层 + 不复用组标"不适用"）：AGENTS.md 桥 Layer-0 / 决策产物管线 Layer-1（契约 FWK-DECISION-RECORD 复用 Layer-0）/ drift-gate Layer-0 / ARC Layer-1 / DeepEval 臂+调研链 MCP Layer-1 / ADR 三层 Layer-0；附批量预演注（分层 = 事实判定不随裁决改变；不复用组已按 D6 先例否决不过门禁）——**闭环 ADR-0010 验收条件之二**。核心裁定与 §3.5 不变；断言计数不变（25/3/12/4，无新增断言）。
+> **v1.4 变更（Ponytail 补充调研批，用户指令「社区同类框架生态调研 补充调研 代码实现阶段 ponytail 框架 是否可复用」）**: §2.5 新增**「代码实现步骤（Step 5-7 实施）→ 生成端防过度工程」**子节 + A-26（Ponytail v4.8.4 MIT——"懒惰资深开发者"规则集+插件，7 级决策阶梯：YAGNI→库内复用→stdlib→平台原生→已装依赖→一行→最少代码；基准 -54% 代码/-22% token；阶梯在理解后运行+根因修复+安全不可偷懒）；判定 C = **插件/规则集本体不复用**（同 Superpowers 先例）+ **7 级阶梯概念吸收候选（Layer-0）**——它是 ADR-0010 三问门禁的**生成端镜像**（方法论方向第 N 独立印证）；矩阵 + 十步映射 Step 5-7 行同步；A 25→26 / C 12→13（人工重数核对）；depends 补 ADR-0010。
 > **裁决建议**: 不变（分层吸收 + §3.5 强制决策产物管线可行且优先）。待用户裁决（P-018 登记）。
 
 ## 0. 断言统计表（必填，审计入口）
 
 | 级别 | 条数 | 说明 |
 |------|------|------|
-| A 事实类 | 25 | 每条附 URL 来源；取证日期 2026-09-08（v1.1 +9 条步骤级工具） |
+| A 事实类 | 26 | 每条附 URL 来源；取证日期 2026-09-08（v1.1 +9 条步骤级工具；v1.4 +A-26 ponytail） |
 | B 推断类 | 3 | 登记于附录 B |
-| C 判断类 | 12 | §3.5 强制决策产物管线裁定 3 条 + §4 补强评估 9 条（v1.2 修正：v1.1 声明 10 实为 12，M7 样本 ㉙） |
+| C 判断类 | 13 | §3.5 强制决策产物管线裁定 3 条 + §4 补强评估 9 条 + v1.4 ponytail 判定 1 条（v1.2 修正：v1.1 声明 10 实为 12，M7 样本 ㉙） |
 | 假设区 | 4 | H1-H4（全部待实测——读取兼容 / 导入可行性 / 评测价值 / MCP 服务形态） |
 
-> **计数说明（R7 机械重数）**: A 类 25 条（行首 `【A】` 标记）；附录 B 3 条（`"id": "B\d+"` 机读块）；C 类 12 条（`【C】` 标记——**不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 声明 10 实为 12 由 v1.2 吃狗粮 review 重数捕获（M7 样本 ㉙）**）；假设区 4 条（`[H\d+]` 列表项）。
+> **计数说明（R7 机械重数）**: A 类 26 条（行首 `【A】` 标记）；附录 B 3 条（`"id": "B\d+"` 机读块）；C 类 13 条（`【C】` 标记——**不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 声明 10 实为 12 由 v1.2 吃狗粮 review 重数捕获（M7 样本 ㉙）；v1.4 +1 C（ponytail 判定）人工重数核对**）；假设区 4 条（`[H\d+]` 列表项）。
 
 ## 1. 调研目标与实体盘点
 
@@ -123,6 +124,10 @@ upstream: null
 
 【A】**ADR 侵食三层防御模式**（社区实践文章，wakatchi.dev 2026-05）——「ADRs are eroded」对策：① ADR 禁止事项显式化到标识符级（如 `plan_tier` 列禁止新代码引用）→ ② 静态检查脚本（git diff 差分扫描违规引入）→ ③ CI/pre-commit 自动执行 + PR 模板自查清单——**人工（ADR 本文 + PR 清单）与机械（检查脚本 + CI）双防线，不依赖 reviewer 记忆**。【来源：https://wakatchi.dev/adr-guardrails-as-code/】
 
+#### 代码实现步骤（Step 5-7 实施 → 生成端防过度工程）
+
+【A】**Ponytail**（github.com/DietrichGebert/ponytail，**v4.8.4**，MIT，147 commits，2026-06-26 活跃）——**"懒惰资深开发者"规则集 + 插件形态**（非模型/非独立工具/非框架）：跨 16+ AI 代理平台（Claude Code/Cursor/Copilot/Codex/Gemini/OpenCode/Windsurf/Pi…）工作。核心 = **7 级决策阶梯**——写代码前停在第一个成立的阶梯：① YAGNI（这东西需要存在吗？不需要就跳过）→ ② 代码库已有？复用之 ← ③ 标准库能做？用它 → ④ 原生平台功能？用它 → ⑤ 已装依赖能解？用它 → ⑥ 一行能搞定？一行 → ⑦ 以上都不行才写最少能工作的代码。**关键纪律 = 阶梯在理解问题之后运行（对解决方案懒惰，对阅读理解从不懒惰）**；Bug 修复 = 根因而非症状（修前 grep 每个调用者）；安全/信任边界/数据丢失处理/可访问性 = 不可偷懒区。附带 5+1 skills（`ponytail` 懒惰模式 / `ponytail-review` 过度工程审查 / `ponytail-audit` 全仓库过度工程审计 / `ponytail-debt` 技术债收集）+ 3 lifecycle hooks + MCP 形态（ponytail-mcp 高级）。**基准测试**（真实 Claude Code headless，编辑 tiangolo/full-stack-fastapi-template，12 功能任务，Haiku 4.5，n=4）：代码量 **-54%**（最高 -94%）、token -22%、成本 -20%、速度 -27%、安全性 100%（vs 基线 95%）。**与本框架同构度**：7 级阶梯 = 本框架「纯文档 + 最小工具层」哲学 + ADR-0010 懒加载门禁（Layer-0 优先于 Layer-1 的生成端镜像）+ CODE_WIKI「薄壳不膨胀」；ponytail-review/audit = 本框架独立 pass / repo_stats 对账的生成端对照（审查过度工程）；ponytail-debt = DEV-LOG 技术债登记形态。【来源：https://github.com/DietrichGebert/ponytail ; https://blog.csdn.net/yanceyxin/article/details/162553680 ; https://openclawapi.org/en/blog/2026-06-21-ponytail-overengineering-fix】
+
 #### 与十步流程的映射
 
 | 十步流程 | 已有的本框架执行件 | 社区可补强（候选） |
@@ -130,7 +135,7 @@ upstream: null
 | Step 1-2 调研+复验 | WebSearch/MCP（已直测：paper-search/stackexchange/english-search，P-013） | gpt-researcher / Gigaxity / AAT Paper Search MCP（MCP 服务形态，H4 待实测） |
 | Step 3 设计 | DESIGN 模板 + 决策契约 | adr-kit guardrails（候选）、Superpowers brainstorming 技能形态 |
 | Step 4 裁决 | 用户/评审裁决 + M7/ADR 登记 | adr-governance enforcement loop（概念印证）、ADR 侵食三层防御（模式吸收候选） |
-| Step 5-7 实施+校验 | TDD + IMPLEMENTATION/CHECKLIST + 三校验器 + pre-commit hook | Superpowers TDD skill 形态（生成端）、ADR Kit 三层 hook 分阶段（候选） |
+| Step 5-7 实施+校验 | TDD + IMPLEMENTATION/CHECKLIST + 三校验器 + pre-commit hook | Superpowers TDD skill 形态（生成端）、ADR Kit 三层 hook 分阶段（候选）、**Ponytail 7 级阶梯（生成端防过度工程——概念吸收候选）** |
 | Step 8-10 独立 pass+收束 | RULE-1/RULE-5 审查臂 + Spec_Runner gate | spec-reviewer 子代理（同构印证）、promptfoo/DeepEval 评测臂（候选） |
 
 ### 2.6 兼容与可行性矩阵（v1.2 新增：答「可行性 版本 兼容」盲区）
@@ -144,6 +149,7 @@ upstream: null
 | AAT | n/a（只装 skills+MCP，不跑 LLM） | n/a | MIT（版本号未见） | **Python 3.11+ + uv** | 环境门槛高，候选 |
 | ARC | n/a（CLI 图查询） | n/a | MIT（版本号未见） | 任意 OS 单文件二进制 | 轻量可行 |
 | adr-governance / ADR Kit | n/a | n/a | MIT（版本号未见） | git hooks / Python | 模式印证（不强引） |
+| Ponytail（v1.4） | n/a（规则集无需端点） | n/a | **v4.8.4 / MIT / 147 commits / 2026-06-26 active** | 跨 16+ agent 平台规则（无运行时依赖） | **概念吸收（Layer-0）——插件本体不引入** |
 | promptfoo（P-010） | ✅（双臂模板端点运行时注入，已实测） | n/a | 24.9k★ / 并入 OpenAI / MIT | CLI | 已落地 |
 
 > v1.2 版本盲区登记：除 gpt-researcher（MCP v1.0.0）/promptfoo（星数）/Superpowers（报道数）外，u14app/Alibaba/AAT/ARC/adr-governance/ADR Kit/Gigaxity **均未标注版本号**——采纳任一候选前须 P-015 v1.2 式源码/API 直读核验（§4.3 局限 5）。
@@ -166,6 +172,8 @@ upstream: null
 
 【C】**ADR 三层 enforcement 模式吸收候选（v1.1 新增）**——「ADR 禁止事项显式化 → 静态检查 → CI/hook 自动执行 + 提交自查清单」三层防御与本框架「文档声明 → 校验器 → pre-commit hook」同构，且提供两个补强点：① 禁止事项标识符级显式化（本框架 Spec_Runner gate 的 cmd 是正例命令，缺"禁止性"负例通道的显式登记位点）；② 分阶段 hook（pre-commit 快查/pre-push 慢查）——登记为 gate 演进候选（先不编号，挂 §3.5 P-019 采纳路径一并设计，v1.2 去除自造编号）。
 
+【C】**Ponytail 7 级阶梯 = 概念吸收候选（v1.4 新增，用户提问「代码实现阶段 ponytail 是否可复用」）**——判定：**插件/规则集本体不复用**（跨 16+ agent 平台的软形态规则，与本框架纯文档 + 最小工具层身份无运行时贴合，同 Superpowers 不复用先例）；**7 级决策阶梯本身吸收为方法论思想**——① 它是 ADR-0010 懒加载三问门禁的**生成端镜像**（阶梯 ① YAGNI = 三问 Q2 无触发不实现；②-⑤ 复用先于新建 = Q1 Layer-0 优先于 Layer-1；⑥-⑦ 最少代码 = 零副作用纪律），外部项目独立演化出与本框架同一架构约束 = 方法论方向获又一独立印证；② 其「对解决方案懒惰、对阅读理解从不懒惰」= 本框架 Step 2 调研纪律 + 最小工具层的哲学同构；③ ponytail-review/audit 唯一补强位点 = 生成端（写码前）的过度工程自审——本框架现以验证端（ADD 审计 + repo_stats）为主，生成端纪律可作 Step 5-7 增强候选。**分层归属 = Layer-0（概念）**；激活条件 = 触发驱动（若未来在实施阶段补入生成端自审纪律，先登记不实施）。【来源：A-26 + ADR-0010 对应关系（见 §2.5 实施子节）】
+
 ### 3.3 不复用（明确否决）
 
 【C】**Superpowers / SpecKit 本体不复用**——流程技能形态软（LLM 遵循式，无机械门禁），本框架已用更硬的手段实现同一目标（Spec_Runner gate + pre-commit 三 hook）；其设计思想（brainstorming 强制产出 / 子代理审查）已在本框架十步流程中对应存在。唯一吸收 = 社区同构佐证（见 C-12，v1.2 修正编号错位）。
@@ -186,6 +194,7 @@ upstream: null
 | ARC 先导 | 中（导入试点） | 轻（单文件 CLI） | 中-高（决策图谱） | 触发驱动 | 候选议程 | **Layer-1**（外部 CLI 工具） |
 | DeepEval 臂 / 调研链 MCP | 中 | 中（评测/服务） | 中 | 端点/服务形态 | 候选议程 | **Layer-1**（外部服务/依赖） |
 | ADR 三层 enforcement | 低（模式吸收） | 零 | 中（禁止性通道 + 分阶段 hook） | 登记为 G2 | 候选议程 | **Layer-0**（纯模式吸收，无运行时） |
+| **Ponytail 7 级阶梯**（v1.4） | 近零（概念吸收） | 零 | 中（生成端防过度工程纪律） | 插件本体不复用（同 Superpowers 先例） | 概念吸收候选 | **Layer-0**（方法论思想吸收；插件 = 外部 agent 平台资产不入本仓） |
 | Superpowers/SpecKit/Langfuse/gpt-researcher 本体 | — | — | — | 软形态/重依赖 | 不复用 | 不适用（已按 D6 等先例否决，不过门禁） |
 
 ### 3.5 强制决策产物管线（v1.1 新增：答题主问「每步强制决策+引用依据供下轮审查」）
@@ -311,6 +320,9 @@ upstream: null
 - ADR Kit（kschlt）：https://github.com/kschlt/adr-kit
 - ADR 侵食三段防御：https://wakatchi.dev/adr-guardrails-as-code/
 - ADR 状态机（docsie）：https://www.docsie.io/blog/glossary/architectural-decision-record/
+- Ponytail（DietrichGebert）：https://github.com/DietrichGebert/ponytail
+- Ponytail 介绍文（CSDN）：https://blog.csdn.net/yanceyxin/article/details/162553680
+- Ponytail 过度工程修复评测（openclawapi）：https://openclawapi.org/en/blog/2026-06-21-ponytail-overengineering-fix
 
 ---
 
@@ -338,7 +350,7 @@ upstream: null
 
 ### 附录 C：C 类判断复盘
 
-- C-01 至 C-12：见 §3 各 `【C】` 行；§0 声明 12 条（v1.2 吃狗粮 review 重数修正自 v1.1 的 10——P-011 教训的 reverse：声明写少漏计 2，M7 样本 ㉙）。
+- C-01 至 C-13：见 §3 各 `【C】` 行；§0 声明 13 条（v1.2 吃狗粮 review 重数修正自 v1.1 的 10——P-011 教训的 reverse：声明写少漏计 2，M7 样本 ㉙；v1.4 +1 Ponytail 判定）。
 
 ---
 
