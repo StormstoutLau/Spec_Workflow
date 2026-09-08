@@ -1,7 +1,7 @@
 ---
 id: ADR-0007
 type: adr
-version: 1.5
+version: 1.6
 status: accepted
 date: 2026-08-17
 depends: [doc-contract-refactor, CPP_HUB_GAP_ANALYSIS_RESEARCH, CPP_HUB_ABSORPTION_DESIGN, ADR-0006]
@@ -301,6 +301,7 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | ADR-0008 | 本仓库 | Step 2 门禁 + Step 8 双向链路（accepted 2026-08-17） |
 | ADR-0009 | 本仓库 | Discoveries 发现日志机制（accepted 2026-08-17） |
 | ADR-0010 | 本仓库 | 懒加载架构原则——Layer-0/Layer-1 分层作为候选吸收的强制门禁（accepted 2026-09-08） |
+| ADR-0011 | 本仓库 | step-gate 未生效排查——触发依赖与表演性决策软肋 + 社区解法映射（accepted 2026-09-09，决策 = A+C 组合） |
 | ADR-001~019 | **[源项目·Cpp_Hub/docs/decisions/] 独立三位系列** | Header-only Core / SLSQP 扩展 / … / ADR-019 复核 pilot（共 19 项，MADR 格式）；**与本仓四位系列无连续编号关系**，仅登记编号空间与主题，不吞并内容 |
 | DIS-001~006 | 源项目·拆分迁移留存 | `Cpp_Hub/docs/discoveries/`（001_bh_fdr ~ 006_fp_determinism 全枚举实证） |
 | DIS-007 | 本仓库 | 幻觉点清单自身含幻觉（toolized；文件名不改，id↔文件名映射见 docs/discoveries/README.md） |
@@ -338,3 +339,4 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | 2026-08-21 | 附录 A 补登 FWK 命名空间两行（FWK-ASSERTION + FWK-FACT-CHECK）——此前 FWK-ASSERTION 已被 SPEC_PROCESS depends 跨文档引用却未登记，属既有缺口；入册标准列举扩展至含 FWK（D3 决策节 + 附录 A 两处同步）。版本 v1.2 → v1.3 |
 | 2026-08-23 | 附录 A 补登 FWK-DECISION-RECORD（决策记录契约，P-016 B 方案契约批）——Semantica（semantica-agi，MIT）决策 schema 吸收：八字段 + 三载体（M7/ADR/PROGRESS）映射 + I-1~I-4 不变式（docs/DECISION_RECORD_CONTRACT.md，active）。版本 v1.3 → v1.4 | [decision-schema DESIGN](../spec/decision-schema/DESIGN.md)（D1 落点裁决：独立契约文档入 FWK 族） |
 | 2026-09-08 | 附录 A 补登 ADR-0010（懒加载架构原则，proposed）——docs/adr/README.md 同步。版本 v1.4 → v1.5 | [ADR-0010](./ADR-0010-lazy-loading-architecture-gate.md)（D3 入册：ADR 四位系列跨文档复用稳定 ID） |
+| 2026-09-09 | 附录 A 补登 ADR-0011（step-gate 未生效排查，proposed）——docs/adr/README.md 同步。版本 v1.5 → v1.6 | [ADR-0011](./ADR-0011-step-gate-trigger-dependency-and-theatrical-decision.md)（D3 入册：ADR 四位系列跨文档复用稳定 ID） |

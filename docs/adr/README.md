@@ -13,6 +13,7 @@
 | [ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) | SPEC_PROCESS v1.4——Step 2 门禁语义与 Step 8 双向链路检查 | accepted（2026-08-17，D4+D6 双决策） | R4 语义门禁 (a)-(d) + 双向引用/断言延续两项 |
 | [ADR-0009](../../adr/ADR-0009-discoveries-log-mechanism.md) | Discoveries 发现日志机制——学习回路"事故→规则"的载体 | accepted（2026-08-17） | 三态索引 + Step 2/10 双集成点；DIS-008 首登 |
 | [ADR-0010](../../adr/ADR-0010-lazy-loading-architecture-gate.md) | 懒加载架构原则——Layer-0/Layer-1 分层作为候选吸收的强制门禁 | accepted（2026-09-08，用户确认） | 候选吸收三问（放哪层/激活条件/零副作用）+ 与 D6 互补防过重 |
+| [ADR-0011](../../adr/ADR-0011-step-gate-trigger-dependency-and-theatrical-decision.md) | step-gate 未生效排查——触发依赖与表演性决策软肋 + 社区解法映射 | accepted（2026-09-09，用户裁决 A+C 组合收口） | P-021/022/023 三连批决策链缺失根因诊断 + 决策 = A+C 组合（B 排除暂缓）；A 失效条件已命中待实施指令 |
 
 ## 编号空间登记
 
