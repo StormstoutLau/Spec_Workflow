@@ -41,10 +41,14 @@ python spec_runner.py replay --session <sid>
 # fork：复制前 N seq 行至新流
 python spec_runner.py fork --session <sid> --seq 42 --new <sid2>
 
+# 决策产物管线校验（P-020）：decision 事件链 schema/evidence/step 序（只读）
+#   --expect 期望完整链（缺省 = 仅校验已登记链内部一致性）
+python spec_runner.py step-gate --session <sid> --expect research design implement verify finalize
+
 # 检索 = grep（零代码）：
 #   grep '"source": "gate"' sessions/<sid>.jsonl   # 门禁轨迹
-#   grep '"event": "llm_request"' sessions/<sid>.jsonl
-python spec_runner.py selftest   # 21 项内置自测（stdlib mock server）
+#   grep '"event": "decision"' sessions/<sid>.jsonl # 决策记录轨迹
+python spec_runner.py selftest   # 26 项内置自测（stdlib mock server）
 ```
 
 端点/模型/提供商运行时注入：`--endpoint/--model/--provider` 或 `SR_ENDPOINT/SR_MODEL/SR_PROVIDER` 环境变量——不硬编码。
@@ -65,6 +69,9 @@ python spec_runner.py selftest   # 21 项内置自测（stdlib mock server）
 - `seq` 流内单调递增（append-only 的机械保证，`replay` 校验）
 - `source` 五档：system / user / assistant / tool / gate（按来源过滤 = 文本版 Trajectory）
 - `model`/`provider`：LLM 事件（llm_request/llm_response）必填——RULE-5 异质性追溯锚
+- `event: "decision"`：决策产物管线事件（P-020）——`input` = FWK-DECISION-RECORD 八字段
+  dict（`metadata.step_id/step_seq` 标识流程步骤、`metadata.evidence` 数组 = 决策证据锚点
+  E1-E4）；由 `step-gate` 命令只读校验（schema 完整 / evidence 非空 / step 序单调恰一条）
 - 写入端单点把守：schema 违规 / seq 非递增在写入器抛错拒绝落盘
 - 同 session 复用必须显式 `--resume`（RULE-1 时序独立物理化）
 

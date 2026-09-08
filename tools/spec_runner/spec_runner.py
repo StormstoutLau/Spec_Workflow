@@ -22,13 +22,13 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
 SOURCES = ("system", "user", "assistant", "tool", "gate")
 EVENTS = ("session_start", "prompt", "llm_request", "llm_response", "tool",
-          "gate", "endpoint_unreachable", "session_end")
+          "gate", "decision", "endpoint_unreachable", "session_end")
 LLM_EVENTS = ("llm_request", "llm_response")  # model/provider 必填非空
 SID_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 GATE_STDOUT_TAIL = 2000
@@ -136,6 +136,74 @@ def gate_passed(w: EventWriter, sid: str, name: str) -> bool:
     """派生视图查询：流中是否存在该 gate 的 pass 事件（D3 前置检查）。"""
     return any(r.get("gate", {}) and r["gate"].get("name") == name
                and r["gate"].get("verdict") == "pass" for r in w.read(sid))
+
+
+# ---- 模块 2b：step-gate 决策产物管线校验（P-020，CER §3.5——只读校验，三类规则分级 exit） ----
+STEP_SEQUENCE = ("research", "design", "implement", "verify", "finalize")
+DREQ = ("category", "scenario", "reasoning", "outcome", "confidence")
+ANCHOR_RE = re.compile(
+    r"^(https?://\S+|"
+    r"(?:spec|adr|docs|tools|scripts)/"
+    r"[A-Za-z0-9_./\-]*(?:\.(?:md|py|jsonl))?"
+    r"(?:#[L]\d+|L\d+|\s*§[0-9.]+)?)$")
+
+
+def cmd_gate_step(args) -> int:
+    """校验 session 内 decision 事件链——只读不写流。
+
+    三类规则（DESIGN §6.2）：
+      - 硬性-1 schema：八字段必填 + metadata.step_id/step_seq + evidence 非空
+      - 硬性-2 秩序：step_id ∈ 序表、step_seq = 序表位、每步恰一条、--expect 覆盖时全链一致
+      - 软性-3 锚点：evidence[].anchor 形态可解析（正则）
+    exit 0 / 1（硬性）/ 2（软性存疑）。
+    """
+    w = EventWriter(sessions_dir())
+    decisions = [r for r in w.read(args.session) if r.get("event") == "decision"]
+    if not decisions:
+        print(f"step-gate[{args.session}]: 无 decision 事件（决策记录纪律未执行）")
+        return 1
+    expect = tuple(args.expect) if args.expect else None
+    hard, soft, seen = [], [], {}
+    for r in decisions:
+        inp = r.get("input") if isinstance(r.get("input"), dict) else {}
+        md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
+        missing = [k for k in DREQ if k not in inp]
+        if not md.get("step_id") or md.get("step_seq") is None:
+            missing.append("metadata.step_id/step_seq")
+        if not (isinstance(md.get("evidence"), list) and md["evidence"]):
+            missing.append("metadata.evidence 非空")
+        if missing:
+            hard.append(f"seq{r.get('seq')} 缺字段: {missing}")
+            continue
+        sid_, sseq = md["step_id"], md["step_seq"]
+        if sid_ not in STEP_SEQUENCE or sseq != STEP_SEQUENCE.index(sid_) + 1:
+            hard.append(f"seq{r.get('seq')} step 位错 (step_id={sid_!r}, step_seq={sseq})")
+        if sid_ in seen:
+            hard.append(f"seq{r.get('seq')} step_id 重复 {sid_!r}（已见于 seq{seen[sid_]}）")
+        seen[sid_] = r.get("seq")
+        for ev in md["evidence"]:
+            anchor = ev.get("anchor") if isinstance(ev, dict) else str(ev)
+            if anchor and not ANCHOR_RE.match(anchor):
+                soft.append(f"seq{r.get('seq')} 锚点形态存疑 {str(anchor)[:50]!r}")
+    got = list(seen)
+    if expect:
+        if len(got) != len(expect) or got != list(expect):
+            hard.append(f"期望链 {list(expect)} ≠ 已登记 {got}")
+    else:
+        print(f"step-gate[{args.session}]: 已登记 {len(got)}/{len(STEP_SEQUENCE)} 步 ({got})"
+              + ("（未声明 --expect 完整性）" if len(got) < len(STEP_SEQUENCE) else ""))
+    for m in hard:
+        print(f"  [HARD] {m}")
+    for m in soft:
+        print(f"  [SOFT] {m}")
+    if hard:
+        print(f"step-gate[{args.session}]: hard={len(hard)} soft={len(soft)} → exit 1")
+        return 1
+    if soft:
+        print(f"step-gate[{args.session}]: soft={len(soft)} → exit 2（人工复核）")
+        return 2
+    print(f"step-gate[{args.session}]: 决策链一致 pass → exit 0")
+    return 0
 
 
 # ---- 模块 3：adapter 接口 + NativeHTTP（D4/D5——stdlib urllib，预检门控 + 重试） ----
@@ -339,6 +407,11 @@ def build_parser() -> argparse.ArgumentParser:
     f.add_argument("--seq", type=int, required=True, dest="seq_from")
     f.add_argument("--new", required=True)
     f.set_defaults(func=cmd_fork)
+    sg = sub.add_parser("step-gate", help="决策产物管线校验（P-020：schema/evidence/step 序，只读）")
+    sg.add_argument("--session", required=True)
+    sg.add_argument("--expect", nargs="*", default=None,
+                    help="期望完整链 step_id 列表（缺省 = 仅校验已登记链内部一致性）")
+    sg.set_defaults(func=cmd_gate_step)
     st = sub.add_parser("selftest", help="内置自测（stdlib mock server）")
     st.set_defaults(func=lambda a: run_selftest())
     return p
@@ -506,6 +579,38 @@ def run_selftest() -> int:
             + json.dumps(r5, ensure_ascii=False) + "\n", encoding="utf-8")
         p_rp = run_cli("replay", "--session", bad_sid)
         check("F19 replay 坏 seq exit 1", p_rp.returncode == 1)
+
+        # F20-F23: step-gate 决策产物管线（P-020，CER §3.5）
+        p_sg0 = run_cli("step-gate", "--session", "st-nod")
+        check("F20 空流无 decision → exit 1", p_sg0.returncode == 1)
+        w_sg = EventWriter(tmp)
+        for i, st in enumerate(["research", "design"], 1):
+            w_sg.append("st-ok", "assistant", "decision", input_={
+                "category": "feature-design", "scenario": "s", "reasoning": "r",
+                "outcome": "o", "confidence": 0.9,
+                "metadata": {"step_id": st, "step_seq": i,
+                             "evidence": [{"grade": "E1", "anchor": "spec/step-gate/DESIGN.md §4"}]}})
+        p_sg_ok = run_cli("step-gate", "--session", "st-ok",
+                          "--expect", "research", "design")
+        check("F21 完整链 --expect 一致 → exit 0", p_sg_ok.returncode == 0, p_sg_ok.stdout[-80:])
+        w_sg.append("st-miss", "assistant", "decision", input_={
+            "category": "feature-design", "scenario": "s",
+            "metadata": {"step_id": "research", "step_seq": 1,
+                         "evidence": [{"grade": "E1", "anchor": "spec/x.md"}]}})
+        p_sg_miss = run_cli("step-gate", "--session", "st-miss")
+        check("F22 缺 reasoning/outcome/confidence → exit 1", p_sg_miss.returncode == 1)
+        w_sg.append("st-soft", "assistant", "decision", input_={
+            "category": "c", "scenario": "s", "reasoning": "r", "outcome": "o",
+            "confidence": 0.9, "metadata": {"step_id": "research", "step_seq": 1,
+            "evidence": [{"grade": "E1", "anchor": "not a valid anchor !!"}]}})
+        p_sg_soft = run_cli("step-gate", "--session", "st-soft")
+        check("F23 锚点形态存疑 → exit 2", p_sg_soft.returncode == 2)
+        w_sg.append("st-badd", "assistant", "decision", input_={
+            "category": "c", "scenario": "s", "reasoning": "r", "outcome": "o",
+            "confidence": 0.9, "metadata": {"step_id": "XXX", "step_seq": 9,
+            "evidence": [{"grade": "E1", "anchor": "spec/x.md"}]}})
+        p_sg_badd = run_cli("step-gate", "--session", "st-badd")
+        check("F24 step_id 非法 → exit 1", p_sg_badd.returncode == 1)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
