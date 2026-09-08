@@ -1,14 +1,14 @@
 ---
 id: community-ecosystem-RESEARCH
 type: design
-version: 1.8
+version: 1.9
 status: in-review
 date: 2026-09-08
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0007, ADR-0010]
 upstream: null
 ---
 
-# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.8 (2026-09-09)
+# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.9 (2026-09-09)
 
 > **任务来源**: 用户提问「调研分析社区当前类似优秀的开源框架 是否可以补强复用」+ 补充提问「当前工作流规定了流程 但每个步骤比如调研 审查 设计方案 实施方案等具体步骤 社区是否有类似的框架 skill MCP工具可以补强 同时当前是否可以强制要求每个步骤给出决策 引用信息依据 提供给下一轮审查」
 > **调研方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch 六轮取证（2026-09-08，四方向 + 本轮步骤级工具两方向）。
@@ -20,6 +20,7 @@ upstream: null
 > **v1.6 变更（§3.4/§3.4.1 吃狗粮审计轮，用户指令「3.4 补强判定矩阵 3.4.1 候选逐项深入调研与清晰建议 进行一次吃狗粮审计」）**: 对本报告 §3.4 矩阵 + §3.4.1 子节做同基座深度 review（盲区扫描 = 计数/版本/兼容/一致性四维，同 v1.2 先例）捕获 **6 P2 + 5 P3，无 P1**：P2 = ① Ponytail 版本号内部分裂（A-26 行/§2.6 v4.8.4 vs §3.4.1 v1.5 核验 v4.8.3——统一锁 v4.8.x 区间声明）② ARC 建议状态矩阵未同步（矩阵仍"候选议程/触发驱动" vs §3.4.1/§2.6"升级优先候选"）③ 附录 B B3 basis C 编号错位（v1.4 插入 ponytail 致编号 +1，§3.5 三裁定实为 C-11/12/13，表版 C-08/09/10 与 JSON 版 C-10/11/12 均未同步）④ §3.5 采纳路径 P-019 过时（编号已顺延 P-020 未回写）⑤ §3.4.1 ADR 三层行 A-13 引用错位（A-13 实为 Langfuse，rvdbreemen/adr-kit 应为 A-08）⑥ §2.6 盲区登记 + §4.3 局限 5 未随 v1.5 快照更新（仍称 ARC/adr-kit/Ponytail"未标版本号"）；P3 = G2 悬空编号残留（矩阵/§5.1）/ 计数说明未记 v1.5+1.6 重数 / ARC「19 天前」时点相对值 / ADR 三层矩阵行未标 v1.5 注 / §3.4.1 内联取证形态偏移观察。**核心裁定不变**；计数不变（26/3/13/4，无新增断言）。修正全部为同步/编号/版本精化。
 > **v1.7 变更（P-020 step-gate 决策产物管线吃狗粮落地，2026-09-08）**: 矩阵「每步决策产物管线」行建议列更新为**「已吸收（P-020 done，v1.7）」**——CER §3.5 裁定落地：step-gate 三件套（STEP_GATE_CHECKLIST v1.2 accepted 三问 8/8 + DESIGN v1.0 + CHECKLIST_FUNC v1.1 accepting 12/12）+ spec_runner v1.1.0（decision 事件 + step-gate 命令）；§3.5 采纳路径 P-020 完成。断言计数不变（26/3/13/4）。
 > **v1.8 变更（吸收状态同步轮，用户指令「更新一下 已经吸收复用需要更新状态」）**: 对 §3.1/§3.2/§3.4/§3.4.1/§3.5/§5.1 中**已实际吸收复用**条目的状态位点全面同步：**AGENTS.md 桥 → 已吸收（P-021 done，2026-09-08，根 AGENTS.md 落地 + ADR-0010 三问 Layer-0 审核通过）**；**每步决策产物管线（§3.5）→ 已吸收（P-020 done 2026-09-08 step-gate 决策流 + step-gate 命令；**ADR-0011 accepted A+C 决策两出路全落地**：P-024 出路 A 流程强制 = pre-commit 第四 hook step-enforce（2026-09-09）+ P-025 出路 C 独立验证 = spec_runner verify-anchor 锚点真实性机械核查 + SPEC_PROCESS RULE-1 独立 pass 取证清单（2026-09-09）——"决策记录从档案提升为驱动执行的输入"方向三项目独立印证 → 本仓完整实例化含流程强制与审查取证）**；**drift-gate 概念 → P-023 概念登记已落（2026-09-09，Layer-0 仅登记不实施）**；§3.5 采纳路径更新为已实施态；§5.1 候选池前两条改已实施。**断言计数不变（26/3/13/4——纯状态同步零新增断言）**。
+> **v1.9 变更（§2.6 可行性判定补充调研批，用户指令「2.6 兼容与可行性矩阵 可行性判定需要补充调研 给出清晰的判断 吃狗粮执行 测试step-gate是否起效」）**: 对 §2.6 矩阵四个可行性模糊项做 **2026-09-09 四路 WebSearch 补充取证**给出清晰判定：**u14app/deep-research H4 待测 → 可行**（MCP 形态 streamable-http+SSE，任意 OpenAI 兼容端点可接（三机 LM Studio），Searxng 本地搜索轴，v1.0.0@2026-05-21 维护 active，Node 18+；**安全提示：SSRF 漏洞 issue #153 未修**）；**Alibaba DeepResearch H4 待测 → 不复用**（通义 30B-A3B 模型方案 = 训练级重栈 + repo 2026-02 起停滞（19.4k★ 但唯一发布 2025-09），spring-ai-alibaba 变体 = Java 栈 + 2026-02 停滞——均超出调研弹药层定位）；**AAT 环境门槛高 → 可行（生成端互操作）**（PyPI v0.1.2，`uvx` 免安装直跑，Python 3.11+ + uv 确认；其 Paper Search MCP（20+ 学术源）与本仓既有 mcp_paper-search 重叠 → 可选触发驱动）；**Gigaxity 云端依赖 → 不可行（本仓）**（Qwen3-30B-A3B 合成模型重资源 + Exa/Brightdata 外部 key；gpt-researcher 已覆盖同功能且更轻）。版本盲区登记更新（u14app v1.0.0 / AAT v0.1.2 已核验；Alibaba/Gigaxity 判定排除）；§4.3 局限 5 同步。**断言计数不变（26/3/13/4——本批纯内联取证 + 判定更新，无新增行首断言）**；§2.6 表可行/不可行判定即「清晰的判断」。
 > **裁决建议**: 不变（分层吸收 + §3.5 强制决策产物管线可行且优先；v1.5 增补：ARC 升级为优先候选待用户裁决）。待用户裁决（P-018 登记）。
 
 ## 0. 断言统计表（必填，审计入口）
@@ -147,16 +148,16 @@ upstream: null
 | 工具 | 三机 LM Studio OpenAI 兼容端点 | 搜索轴要求 | 版本/维护 | 环境门槛 | 可行性判定 |
 |------|------------------------------|-----------|-----------|---------|-----------|
 | gpt-researcher | ✅ **官方支持**（OPENAI_BASE_URL，A-17 v1.2 取证） | Tavily（免费额）或 duckduckgo/searx+ 等（可免商业 key） | MCP v1.0.0 / 2026-05-22 / active | Python 3.11+ | **可行（触发驱动，H4 实测后接）** |
-| Gigaxity Deep Research | ✅（local-inference 分支换 vLLM/SGLang/llama.cpp，OpenAI 兼容） | 默认 OpenRouter（云端 key）；本地分支可 | 53★ / MIT（版本号未见） | Python 3.11+ / FastAPI | 可行但默认云端 key，本地分支待实测 |
-| u14app/deep-research | 未证（宣称任意 LLM） | — | 4.7k★（版本号未见） | Node/JS | H4 待测 |
-| Alibaba DeepResearch | 未证 | — | 19.9k★（版本号未见） | — | H4 待测 |
-| AAT | n/a（只装 skills+MCP，不跑 LLM） | n/a | MIT（版本号未见） | **Python 3.11+ + uv** | 环境门槛高，候选 |
+| Gigaxity Deep Research | ✅（local-inference 分支换 vLLM/SGLang/llama.cpp，OpenAI 兼容） | 默认 OpenRouter（云端 key）；本地分支可 | 53★ / MIT（版本号未见） | Python 3.11+ / FastAPI | **不可行（v1.9 判定）**——Qwen3-30B-A3B 合成模型重资源 + Exa/Brightdata 外部 key 依赖；gpt-researcher 已覆盖同功能且更轻 |
+| u14app/deep-research | ✅ 未证到**已核验**（v1.9：README 明示 "any OpenAI Compatible LLMs" + Ollama + OpenRouter，含 Atlas Cloud——三机 LM Studio 可接） | ✅ **Searxng 本地轴**（v1.9 核验：支持 Searxng/Tavily/Firecrawl/fastCRW/Exa/Bocha/Brave） | **v1.0.0 @ 2026-05-21 / 维护 active / MIT**（v1.9 核验，4.6k★） | Node.js 18+ + pnpm/npm/yarn（Docker 可选）；MCP 形态 streamable-http+SSE / SaaS / PWA | **可行（v1.9 判定，触发驱动）**——本地数据处理 + OpenAI 兼容端点 + 本地搜索轴，MCP 形态适配调研链；**安全提示：SSRF 漏洞 issue #153 未修** |
+| Alibaba DeepResearch | 未核验（通义 30B-A3B 模型经 OpenRouter 托管有免费档；但本仓判定已排除） | — | 19.4k★ / Apache-2.0 / **repo 2026-02 起停滞**（v1.9 核验：唯一发布 2025-09 30B-A3B；spring-ai-alibaba 变体 = Java 栈 2026-02 停滞） | 30B-A3B 模型推理（重资源）或 Java/Spring AI 栈 | **不复用（v1.9 判定）**——训练级模型方案超出调研弹药层定位 + repo 停滞；轻量替代 = u14app/gpt-researcher |
+| AAT | n/a（只装 skills+MCP，不跑 LLM） | n/a | **PyPI v0.1.2 / MIT**（v1.9 核验，18 commits） | **Python 3.11+ + uv**（`uvx academic-agent-toolkit` 免安装直跑） | **可行（v1.9 判定，生成端互操作，触发驱动）**——一键装 skills + Paper Search MCP（20+ 学术源）跨 agent 配置；**与既有 mcp_paper-search 重叠 → 可选，不优先** |
 | ARC | n/a（CLI 图查询） | n/a | **v0.8.0 / 161 commits / 0 依赖（v1.5 快照核验）** | 任意 OS 单文件二进制 | 升级为优先候选（P-020 后触发） |
 | adr-governance / ADR Kit | n/a | n/a | kschlt/adr-kit v0.2.x（CHANGELOG 0.2.7 锚，声明级） | git hooks / Python | 模式印证（不强引；吸收点并入 P-020） |
 | Ponytail（v1.4） | n/a（规则集无需端点） | n/a | **v4.8.x / MIT / 147 commits / 2026-06-26 active**（v1.5 核验：release v4.8.3@06-24，v1.6 统一锁区间） | 跨 16+ agent 平台规则（无运行时依赖） | **概念吸收（Layer-0）——插件本体不引入** |
 | promptfoo（P-010） | ✅（双臂模板端点运行时注入，已实测） | n/a | 24.9k★ / 并入 OpenAI / MIT | CLI | 已落地 |
 
-> v1.6 更新版盲区登记：v1.5 快照已核验 **ARC（v0.8.0）/ kschlt-adr-kit（v0.2.x）/ Ponytail（v4.8.x）** 版本；其余 u14app/Alibaba/AAT/adr-governance/Gigaxity **仍无版本号标注**——采纳任一前须 P-015 v1.2 式源码/API 直读核验（§4.3 局限 5）。
+> v1.6 更新版盲区登记（v1.9 再更新）：v1.5 快照已核验 **ARC（v0.8.0）/ kschlt-adr-kit（v0.2.x）/ Ponytail（v4.8.x）** 版本；**v1.9（2026-09-09）再核验 u14app（v1.0.0@2026-05-21）/ AAT（PyPI v0.1.2）/ Alibaba DeepResearch（19.4k★ 但 repo 停滞）/ Gigaxity（53★ 无版本号）**——四个模糊项判定已落地（可行×2 / 不可行×2）；剩余无版本号标注 = **gpt-researcher MCP（v1.0.0 已标注）** + Gigaxity（已排除）——采纳任一前须 P-015 v1.2 式源码/API 直读核验（§4.3 局限 5）。
 
 ## 3. 补强可行性评估（候选议程明细）
 
@@ -280,7 +281,7 @@ upstream: null
 2. Superpowers / SpecKit / gpt-researcher 星数为第三方报道或主题页快照，非 API 快照；锁引用时须复核。
 3. 三起事故描述来自中文综述转述，个别细节未经官方确认——仅作动机佐证。
 4. ADR Kit 的 LOC/接口细节未核验（README 级）——采纳其模式时须 P-015 式源码直读。
-5. **版本成熟度盲区（v1.2 新增，v1.6 更新）**：v1.5 快照已核验 ARC（v0.8.0）/kschlt-adr-kit（v0.2.x）/Ponytail（v4.8.x）版本；u14app/Alibaba DeepResearch/AAT/adr-governance/Gigaxity/Superpowers/SpecKit 仍无版本号标注——采纳任一候选前须源码/API 直读核验（P-015 v1.2 先例；H4 触发时一并执行）。
+5. **版本成熟度盲区（v1.2 新增，v1.6 更新，v1.9 收窄）**：已核验 ARC（v0.8.0）/kschlt-adr-kit（v0.2.x）/Ponytail（v4.8.x）/u14app（v1.0.0）/AAT（PyPI v0.1.2）/Alibaba DeepResearch（19.4k★ 但 2026-02 停滞）版本；Gigaxity 已判定排除（53★ 无版本号）；仍无版本号标注 = Superpowers/SpecKit（软形态不复用，不采纳即不需核验）——采纳任一候选前须源码/API 直读核验（P-015 v1.2 先例；H4 触发时一并执行）。
 6. **兼容性盲区部分解除（v1.2）**：gpt-researcher 与 OpenAI 兼容端点兼容性已官方文档确认（OPENAI_BASE_URL）——三机实测仍待 H4；Gigaxity 默认 OpenRouter 云端 key、本地分支待实测。
 
 ## 5. 对设计的输入
