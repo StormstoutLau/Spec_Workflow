@@ -3,7 +3,7 @@
 ---
 id: loop-engineering-RESEARCH
 type: design
-version: 1.1
+version: 1.2
 status: draft
 date: 2026-09-09
 depends: [SPEC-PROCESS, ADR-0007, ADR-0010, community-ecosystem-RESEARCH]
@@ -96,6 +96,16 @@ upstream: null
 - **验证层级理论**——**RSI 综述**（arXiv:2607.07663，1,250 篇 2024-2026 论文）：评估器设计空间按**验证层级**排序 = 形式验证器（最强）→ 过程奖励模型 → 验证器/评分标准 → **内在自我评估（最弱）**；已展示的自我改进强度遵循该层级，典型失败模式（自我确认循环、模型崩溃、多样性崩溃）**源于对层级的违反**；人类方向设定为最后验证层。【依据：https://arxiv.org/abs/2607.07663 ；https://hyper.ai/cn/papers/2607.07663】
 - **成本复利实证**（原"工程成本"为纯推理）——Hermes 自改进 Agent 实测成本模型：stateless re-derivation 每 run $0.065（9,000 in / 2,500 out tokens）vs **skill-cached 每 run $0.024**（3,500 / 900）；自改进"复合能力的同时复合一切——成本漂移、技能腐化、信任面扩张"，是"贷款——现在提现能力，日后以不可预测的 token、未审阅的技能、你没写的代码偿还"；业界数据 = 生产 agent 单会话 2k-10k → 50k-200k tokens（规划/反思/工具选择/验证调用），维护成本 = 初始开发 15-25%/年（五到八个集成）。【依据：https://nefetechltd.com/blog/3784969/ ；https://genta.dev/resources/enterprise-ai-agent-true-cost-after-go-live】
 
+【A】**错误放大抑制机制专向调研**（v1.2 追加——用户指令「借鉴蒸馏金融博主决策思维链的框架 用社区蒸馏框架建立不同心智 agent 提供外部信息注入 抑制循环工作流中的错误放大问题」，针对 §4.2 确认偏误放大/self-bias 的缓解路径定向搜索取证）：
+- **蒸馏结构而非文本（用户蒸馏框架的社区印证）**——**Reasoning Scaffolding**（ICLR 2026，CUHK/Huawei/SUSTech）：从 LLM 蒸馏推理的主流做法 = CoT rationales 行为克隆，其**根本受限**——教学生模仿表面模式而非底层算法结构（逻辑脆弱）；主张把教师思维过程抽象为离散可解释**语义信号**（Contrast / Addition 等）作为 scaffold 迁移，多任务训练预测"下一语义信号 + 生成对应步骤"。→ 蒸馏"金融博主决策思维链"时，可迁移资产 = 决策**结构信号**（质疑点 / 信息加权 / 风险偏好极性 / 前提检查），而非文本克隆——与蒸馏式可信度判断同构。【依据：https://proceedings.iclr.cc/paper_files/paper/2026/file/8248b1ded388fcdbbd121bcdfea3068c-Paper-Conference.pdf】
+- **多 persona 辩证推理降偏**——**Multi-Persona Thinking (MPT)**（arXiv:2601.15488，Alberta）：单 LLM 内部编码多种社会视角与固有偏误；用特定 system prompt 实例化**对比性 personas + 中性视角**，迭代交换观点辩证推理（dialectical reasoning）暴露并纠正偏误；BBQ/StereoSet 取得最低偏误同时保持推理能力。→ 不同心智**不必是独立模型**：单模型内多 persona 交换观点即降偏（成本远低于独立 agent 群）。【依据：https://arxiv.org/html/2601.15488v1】
+- **异构专家共识降幻觉**——**Council Mode**（arXiv:2604.02923）：异构前沿模型并行生成 + 专用 consensus 模型合成（显式标注 agreement / disagreement / unique findings）；HaluEval 幻觉 **-35.9%**、TruthfulQA **+7.8**、跨域 bias variance 显著下降——**异构即去偏，同构集成无此收益**。【依据：https://arxiv.org/html/2604.02923v2】
+- **外部工具异质性注入**——**Tool-MAD**（arXiv:2601.04742，Yonsei）：给每个 debate agent 绑定**不同外部工具**（search API / RAG 模块等），异构证据视角 + 辩论流程中自适应查询重查；四事实验证基准最高 **+5.5%** 准确率。【依据：https://arxiv.org/pdf/2601.04742v1】
+- **交互擦除多样性的反例（关键约束）**——**The Interaction Tax**（arXiv:2608.23541，UChicago）：agent 互相读**完整输出**时一轮内提议**收敛**、多样性被擦除（11 个 verifier-scored 优化任务实证）；只有"独立生成 + 选择/合成"保留多样性；critique 仅在违规规则**容易被 LLM 找到并修复**时有用；MoA 是唯一逃出 interaction tax zone 的形态（proposers 从不看彼此输出）。→ **注入必须受控**：交换"信号 / 证据 / 质疑"而非完整答案，或独立生成后汇总。【依据：https://arxiv.org/html/2608.23541v1】
+- **辩论强化偏误的反例**——**Belief Entrenchment / DReaMAD**（arXiv:2503.16814，KAIST）：MAD 经常**强化偏误**而非减少——MetaNIM Arena 实测模型面对更优替代仍坚持有偏推理（信念固化）；DReaMAD（先验知识 elicitation + 视角多样化）缓解。→ **辩论不是解药**，需结构化解偏 + 外部裁决。【依据：https://arxiv.org/html/2503.16814】
+- **少数派正确被淹没的反例**——**The 10th Agent / Spiral of Silence**（GitHub 开源实验）：9 个 agent 持错误信念 + 1 个 locked dissenter（持有真理、被锁定永不退让）；争论中测量 truth-conversion rate——多数可能把唯一正确声音**淹没**。→ 少数派正确心智需**结构性保护**（locked 角色：永不退让的质疑者 / dissenter）。【依据：https://github.com/guilleqp/the-10th-agent】
+- **多样性上限的量化反例**——**Co-Failure Ceiling**（arXiv:2606.27288，KAIKAKU）：67 前沿模型 21 provider 实证——多模型组合（routing / voting / cascade / MoA）增益上限由**共同错误率 β**（所有模型在同一 query 全错的比率）决定，平均成对错误相关 ρ 无法识别 β（同边缘同相关仍可不同 β）。→ **表面多样性 ≠ 错误结构独立**：若异心智 agent 与主 agent 共享训练分布，pairwise correlation 高、注入无效；真正对立需错误结构独立（不同数据源刻意训练 / 非 LLM 验证器如 Lean4 / 外部工具证据源）。【依据：https://arxiv.org/html/2606.27288v1】
+
 【C】**学术结论对组建循环的三条约束**：① 反馈信号必须是**机械可验证**的——Reflexion 靠 LLM 自评导致确认偏误（MAR 实证），本仓天然有机械三通道 + 异基座独立 pass，是结构性优势而非缺失；② **启发式原则比轨迹可迁移**（ERL）——循环沉淀物应为失败模式/原则而非原始轨迹；③ **递归自修改远未成熟**（AI4AI 0.250/1.0）——自动化改写校验规则/统计声明的 L3 形态须暂缓，人类必须在环。【置信度: ★★★★★】
 
 ### 3.4 本仓工作流单向性诊断
@@ -117,6 +127,7 @@ upstream: null
 3. 循环的反馈信号必须坚持机械信号 + 异基座，不能引入 LLM 自评（MAR + Perils of Self-Feedback 双实证 + Illusions of Reflection 反例 + RSI 综述验证层级理论四方印证）。【置信度: ★★★★★】
 4. 递归自修改（L3）远未成熟（AI4AI 实证最强者仅 0.250/1.0），须暂缓；人类必须在环收口。【置信度: ★★★★★】
 5. 代价/风险的"纯推理"条目经外部证据注入后已升级为实证——不收敛（IAL-SCAN 68 IAL/6,549 仓库）、工程成本（Hermes 成本复利 + 业界维护 15-25%/年）；未发现对组建循环结论的**反例**，但确认偏误/反思幻觉的实证反而强化了"只消费机械信号"的设计约束。【置信度: ★★★★★】
+6. **错误放大可被"异心智注入"抑制**（v1.2 追加）：蒸馏"不同认知风格心智"（Reasoning Scaffolding 结构信号 + MPT 多 persona + Council Mode 异构共识 + Tool-MAD 异构工具）作为循环的外部注入臂在社区有实证支撑；但形态受**四重硬约束**——交互擦除多样性（Interaction Tax 受控注入）、辩论强化偏误（Belief Entrenchment 不靠辩论）、少数派正确被淹没（Spiral of Silence 需 locked dissenter 保护）、多样性存在共同错误上限（Co-Failure Ceiling 需错误结构独立而非表面多样）。与本仓异基座独立 pass（P-008/P-025）同构，可视为其"异心智族"升级候选。【置信度: ★★★★☆】
 
 ### 4.2 组建循环的收益与代价
 
@@ -149,6 +160,8 @@ upstream: null
 
 【C】**分层归属 = Layer-1 工具层候选**（循环需新子命令与注入管线，非纯概念）；激活条件 = 触发驱动（本调研登记后，无触发不实施）；未激活副作用 = 0（不实施即不存在）。**本次调研止于懒加载 gate，不实施**（同 P-023 先例）。【置信度: ★★★★☆】
 
+【C】**错误放大抑制的形态约束（v1.2 追加，仅登记为 L1 设计的候选约束——未来实施异心智注入臂时必须满足）**：① **独立生成**——注入臂不看主 agent 完整输出，内部生成揭示物互不可见（Interaction Tax：完整交互一轮收敛擦除多样性）；② **注入内容 = 证据/质疑/分歧点**而非替代结论，主 agent 保留裁决权；③ **少数派结构性保护**——质疑者以 locked 角色设定（被要求永不退让，反 Spiral of Silence），不参与多数派顺从；④ **机械裁决**——注入不影响机械校验/验证层级，最终裁决仍归形式验证器 + 人类（反 Belief Entrenchment：辩论本身不裁决）；⑤ **错误结构独立优先于表面多样性**——异心智的选择以其推理分布尽量独立为准则（不同数据源 / 刻意相反策略 / 非 LLM 验证器），Co-Failure Ceiling 表明共享训练分布的表面"不同心智"无法对冲共同错误。【置信度: ★★★★☆】
+
 ## 5. 局限
 
 1. 学术检索以 WebSearch 摘要为取证主源（arXiv 页面直接抓取），未做全文精读；关键论文（Reflexion / MAR / ERL / AI4AI）建议后续吃狗粮时全文核验。
@@ -156,9 +169,11 @@ upstream: null
 3. 开源项目快照（stars/版本）为检索时点值，非全量枚举（聚焦循环机制相关项目）。
 4. 本调研为 RESEARCH-only 落档，循环功能设计（L1 的具体 schema/命令面/注入管线）留待触发后 DESIGN。
 5. **v1.1 外部证据注入的局限**：新增外部证据（IAL-SCAN / Perils of Self-Feedback / Illusions of Reflection / RSI 综述 / Hermes 成本数据）均以检索摘要为主源，未全文核验；成本数据（Hermes / genta / agentplace）为业界博客/咨询来源，非同行评审，数量级仅供参考；定向搜索聚焦「相似证据或反例」，未穷举全部代价维度（如安全攻击面 OpenClaw ClawJacked、多 agent 协调开销倍数等仅点到为止）。证据注入本身即"外部信息 → 文档"的循环初形，其质量控制依赖本仓既有断言分级（A/B/C + 置信度）与 R7 机械重数纪律。
+6. **v1.2 错误抑制机制调研的局限**：本专向调研聚焦「蒸馏异心智 agent + 多主体外部注入」**一条路径**，未穷举其他抑制机制（self-consistency 多数投票、事后验证器训练、链式验证等）；Co-Failure Ceiling（arXiv:2606.27288）与 Interaction Tax（arXiv:2608.23541）均为 preprint 未含同行评审确认；Spiral of Silence（The 10th Agent）为 GitHub 实验非正式论文（方法较简、结论为趋势性）；用户蒸馏框架本身为私有方法未公开，本文仅迁移其「蒸馏决策思维链」抽象，迁移细节（scaffold 信号词典设计 / persona 语料选择）留待实施时 DESIGN。异心智注入约束仅在 L1 循环**实施时**生效，本次仍止于懒加载 gate。
 
 ## 6. 关联登记
 
 - **候选登记**（触发驱动，同 drift-gate 先例）：L1 反思循环 = repo_stats 演进 / pattern_lib_version 2 族外的独立候选；M7 账本 hits 机读块 = L2 的现成输入。
-- **CER 关联**：loop engineering 与 CER §3.4.1「AGENTS.md 规则源传播生态」「决策产物管线」同属生成端方法论演进观察，本调研为其补充"循环层"视角。
+- **v1.2 异心智注入登记**：异心智注入臂 = 本仓异基座独立 pass（P-008/P-025 Roadmap：RULE-1 异基座审查臂）的**升级候选**——从"单一外部审查臂"扩展为"一族固定认知风格的外部注入臂"；用户私有蒸馏框架（蒸馏决策思维链 → 可信度判断）为方法论迁移源（Layer-0 登记，不迁入私有内容）。
+- **CER 关联**：loop engineering 与 CER §3.4.1「AGENTS.md 规则源传播生态」「决策产物管线」同属生成端方法论演进观察，本调研为其补充"循环层"视角；v1.2 补充"错误抑制层"视角。
 - **不新增 M7 样本**：本调研为零计数声明（无新缺陷发现，零形态 II）。
