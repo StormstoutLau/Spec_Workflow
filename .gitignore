@@ -4,3 +4,8 @@ __pycache__/
 
 # promptfoo 沙箱目录（P-010：env 重定向的 SQLite/缓存落点，非版本库资产）
 .promptfoo/
+
+# ARC 决策图谱二进制（P-035：94MB 外部工具，版本事实源 = arc.sha256.md）
+tools/arc/arc.exe
+tools/arc/node_modules/
+tools/arc/npm_tmp/

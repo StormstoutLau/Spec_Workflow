@@ -236,7 +236,8 @@ def check_links(file, text, root=ROOT):
 def gather_md_files(root=ROOT):
     out = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "__pycache__")]
+        dirnames[:] = [d for d in dirnames
+                       if d not in (".git", "__pycache__", ".arc")]  # .arc = ARC 图存储（P-035，同 .git 先例）
         for fn in filenames:
             if fn.endswith(".md"):
                 out.append(os.path.relpath(os.path.join(dirpath, fn), root))
