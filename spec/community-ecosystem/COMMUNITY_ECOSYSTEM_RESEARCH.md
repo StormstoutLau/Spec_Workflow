@@ -1,14 +1,14 @@
 ---
 id: community-ecosystem-RESEARCH
 type: design
-version: 1.9
+version: 1.10
 status: in-review
 date: 2026-09-08
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0007, ADR-0010]
 upstream: null
 ---
 
-# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.9 (2026-09-09)
+# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.10 (2026-09-09)
 
 > **任务来源**: 用户提问「调研分析社区当前类似优秀的开源框架 是否可以补强复用」+ 补充提问「当前工作流规定了流程 但每个步骤比如调研 审查 设计方案 实施方案等具体步骤 社区是否有类似的框架 skill MCP工具可以补强 同时当前是否可以强制要求每个步骤给出决策 引用信息依据 提供给下一轮审查」
 > **调研方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch 六轮取证（2026-09-08，四方向 + 本轮步骤级工具两方向）。
@@ -21,6 +21,7 @@ upstream: null
 > **v1.7 变更（P-020 step-gate 决策产物管线吃狗粮落地，2026-09-08）**: 矩阵「每步决策产物管线」行建议列更新为**「已吸收（P-020 done，v1.7）」**——CER §3.5 裁定落地：step-gate 三件套（STEP_GATE_CHECKLIST v1.2 accepted 三问 8/8 + DESIGN v1.0 + CHECKLIST_FUNC v1.1 accepting 12/12）+ spec_runner v1.1.0（decision 事件 + step-gate 命令）；§3.5 采纳路径 P-020 完成。断言计数不变（26/3/13/4）。
 > **v1.8 变更（吸收状态同步轮，用户指令「更新一下 已经吸收复用需要更新状态」）**: 对 §3.1/§3.2/§3.4/§3.4.1/§3.5/§5.1 中**已实际吸收复用**条目的状态位点全面同步：**AGENTS.md 桥 → 已吸收（P-021 done，2026-09-08，根 AGENTS.md 落地 + ADR-0010 三问 Layer-0 审核通过）**；**每步决策产物管线（§3.5）→ 已吸收（P-020 done 2026-09-08 step-gate 决策流 + step-gate 命令；**ADR-0011 accepted A+C 决策两出路全落地**：P-024 出路 A 流程强制 = pre-commit 第四 hook step-enforce（2026-09-09）+ P-025 出路 C 独立验证 = spec_runner verify-anchor 锚点真实性机械核查 + SPEC_PROCESS RULE-1 独立 pass 取证清单（2026-09-09）——"决策记录从档案提升为驱动执行的输入"方向三项目独立印证 → 本仓完整实例化含流程强制与审查取证）**；**drift-gate 概念 → P-023 概念登记已落（2026-09-09，Layer-0 仅登记不实施）**；§3.5 采纳路径更新为已实施态；§5.1 候选池前两条改已实施。**断言计数不变（26/3/13/4——纯状态同步零新增断言）**。
 > **v1.9 变更（§2.6 可行性判定补充调研批，用户指令「2.6 兼容与可行性矩阵 可行性判定需要补充调研 给出清晰的判断 吃狗粮执行 测试step-gate是否起效」）**: 对 §2.6 矩阵四个可行性模糊项做 **2026-09-09 四路 WebSearch 补充取证**给出清晰判定：**u14app/deep-research H4 待测 → 可行**（MCP 形态 streamable-http+SSE，任意 OpenAI 兼容端点可接（三机 LM Studio），Searxng 本地搜索轴，v1.0.0@2026-05-21 维护 active，Node 18+；**安全提示：SSRF 漏洞 issue #153 未修**）；**Alibaba DeepResearch H4 待测 → 不复用**（通义 30B-A3B 模型方案 = 训练级重栈 + repo 2026-02 起停滞（19.4k★ 但唯一发布 2025-09），spring-ai-alibaba 变体 = Java 栈 + 2026-02 停滞——均超出调研弹药层定位）；**AAT 环境门槛高 → 可行（生成端互操作）**（PyPI v0.1.2，`uvx` 免安装直跑，Python 3.11+ + uv 确认；其 Paper Search MCP（20+ 学术源）与本仓既有 mcp_paper-search 重叠 → 可选触发驱动）；**Gigaxity 云端依赖 → 不可行（本仓）**（Qwen3-30B-A3B 合成模型重资源 + Exa/Brightdata 外部 key；gpt-researcher 已覆盖同功能且更轻）。版本盲区登记更新（u14app v1.0.0 / AAT v0.1.2 已核验；Alibaba/Gigaxity 判定排除）；§4.3 局限 5 同步。**断言计数不变（26/3/13/4——本批纯内联取证 + 判定更新，无新增行首断言）**；§2.6 表可行/不可行判定即「清晰的判断」。
+> **v1.10 变更（hook 面扩展独立评估批，用户指令「执行后续 hook 面扩展调研评估」——§3.4.1 ADR 三层 enforcement 行"下一步 = 触发驱动（后续 hook 面扩展时评估）"触发）**: 新增**§3.4.2 hook 面扩展独立评估**——社区三轮 WebSearch 取证（2026-09-09：分层 hook 实践 = pre-commit 增量快查 <5s / pre-push 全量复验 <15s / CI 完整兜底（ADR Kit 分阶段 enforcement 实证）；\--no-verify 旁路 = git 官方文档明示可跳过 + block-no-verify 实测 12 种绕过向量全放行 → 本地 hook 是"诚实护栏"非绝对强制；forbid-ban 通道形态 = deny-list 正则 + allowlist 例外（git-secrets / nhsd-rules-deny.txt / detect-secrets baseline）+ policy 块显式化）+ **本仓 AGENTS.md 禁止事项 6 条逐条机械化可行性矩阵**（记录性 #2/#4 已完全机械化、过程性 #3/#5/#6 不可机械拦截、#1 仅 pre-push 复验可兜底）+ **ADR-0010 三问结局 = Q2 激活条件未满（无真实旁路失败案例 → 不实施）**，注册为 ADR-0010 失效条件②观察项；§3.4.1 ADR 三层行同步"评估已执行"标注；完整评估落档 `spec/hook-surface/RESEARCH.md`（P-030）。**断言计数不变（26/3/13/4——本批纯内联取证 + 评估结论，无新增行首断言）**。
 > **裁决建议**: 不变（分层吸收 + §3.5 强制决策产物管线可行且优先；v1.5 增补：ARC 升级为优先候选待用户裁决）。待用户裁决（P-018 登记）。
 
 ## 0. 断言统计表（必填，审计入口）
@@ -213,9 +214,65 @@ upstream: null
 | drift-gate 概念 | SGE 双图校验（无 v1.5 新信息，arXiv 稳定）。 | 登记候选（Layer-0）不变——**P-023 概念登记已落（2026-09-09：走 ADR-0010 三问 Layer-0/触发驱动/副作用 0，本批止于懒加载 gate 仅登记不实施）**——repo_stats 演进候选（意图→证据→缺口闭环）。下一步 = 无（仅登记）。 |
 | ARC 先导 | **重大演进**（2026-09-08 核验）：npm @kegesch/arc v0.8.0（2026-08 下旬发布）/161 commits/**0 依赖**单文件二进制；实体 9 型、关系 14+；命令 arc init/add/trace/impact/check/**next/context**/list；D-045 "Arc answers questions agents cannot answer themselves"；**明确否决 MCP 与插件系统（#3/#11/#13），agent surface = CLI+JSON+skill file**——与本框架"薄壳 CLI + 纯文档 + 生成端自由"身份高度契合；`arc import --from-adr` 支持 ADR 导入（反向工程#15 关闭=由 agent 导入）。【内联来源：npm @kegesch/arc 页；issues #20/#15；README】 | **升级为优先候选（Layer-1，外部 CLI 非依赖）**：① 零依赖单文件二进制 = 与本仓零依赖不变式兼容；② 其 graph-query（trace/impact/check）+ driver（next/gaps）= P-015 方向 A 的**轻量替代**（vs Semantica 多 GB 重栈，增量成本近零）；③ 结构化图查询非语义检索 → **H3 中文召回风险不适用**（比 Semantica 更适配本仓中文语料）。**触发条件已满足（v1.8 更新：P-020 落地 2026-09-08，决策事件流面已就绪——P-024 流程强制 + P-025 锚点取证后事件流更完备）**。下一步 = 待用户裁决（独立 P 编号试点；试点限定 ADR 簇，映射最干净，P-015 §4.3 先例）。 |
 | DeepEval 臂 | 15.6k 星（2026-05 快照）；无 v1.5 重大变更信息。 | 候选议程（Layer-1）不变——首轮评测（端点就绪）后作 M7 评测矩阵第二臂（pytest-native 补 promptfoo CLI 盲区）。下一步 = 触发驱动。 |
-| ADR 三层 enforcement | **双仓独立演化确认**：kschlt/adr-kit（195 commits、MADR、policy 块自动生成 ESLint/Ruff/import-linter/mypy/tsconfig 规则、MCP adr_preflight/create/approve/planning_context、ContractRelations+supersession chains+scenario taxonomy）；rvdbreemen/adr-kit（CER A-08 原记录，v1.6 修正：A-13 实为 Langfuse；dev 539 commits）。两仓独立实现同一"ADR=可执行 guardrail"模式 = 方向已获竞争性验证。【内联来源：kschlt/adr-kit README/TECHNICAL；decision-records 话题页 2026-07-28 快照】 | **模式吸收候选（Layer-0）不变，吸收点未单独立项（v1.8 更新）**：禁止性负例通道（require/forbid 显式化）+ 分阶段 hook（pre-commit 快查/pre-push 慢查）——P-020 已落地（2026-09-08）但吸收点**未随 P-020 实施**（step-gate 批未含禁止性负例通道），仍为触发驱动候选（不与 step-gate 并列编号）。下一步 = 触发驱动（后续 hook 面扩展时评估）。 |
+| ADR 三层 enforcement | **双仓独立演化确认**：kschlt/adr-kit（195 commits、MADR、policy 块自动生成 ESLint/Ruff/import-linter/mypy/tsconfig 规则、MCP adr_preflight/create/approve/planning_context、ContractRelations+supersession chains+scenario taxonomy）；rvdbreemen/adr-kit（CER A-08 原记录，v1.6 修正：A-13 实为 Langfuse；dev 539 commits）。两仓独立实现同一"ADR=可执行 guardrail"模式 = 方向已获竞争性验证。**分层 hook 方案已明确（v1.10 补取证）**：`pre-commit` 做**增量快查**（<5s）→ `pre-push` 做**全量/影响域复验**（<15s）→ CI 做**完整兜底检查**；核心思想 = "禁止策略显式落文档 → 工具自动生成正则/lint 规则 → 差分扫描违规引入 → 分层 hook 递进拦截"。【内联来源：kschlt/adr-kit README/TECHNICAL；decision-records 话题页 2026-07-28 快照；wakatchi.dev 2026-05 实操文章】 | **模式吸收候选（Layer-0）不变，吸收点未单独立项（v1.8 更新）**：禁止性负例通道（require/forbid 显式化）+ 分阶段 hook（pre-commit 快查/pre-push 慢查）——P-020 已落地（2026-09-08）但吸收点**未随 P-020 实施**（step-gate 批未含禁止性负例通道），仍为触发驱动候选（不与 step-gate 并列编号）。**后续 hook 面扩展评估已执行（v1.10，见新 §3.4.2 独立评估 + 落档 spec/hook-surface/ RESEARCH v1.0）**。 |
 | Ponytail 7 级阶梯 | star 多源声明级差异大（5w+ juejin 2026-06-23 / 16k+ pyshine / 84k+ awesome-prompts——不锁单值）；v4.8.3（2026-06-24 release）+ 147 commits（活跃 06-26）；**ponytail: 注释 = 技术债账本**（/ponytail-debt 收集防"later means never"）；AGENTS.md 即规则源（~20 行）。【内联来源：github.com/DietrichGebert/ponytail；juejin/pyshine/awesome-prompts 评测文】 | **概念吸收（Layer-0）不变**——7 级阶梯 = ADR-0010 生成端镜像（v1.4 已判）；**唯一补强点位登记**：`ponytail:` 注释约定（有意简化的机械可收集标记）可借鉴为本仓生成端"有意简化"登记形态（与 repo_stats 扫描位点兼容），登记为 pattern 演进候选，**不实施**。下一步 = 无（触发驱动）。 |
 | 不复用组 + 生态观察 | Superpowers/SpecKit（流程技能软形态）/Langfuse（重平台）/gpt-researcher 本体（服务）——v1.5 维持否决；**新观察**：decision-records 话题同族小体量项目（phodal/adr 271★ 轻量 ADR CLI / watercooler 13★ MCP 共享推理层 / repo-seed 8★ "self-governing repos：AGENTS.md+MADR+deterministic gates+pre-commit hooks"——与本框架门禁物理化同构度最高但未成熟）。【内联来源：github.com/topics/decision-records 2026-09-08 快照】 | 不复用（D6 先例，不过门禁）；repo-seed 等登记为生态观察（不入候选池——体量 <10★，待其成熟再评估）。下一步 = 无。 |
+
+### 3.4.2 hook 面扩展独立评估（v1.10，2026-09-09，P-030——「ADR 三层 enforcement」候选的触发驱动评估）
+
+> **触发**：§3.4.1 ADR 三层行"下一步 = 触发驱动（后续 hook 面扩展时评估）"被用户指令「执行后续 hook 面扩展调研评估」触发；亦与 ADR-0010 失效条件之「连续 3 个吸收裁决未引用三问 → 重审门禁是否需要机械化（hook 级）」候选项同题。
+> **方法**：社区 WebSearch 三轮取证（2026-09-09，分层 hook 实践 / --no-verify 旁路与兜底 / forbid-ban 通道形态）+ 本仓禁止事项（AGENTS.md）逐条机械化可行性评估 + ADR-0010 三问懒加载门禁（本候选吸收物 = "hook 面扩展机制"）。
+> **结论速览**：hook 面扩展现状 = 4 hook 全在 pre-commit 单层；社区证据显示记录性禁止事项应显式落 policy 块 + 机械扫描；分层（pre-push/CI 兜底）增量价值**有限**；可行性矩阵显示 3/6 禁止事项可机械化、3/6 不可（过程性行为）；**结论 = 仅零星增量，当前不实施，触发登记在案，止于懒加载 gate（Q2 触发条件未满）**——注册为 ADR-0010 失效条件②观察项，避免重复评估。
+
+#### ① 社区分层 hook 实践（预提交快查 / 预推送中查 / CI 兜底）
+
+社区主流实践（Husky / jest / commitlint 等工具生态）与 ADR Kit 的分阶段 enforcement 已形成「分层成本-深度」共识（ADR Kit：pre-commit 查导入限制 <5s → pre-push 查架构边界 <15s → CI 全量复跑）：
+
+- **pre-commit = 本地增量快查层**：只检查**暂存区文件**（`git diff --cached`），<2s 完成，可自动修复（lint-staged 限定范围）。目标 = 拦截明显低级错误，速度优先。
+- **pre-push = 本地全量/影响域慢查层**：可检查整个项目或变更影响域，<15s。常用于本地无法低成本完成的完整校验（全量测试/类型检查/架构边界）。
+- **CI/PR = 远程完整兜底层**：执行最重最完整的检查（构建/集成/端到端），作为本地 hook 被绕过后的兜底闸门。
+
+wakatchi.dev 的 ADR 侵食三层防御（见 CER §2.5）即禁止事项→差分扫描→pre-commit+CI 的静态检查脚本实现。
+
+#### ② --no-verify 旁路与兜底
+
+git 原生 pre-commit/pre-push 均可被 `--no-verify` 跳过（git 官方文档明示：pre-commit "can be bypassed with the --no-verify option"）。社区实证（[git 官方 githooks 文档](https://git-scm.com/docs/githooks)；[block-no-verify](https://github.com/tupe12334/block-no-verify)——实测 12 种绕过向量全放行：引号拆分 / `--no-veri` 前缀缩写 / `GIT_CONFIG_PARAMETERS` 环境变量注入 / `LEFTHOOK=0` 等 hook 管理器禁用开关）证实：**任何本地 hook 都无法 100% 阻挡绕过**——本地 hook 是"诚实的护栏"，远程/CI 才是真正的强制层。
+
+对纯本地单人仓库（本仓无 CI），这意味着：
+- 本地环上优化到极致也只是**最外层**，无法达到绝对强制
+- 更现实的定位 = "记录性禁止事项显式化 + 机械扫描证据"，而非"依赖 hook 做最终强制"
+
+#### ③ forbid-ban 通道社区形态
+
+社区禁止性规则的落点形态 = **显式 deny-list 正则文件 + 例外 allowlist**（[git-secrets](https://github.com/awslabs/git-secrets) 扫描 commits/commit messages；[nhsd-git-secrets-precommit](https://github.com/nhsengland/nhsd-git-secrets-precommit) `rules/nhsd-rules-deny.txt`；detect-secrets `.secrets.baseline`）。核心机制：**policy 显式落文档/规则文件 → 工具自动生成可执行检查（正则/lint 规则）→ 激活于 hook/CI → 命中即拒绝**。
+
+- **记录性禁止事项**（如：禁止引入某依赖、禁止使用某 API）→ **可机械化**：搜索 + 阻止 + 例外白名单（允许场景）。社区格式 = `policy 块`（adr-kit）或 `deny.txt 规则文件`（git-secrets）。
+- **过程性禁止事项**（如：不得提交前不备份、不得 skip-hook）→ **不可机械化**：tool 执行的环境状态不可机械校验（无法判断"提交前是否备份"），只能文档显式化 + 审查监督。
+
+#### ④ 本仓禁止事项逐条机械化可行性矩阵
+
+本仓 AGENTS.md「禁止事项」共 6 条。逐条评估：
+
+| # | 禁止事项 | 类型 | 机械化可行性 | 现状（已有机械位点） | 候选新增机械位点 |
+|---|---------|------|------------|--------------------|----------------|
+| 1 | 不得跳过 pre-commit 检查 | 过程性 | **部分**（只能兜底，不能强制；`--no-verify` 旁路） | step-enforce（batch 级，P-024）；三 hook 均 arm | pre-push 复验（三校验器+step-enforce 全量重跑，拦截被跳过的批次） |
+| 2 | 不得手改 M7 账本统计声明（由机械脚本重写） | 记录性 | **完全** | m7-stats hook（M7_EVIDENCE_LOG.md 单文件）+ `--write` 再生成制 | commit-msg/pre-push 复验（防止 edit 后 skip hook） |
+| 3 | 破坏性文件操作（覆盖/截断/批量替换）前必须备份 | 过程性 | **不可**（tool 执行环境不可校验；git 只能看最终结果） | 无（依赖审查臂 RULE-1 复核 + git 本身可回滚） | 不可机械拦截——保持生成端纪律 + 审查臂监督 |
+| 4 | 文档计数声明必须与机械重数一致（声明=重数） | 记录性 | **完全** | dc-validator（R7 机械重数）+ repo-stats（视图层声明=重数） | pre-push 复验 |
+| 5 | 同一文件修改必须严格串行（DIS-008） | 过程性 | **不可**（发生在 agent 编辑流程，工具层不可见） | 无（依赖 agent 遵守 + 编辑工具自身单次请求限制） | 不可机械拦截——Ext 工具调用本身即强制单请求，已天然缓解 |
+| 6 | batch 编辑后必须全覆盖终验 grep（不得抽样） | 过程性 | **不可**（agent 行为，工具层不可见） | 无（依赖 agent 遵守；repo-stats/dc-validator 全量扫描近等价兜底） | 不可机械拦截——三校验器全量扫描已近似强制终验 |
+
+**结论**：6 条禁止事项中 **3 条（#1/#2/#4）已机械化或可在现有工具位点内强化**，**3 条（#3/#5/#6）本质上是过程性行为纪律，git hook 层不可机械拦截**。hook 面扩展的增量价值集中在：#1 的 pre-push 复验兜底（拦截 `--no-verify` 旁路的批次）——这是唯一有真实增量的点。
+
+#### ⑤ 结论与建议（gate 三问）
+
+**ADR-0010 三问懒加载门禁（候选吸收物 = "hook 面扩展机制"）**：
+
+- **Q1 放哪层**：若实施 = Layer-1（`.pre-commit-config.yaml`/`.pre-push` hook 配置）。记录性禁止事项的机读显式化（policy 块）= Layer-0。
+- **Q2 激活条件**：**未满足**。本仓为纯文档仓，无应用代码库；记录性禁止事项（#2/#4）已机械化，增量仅剩 #1 的 pre-push 复验兜底（防 `--no-verify` 旁路）。但 `--no-verify` 纪律属本仓流程层已强约束项（AGENTS.md + step-enforce），旁路场景实际未发生过（P-020 起吃狗粮全过 hook）。**无真实失败案例 → 触发条件不成立**。
+- **Q3 未激活副作用 = 0**：是。不引入任何 hook 改动，三校验器/hook 零变化。
+
+**结论**：hook 面扩展**当前不实施**（零/极小增量），登记为 ADR-0010 失效条件②观察项（若连续 3 个吸收裁决未引用三问，则升级为机械化门禁再评估）。**本次评估本身闭环本候选的"下一步 = 触发驱动（后续 hook 面扩展时评估）"条目**——提供"已评估"替代"未评估"的确定性。完整评估落档 `spec/hook-surface/RESEARCH.md`（P-030）。
 
 ### 3.5 强制决策产物管线（v1.1 新增：答题主问「每步强制决策+引用依据供下轮审查」）
 
