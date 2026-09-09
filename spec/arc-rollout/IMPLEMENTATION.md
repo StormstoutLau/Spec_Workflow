@@ -23,6 +23,7 @@ upstream: null
 | `tools/arc/arc_prelink.py` | ADR 预链接脚本（D4 落地） | ✅ 实测 |
 | `tools/arc/arc.exe` | ARC 0.8.0 Windows 二进制（gitignore） | ✅ sha256 校验 |
 | `tools/arc/arc.sha256.md` | 版本快照固化（D3 落地） | ✅ 与官方一致 |
+| `tools/arc/README.md` | 用法 + D7 停滞观察项登记（D1 文件布局交付） | ✅ 新增 |
 | `tools/arc/data/.arc/` | 8 ADR 决策图谱（git 提交） | ✅ 8 实体 7 关系 |
 | `spec/arc-rollout/` 四件套 | RESEARCH/DESIGN/IMPLEMENTATION/CHECKLIST | ✅ |
 | `.gitignore` | arc.exe/node_modules/npm_tmp 排除 | ✅ |

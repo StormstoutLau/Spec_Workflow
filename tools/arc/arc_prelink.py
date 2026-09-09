@@ -3,11 +3,13 @@
 
 职责：
   - 扫描本仓 adr/*.md 的 frontmatter（id/depends/status/取代元数据）
-  - 将 ADR 依赖簇映射为 ARC 实体间链接建议（decision → decision 用 driven_by）
+  - 将 ADR 依赖簇映射为 ARC 实体间链接建议（decision → decision 用 depends_on）
   - 输出 `arc link <from> <to> --type <edge>` 命令序列 + dry-run 统计
   - 方向映射（实测校准，P-031 A-9 + 本批复测）：
-      ADR 之间：D-xxx ──driven_by──▶ D-yyy（yyy 在 xxx 的 depends 中）
-      （0.8.0 link 合法边类型: driven_by | enables | supersedes | derived_from | conflicts_with）
+      ADR 之间：D-xxx ──depends_on──▶ D-yyy（yyy 在 xxx 的 depends 中）
+      （0.8.0 link --help 展示边: driven_by | enables | supersedes | derived_from | conflicts_with；
+       实测运行时按实体类型动态校验——decision→decision 仅 enables | supersedes | depends_on，
+       --help 展示集 ≠ 运行时校验集，见 IMPLEMENTATION §4）
 
 零依赖 stdlib only。
 用法：

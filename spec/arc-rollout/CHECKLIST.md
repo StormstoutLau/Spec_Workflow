@@ -37,7 +37,7 @@ upstream: null
 | A4 | 预链接 | 7 条 depends_on 边链接成功（依赖簇正确）| ✅ |
 | A5 | trace 递归 | D-008 trace ≥2 跳（D-008→D-004→D-003→...）| ✅ |
 | A6 | impact 影响面 | D-004 impact 含 D-006/D-007/D-008 | ✅ |
-| A7 | check 健康 | 8 实体 7 关系，0 断链（orphan 为 decision-only 结构性语义，§6）| ✅ 理解性通过 |
+| A7 | check 健康 | 8 实体 7 关系（orphan_decision 提示为 decision-only 结构性语义，无 requirement 层，见 IMPLEMENTATION §6 处置②）| ✅ 理解性通过 |
 | A8 | 零 hook 改动 | pre-commit / 三校验器 / spec_runner 零改动 | ✅ |
 
 ## 3. ADD Phase 0 质量门
