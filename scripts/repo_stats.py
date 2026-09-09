@@ -81,6 +81,7 @@ class CheckResult:
     severity: str      # "P1" | "P2" | "P3" | ""（空 = skip）
     message: str
     line: int | None = None
+    gap: str | None = None   # drift-gate（pattern_lib_version ≥2）：意图→证据→缺口 三元组
 
 
 class Summary:
@@ -638,7 +639,8 @@ def reconcile(spec: StatsSpec, truth: TruthSet, root: str) -> list[CheckResult]:
         if declared != actual:
             results.append(CheckResult(
                 "rs-decl", CODE_WIKI_PATH, "P1",
-                f"declared.{key} 声明 {declared} ≠ 机械重数 {actual}"))
+                f"declared.{key} 声明 {declared} ≠ 机械重数 {actual}",
+                gap=f"意图(声明) {key}={declared} → 证据(重数) {actual} → 缺口 {'+' if actual > declared else ''}{actual - declared}（{'欠声明' if actual > declared else '过声明'}）"))
 
     # ② rs-pattern：逐载体扫描
     for carrier in spec.living:
@@ -680,11 +682,13 @@ def _reconcile_lists(spec: StatsSpec, truth: TruthSet, root: str,
         if missing:
             results.append(CheckResult(
                 "rs-list", CODE_WIKI_PATH, "P2",
-                f"§2.1 树缺登 spec/ 子目录：{sorted(missing)}"))
+                f"§2.1 树缺登 spec/ 子目录：{sorted(missing)}",
+                gap=f"意图(树登记集) {sorted(tree_dirs)} → 证据(LS 实际) {sorted(truth.spec_dirs)} → 缺口 缺登 {sorted(missing)}"))
         if phantom:
             results.append(CheckResult(
                 "rs-list", CODE_WIKI_PATH, "P2",
-                f"§2.1 树幻影子目录（LS 不存在）：{sorted(phantom)}"))
+                f"§2.1 树幻影子目录（LS 不存在）：{sorted(phantom)}",
+                gap=f"意图(树登记集) {sorted(tree_dirs)} → 证据(LS 实际) {sorted(truth.spec_dirs)} → 缺口 幻影 {sorted(phantom)}"))
 
     # §9 spec 索引链接集 vs LS（缺行/幻影行）
     s9 = _extract_section(wiki_text, RE_S9_HEADER)
@@ -696,11 +700,13 @@ def _reconcile_lists(spec: StatsSpec, truth: TruthSet, root: str,
             if missing:
                 results.append(CheckResult(
                     "rs-list", CODE_WIKI_PATH, "P2",
-                    f"§9 索引缺 spec/*/ 行：{sorted(missing)}"))
+                    f"§9 索引缺 spec/*/ 行：{sorted(missing)}",
+                    gap=f"意图(§9 索引集) {sorted(s9_dirs)} → 证据(LS 实际) {sorted(truth.spec_dirs)} → 缺口 缺行 {sorted(missing)}"))
             if phantom:
                 results.append(CheckResult(
                     "rs-list", CODE_WIKI_PATH, "P2",
-                    f"§9 索引幻影行（LS 不存在）：{sorted(phantom)}"))
+                    f"§9 索引幻影行（LS 不存在）：{sorted(phantom)}",
+                    gap=f"意图(§9 索引集) {sorted(s9_dirs)} → 证据(LS 实际) {sorted(truth.spec_dirs)} → 缺口 幻影 {sorted(phantom)}"))
 
         # doc_registry 版本对账（§9 载体行版本号 vs front-matter version，字符串全等）
         # 行定位 = 链接形态（](./rel) 文件链接或 ](./dir/) 父目录链接）——
@@ -741,7 +747,8 @@ def _reconcile_lists(spec: StatsSpec, truth: TruthSet, root: str,
                 if prose_ver != fm.group(1):
                     results.append(CheckResult(
                         "rs-list", CODE_WIKI_PATH, "P2",
-                        f"「{label}」§9 版本 v{prose_ver} ≠ front-matter {fm.group(1)}"))
+                        f"「{label}」§9 版本 v{prose_ver} ≠ front-matter {fm.group(1)}",
+                        gap=f"意图(§9 行声明) v{prose_ver} → 证据(front-matter) v{fm.group(1)} → 缺口 版本失配 {label}"))
     return results
 
 
@@ -953,7 +960,7 @@ def _expect(name: str, cond: bool, failures: list[str]) -> int:
 
 
 def run_selftest() -> int:
-    """20 fixture + F7 双变体（SVG 通道/suppress 白名单）+ I-1 只读断言 + 数字转换全区间
+    """27 fixture（20 基 + F7 双变体 + F21-F24 drift-gate 缺口报告）+ I-1 只读断言 + 数字转换全区间
     （expect 计数自增机械计数，DR-6 同构）。"""
     failures: list[str] = []
     passed = 0
@@ -1192,6 +1199,45 @@ def run_selftest() -> int:
           len(wrong) == 0 and summary.passed)
     shutil.rmtree(root, ignore_errors=True)
 
+    # F21: drift-gate 缺口三元组捕获（rs-decl 失配 → gap 非空 + 意图/证据/缺口）
+    bad = json.loads(_mini_stats_json(pattern_lib_version=2))
+    bad["declared"]["spec_feature_dirs"] = 9
+    root = _build_mini_repo("", stats_json=json.dumps(bad, ensure_ascii=False))
+    summary, _ = _verify(root)
+    gapped = [r for r in summary.results
+              if r.gap and "意图(声明) spec_feature_dirs=9" in r.gap
+              and "证据(重数) 2" in r.gap and "过声明" in r.gap]
+    check("F21 drift-gate 缺口三元组（意图→证据→缺口）", len(gapped) == 1 and not summary.passed)
+    shutil.rmtree(root, ignore_errors=True)
+
+    # F22: _gap_report 输出（version 2 激活 → 含 [gap-report] 块 + 载体分布）
+    bad = json.loads(_mini_stats_json(pattern_lib_version=2))
+    bad["declared"]["spec_feature_dirs"] = 9
+    root = _build_mini_repo("", stats_json=json.dumps(bad, ensure_ascii=False))
+    summary, spec = _verify(root)
+    report = _gap_report(summary.results) if spec and spec.pattern_lib_version >= 2 else ""
+    ok22 = ("[gap-report]" in report and "rs-decl" in report
+            and "CODE_WIKI.md×1" in report and "过声明" in report)
+    check("F22 gap-report 块（version 2 激活）", ok22)
+    shutil.rmtree(root, ignore_errors=True)
+
+    # F23: version 1 不激活 gap-report（缺口在场但输出块空）
+    bad = json.loads(_mini_stats_json(pattern_lib_version=1))
+    bad["declared"]["spec_feature_dirs"] = 9
+    root = _build_mini_repo("", stats_json=json.dumps(bad, ensure_ascii=False))
+    summary, spec = _verify(root)
+    gapped = [r for r in summary.results if r.gap]
+    report = _gap_report(summary.results) if spec and spec.pattern_lib_version >= 2 else ""
+    check("F23 version 1 缺口在场但 gap-report 不激活",
+          len(gapped) == 1 and report == "")
+    shutil.rmtree(root, ignore_errors=True)
+
+    # F24: stats 块 pattern_lib_version 2 解析（drift-gate 激活登记读通）
+    wiki_v2 = MINI_WIKI_BODY.replace("{stats}", _mini_stats_json(pattern_lib_version=2))
+    spec_v2 = parse_stats_block(wiki_v2)[0]
+    check("F24 pattern_lib_version=2 解析（drift-gate 激活）",
+          spec_v2 is not None and spec_v2.pattern_lib_version == 2)
+
     # I-1 只读：迷你仓双跑文件字节不变
     root = _build_mini_repo("")
     before_bytes = {p: open(os.path.join(root, p), "rb").read()
@@ -1211,6 +1257,27 @@ def run_selftest() -> int:
 
 
 # ---------------------------------------------------------------- 输出与 CLI
+
+def _gap_report(results: list) -> str:
+    """drift-gate 缺口报告（pattern_lib_version ≥2 激活；DESIGN §6.1 意图→证据→缺口）。
+
+    从已收集 CheckResult 的 gap 字段派生「意图 vs 证据 vs 缺口」三元组摘要 + 载体分布。
+    无结构化缺口 → 返回空串（不输出块）。
+    """
+    gaps = [r for r in results if r.gap]
+    if not gaps:
+        return ""
+    lines = [f"[gap-report] drift-gate 激活（意图→证据→缺口，{len(gaps)} 条）"]
+    for r in gaps:
+        loc = f"{r.file}" + (f":L{r.line}" if r.line else "")
+        lines.append(f"  - [{r.severity}] {r.check_id} {loc}: {r.gap}")
+    by_file: dict[str, int] = {}
+    for r in gaps:
+        by_file[r.file] = by_file.get(r.file, 0) + 1
+    dist = " ".join(f"{k}×{v}" for k, v in sorted(by_file.items()))
+    lines.append(f"  缺口分布: {dist}")
+    return "\n".join(lines)
+
 
 def _format_results(summary: Summary) -> str:
     lines = []
@@ -1259,6 +1326,10 @@ def main(argv: list[str] | None = None) -> int:
             results.extend(reconcile(spec, truth, ROOT))
         summary = Summary(results)
         print(_format_results(summary))
+        if spec is not None and spec.pattern_lib_version >= 2:
+            gr = _gap_report(results)
+            if gr:
+                print(gr)
         n_p1 = sum(1 for r in summary.violations if r.severity == "P1")
         n_p2 = sum(1 for r in summary.violations if r.severity == "P2")
         n_p3 = len(summary.p3s)

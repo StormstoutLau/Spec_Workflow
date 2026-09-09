@@ -1,21 +1,21 @@
-# 设计文档：drift-gate / 意图图-证据图概念吸收（Layer-0 概念登记）
+# 设计文档：drift-gate / 意图图-证据图概念吸收（Layer-0 概念登记 → v1.1 工具层实施）
 
 ---
 id: drift-gate-DESIGN
 type: design
-version: 1.0
-status: draft
+version: 1.1
+status: verified
 date: 2026-09-09
 depends: [drift-gate-RESEARCH, community-ecosystem-RESEARCH, ADR-0010, SPEC-PROCESS]
 upstream: null
 ---
 
-> **Feature**: drift-gate / 意图图-证据图概念吸收（PROGRESS P-023——Layer-0 概念登记，作为 repo_stats 演进候选）
+> **Feature**: drift-gate / 意图图-证据图概念吸收（PROGRESS P-023 概念登记 + P-029 实施批——repo_stats 演进落地）
 > **创建日期**: 2026-09-09
-> **状态**: draft
-> **Spec 步骤**: Step 3-4
+> **状态**: verified（v1.1 实施批落地；v1.0 为 Layer-0 登记形态）
+> **Spec 步骤**: Step 3-4（v1.1 补充 Step 5-7 实施验收）
 > **基于调研**: [RESEARCH.md](./RESEARCH.md)（复用 CER 资产，零新增外部断言）
-> **任务边界**: 用户指令「运行到懒加载 gate 部分即可」——本设计完成 ADR-0010 三问懒加载审核判定后即驻留，**不进入实施**（repo_stats 演进仅登记为触发驱动候选）。
+> **任务边界**: v1.0（2026-09-09）用户指令「运行到懒加载 gate 部分即可」——完成 ADR-0010 三问懒加载审核判定后驻留，**不进入实施**；v1.1（2026-09-09 P-029）用户指令「按照吃狗粮模式 继续执行」——懒加载 gate 重审通过（Q1 升级 Layer-1 / Q2 用户裁决激活 / Q3 副作用评估）后**实施 repo_stats 缺口报告**，详见 [§9 实施追记](#9-实施追记v11)。
 
 ---
 
@@ -150,6 +150,42 @@ CER §4 候选表 drift-gate 行追加注：「P-023 概念登记已落（2026-0
 1. 实现时点为「意图→证据→缺口」闭环的缺口报告 schema + exit-code 语义（打通 Bool 对账 → 定位对账）。
 2. 实施前须三校验器基线与回归（repo_stats 演进不影响 dc_validator/m7_stats）。
 3. 激活时走独立 feature 裁决 + 懒加载 gate 重审（同 P-020 先例）。
+
+---
+
+## 9. 实施追记（v1.1，2026-09-09 P-029 实施批）
+
+> v1.0 为 Layer-0 概念登记（仅两件套文档）；v1.1 在懒加载 gate 重审通过后落地工具层能力。本节追加真实发生事实（非表演——用户指令「按照吃狗粮模式 继续执行」后的完整实施批，决策链路见 `tools/spec_runner/sessions/specwf-p029-20260909.jsonl`，step-gate/verify-anchor 全过）。
+
+### 9.1 懒加载 gate 重审（ADR-0010 三问——v1.0 §4 的再审理）
+
+| 问 | v1.0 判决 | v1.1 重审 | 结论 |
+|----|----------|----------|------|
+| **Q1 放哪层** | Layer-0（概念登记）| 实施形态 = repo_stats 工具层能力（Layer-1：脚本 + stdout 输出），概念仍为 Layer-0 | **Layer-1（实施）** |
+| **Q2 激活条件** | 触发驱动（pattern_lib_version 2 候选议程）| 用户裁决提前实施（「按照吃狗粮模式 继续执行」）→ pattern_lib_version **1→2 激活登记**（声明=重数：stats 块升 2 = 模式库纳入缺口报告能力）| **用户裁决激活** |
+| **Q3 未激活副作用** | 0 | 实施后默认行为不变——全绿无缺口不输出；仅 version ≥2 且存在缺口时追加 `[gap-report]` 块 | **0（行为兼容）** |
+
+**重审结论：通过**——drift-gate 由 Layer-0 概念登记升级为 Layer-1 工具能力，激活 = pattern_lib_version 2（stats 块声明 + 工具门控双绑定）。
+
+### 9.2 实施内容（repo_stats.py，最小 diff）
+
+- `CheckResult` 增可选 `gap: str | None` 字段（dataclass 尾部，既有构造全兼容）——缺口三元组载体。
+- 4 处填充点：`rs-decl`（声明 vs 重数 ±差 + 欠/过声明）、`§2.1 树缺登/幻影`、`§9 索引缺行/幻影`、`doc_registry 版本失配`——均以「意图(…) → 证据(…) → 缺口 …」形态捕获。
+- `_gap_report(results)`：提取带 gap 结果 → `[gap-report]` 块（明细 + 载体分布）；无缺口返回空串。
+- `main` 门控：`pattern_lib_version >= 2` 时自动输出 gap-report（无缺口则静默）。
+- `pattern_lib_version` 默认保持 1（selftest 迷你仓不激活）；真实仓 CODE_WIKI §10 stats 块 **1 → 2** 激活。
+- 退出码语义不变：P1/P2 → 1（缺口=阻断），P3 → 0（提示）——「是否该阻塞」沿用验证层级（缺口定性于缺口报告内）。
+
+### 9.3 回归与验收
+
+- selftest：原 23 用例 + 新增 **F21-F24** = **27/27 全过**（F21 三元组捕获 / F22 激活输出 / F23 v1 门控 / F24 解析）。
+- 实测捕获自身缺陷：F21/F22 首跑断言方向写反（declared=9 > actual=2 应为「过声明」非「欠声明」）——修正后全绿，作为本批证据注入有效性的实证。
+- 三校验器全绿（dc 89 文件 0 违规 / m7 0 违规 / repo_stats 0 违规，P3 提示均为既有快照滞后项）。
+- 激活后直跑：无缺口 → 不输出 gap-report（正确静默）；drift-gate 能力 = 「意图→证据→缺口」定位对账，Bool 对账 → 定位对账闭环达成（DESIGN §6.1 演化落地）。
+
+### 9.4 交付物
+
+`scripts/repo_stats.py`（能力落地）+ `CODE_WIKI.md` §10 stats 块（pattern_lib_version 1→2 + 激活注）+ [IMPLEMENTATION.md](./IMPLEMENTATION.md) + [CHECKLIST.md](./CHECKLIST.md) + PROGRESS P-029 行 + 决策流 `specwf-p029-20260909.jsonl`。
 
 ---
 

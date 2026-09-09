@@ -67,7 +67,7 @@ f:\Spec_Workflow/
 │   ├── FACT_CHECK_FRAMEWORK.md           # 事实核查框架 v1.0（CHK-/FC- 编号，FWK-ASSERTION 下游补充，2026-08-21 吸收）
 │   ├── DECISION_RECORD_CONTRACT.md       # 决策记录契约 v1.1（FWK-DECISION-RECORD：schema 八字段 + 三载体映射 + I-1~I-4，Semantica schema 吸收，P-016）
 │   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉛ + §5 hits 机读块，形态 II 70 处）
-│   ├── PROGRESS.md                       # 待办登记（P-001~P-028 登记在册 28 项——P-001 至 P-028 全 done，剩触发驱动项）
+│   ├── PROGRESS.md                       # 待办登记（P-001~P-029 登记在册 29 项——P-001 至 P-029 全 done，剩触发驱动项）
 │   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
 │   ├── discoveries/README.md             # 发现三态索引（DIS-007~010；DR-6 追记）
 │   └── dev-log/                          # DEV-LOG-001~007（事件叙事）
@@ -99,7 +99,7 @@ f:\Spec_Workflow/
     ├── step-gate/              # P-020 决策产物管线吃狗粮全流程（ADR-0010 首例：STEP_GATE_CHECKLIST v1.2 accepted 三问 8/8 + DESIGN v1.0 + CHECKLIST_FUNC v1.1 accepting——decision 事件 + step-gate 命令落地 spec_runner v1.1.0）
     ├── defect-fixes/           # P-022 缺陷修复批（done：DESIGN v1.2 verified + CHECKLIST_FUNC v1.0 accepting——gate auto-commit A+B（spec_runner v1.2.0）+ DIS-008 规则化 AGENTS.md 两条）
     ├── agents-md-bridge/       # AGENTS.md 桥文件生成（P-021，CER C-01：根 AGENTS.md = SPEC_PROCESS 操作摘要桥，ADR-0010 三问审核通过，Layer-0）
-    ├── drift-gate/             # drift-gate / 意图图-证据图概念吸收（P-023：RESEARCH + DESIGN 两件套，Layer-0 概念登记——repo_stats 演进候选，ADR-0010 三问全过但仅登记不实施，pattern_lib_version 2 触发驱动）
+    ├── drift-gate/             # drift-gate 缺口报告（P-023 登记 + P-029 实施：RESEARCH v1.0 + DESIGN v1.1（§9 实施追记）+ IMPLEMENTATION + CHECKLIST——「意图→证据→缺口」定位对账落地 repo_stats，pattern_lib_version 2 激活）
     ├── step-gate-enforcement/  # step-gate 流程强制（P-024 出路 A 实施：pre-commit 第四 hook step-enforce + spec_runner step-enforce 命令——批次级提交门禁，ADR-0011 accepted A+C 决策落地，只读零副作用）
     ├── independent-verify/     # 独立验证（P-025 出路 C 实施：spec_runner verify-anchor 命令——decision 锚点真实性机械核查（文件存在 + 章节精确匹配 + 行号上界），审查臂查系统真实状态，只读零副作用）
     └── loop-engineering/       # loop engineering 循环工作流调研（P-028：RESEARCH v1.2，Layer-0 概念调研登记——社区 loop engineering 溯源 + 开源项目 + 学术论文 + 本仓单向性诊断 + L1/L2/L3 循环形态收益代价，可组建循环且 L1 起步但本次止于懒加载 gate 不实施，同 P-023 先例；v1.1 外部证据注入 = IAL-SCAN 不收敛实证 + Perils of Self-Feedback self-bias 放大 + 工程成本实证；v1.2 错误放大抑制 = 蒸馏异心智注入 8 条证据 + 四重硬约束）
@@ -694,7 +694,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [docs/DECISION_RECORD_CONTRACT.md](./docs/DECISION_RECORD_CONTRACT.md) | 决策记录契约 v1.1（FWK-DECISION-RECORD）：Semantica schema 吸收——八字段 + 三载体映射（M7/ADR/PROGRESS）+ 关系类型 + I-1~I-4（severity 无损分流；方向 A 导入唯一映射权威） |
 | [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉛ + 形态 II 复发分桶（70 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
 | [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open）/ DIS-009（resolved）/ DIS-010（toolized）；维护纪律含首次重审记录（2026-08-19） |
-| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-028 在册 28 项（P-001 至 P-028 全 done；主动队列清空，剩触发驱动项） |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-029 在册 29 项（P-001 至 P-029 全 done；主动队列清空，剩触发驱动项） |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
 | [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ 002（cpp-hub-absorption）/ 003（precommit-dc-validator）/ 004（治理收束）/ 005（m7-hits-block）/ 006（repo-stats）/ 007（promptfoo-m7-eval） |
 | [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.0 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
@@ -716,7 +716,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [spec/step-gate/](./spec/step-gate/) | P-020 决策产物管线吃狗粮全流程（ADR-0010 首例：STEP_GATE_CHECKLIST v1.2 accepted（三问 8/8 全过 → P-020 获准立项）+ DESIGN v1.0（decision 事件 schema 八字段 + step 序表五步 + step-gate 三类规则 exit 0/1/2）+ CHECKLIST_FUNC v1.1 accepting 12/12（spec_runner.py v1.1.0 + selftest 26/26 + 五步链 exit 0 实证）） |
 | [spec/defect-fixes/](./spec/defect-fixes/) | P-022 缺陷修复批（DESIGN v1.2 verified + CHECKLIST_FUNC v1.0 accepting——gate auto-commit A+B 修复（spec_runner v1.2.0：门控默认关 + 精确 sid 单文件 + 会话目录 git 根派生 + selftest 28/28）+ DIS-008 规则化（AGENTS.md 禁止事项两条 + 第 4/5 次复发追记）） |
 | [spec/agents-md-bridge/](./spec/agents-md-bridge/) | AGENTS.md 桥文件生成（P-021 done，CER C-01 落地：DESIGN v1.1 verified（§1.1 收益分析：工具互操作入口 / 行为对齐+护栏前置 / 零成本正收益 / 方法论收益四层 + H1 诚实边界=升级触发驱动）+ CHECKLIST v1.0 accepted 20/20 + 独立 pass 4/4——根 AGENTS.md = SPEC_PROCESS 操作摘要桥（五段，零可漂移声明 I-1）；ADR-0010 三问懒加载审核正式执行（Layer-0/生成即激活/副作用 0，通过）；doc_registry + repo_stats 同步） |
-| [spec/drift-gate/](./spec/drift-gate/) | P-023 drift-gate / 意图图-证据图概念吸收（RESEARCH v1.0 + DESIGN v1.0 两件套——Layer-0 概念登记：SGE 双图校验思想 → repo_stats「意图→证据→缺口」闭环演进候选；ADR-0010 三问懒加载审核（Q1 Layer-0 / Q2 触发驱动 pattern_lib_version 2 / Q3 副作用 0）全过但**仅登记不实施**；关联 pattern_lib_version 2，触发驱动） |
+| [spec/drift-gate/](./spec/drift-gate/) | P-023 概念登记 + **P-029 实施批**（DESIGN **v1.1**（§9 实施追记 + 懒加载 gate 重审：Q1 Layer-0→Layer-1 / Q2 用户裁决激活 / Q3 行为兼容）+ RESEARCH v1.0 + IMPLEMENTATION v1.0 + CHECKLIST v1.0 accepting）：**「意图→证据→缺口」缺口报告落地 repo_stats**——`CheckResult.gap` 三元组（rs-decl/树缺登幻影/§9 缺行幻影/doc_registry 版本 4 处填充）+ `_gap_report()` 块 + version 门控（`pattern_lib_version >= 2` 自动输出）+ selftest F21-F24 = 27/27；CODE_WIKI §10 stats 块 pattern_lib_version **1→2** 激活（声明=重数） |
 | [spec/step-gate-enforcement/](./spec/step-gate-enforcement/) | P-024 step-gate 流程强制（出路 A 实施：DESIGN v1.1（P-027 覆盖盲区追记）+ RESEARCH v1.0 + CHECKLIST v1.0 accepting——ADR-0011 accepted A+C 决策落地 = pre-commit 第四 hook step-enforce + spec_runner step-enforce 命令（批次级提交门禁，只读零副作用）） |
 | [spec/independent-verify/](./spec/independent-verify/) | P-025 独立验证（出路 C 实施：RESEARCH v1.0 + DESIGN v1.0 + CHECKLIST v1.0 accepting——ADR-0011 accepted A+C 决策落地 = spec_runner verify-anchor 命令（decision 锚点真实性机械核查：文件存在 + 章节精确匹配 + 行号上界，URL soft）+ SPEC_PROCESS RULE-1 独立 pass 取证清单） |
 | [spec/loop-engineering/](./spec/loop-engineering/) | P-028 loop engineering 循环工作流调研（RESEARCH v1.2——社区 loop engineering 概念溯源（2026-06 Steinberger/Osmani 五步闭环，错误=新上下文）+ 开源项目（OpenClaw Observe-Plan-Act / LangGraph 图循环 / AutoGPT / AutoGen / EvoAgentX / EdgeClaw）+ 学术论文（Reflexion / MAR 确认偏误实证 / ERL 启发式 / EvolveR / AI4AI-Bench RSI 未成熟）+ 本仓单向性诊断（循环底座 80% 已备）+ L1/L2/L3 循环形态收益代价；结论 = 可组建循环且 L1 起步，**本次止于懒加载 gate 不实施**（同 P-023 先例），Layer-0 概念调研登记；v1.1 外部证据注入 = IAL-SCAN 不收敛实证 + Perils of Self-Feedback self-bias 放大 + Illusions of Reflection 反思反例 + 工程成本实证，未发现推翻结论反例；v1.2 错误放大抑制专向调研 = 蒸馏异心智注入（Reasoning Scaffolding 结构信号 / MPT 多 persona / Council Mode 异构共识 -35.9% / Tool-MAD 异构工具）+ 四重硬约束（Interaction Tax 交互擦除多样性 / Belief Entrenchment 辩论强化偏误 / Spiral of Silence 少数派淹没需 locked dissenter / Co-Failure Ceiling 共同错误 β 上限），登记异心智注入臂 = 异基座独立 pass 升级候选） |
@@ -732,12 +732,13 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 
 > **用途**: `scripts/repo_stats.py`（P-014，[DIS-010](docs/discoveries/README.md) 处置落地）的扫描契约唯一登记处——模式库（数据非代码：正则 / 真值绑定 / 作用域 / 捕获组，I-4）、载体两级分类（living = 阻断；facade = 时点快照 + 真值指针，P3 非阻断）、实体计数声明（声明 = 机械重数，rs-decl）、门面快照基准与误报白名单。运行：`python scripts/repo_stats.py`（verify）；提交瞬间由 pre-commit hook `repo-stats` 复验。
 > **维护工作流（对账制，非再生成制）**: 真值源前进（新样本 / 新 feature 目录 / 新文档 / 新 hook）→ 人工同步视图 prose **与**本块声明 → verify 至全绿 → commit。工具只报偏差、永不代改——与 m7_stats 的 `--write` 再生成制相反（prose 不可机械重建）。
+> **drift-gate 激活（pattern_lib_version 2，2026-09-09 P-029 实施批）**: 「意图→证据→缺口」闭环缺口报告能力已纳入模式库——rs-decl/rs-list 结果带缺口三元组（gap），version ≥2 时对账自动输出 `[gap-report]` 块（缺口明细 + 载体分布）；drift-gate 由 Layer-0 概念登记升级为工具层能力（spec/drift-gate/ DESIGN v1.1）。
 > **试扫否决记录（pattern_lib_version 1）**: PT-3（DIS 范围对账）否决——T6 真值口径为 discoveries 全文 DIS 编号 min/max（索引含源项目 DIS-001~006 行 → 真值 1-10），与本仓序列声明的 prose 形态语义不同轴，登记必产误报；DIS 范围漂移暂无机械看护（低频位点，人工同步兜底）。
 > **已知未覆盖**: evidence.svg 复发规律数大数节点（TRUTH_KEYS 封闭枚举无对应绑定键）；README.en 词形数字（Five）；§2.1 树 scripts/ 文件级条目（树清单比对契约仅覆盖 spec/ 子目录）；PT-4/PT-8 以负向后顾排除述史/引用形态（PT-4：`(?<!L)` 行号引用「L4 feature 目录」+ `(?<![.\d])` 版本号片段「v1.5 feature 目录」；PT-8：`(?<!扩为)`——历史叙事非当前态声明，不走 suppress 白名单，suppress 为文件粒度会误杀同文件其余位点）。doc_registry 载体行定位 = 链接形态（文件链接或父目录链接），label 子串会误命中叙事行（dev-log 行「002（cpp-hub-absorption）」，F20）。
 
 ```stats
 {
-  "pattern_lib_version": 1,
+  "pattern_lib_version": 2,
   "carriers": {
     "living": ["CODE_WIKI.md", "docs/discoveries/README.md"],
     "facade": ["README.md", "README.en.md", "docs/assets/readme/evidence.svg"]
@@ -771,7 +772,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
     "scripts": 5,
     "templates": 5,
     "hooks": 4,
-    "progress_tasks": 28
+    "progress_tasks": 29
   },
   "view_layer_samples": [11, 16, 17, 18, 19, 20, 21],
   "doc_registry": [
