@@ -16,6 +16,7 @@ upstream: null
 > **Spec 步骤**: Step 1-2
 > **任务来源**: 用户指令「DeepEval 臂 是否已经评估过实施可行性 检查一下」→ 检查发现仅浅层候选定位（15.6k 星快照，无本机实测/版本核验/三问门禁）→ 用户指令「对它做吃狗粮评估」
 > **参考先例**: P-036 promptfoo-first-run（懒加载分析）、P-030 hook 面评估、P-031~P-034 ARC 四批（arc-probe）、P-035 ARC 升级实施
+> **实施批指针（2026-09-10，P-038）**: 本 RESEARCH 三问判定「触发 = 评测样本库就绪 / 用户指定首用例」——本次用户已明确指令升级实施，触发满足；设计与实施文档见 [DEEPEVAL_M7_EVAL_DESIGN.md](./DEEPEVAL_M7_EVAL_DESIGN.md) / [DEEPEVAL_M7_EVAL_IMPLEMENTATION.md](./DEEPEVAL_M7_EVAL_IMPLEMENTATION.md) / [DEEPEVAL_M7_EVAL_CHECKLIST.md](./DEEPEVAL_M7_EVAL_CHECKLIST.md)。
 > **v1.1 变更（升级价值分析轮，用户指令「DeepEval 臂升级价值是什么 需要在 research 文档内补充」）**: 新增 **§4 升级价值分析**（§4.1 价值锚点 = 补 promptfoo 声明式断言覆盖不到的「事实忠实」盲区 / §4.2 三重增量价值 = ①事实忠实定量化（FaithfulnessMetric 量化幻觉）②可解释审计（reason 即证据锚点）③判据可塑形（GEval 编码本仓纪律）/ §4.3 价值边界），**注重编号**：原 §4 三问→§5、原 §5 分层→§6、原 §6 文献→§7；断言 **B 1→2**（+B2 价值成立推断）+ **C 2→3**（+C-3 价值成立判定）。A 6 不变、H 0 不变。**声明计数 6/2/3/0**。
 
 ## 0. 断言统计表（必填，审计入口）

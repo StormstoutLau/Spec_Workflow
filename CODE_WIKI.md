@@ -66,8 +66,8 @@ f:\Spec_Workflow/
 │   ├── ASSERTION_EVIDENCE_FRAMEWORK.md   # 断言分级证据框架 v1.4.2（STEP_GAP 两态 + R7 + §10 下游分工）
 │   ├── FACT_CHECK_FRAMEWORK.md           # 事实核查框架 v1.0（CHK-/FC- 编号，FWK-ASSERTION 下游补充，2026-08-21 吸收）
 │   ├── DECISION_RECORD_CONTRACT.md       # 决策记录契约 v1.1（FWK-DECISION-RECORD：schema 八字段 + 三载体映射 + I-1~I-4，Semantica schema 吸收，P-016）
-│   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉝ + §5 hits 机读块，形态 II 75 处）
-│   ├── PROGRESS.md                       # 待办登记（P-001~P-037 登记在册 37 项——P-001 至 P-037 全 done，剩触发驱动项）
+│   └── M7_EVIDENCE_LOG.md                # M7 证据账本（唯一活载体；样本①-㉞ + §5 hits 机读块，形态 II 76 处）
+│   ├── PROGRESS.md                       # 待办登记（P-001~P-038 登记在册 38 项——P-001 至 P-038 全 done，剩触发驱动项）
 │   ├── adr/README.md                     # ADR 索引（命名空间权威 = ADR-0007 附录 A）
 │   ├── discoveries/README.md             # 发现三态索引（DIS-007~010；DR-6 追记）
 │   └── dev-log/                          # DEV-LOG-001~007（事件叙事）
@@ -107,7 +107,7 @@ f:\Spec_Workflow/
     ├── arc-probe/              # ARC 决策图谱试点调研 + 替代框架调研 + 选型对比 + 缺陷规避（P-031/P-032/P-033/P-034 四批：RESEARCH v1.4——CER §3.4.1 优先候选吃狗粮评估：npm 0.8.0 实态试跑（Windows 命令面可用）+ 0.x 平台缺陷双实证（arc --version 0.1.0≠0.8.0 / skill 命令 B:\~BUN 路径崩溃 / issue #30 linux bun 缺失）+ H2 部分证伪（ADR 导入关系不自动映射，需预链接）；v1.1 替代调研 = 6 候选全景无完全替代，ARC 保持主选；v1.2 选型评分 = ARC 升级 4.2 显著优于四单维补位（adr-explorer 3.2 次高仅只读看板）；v1.3 缺陷规避矩阵 = 官方 Windows 二进制直链 + 版本 0.8.0 快照固化（sha256）+ 命令白名单 + 预链接脚本 + 90 天观察项；v1.4 深入社区复核修正 A-11 事实错误（driver 命令 #25/#26 已发布非计划中，A-20/A-21 取证）——止于调研评估，试点实施待用户裁决）
     └── arc-rollout/            # ARC 升级实施（P-035 done：规避矩阵落地——tools/arc/ 薄壳封装器 arc_wrap.py（命令白名单拦截 skill/崩溃面）+ arc_prelink.py（ADR 依赖簇→depends_on 边预链接）+ arc.sha256.md（0.8.0 版本固化，与官方一致）+ data/.arc 8 ADR 图（7 depends_on 边，trace/impact 递归可用）；实测发现 link 合法边按实体类型动态决定（--help ≠ 运行时）；零 hook/校验器改动，仅 dc_validator .arc 排除 + gitignore；ALTERNATIVE D6 不接门禁）
     └── promptfoo-first-run/    # promptfoo 首轮评测调研-懒加载分析（P-036：RESEARCH v1.1——端点认知修正 = 三机推理集群已组建（D:\RPC 手册 v1.8，C 站 09-09 接入）OpenAI 兼容端点 E2E 已验证（网关 :4000 + A/B/C :8080），原"端点不可达"为漂移前旧地址作废；promptfoo 问题域说明（声明式断言/测试矩阵/CI 退出码/red team 四子问题）+ red team 157 插件 6 类能力快照（financial 族与本仓断言分级同构观察）+ H3 研判 = 评测价值低（静态语料无攻击面）+ 扩展暂时挂起（用户裁决 2026-09-10，待工作站集群完善后升级评估）零工具改动）
-    └── deepeval-arm/            # DeepEval 臂实施可行性吃狗粮评估（P-037：RESEARCH v1.0——6A+1B+2C+0H；既有评估 = CER §3.2 C-04 仅浅层候选定位（P-010 双臂 = promptfoo 内部 provider，CER「第二臂」为调研层概念需新契约）；本机实测 deepeval v4.2.2 CLI 面 + OpenAIModel(base_url=主控站 :1234/v1) 直连 LM Studio qwen2.5-7b-instruct Faithfulness=1.00/GEval=1.00 端到端通过 → 实施资质全达标；A-6 = qwen3.8-27b-uncensored 生成空输出（端点侧模型异常，非 deepeval 兼容）；gate 三问 = Q1 Layer-1/Q2 端点已就绪但评测样本库未建/Q3 副作用 0 → 止于懒加载 gate（触发 = 评测样本库就绪/用户指定首用例）；零工具改动 I-1）
+    └── deepeval-arm/            # DeepEval 臂实施可行性吃狗粮评估（P-037：RESEARCH v1.0——6A+1B+2C+0H；既有评估 = CER §3.2 C-04 仅浅层候选定位（P-010 双臂 = promptfoo 内部 provider，CER「第二臂」为调研层概念需新契约）；本机实测 deepeval v4.2.2 CLI 面 + OpenAIModel(base_url=主控站 :1234/v1) 直连 LM Studio qwen2.5-7b-instruct Faithfulness=1.00/GEval=1.00 端到端通过 → 实施资质全达标；A-6 = qwen3.8-27b-uncensored 生成空输出（端点侧模型异常，非 deepeval 兼容）；gate 三问 = Q1 Layer-1/Q2 端点已就绪但评测样本库未建/Q3 副作用 0 → 止于懒加载 gate（触发 = 评测样本库就绪/用户指定首用例）；零工具改动 I-1）**→ P-038 升级实施**（2026-09-10：`scripts/deepeval_m7_eval.py` selftest/eval/record 三件套落地 + 真实吃狗粮首测评 LLM-judge 边界实证 → M7 样本㉞）
 ```
 
 ### 2.2 逻辑架构分层
@@ -697,9 +697,9 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [docs/007](./docs/007_hallucination_audit_asymmetric_evidence.md) | Discovery 007：幻觉清单自身含幻觉的发现记录（126→8 错误复盘） |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](./docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言分级证据框架 v1.4.2：A/B/C + 不对称配置 + B 类三阶段审计 + STEP_GAP 两态 + R7 计数机械枚举 |
 | [docs/DECISION_RECORD_CONTRACT.md](./docs/DECISION_RECORD_CONTRACT.md) | 决策记录契约 v1.1（FWK-DECISION-RECORD）：Semantica schema 吸收——八字段 + 三载体映射（M7/ADR/PROGRESS）+ 关系类型 + I-1~I-4（severity 无损分流；方向 A 导入唯一映射权威） |
-| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉝ + 形态 II 复发分桶（75 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
+| [docs/M7_EVIDENCE_LOG.md](./docs/M7_EVIDENCE_LOG.md) | M7 证据账本：审查对比臂样本①-㉞ + 形态 II 复发分桶（76 处/7 字段类型）+ §5 hits 机读块 + 命中率 baseline（唯一活载体，ADR-0007 D1） |
 | [docs/discoveries/README.md](./docs/discoveries/README.md) | 发现三态索引：DIS-007（toolized）/ DIS-008（open）/ DIS-009（resolved）/ DIS-010（toolized）；维护纪律含首次重审记录（2026-08-19） |
-| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-037 在册 37 项（P-001 至 P-037 全 done；主动队列清空，剩触发驱动项） |
+| [docs/PROGRESS.md](./docs/PROGRESS.md) | 待办登记：P-001~P-038 在册 38 项（P-001 至 P-038 全 done；主动队列清空，剩触发驱动项） |
 | [docs/adr/README.md](./docs/adr/README.md) | ADR 本地索引（命名空间权威 → ADR-0007 附录 A） |
 | [docs/dev-log/](./docs/dev-log/) | DEV-LOG-001（doc-contract+ADR-0006）/ 002（cpp-hub-absorption）/ 003（precommit-dc-validator）/ 004（治理收束）/ 005（m7-hits-block）/ 006（repo-stats）/ 007（promptfoo-m7-eval） |
 | [spec/cpp-hub-absorption/](./spec/cpp-hub-absorption/) | 第二次回流四件套：DESIGN v1.0 + IMPLEMENTATION + CHECKLIST（39/40 已验收） |
@@ -729,7 +729,7 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
 | [spec/arc-probe/](./spec/arc-probe/) | P-031 ARC 决策图谱试点调研 + **P-032 替代框架调研 + P-033 选型对比 + P-034 缺陷规避调研**（RESEARCH v1.4——CER §3.4.1 优先候选吃狗粮评估：**本机实态试跑**（Windows node v24 + 临时安装 @kegesch/arc 0.8.0）命令面 init/add/list/check/next/trace/graph/import 全可用 + check 分类/JSON 输出正常；**0.x 平台缺陷双实证** = `arc --version` 0.1.0（≠ 包版本 0.8.0）+ `arc skill` Windows 崩溃（`B:\~BUN` 构建路径硬编码泄漏）+ issue #30（linux/pnpm 无 bun → `env: bun` 失败，与 README「no bun required」矛盾）；**H2 假设部分证伪** = 本仓 ADR-0007 导入成功（title/status 中文保真）但 date=导入日期 + depends/driven_by 关系全空（图关系不自动映射，需预链接）；**v1.1 替代调研** = 6 候选全景核验 + phodal/adr 本机实测——无候选在「关系图谱递归 + 零依赖 agent 面」维度完全替代 ARC，ARC 保持主选（缺陷处置 = 规避命令面 + 等 1.0）；**v1.2 选型对比** = 加权评分（关系图谱 30%/兼容 25%/性能 10%/维护 15%/agent 面 20%）：**ARC 升级 4.2 显著优于四单维补位**（次高 adr-explorer 3.2 仅只读看板），单维补位仅登记辅助观测（优选 adr-explorer 可视化看板）；**v1.3 缺陷规避矩阵** = 官方 Windows 二进制直链（sha256 可校验）+ 版本 0.8.0 快照固化 + 命令白名单（排除 skill 崩溃面）+ import 预链接脚本（FWK-DECISION-RECORD 映射）+ 90 天停滞观察项对冲 bus factor=1；**v1.4 深入社区复核** = **修正 A-11 事实错误**（driver 命令 #25 next/context/gaps + #26 Vision 实体已于 2026-06-01/05-31 发布，gaps 并入 check——原「计划中未发布」取证过时，A-20/A-21 补证）+ 版本节奏精确化（A-22）；agent surface（CLI+JSON+skill）+ init-agent 与本仓 AGENTS.md 桥同构；**gate 三问：止于调研评估，试点实施待用户裁决**（同 P-015 先例）） |
 | [spec/arc-rollout/](./spec/arc-rollout/) | P-035 ARC 升级实施（四件套：DESIGN v1.0（D1-D7）+ IMPLEMENTATION v1.0 verified + CHECKLIST v1.0 accepting——规避矩阵落地：**tools/arc/ 薄壳工具链**——arc_wrap.py 命令白名单封装器（skill/init-agent 崩溃面拦截 exit 2）+ arc_prelink.py ADR 预链接脚本（frontmatter depends→depends_on 边，ADR id→D 动态映射）+ arc.exe（0.8.0，sha256 8f4b3089 与官方一致，版本固化 arc.sha256.md）+ data/.arc 8 ADR 决策图（7 depends_on 边，trace/impact 递归可用）；**实测发现 link 合法边按实体类型动态决定**（decision→decision 仅 enables/supersedes/depends_on，--help ≈ 运行时）；零 hook/校验器逻辑改动（dc_validator 仅 .arc 目录排除），D6 不接门禁与 step-gate 正交） |
 | [spec/promptfoo-first-run/](./spec/promptfoo-first-run/) | P-036 promptfoo 首轮评测调研-懒加载分析（RESEARCH **v1.1**——端点认知修正：三机推理集群已组建（D:\RPC 手册 v1.8，C 站 2026-09-09 接入）OpenAI 兼容端点 E2E 已验证（网关 scott-lau-GTR-Pro.local:4000 + A/B/C 三站 :8080）——原"端点不可达"为漂移前旧地址作废；**promptfoo 问题域说明**（声明式断言/测试矩阵/CI 退出码/red team 四子问题）；**扩展暂时挂起（用户裁决 2026-09-10）**——待工作站集群完善后升级评估，零工具改动 I-1） |
-| [spec/deepeval-arm/](./spec/deepeval-arm/) | P-037 DeepEval 臂实施可行性吃狗粮评估（RESEARCH **v1.1**，6A+2B+3C+0H——既有评估确认 = CER §3.2 C-04 仅浅层候选定位（P-010「双臂」= promptfoo 内部 base/cross-model provider，CER「第二臂」为调研层概念需新契约）；**本机实测** = deepeval **v4.2.2**（Python 3.11.16）CLI 面 generate/inspect/diagnose/gate + diagnose 5 级配置优先级；**端点端到端** = OpenAIModel(base_url=主控站 127.0.0.1:1234/v1) 直连 LM Studio qwen2.5-7b-instruct **FaithfulnessMetric=1.00 + GEval=1.00**（中文语料）→ **实施资质全达标**；A-6 端点层注意项 = qwen3.8-27b-uncensored 生成空输出（模型异常非兼容问题）；**v1.1 升级价值分析**（用户指令「DeepEval 臂升级价值是什么」）= 新增 §5 三重增量（①事实忠实定量化 FaithfulnessMetric 量化幻觉 ②可解释审计 reason 即证据锚点 ③判据可塑形 GEval 编码纪律）+ B2/C-3；ADR-0010 三问 = Q1 Layer-1 / Q2 端点已就绪但评测样本库未建 / Q3 副作用 0 → **资质达标但止于懒加载 gate**（触发 = 评测样本库就绪/用户指定首用例）；零工具改动 I-1） |
+| [spec/deepeval-arm/](./spec/deepeval-arm/) | P-037 DeepEval 臂实施可行性吃狗粮评估（RESEARCH **v1.1**，6A+2B+3C+0H——既有评估确认 = CER §3.2 C-04 仅浅层候选定位（P-010「双臂」= promptfoo 内部 base/cross-model provider，CER「第二臂」为调研层概念需新契约）；**本机实测** = deepeval **v4.2.2**（Python 3.11.16）CLI 面 generate/inspect/diagnose/gate + diagnose 5 级配置优先级；**端点端到端** = OpenAIModel(base_url=主控站 127.0.0.1:1234/v1) 直连 LM Studio qwen2.5-7b-instruct **FaithfulnessMetric=1.00 + GEval=1.00**（中文语料）→ **实施资质全达标**；A-6 端点层注意项 = qwen3.8-27b-uncensored 生成空输出（模型异常非兼容问题）；**v1.1 升级价值分析**（用户指令「DeepEval 臂升级价值是什么」）= 新增 §5 三重增量（①事实忠实定量化 FaithfulnessMetric 量化幻觉 ②可解释审计 reason 即证据锚点 ③判据可塑形 GEval 编码纪律）+ B2/C-3；ADR-0010 三问 = Q1 Layer-1 / Q2 端点已就绪但评测样本库未建 / Q3 副作用 0 → **资质达标但止于懒加载 gate**（触发 = 评测样本库就绪/用户指定首用例）；零工具改动 I-1）**→ P-038 升级实施**（2026-09-10：`scripts/deepeval_m7_eval.py` selftest/eval/record 三件套 + 真实吃狗粮首测评（127.0.0.1:1234 + qwen2.5-7b）→ LLM-judge 忠实性量尺边界实证（忠实用例语义等价改写误判 0.0 / 负例正确 0.0）→ M7 样本㉞） |
 | [spec/templates/RESEARCH_TEMPLATE.md](./spec/templates/RESEARCH_TEMPLATE.md) | Step 2 调研文档模板 |
 | [spec/templates/DESIGN_TEMPLATE.md](./spec/templates/DESIGN_TEMPLATE.md) | Step 3 设计文档模板（含不变式与职责边界） |
 | [spec/templates/IMPLEMENTATION_TEMPLATE.md](./spec/templates/IMPLEMENTATION_TEMPLATE.md) | Step 5 实施文档模板（依赖/签名/兼容性验证表） |
@@ -779,10 +779,10 @@ v1.2.1 起 SPEC_PROCESS 自包含，整仓复制即可使用：
     "spec_feature_dirs": 28,
     "adr_files": 8,
     "dev_logs": 7,
-    "scripts": 5,
+    "scripts": 6,
     "templates": 5,
     "hooks": 4,
-    "progress_tasks": 37
+    "progress_tasks": 38
   },
   "view_layer_samples": [11, 16, 17, 18, 19, 20, 21],
   "doc_registry": [
