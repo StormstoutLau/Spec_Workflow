@@ -33,3 +33,12 @@ repos:
         entry: python scripts/step_enforce.py
         language: system
         files: ^spec/[a-z0-9-]+/(?:[A-Z0-9_]+_)?(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(?:_FUNC)?)\.md$
+      # 项目控制台生成器（P-043，L0 门禁触发：提交即刷新；前身 = P-041 任务看板 board-gen）
+      # 设计：spec/project-console/DESIGN.md §3.1/§3.3（生成 + git add → 提交即刷新；唯一写路径 docs/CONSOLE.md，纯派生）
+      # pass_filenames=false：作用域由 files 正则收窄（源 = PROGRESS + 事件流 + spec 四文档）
+      - id: console-gen
+        name: Project console generator (derived view, P-043)
+        entry: python scripts/console_gen.py --stage
+        language: system
+        pass_filenames: false
+        files: ^(docs/PROGRESS\.md|tools/spec_runner/sessions/.*\.jsonl|spec/.*(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST)\.md)$

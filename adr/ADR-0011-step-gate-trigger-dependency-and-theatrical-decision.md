@@ -1,7 +1,7 @@
 ---
 id: ADR-0011
 type: adr
-version: 1.7
+version: 1.8
 status: accepted
 date: 2026-09-09
 depends: [ADR-0007, ADR-0010, step-gate-DESIGN, community-ecosystem-RESEARCH, FWK-DECISION-RECORD]
@@ -185,6 +185,7 @@ P-023（drift-gate 概念吸收，2026-09-09）按 spec 工作流走完 RESEARCH
 |---|------|---------|------|------|
 | — | 2026-09-09 | 初始登记（proposed） | 待确认 | P-023 排查 + 社区检索 |
 | 1 | 2026-09-09 | 用户裁决「决策为 A + C 组合收口」；**失效条件命中**（P-021/022/023 三连批应走未走，90 日窗口，E1 实证 + 样本㉚） | **accepted（2026-09-09）**；A 实施待独立指令、C 待 A 落地 | 用户裁决 + sessions E1 取证 |
+| 2 | 2026-09-11 | 用户裁决「补建缺失的 session」（承接 P-041 看板暴露：`board_gen` 投影 P-038/P-039/P-040 最远 step = `—`；机械枚举 P-020 至 P-041 得存量缺失 5 批 = p021 / p022 / p038 / p039 / p040） | **裁决执行**：依 PROGRESS 对应 P 行**回溯补建** 5 条 session（各 5 步决策链，首步 scenario 明示【补建】）；**不追溯勾销**原失效条件命中（A 自 P-024 已落地防复发，本批为存量清偿） | 用户指令 + sessions E1 枚举 |
 
 ## 修订历史
 
@@ -197,3 +198,4 @@ P-023（drift-gate 概念吸收，2026-09-09）按 spec 工作流走完 RESEARCH
 | 2026-09-09 | **P-024 实施追记（用户指令「开启后续吃狗粮spec工作流」）**：出路 A 落地 = pre-commit **第四 hook `step-enforce`**（files 收窄 spec/ 四文档）+ **spec_runner.py v1.3.0**（`step-enforce --pid` 前缀定位 specwf-p0xx-* session + 复用 cmd_gate_step；selftest 31/31 = 28 + F27-F29）+ `scripts/step_enforce.py`（feature→P 映射，缺位 exit 2）；**批次级强制**（存在 + decision 非空）+ **只读零副作用**（P-022 教训）；**吃狗粮自证** = P-024 session 过 step-enforce exit 0；三通道全绿。**C 待 A 落地后触发**（下一候选，用户裁决或后续批次暴露表演空间时）。版本 v1.4 → v1.5 |
 | 2026-09-09 | **P-025 实施追记（用户指令「按照吃狗粮执行出路 C」）**：出路 C 落地 = spec_runner **v1.4.0**（`verify-anchor --session` 子命令——decision 锚点真实性机械核查：文件存在 + 章节标题**精确匹配**（标题首 token 去尾点，`4.` 命中 §4 不命中 4.1）+ 行号上界，URL soft exit 2；selftest **38/38** = 31 + F30-F36）+ **SPEC_PROCESS RULE-1 补独立 pass 取证清单**（审查输入 = 事件流 + verify-anchor + git 状态；纯登记型无 diff 合法；只验位置可达不验断言对错）；吃狗粮自证 = P-025 session 决策链 3 步过 step-gate exit 0 + 自身锚点 3 条过 verify-anchor exit 0；历史 session 取证（p020 v2 6 锚点含行号 / p023 2 / p024 1）全真实；三通道全绿；**B 仍暂缓**（C 落地后重评——后续批次暴露自报空间时评估）。版本 v1.5 → v1.6 |
 | 2026-09-09 | **P-027 盲区修复追记（用户指令「登记并修复 step-enforce 的盲区」）**：出路 A 实施物（step-enforce hook）暴露**覆盖盲区**——v1.0 files 正则仅收四文档精确名，不匹配 P-003 前遗留前缀命名（COMMUNITY_ECOSYSTEM_RESEARCH.md / STEP_GATE_CHECKLIST.md）→ **P-026 批次实际未被 hook 门禁强制**（手动吃狗粮掩盖）→ **M7 样本 ㉛ 入账**（1 P2，形态 II = 0 不入分桶）；修复 = FEATURE_RE/files 扩展 `[A-Z0-9_]+_` 前缀四文档 + **历史批次豁免（P-020 前不追溯）**（新纳入 15 feature 中 13 个为 P-020 前批次豁免，step-gate P-020 / community-ecosystem P-026 纳入强制且均有 session）；step-gate-enforcement DESIGN v1.0→v1.1 追记；三通道全绿 + 五场景验收；**A+C 两路闭环后新增机制自身盲区已修复**——B 仍暂缓。版本 v1.6 → v1.7 |
+| 2026-09-11 | **决策链缺失存量清偿追记（用户指令「好的，补建缺失的 session」→「好的，补记 ADR-0011」）**：触发 = P-041 看板生成器落地后暴露投影缺口（`board_gen` 中 P-038/P-039/P-040 最远 step 显示 `—`）+ step-enforce 仅查「session 存在性」不透支历史 → 机械枚举 P-020 至 P-041（`sessions present: 17`）得**存量缺失 5 批 = p021 / p022 / p038 / p039 / p040** → 依 PROGRESS 对应 P 行落档**回溯补建 5 条 session**（各 5 步决策链 research→design→implement→verify→finalize；文件 `specwf-p021-20260908` / `specwf-p022-20260908` / `specwf-p038-20260910` / `specwf-p039-20260910` / `specwf-p040-20260911`），**首步 scenario 内明示「【补建】原批未登记决策流，本 session 于 2026-09-11 依 PROGRESS 落档回溯补建」**；**纪律声明（防误读，关键）**：补建 session = **回溯重建记录**，其 `ts` 取批次日期而非当时写入时刻，**不得作为「该批当时已执行决策纪律」的证据**使用，且本 ADR §1/§三判定准则的 E1 实测结论（**4 应走批次仅 1 走 3 未走，值守失效为系统性**）**不因补建而改写**——补建只恢复 step-enforce 可校验性与看板 step 投影，**不追溯勾销失效条件命中**（该命中已于 P-024 登记 M7 样本 ㉚，本批**零新增 M7 样本**）；**取证** = `step-enforce --pid` 5/5 定位成功 + `step-gate` 各 5/5 步一致 exit 0 + `verify-anchor` **49 锚点全真实 / 0 硬性 / 0 软性**（首轮 4 条裸路径锚点因无 §/行号定位不可解析 → 改为真实章节锚点后复跑）+ `board_gen` session 17→22（P-038/P-039/P-040 最远 step `—` → `finalize`）+ 三校验器全绿（dc_validator 110 文件 / m7_stats / repo_stats 0 违规）；**注**：`tools/arc/data/.arc/decisions/D-008-*.md` 为其时点导入快照（内嵌 version 1.7），`depends` 未变故依赖边集不变，本追记不触发重导入。版本 v1.7 → v1.8 |
