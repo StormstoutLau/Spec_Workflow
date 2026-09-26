@@ -2,7 +2,7 @@
 id: D-005
 title: "ADR-0008: SPEC_PROCESS v1.4——Step 2 门禁语义与 Step 8 双向链路检查"
 status: accepted
-date: 2026-09-09
+date: 2026-09-26
 tags:
   - imported
 driven_by: []

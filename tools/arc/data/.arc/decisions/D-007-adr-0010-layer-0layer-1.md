@@ -2,7 +2,7 @@
 id: D-007
 title: "ADR-0010: 懒加载架构原则——Layer-0/Layer-1 分层作为候选吸收的强制门禁"
 status: accepted
-date: 2026-09-09
+date: 2026-09-26
 tags:
   - imported
 driven_by: []

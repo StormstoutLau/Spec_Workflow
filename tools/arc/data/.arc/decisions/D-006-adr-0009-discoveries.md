@@ -2,7 +2,7 @@
 id: D-006
 title: 'ADR-0009: Discoveries 发现日志机制——学习回路"事故→规则"的载体'
 status: accepted
-date: 2026-09-09
+date: 2026-09-26
 tags:
   - imported
 driven_by: []
