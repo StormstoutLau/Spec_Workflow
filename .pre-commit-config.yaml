@@ -10,7 +10,10 @@ repos:
         name: DC contract validator (DC1-DC4 + R7)
         entry: python scripts/dc_validator.py
         language: system
-        files: \.md$
+        # 作用域收窄：排除 .arc（ARC 图存储，P-035 与 dc_validator 目录遍历排除同义）。
+        # 缺陷修复（2026-09-26）：原 `\.md$` 会把 tools/arc/data/.arc/decisions/*.md 喂给校验器，
+        # 而校验器的 .arc 排除仅在 os.walk 生效 → 显式传文件名时失效，报 P1/P2 误判。
+        files: ^(?!.*\.arc/).*\.md$
       # M7 账本统计校验器（P-011，R7 同构：hits 声明 = 机械重数）
       # 设计：spec/m7-hits-block/M7_HITS_DESIGN.md §3.1（files 收窄至 M7 路径）
       - id: m7-stats

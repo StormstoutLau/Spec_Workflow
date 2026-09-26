@@ -96,7 +96,7 @@ flowchart LR
 
 - **dc-validator** —— DC contract validator (DC1-DC4 + R7)
   - 命令：`python scripts/dc_validator.py`
-  - 触发范围（`files` 正则）：`\.md$`
+  - 触发范围（`files` 正则）：`^(?!.*\.arc/).*\.md$`
   - 传入文件名（`pass_filenames`）：未设（pre-commit 默认「是」）
 - **m7-stats** —— M7 ledger hits block validator
   - 命令：`python scripts/m7_stats.py`
