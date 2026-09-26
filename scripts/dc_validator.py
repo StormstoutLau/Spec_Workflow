@@ -233,11 +233,23 @@ def check_links(file, text, root=ROOT):
 
 # ---------------------------------------------------------------- M1 CLI
 
+# 目录排除（M1）。`.arc` = ARC 图存储（P-035，同 `.git` 先例）。
+# P-049 单点化修复：原排除**只作用于 os.walk**，pre-commit 显式传参（staged 列表）绕过它，
+# 致 tools/arc/data/.arc/decisions/*.md 被当 DC 契约对象校验（47 处误判）。
+# 现将判定抽为 EXCLUDE_DIRS + is_excluded()，**遍历与显式传参共用同一份判定**（I-10 语义同源）。
+EXCLUDE_DIRS = (".git", "__pycache__", ".arc")
+
+
+def is_excluded(rel):
+    """相对路径是否落在排除目录内（任一路径段命中 EXCLUDE_DIRS；末段为文件名，不参与）。"""
+    parts = str(rel).replace("\\", "/").split("/")
+    return any(p in EXCLUDE_DIRS for p in parts[:-1])
+
+
 def gather_md_files(root=ROOT):
     out = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames
-                       if d not in (".git", "__pycache__", ".arc")]  # .arc = ARC 图存储（P-035，同 .git 先例）
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
         for fn in filenames:
             if fn.endswith(".md"):
                 out.append(os.path.relpath(os.path.join(dirpath, fn), root))
@@ -292,7 +304,8 @@ def main(argv=None):
         selected = set(ALL_CHECKS)
 
     try:
-        files = args.files if args.files else gather_md_files()
+        chosen = args.files if args.files else gather_md_files()
+        files = [f for f in chosen if not is_excluded(f)]   # P-049：显式传参与遍历同判
         results = run_checks(files, selected)
     except Exception as e:  # 工具自身错误 ≠ 校验通过（DESIGN §3.4 补注）
         sys.stderr.write("[tool-error] %s: %s\n" % (type(e).__name__, e))
@@ -320,7 +333,7 @@ FM_OK = ("---\nid: selftest-ok-RESEARCH\ntype: design\nversion: 1.0\n"
 
 
 def run_selftest():
-    """十三 fixture（IMPLEMENTATION §8.1 F1-F10，含 F3b/F3c/F8b 分支），tempfile 构造于系统临时目录（I-1 不触工作树）。"""
+    """十四 fixture（IMPLEMENTATION §8.1 F1-F10 + F11（P-049 单点化），含 F3b/F3c/F8b 分支），tempfile 构造于系统临时目录（I-1 不触工作树）。"""
     import shutil
     import tempfile
 
@@ -409,6 +422,16 @@ def run_selftest():
         r = check_frontmatter(f10, _read(os.path.join(tmp, f10)))
         expect(len(r) == 1 and r[0].severity == "" and "不在 DC 契约范围" in r[0].message,
                "F10 装饰性 --- 分隔线判为范围外 [skip]")
+
+        # F11 .arc 排除单点化（P-049）：显式传参路径与遍历共用同一判定
+        arc = w(os.path.join("tools", "arc", "data", ".arc", "decisions", "D-001.md"),
+                FM_OK + "\n[bad](./nope.md)\n")
+        expect(is_excluded(arc) and is_excluded(os.path.join(".arc", "x.md")),
+               "F11 .arc 显式路径判为排除")
+        expect(not is_excluded("docs/PROGRESS.md") and not is_excluded("spec/a/RESEARCH.md"),
+               "F11b 常规路径不排除")
+        expect(all(not is_excluded(f) for f in gather_md_files(tmp)),
+               "F11c 遍历结果零排除项（.arc fixture 未入列）")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
