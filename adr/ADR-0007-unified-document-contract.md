@@ -1,7 +1,7 @@
 ---
 id: ADR-0007
 type: adr
-version: 1.6
+version: 1.7
 status: accepted
 date: 2026-08-17
 depends: [doc-contract-refactor, CPP_HUB_GAP_ANALYSIS_RESEARCH, CPP_HUB_ABSORPTION_DESIGN, ADR-0006]
@@ -74,7 +74,8 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 ### D4. `design` 入 type 词表（六类）
 
 - 词表定稿: `process-spec / adr / discovery / framework / template / design`
-- design 状态词表: `draft / in-review / verified`（与模板实例同）
+- design 状态词表: **`draft / in-review / verified / superseded`**（与模板实例同）
+- **增补追记（2026-09-27，P-050 交付 B，用户裁决「两项都做」）**: 一般档增 **`superseded`**（作废态）——上游 RESEARCH/DESIGN 被后继者取代时用于**标记旧文档失效**；**只增一词、不增字段**（DC1 零改动）；**CHECKLIST 档与 `template` 类不增**（R2 判不可裁 ⇒ 触发驱动）；**不设** `superseded_by` 反向字段（R3 经 FTA 倾向否决——反向字段引入一致性割集）；契约文本同步 [PLAN v1.6 §1 DC2](../spec/doc-contract/PLAN.md)；实现镜像 = `scripts/dc_validator.py` L36（Layer-1）+ `spec/precommit-dc-validator/DESIGN.md` L271（§6.3 副本）
 - **澄清追记（2026-08-18，P-007 复验 P2-1 触发）**: design 状态词表按文档类别二档——CHECKLIST 实例（id 以 `-CHECKLIST` 结尾）沿用 `pending / accepting / accepted`，其余沿用 `draft / in-review / verified`；消除 PLAN DC2 表 type/文档类别混轴（该表此前并缺 design 行），契约文本见 [PLAN v1.6 §1 DC2](../spec/doc-contract/PLAN.md)。E1 全仓实证 14 份 design 文档零违规，纯澄清无迁移
 - 依据: 存量三份已事实使用（E1），拒绝入册即制造存量违规
 
@@ -340,3 +341,4 @@ PLAN §4 G4 登记表缺两行：Cpp_Hub 三位 ADR 系列（001-019）与 ADR-0
 | 2026-08-23 | 附录 A 补登 FWK-DECISION-RECORD（决策记录契约，P-016 B 方案契约批）——Semantica（semantica-agi，MIT）决策 schema 吸收：八字段 + 三载体（M7/ADR/PROGRESS）映射 + I-1~I-4 不变式（docs/DECISION_RECORD_CONTRACT.md，active）。版本 v1.3 → v1.4 | [decision-schema DESIGN](../spec/decision-schema/DESIGN.md)（D1 落点裁决：独立契约文档入 FWK 族） |
 | 2026-09-08 | 附录 A 补登 ADR-0010（懒加载架构原则，proposed）——docs/adr/README.md 同步。版本 v1.4 → v1.5 | [ADR-0010](./ADR-0010-lazy-loading-architecture-gate.md)（D3 入册：ADR 四位系列跨文档复用稳定 ID） |
 | 2026-09-09 | 附录 A 补登 ADR-0011（step-gate 未生效排查，proposed）——docs/adr/README.md 同步。版本 v1.5 → v1.6 | [ADR-0011](./ADR-0011-step-gate-trigger-dependency-and-theatrical-decision.md)（D3 入册：ADR 四位系列跨文档复用稳定 ID） |
+| 2026-09-27 | D4 **增补追记**（P-050 交付 B，用户裁决「两项都做」）：design **一般档**增 `superseded`（作废态）——**只增一词、不增字段**（DC1 零改动）；**CHECKLIST 档与 `template` 类不增**（R2 判不可裁 ⇒ 触发驱动）；**不设** `superseded_by`（R3 经 FTA 倾向否决——反向字段引入一致性割集）；契约文本 [PLAN v1.6 §1 DC2](../spec/doc-contract/PLAN.md) 同步；实现镜像 = `scripts/dc_validator.py` L36 + [precommit DESIGN §6.3](../spec/precommit-dc-validator/DESIGN.md)。版本 v1.6 → v1.7 | [P-050 DESIGN §7.2](../spec/rework-and-decision-paths/DESIGN.md)（D-B2）+ [P-050 RESEARCH §6](../spec/rework-and-decision-paths/RESEARCH.md) |

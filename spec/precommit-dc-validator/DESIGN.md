@@ -268,7 +268,7 @@ TYPE_VOCAB = {
     "process-spec":     {"active", "deprecated"},
     "framework":        {"active", "deprecated"},
     "template":         {"draft", "in-review", "verified"},
-    "design":           {"draft", "in-review", "verified"},  # 一般设计文档（id 不以 -CHECKLIST 结尾）
+    "design":           {"draft", "in-review", "verified", "superseded"},  # 一般设计文档（id 不以 -CHECKLIST 结尾）；superseded 由 P-050 交付 B 增补（ADR-0007 D4 追记）
 }
 
 # 副轴（v1.2，PLAN v1.6 DC2 消歧）：id 以 "-CHECKLIST" 结尾的 design 文档用 CHECKLIST 词表

@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-RESEARCH
 type: design
-version: 1.6
+version: 1.8
 status: draft
 date: 2026-09-27
 depends: [ADR-0006, ADR-0007, ADR-0010, SPEC-PROCESS, loop-engineering-RESEARCH, project-console-DESIGN, FWK-DECISION-RECORD]
@@ -21,6 +21,8 @@ upstream: null
 > **v1.4 变更（2026-09-27，交付 B 规格自审批连带订正）**：DESIGN 交付 B 规格自审（DESIGN §9.5，10 项发现）发现 §7.1 的**原语命令面**与**资格**两处失真——**同源于本文 §3.1 Q1 表 L103 行**（原文作「`spec_runner fork --seq-from`（唯一写入原语）」）：① `--seq-from` 是源码**内部关键字名**（`dest="seq_from"`），CLI flag 实为 **`--seq`** 且另有**必需**的 **`--new`**；② 「唯一写入原语」丢失 A-3 原限定词「**能产出新事件流的**」。已同步订正 L103 行。断言计数**不变**（A-2/A-3 本已正确，失真在**转述层**）；登记 **M7 样本 ㊲**（转述失真族）。
 > **v1.5 变更（2026-09-27，故障链方法首个真实用例登记）**：用户提问「R2 R3 是否可以进行故障链方案分析」→ 于 **§6 对设计的输入**登记：**FTA（Q2 三项空白之一）的首个真实应用发生于 DESIGN §7.6**——R3 得倾向结论（否决显式反向链，与 I-10 论证结构独立收敛）、R2 判不可裁（对称）⇒ 回归触发驱动；并登记其**能力边界**（给结构不给概率 / 粒度与顶事件敏感 / **判据选择器非生成器**）。断言计数**不变**（本项为既有空白的方法应用登记，无新增断言行）。
 > **v1.6 变更（2026-09-27，FTA 工具化触发条件正式登记）**：用户指令「补登为正式观察项」→ 于 **§6** 将 FTA 的「不立即工具化」升级为**正式观察项登记**（仿 [hook-surface §4.1](../hook-surface/RESEARCH.md) 形态）：固化 **3 条触发条件**（① 结构性分叉需求累计 ≥3 例，当前 1 例 / ② 既有机械手段失效 / ③ 用户显式裁决）+ **载体预判**（Layer-0 判据 + Layer-1 纯图运算、零新依赖、须过 ADR-0010 三问）+ **未触发处置**（人建树 + 机器只做割集算术）+ **边界重申**（只承载结构分析）。**目的 = 缓存评估结论**，避免每次结构性分叉重复评估工具化 ROI。断言计数**不变**（登记为观察项，非新增事实断言）。
+> **v1.7 变更（2026-09-27，Step 8 独立审查整改）**：用户指令「执行 P-050 后续阶段 按照吃狗粮执行」→ 选定「先独立 pass → 再实施交付 B」。以子代理执行 **Step 8 独立审查**（RULE-1 取证清单 + **RULE-5 同基座降级标注**），**7 项发现（2 P2 + 5 P3）全部整改**（记录见 **§5.5**）：订正 A-7 的 `PLAN.md` 引用（L216→**L217**）/ §3.8.1「四→**五**分支不可达」/ A-23 `next_step()` 行号（L414→**L416**）/ **四项增长型载体计数刷新**（CONSOLE 阶段 14/19→**13/20**、触发 63→**31 行/74 次**、confidence 153/33→**178/38**、CHECKLIST 标记口径重定 **661 行/58 文件**，均补**口径 + 读数日期**）。**元发现 = 增长型载体计数漂移第三度复发**（同日即漂移）⇒ 强化候选规则证据（状态不改）；另**主臂全覆盖终验 grep 补捕获 1 处跨文档残留（S8-8，不入分桶）**⇒ 再证「审查臂非穷举」。断言计数**不变**（订正数值/引用/口径，无新增断言）；登记 **M7 样本 ㊳**。
+> **v1.8 变更（2026-09-27，交付 B 实施批）**：用户裁决「两项都做」（先独立 pass → 再实施）⇒ 于 **§6** 追记 **D-B2 已实施**——`superseded` 入 design **一般档**，落 **4 权威位点 + 3 模板**（**R2 触发驱动** ⇒ CHECKLIST 档 / `template` 类不增；**R3 未采纳** ⇒ 不设 `superseded_by`）。本项属**实现层落地**（承载 = [IMPLEMENTATION §11](./IMPLEMENTATION.md)）；RESEARCH 侧仅同步「候选 → **已实施**」。断言计数**不变**。
 
 ---
 
@@ -67,7 +69,7 @@ A-4 实践先例（人工回写已发生过）：P-028 的 v1.1 补充采用**�
 
 A-5 ADR 层**已有 `superseded`**：ADR-0006 §B 失效条件①即写作"用户裁决方案 A → 本 ADR 状态改 **superseded**，`upstream` 反向设置"【E1】
 A-6 契约层**已有 bi-temporal 时间语义**：`DECISION_RECORD_CONTRACT` §…「状态（accepted/superseded）| `metadata.status`；**superseded 时点 → `valid_until`（bi-temporal）**」【E1】⇒ 决策级失效**可被表达为两个时间点之间的有效区间**
-A-7 **但四件套（design 类）的词表内没有失效态**：**ADR-0007 D4**（design 入词表裁决；契约文本 = `PLAN.md` v1.6 §1 DC2）定 `design` 状态词表 = **`draft / in-review / verified`**（CHECKLIST 实例为 `pending / accepting / accepted`），**不含 `superseded` / `deprecated`**【E1】（**引用订正（v1.3）**：原稿作「ADR-0007 D5」，但 **D5 = 「G2 双语取舍 = 英文 token 为准」**，与状态词表无关；正确出处 = **D4** + `PLAN.md` L13/L216 交叉印证，详见 §5.4）
+A-7 **但四件套（design 类）的词表内没有失效态**：**ADR-0007 D4**（design 入词表裁决；契约文本 = `PLAN.md` v1.6 §1 DC2）定 `design` 状态词表 = **`draft / in-review / verified`**（CHECKLIST 实例为 `pending / accepting / accepted`），**不含 `superseded` / `deprecated`**【E1】（**引用订正（v1.3）**：原稿作「ADR-0007 D5」，但 **D5 = 「G2 双语取舍 = 英文 token 为准」**，与状态词表无关；正确出处 = **D4** + `PLAN.md` L13/L217 交叉印证，详见 §5.4）
 A-8 且**不得自造**：全仓状态词表"固定, 不得自造"（`ASSERTION_EVIDENCE_FRAMEWORK` 状态词表章 + DC2 权威声明）【E1】⇒ 上游 RESEARCH/DESIGN 被推翻时，**在现有契约下无合法状态可标记它作废**；唯一合规做法是**追加文字（追记）**，即 P-045 至 P-049 反复使用的形态
 
 ### 3.3 Q2 本仓实测：五项能力中「两项有载体、三项空白」
@@ -122,23 +124,23 @@ A-（外）**Microsoft Azure Well-Architected**：ADR 是 **append-only log**，
 #### 3.8.1 候选 ①：PROGRESS 状态词表四态**实际退化为一态**，`blocked` 零使用【E1】
 
 - 词表**声明为四态**（`PROGRESS.md` L3：`pending / in-progress / blocked / done`），实测使用分布 = **`done` 50 次 / `pending` 0 / `in-progress` 0 / `blocked` 0**【E1】
-- 而「等待外部触发」**真实存在且持续书写**：`PROGRESS.md` 中含「触发」的**行数 = 63**（口径 = 行数，读数日期 2026-09-27；**⚠ 该计数随 PROGRESS 增长漂移，属本仓形态 II「计数」族——原稿「59 次」经 P-050 独立 pass 机械复算证伪，见 §5.3**）；P-009、P-030、P-036、P-037 均为「止于懒加载 gate，触发条件 = …」形态【E1】
+- 而「等待外部触发」**真实存在且持续书写**：`PROGRESS.md` 中含「触发」的**行数 = 31**（出现 **74** 次；口径 = 含「触发」的行数 / 出现次数，读数日期 2026-09-27；**⚠ 该计数随 PROGRESS 增长漂移，属本仓形态 II「计数」族——历史值「59」「63」均经机械复算证伪，见 §5.3 / §5.5**）；P-009、P-030、P-036、P-037 均为「止于懒加载 gate，触发条件 = …」形态【E1】
 - **代偿手法 = 用编号表达状态**：`PROGRESS.md` L102 原文——「P-009 记为 5 而非 4，标识其属**「触发驱动」异质类（不排队、等外部条件）**，语义上与主动队列隔开，避免被误读为『下一个要做的第 4 项』」【E1】
 - ⇒ 与 Q1 的「四件套无失效态 → 只能追记文字」（A-7/A-8）**同构**：状态词滞后于事实，用非状态手段（编号 / 散文 / 「零（等待触发即设计状态）」）代偿。把该项升级为 `blocked` 属**分类工作而非采集工作**——触发条件早已写在文档里。
-- **看板侧反证（本批追加核实，用户质疑触发）**：`console_gen.py` 的 `derive_state` **已为「什么在等」设计了位置**——`blocked` → `Needs Attention`、无 session → `Needs Attention`、gate 软性存疑 → `Ready to Verify`、非终态 → `Recommended`（`TIER_ORDER` 三档），且 `Recommended` 分支还会调 `next_step()` **推导「下一步」**。**但它当前完全空转**：`derive_state` **第一分支**即 `if task.status == "done": return Derived("done", …, "")`（tier = 空），而 PROGRESS **50/50 全为 `done`** ⇒ 其后**四个分支全部不可达**，`docs/CONSOLE.md` 的「⚑ 需要你 / NEXT」三档渲染为 **「（无）」×3**，`next_step()` 对当前集合**成为不可达代码**；且 `console_gen.py` L17/L60 的 **I-7「状态只用 PROGRESS 原词，不重贴标签」**明文**禁止视图层自救**。
+- **看板侧反证（本批追加核实，用户质疑触发）**：`console_gen.py` 的 `derive_state` **已为「什么在等」设计了位置**——`blocked` → `Needs Attention`、无 session → `Needs Attention`、gate 软性存疑 → `Ready to Verify`、非终态 → `Recommended`（`TIER_ORDER` 三档），且 `Recommended` 分支还会调 `next_step()` **推导「下一步」**。**但它当前完全空转**：`derive_state` **第一分支**即 `if task.status == "done": return Derived("done", …, "")`（tier = 空），而 PROGRESS **50/50 全为 `done`** ⇒ 其后**五个分支全部不可达**，`docs/CONSOLE.md` 的「⚑ 需要你 / NEXT」三档渲染为 **「（无）」×3**，`next_step()` 对当前集合**成为不可达代码**；且 `console_gen.py` L17/L60 的 **I-7「状态只用 PROGRESS 原词，不重贴标签」**明文**禁止视图层自救**。
 ⇒ **不是「不擅长表达」，而是「表达层已备、真值层无值」**——「机制缺失」与「输入缺失」是两回事。本候选因此由「缺表达」**升级为「机制空转」**，后者更严重：**空转的机制会制造「已覆盖」的错觉**（三档队列恒显「（无）」读起来像「无待办」，实为「无值可判」）。
 
 #### 3.8.2 候选 ②：决策记录契约十字段——契约齐备、数据已写入、**零机械消费**【E1】
 
 - `DECISION_RECORD_CONTRACT` v1.1 定义八字段 + 两时点（含 `decision_maker` / `valid_from` / `valid_until`），并含三载体映射表与 I-1~I-4 不变式，**契约文本完整**【E1】
 - 全仓检索 `decision_maker|valid_from|valid_until` 命中 **12 文件**（**口径订正**：其中 **9 个文档 + 3 个 session JSONL**——session 内为契约字段名出现，非消费）；`scripts/` 侧**零消费**【E1】（原稿「全部为文档」经 P-050 独立 pass 证伪，见 §5.3）
-- 而 session jsonl 中 `"confidence": 0.9` **已按契约写入 153 次 / 33 个 session**【E1】
+- 而 session jsonl 中 `"confidence": 0.9` **已按契约写入 178 次 / 38 个 session**（口径 = `tools/spec_runner/sessions/*.jsonl` 中该串出现次数 / 含它的文件数；读数日期 2026-09-27，随 session 增长漂移，见 §5.5）【E1】
 - `spec/decision-schema/DESIGN.md` §6 风险表**自认**：「无人消费的契约沦为僵尸文档」【E1】（**来源订正**：原稿作「契约 §6 风险表」，但 `DECISION_RECORD_CONTRACT` 仅至 §5、**无 §6**；该句实出 decision-schema DESIGN §6，见 §5.3）
 - ⇒ 数据**已经在写**，缺的只是**校验器**——且「结构完整性」（scenario / reasoning / outcome / valid_from 是否齐）是**可机械判定**的，属低成本切口。
 
 #### 3.8.3 候选 ③：CHECKLIST 条目级状态**无机械重数**【E1】
 
-- 条目级「通过 / 待办 / 失败」标记形态稳定存在（全仓 **37 行 / 9 文件**；口径 = `spec/**/*.md` 中含该三标记之一的行数，读数日期 2026-09-27——原稿「约 30 处」经 P-050 独立 pass 机械复算修正，见 §5.3）【E1】
+- 条目级状态标记形态稳定存在（全仓 **661 行 / 58 文件**；口径 = `spec/**/*.md` 中**以 `|` 开头且含 `✅`/`❌`/`⬜` 的表格行数**，读数日期 2026-09-27，随文档增长漂移；原稿「约 30 处」「37 行 / 9 文件」两版口径均**不可复现**，经 v1.7 Step 8 独立审查证伪，见 §5.3 / §5.5）【E1】
 - `repo_stats.py` **仅解析 PROGRESS 的 P 号**（L387-**394**；原稿作 387-390，经独立 pass 校订）；`dc_validator.py` 的四项检查（frontmatter / namespace / counting / links）**均不解析 CHECKLIST 条目**（counting 只对 §0 断言统计表）【E1】
 - ⇒ 全仓「**声明 = 重数纪律**」（R7）在此**唯一豁免**：P-049 CHECKLIST 的「39 项 / 33 通过 / 6 待办」为**手写计数**；那 6 项待办**无任何机械追踪**，是漂移的必然位点。
 
@@ -186,7 +188,7 @@ P-009 等的「等待触发」语义写在 PROGRESS 的**事项 / 散文列**，
 |---|---|---|---|
 | `derive_state` 状态分支 | **6**（`done` / `blocked` / 无 session / soft / `finalize` / else；原稿计 5，经独立 pass 校订） | **1**（`done`） | `done` 首分支短路（PROGRESS 50/50 全 done） |
 | `TIER_ORDER` 行动档 | 3 | **0** | `tier` 由 `status` 分支决定 ⇒ 恒空 |
-| `feature_stage` 阶段 | 5（未启动/调研/设计/实施/验收） | **3** | 制品链**降序互斥**：`C` 存在即遮蔽 `I`/`D` ⇒ **「实施」「设计」两档结构性不可达**（实测 CONSOLE **34** feature 行：调研 **14** / 验收 **19** / 未启动 **1**，**设计 0 / 实施 0**——原稿作 15/18，经独立 pass 机械重数订正） |
+| `feature_stage` 阶段 | 5（未启动/调研/设计/实施/验收） | **3** | 制品链**降序互斥**：`C` 存在即遮蔽 `I`/`D` ⇒ **「实施」「设计」两档结构性不可达**（实测 CONSOLE **34** feature 行：调研 **13** / 验收 **20** / 未启动 **1**，**设计 0 / 实施 0**——读数日期 2026-09-27，随制品链推进漂移；历史值 15/18、14/19 均经机械复算订正，见 §5.3 / §5.5） |
 
 ⇒ 三处**共因**：**视图定义的档位空间宽于上游真实取值空间**。而 I-7 恰是**禁止视图用重贴标签去填这个差**的那条约束——故「档位不可达」在本仓是**结构性**的，**只能由源层扩值解决**（与影响二同一结论）。
 
@@ -293,9 +295,38 @@ P-009 等的「等待触发」语义写在 PROGRESS 的**事项 / 散文列**，
 
 **已入 M7 分桶（v1.3 追加登记）**：本项**属「章节号」族**——与 v1.2 独立 pass 的 **F4**（「契约 §6 风险表」实出 `decision-schema/DESIGN.md` §6，引用**来源**错位）**同族同文档**；**F4 已入分桶，故本项同处置**（一致性优于「出处错误不算断言失效」的初判——F4 亦仅为出处错误）。已登记为 **M7 样本 ㊱**（章节号×1，分桶 章节号 5→6、合计 81→82，hits `samples 35→36`）。
 
+### 5.5 Step 8 独立审查记录（v1.7 追加）
+
+**触发**：用户指令「执行 P-050 后续阶段 按照吃狗粮执行」→ 选定「**先独立 pass → 再实施交付 B**」。本项 = **Step 8 独立审查**（[CHECKLIST §8.4](./CHECKLIST.md) 唯一登记待办）。
+
+**RULE-1 取证清单（输入冻结）**：① 决策流 `specwf-p050-20260927v3`~`v6` 全部 `verify-anchor` **exit 0**（锚点 10 / 6 / 5 / 5 全真实）；② git 状态 HEAD `fbfe3ff`、工作区净（除未跟踪 `workflow.svg`）。
+
+**RULE-5 异质性 = 未达成（降级标注）**：审查臂以**子代理**执行（**上下文/时序独立**），但**与生成端同基座模型**——本环境无换基座能力 ⇒ **不满足真异基座**，与 v1.1 的降级标注同级；**结论不冒充异基座独立 pass**。
+
+**方式**：以机械核验替代印象（审查臂实读源码 + 全量实跑 + `git show` 取前版重数），主臂**逐条复算**。
+
+**发现与整改（审查臂 **7 项**：2 P2 + 5 P3；另**主臂全覆盖终验 grep 补捕获 1 处** S8-8——审查臂漏检）：
+
+| # | 级 | 发现 | 证据（机械复算） | 处置 |
+|---|---|---|---|---|
+| S8-1 | **P2** | CHECKLIST 头部「基于设计 v1.1」/ §1 交叉表「RESEARCH v1.4 ↔ DESIGN v1.1」把**事实错误标为「机械复核 ✅ 无矛盾」** | `CHECKLIST.md` L18 / L28 / L107 | ✅ 订正（见 CHECKLIST v1.2） |
+| S8-2 | **P2** | IMPLEMENTATION 头部两条「基于」行**全部滞后**（设计 v1.1 / 调研 v1.4） | `IMPLEMENTATION.md` L17 / L18（真值 = DESIGN v1.4 / RESEARCH v1.7） | ✅ 订正（见 IMPLEMENTATION v1.1） |
+| S8-3 | P3 | 同一 `PLAN.md` 契约行两种引法：A-7 引 **L216**（实为 D5 / G2 双语取舍），DESIGN §7.3 引 **L217**（实为 D4） | `PLAN.md` L216=D5 / L217=D4（实测） | ✅ A-7 改 **L217** |
+| S8-4 | P3 | 计数**口径不可复现**：「CHECKLIST 标记 37 行 / 9 文件」（口径 = 含「通过/待办/失败」之一的行数）→ 按该口径机械复算 = **523 行 / 82 文件** | `spec/**/*.md` 逐文件重数 | ✅ 改可复现口径（**表格行含 `✅`/`❌`/`⬜` = 661 / 58**） |
+| S8-5 | P3 | 计数**漂移复发**：CONSOLE 阶段 **14/19 → 13/20**、触发 **63 → 31 行 / 74 次**、confidence **153/33 → 178/38** | `CONSOLE.md` / `PROGRESS.md` / `sessions/*.jsonl` 机械复算 | ✅ 全部刷新 + 口径/日期（见 §3.8 / A-18/A-20/A-21/A-24） |
+| S8-6 | P3 | DESIGN §7.2 引 `check_frontmatter` **L116-118** ≠ 实际 **L118-120**（A-13 已正确） | `dc_validator.py` L118 起 | ✅ 改 **L118-120** |
+| S8-7 | P3 | 命名/分支残留：DESIGN §4.1 伪码名 `RE_CL_STAT` 源码不存在（实为 `RE_CL_STAT_HEAD`/`_ANY`）；§3.8.1「四个分支不可达」未随 F5 订正为**五个**；`next_step()` **L414 → L416**；IMPL「新增正则 **4**」实为 3、`selftest 23/23→24/24` 与 `22/22` 自相矛盾（**前值应为 16**） | `dc_validator.py` / `console_gen.py` / `IMPLEMENTATION.md` 实读 | ✅ 全部订正 |
+| S8-8 | P3 | **（审查臂漏检，由主臂全覆盖终验 grep 补捕获）** DESIGN §2.1 依据表仍写旧口径「CHECKLIST 标记 **37 行 / 9 文件**」（与 S8-4 同源，属**跨文档残留**；**不入分桶**——同一口径缺陷的跨文档残留，免稀释，同 ㉟ P2-1/P3-3 处置逻辑） | `DESIGN.md` L40（原） | ✅ 改 **661 行 / 58 文件** + 标注 S8-8 |
+
+**元发现（第三度复发）**：**S8-5 = 「增长型载体计数漂移」的第三度实证**（v1.2 首现 → v1.3 二现 → 本次三现），且**同日**（读数日期均为 2026-09-27）因文档增长即漂移 ⇒ 强化「**读数须附口径 + 日期**」候选规则的证据强度；本项**不改候选状态**（激活与否待用户裁决），仅登记证据。已登记 **M7 样本 ㊳**。
+
+**未发现项（正面结论）**：链接可达性（相对链接与章节号全可达）、`dc_validator` 接口与 DESIGN §5 描述一致、**交付 B 影响面（4 权威位点 + 3 模板）逐项核实属实**。
+
+**审查臂覆盖边界（由 S8-8 派生）**：审查臂**漏检** DESIGN §2.1 的跨文档残留（S8-8），由主臂**全覆盖终验 grep** 补捕获 ⇒ **再证「审查臂非穷举、须以机械终验兜底」**（与 ㉟ 的「元审视轮自身」族一致；亦佐证 AGENTS.md「batch 编辑后须对全部修改行做全覆盖终验 grep，不得抽样」这条纪律的必要性）。
+
 ## 6. 对设计的输入（若后续触发）
 
-- **最小切口**候选（**DESIGN v1.2 §7.2 已收敛**）：**只增 `superseded` 一词，不增字段**（DC1 零改动）；原并列的 `superseded_by` **降为备选项**（若采纳须把 DC1 列作第二处契约变更）；须过 ADR-0010 三问 + DC2 契约变更流程；
+- **最小切口**候选（**DESIGN v1.5 §7.2 已实施**）：**只增 `superseded` 一词，不增字段**（DC1 零改动）；原并列的 `superseded_by` **降为备选项**（若采纳须把 DC1 列作第二处契约变更）；须过 ADR-0010 三问 + DC2 契约变更流程。**✅ 已实施（2026-09-27，v1.8 追记）**：`superseded` 已入 design **一般档**，落 **4 权威位点**（`dc_validator` L36 / precommit DESIGN L271 / `PLAN` §1 DC2 / `ADR-0007` **v1.7**）+ **3 模板**；**R2 触发驱动**（CHECKLIST 档 / `template` 类不增）/ **R3 未采纳**（不设 `superseded_by`）——明细见 [IMPLEMENTATION §11](./IMPLEMENTATION.md)；
 - **故障链（FTA）方法的本仓首个真实用例（v1.5 添加，E1）**：Q2 曾把「故障依赖链」列为三项空白之一——**其首个真实应用发生于 DESIGN §7.6**（用户提问「R2 R3 是否可以进行故障链方案分析」）：以 **FTA** 对 R2（`superseded` 是否覆盖 CHECKLIST / 模板档）与 R3（是否需显式反向链 `superseded_by`）建树。**结果 = R3 得倾向结论（否决反向链：反向字段新增「同一事实两处表达」的 2 元素一致性割集）且与 I-10 论证结构独立收敛；R2 判为不可裁（两选项割集 3 vs 2 且方向相反）⇒ 回归触发驱动**。**前置机械事实 = 文档 front-matter `status` 全仓零语义消费方**（唯一读取点 `dc_validator` L121-131 只校词表成员）。**能力边界（登记）**：FTA 给**结构**不给**概率**（底事件概率 E1 不可得）；结论对**基本事件粒度**与**顶事件定义**敏感（须显式固定）；⇒ 本仓角色 = **判据选择器（selection），非判据生成器（generation）**——**对结构性分叉有效、对触发型决策无效**。**据此维持「不立即工具化」**（与 §3.1 Q2 的"各自单独评估不打包"取向一致）；
 - **【观察项 · 正式登记】FTA 工具化触发条件（v1.6 添加；承 v1.5 的「不立即工具化」）**：FTA 当前状态 = 「**方法论 + 一次真实应用**」，**工具化登记为懒加载观察项、本轮不实施**。形态仿 [hook-surface §4.1](../hook-surface/RESEARCH.md) 的「失效条件观察项登记」——**固化触发条件以避免每次结构性分叉都重新评估「要不要建工具」**（缓存评估结论）。
   - **触发条件**（**任一**满足即触发重审）：① **结构性分叉型裁决需求累计 ≥3 例**（同 R3 形态：选项差异可表为 AND/OR 门与割集规模比较；当前 **1 例 = R3**）；② 出现**既有机械手段无法给出结论**的结构性分叉（`upstream` 正向链 + 检索纪律、`depends_on` 图均不适用）；③ **用户显式裁决工具化**。
@@ -351,13 +382,13 @@ P-009 等的「等待触发」语义写在 PROGRESS 的**事项 / 散文列**，
 【A】A-15 实测 `upstream` 填充：`spec/` 88 份中 87 为 `null`（唯一非 null = `PILOT_TASK_CARD.md`）、`adr/` 8/8 `null`、`docs/` 4/4 `null` ⇒ **100 份中 99 为 `null`**；对照 `depends:` 在 `spec/` 下 **88/88 全填**【E1】
 【A】A-16 Cpp_Hub 侧 `docs/ASSERTION_EVIDENCE_FRAMEWORK.md` **无 front-matter**（L1 为标题行），以正文「⚠️ 权威源已迁移」指针行（L5）声明迁移关系【E2】
 【A】A-17 `PROGRESS.md` L3 状态词表 = `pending / in-progress / blocked / done`；实测使用分布 = `done` 50 / `pending` 0 / `in-progress` 0 / `blocked` 0【E1】
-【A】A-18 `PROGRESS.md` L102 以「P-009 记为 5 而非 4」的**编号手段**表达「触发驱动（不排队、等外部条件）」；含「触发」的行数 = **63**（口径 = 行数，2026-09-27 读数；原稿「59 次」经 P-050 独立 pass 机械复算证伪，见 §5.3）【E1】
+【A】A-18 `PROGRESS.md` L102 以「P-009 记为 5 而非 4」的**编号手段**表达「触发驱动（不排队、等外部条件）」；含「触发」的**行数 = 31 / 出现 74 次**（口径 = 行数 / 出现次数，2026-09-27 读数，随 PROGRESS 增长漂移；历史值「59」「63」均经机械复算证伪，见 §5.3 / §5.5）【E1】
 【A】A-19 `DECISION_RECORD_CONTRACT` v1.1 定义八字段 + 两时点（含 `decision_maker` / `valid_from` / `valid_until`）；全仓检索三者命中 **12 文件（9 文档 + 3 session JSONL；原稿作「全为文档」，经独立 pass 证伪）**，`scripts/` **零消费**【E1】
-【A】A-20 session jsonl 中 `"confidence": 0.9` 出现 153 次，分布于 33 个 session 文件【E1】
-【A】A-21 CHECKLIST 条目级状态标记（「通过 / 待办 / 失败」形态）全仓 **37 行 / 9 文件**（口径 = `spec/**/*.md` 含标记行数，2026-09-27；原稿「约 30 处」经独立 pass 修正）；`repo_stats.py` L387-**394** 仅解析 PROGRESS P 号，`dc_validator.py` 四项检查均不解析 CHECKLIST 条目【E1】
+【A】A-20 session jsonl 中 `"confidence": 0.9` 出现 **178** 次，分布于 **38** 个 session 文件（口径 = `tools/spec_runner/sessions/*.jsonl`；读数日期 2026-09-27，随 session 增长漂移；历史值 153/33 已过期，见 §5.5）【E1】
+【A】A-21 CHECKLIST 条目级状态标记全仓 **661 行 / 58 文件**（口径 = `spec/**/*.md` 中以 `|` 开头且含 `✅`/`❌`/`⬜` 的**表格行数**，2026-09-27 读数，随文档增长漂移；原稿「约 30 处」「37 行 / 9 文件」两版口径均**不可复现**，经 v1.7 Step 8 独立审查证伪，见 §5.5）；`repo_stats.py` L387-**394** 仅解析 PROGRESS P 号，`dc_validator.py` 四项检查均不解析 CHECKLIST 条目【E1】
 【A】A-22 `adr/` 下 `status: superseded` **0 命中**（8 份 ADR 无一失效）【E1】
-【A】A-23 **看板已备「什么在等」的表达机制而当前空转**：`console_gen.py` `derive_state` **6 分支** = `done`→tier 空（**首分支，短路**）/ `blocked`→`Needs Attention` / 无 session→`Needs Attention` / soft→`Ready to Verify` / `finalize`→`Ready to Verify` / else→`Recommended`（`TIER_ORDER` 三档，L79；原稿计 5 并漏 `finalize` 支，经独立 pass 校订），`Recommended` 分支调 `next_step()` 推导下一步（L414）；PROGRESS 50/50 为 `done` ⇒ 后**五**分支**不可达**，`docs/CONSOLE.md` 三档渲染 **「（无）」×3**（L7-14）、`next_step()` **不可达**；`console_gen.py` L17/L60 **I-7「只用 PROGRESS 原词、不重贴标签」**禁止视图层自救【E1】
-【A】A-24 **I-7 的文本与影响面**：`DESIGN.md` L112 定义 I-7「状态输出只用 `PROGRESS` 原词（`pending`/`in-progress`/`blocked`/`done`）+ 独立派生依据列，**不得重贴标签**（禁「待你审」）」，动机 = P-042 **A-3 升格标签错配**；`derive_state` **第一参直传** `task.status`（状态**冻结**）、`basis`/`tier` 可派生；**三处「定义档位 > 可达档位」**——`derive_state` **6**→**1**、`TIER_ORDER` 3→**0**、`feature_stage` 5→**3**（实测 CONSOLE **34** feature 行：调研 **14** / 验收 **19** / 未启动 **1**、**设计 0 / 实施 0**，因制品链**降序互斥** `C` 遮蔽 `I`/`D`；**档位数与阶段分布均经独立 pass 机械复算订正**）；CONSOLE feature 表「阶段」列 3 个实际用词**均不在 PROGRESS 词表内**【E1】
+【A】A-23 **看板已备「什么在等」的表达机制而当前空转**：`console_gen.py` `derive_state` **6 分支** = `done`→tier 空（**首分支，短路**）/ `blocked`→`Needs Attention` / 无 session→`Needs Attention` / soft→`Ready to Verify` / `finalize`→`Ready to Verify` / else→`Recommended`（`TIER_ORDER` 三档，L79；原稿计 5 并漏 `finalize` 支，经独立 pass 校订），`Recommended` 分支调 `next_step()` 推导下一步（L416；原稿作 L414，经 v1.7 Step 8 独立审查校订）；PROGRESS 50/50 为 `done` ⇒ 后**五**分支**不可达**，`docs/CONSOLE.md` 三档渲染 **「（无）」×3**（L7-14）、`next_step()` **不可达**；`console_gen.py` L17/L60 **I-7「只用 PROGRESS 原词、不重贴标签」**禁止视图层自救【E1】
+【A】A-24 **I-7 的文本与影响面**：`DESIGN.md` L112 定义 I-7「状态输出只用 `PROGRESS` 原词（`pending`/`in-progress`/`blocked`/`done`）+ 独立派生依据列，**不得重贴标签**（禁「待你审」）」，动机 = P-042 **A-3 升格标签错配**；`derive_state` **第一参直传** `task.status`（状态**冻结**）、`basis`/`tier` 可派生；**三处「定义档位 > 可达档位」**——`derive_state` **6**→**1**、`TIER_ORDER` 3→**0**、`feature_stage` 5→**3**（实测 CONSOLE **34** feature 行：调研 **13** / 验收 **20** / 未启动 **1**、**设计 0 / 实施 0**（读数日期 2026-09-27，随制品链推进漂移），因制品链**降序互斥** `C` 遮蔽 `I`/`D`；**档位数与阶段分布均经机械复算订正**，见 §5.5）；CONSOLE feature 表「阶段」列 3 个实际用词**均不在 PROGRESS 词表内**【E1】
 
 > 外部证据（E3）以「（外）」标记列于 §3.4-§3.6，不占用 A 类编号（其主源为检索摘要，非本仓机械取证），详见 §7 参考文献。
 

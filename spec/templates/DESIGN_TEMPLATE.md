@@ -12,7 +12,7 @@ upstream: null
 
 > **Feature**: <feature_name>
 > **创建日期**: YYYY-MM-DD
-> **状态**: 草稿 / Review 中 / 已验证
+> **状态**: 草稿 / Review 中 / 已验证 / 已作废（superseded）
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md)
 

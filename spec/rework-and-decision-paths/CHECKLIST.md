@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-CHECKLIST
 type: design
-version: 1.1
+version: 1.3
 status: accepting
 date: 2026-09-27
 depends: [rework-and-decision-paths-IMPLEMENTATION, rework-and-decision-paths-DESIGN]
@@ -12,10 +12,13 @@ upstream: null
 
 > **Feature**: 回写流与多方案决策路径（P-050 后续阶段）
 > **创建日期**: 2026-09-27
-> **状态**: accepting（验收中；v1.1 增记交付 B 规格自审）
+> **状态**: accepting（验收中；v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) v1.0
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.1**
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.2**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.5**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.7**
+> **v1.3 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」⇒ 记录 **D-B2 实施**（`superseded` 入 design 一般档，4 权威位点 + 3 模板；[IMPLEMENTATION §11](./IMPLEMENTATION.md)）+ §11 交付 B 行由此前「待裁决」改为「已裁决并实施」（R2 触发驱动 / R3 倾向否决）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
+> **v1.2 变更（2026-09-27，Step 8 独立审查整改）**：记入 **Step 8 独立审查**（子代理 / 同基座降级）结果 —— **7 项发现（2 P2 + 5 P3）全部整改**（记录见 [RESEARCH §5.5](./RESEARCH.md)）；同步 §1 交叉版本表、§8.4、§11 与三条「基于」行版本（S8-1/S8-2）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 
 ---
 
@@ -25,7 +28,7 @@ upstream: null
 |--------|------|------|
 | RESEARCH → DESIGN 设计决策可追溯 | ✅ | DESIGN §2.1 逐条引 RESEARCH §3.1/§3.8 |
 | DESIGN → IMPLEMENTATION 模块可追溯 | ✅ | IMPLEMENTATION §3.1/§3.2 对应 DESIGN §4 |
-| 无文档间矛盾（RESEARCH v1.4 ↔ DESIGN v1.1 ↔ IMPL v1.0） | ✅ | 机械复核 |
+| 无文档间矛盾（RESEARCH v1.7 ↔ DESIGN v1.4 ↔ IMPL v1.1） | ✅ | 机械复核（v1.2 重数） |
 
 ## 2. 功能验收
 
@@ -104,7 +107,7 @@ upstream: null
 | P1 | **交付 B 规格**：`superseded_by` 作「第 8 字段」与 **DC1 七字段**冲突，且未列影响面/未裁决 | DESIGN §9.5 **B-2** | ✅ 已修（§7.2 改判「不增字段」+ §7.3 预留 DC1 条件行） |
 | P1 | **交付 B 规格**：方案不最小（未采纳既有 `upstream` 约定，反新增字段） | DESIGN §9.5 **B-3** | ✅ 已修（§7.2 补四点论证） |
 | P2 | **交付 B 规格** 3 项：模板计数自相矛盾 / 词表**档**未指明 / 资格丢失 | DESIGN §9.5 **B-4/B-5/B-6** | ✅ 已修 |
-| P2 | **同缺陷源留痕**：B-1/B-6 两处同时存在于 **RESEARCH L103**，已连续逃过 2 轮审查 | DESIGN §9.5 元发现 | ✅ 已修（RESEARCH **v1.4**）；登记 **M7 样本 ㊲** |
+| P2 | **同缺陷源留痕**：B-1/B-6 两处同时存在于 **RESEARCH L103**，已连续逃过 2 轮审查 | DESIGN §9.5 元发现 | ✅ 已修（RESEARCH **v1.7**）；登记 **M7 样本 ㊲** |
 | P3 | **交付 B 规格** 4 项：引用行号偏差 / 三问 Q1 无论证 / 新流-原流关联登记缺 / 部分推翻未声明边界 | DESIGN §9.5 **B-7~B-10** | ✅ 已修（§7.3/§7.4/§7.2-3/§7.5） |
 | P3 | `dc_validator` 与 `repo_stats` 的 **P3 语义分歧**（前者把 P3 算违规，后者非阻断） | DR-A1 | 另立观察项；本批不改 `Summary` |
 
@@ -120,7 +123,8 @@ upstream: null
 ### 8.4 独立 pass（RULE-1 / RULE-5）
 
 - [x] **规格自审（同基座，v1.1）**：对**交付 B 规格**（DESIGN §7）执行专项审查 → **10 项发现（3 P1 / 3 P2 / 4 P3）全部修订**（DESIGN §9.5）；**异质性未达成**（同模型、同时序）⇒ 结论**降级标注**，**不替代**下行
-- [ ] **异基座独立 pass（待触发）**：Step 8 后执行（审查输入 = 决策流 + `verify-anchor` + `git status`）
+- [x] **Step 8 独立审查（子代理，同基座降级，v1.2）**：对**四件套整体**执行 Step 8 审查 —— **RULE-1 取证清单** = 决策流 `specwf-p050-20260927v3`~`v6` 全部 `verify-anchor` exit 0（锚点 10/6/5/5 全真实）+ git HEAD `fbfe3ff` 工作区净；**RULE-5 异质性未达成**（子代理**同基座**、本环境无换基座能力）⇒ 降级标注。**7 项发现（2 P2 + 5 P3）全部整改**（记录见 [RESEARCH §5.5](./RESEARCH.md)；**M7 样本 ㊳**）。**元发现 = 增长型载体计数漂移第三度复发**
+- [ ] **真异基座独立 pass（仍待触发）**：需**换基座模型**（RULE-5 完全满足）方可关闭；本环境不可得（审查输入 = 决策流 + `verify-anchor` + `git status`）
 
 ## 9. 文档完整性
 
@@ -171,8 +175,9 @@ upstream: null
 | 行动 | 责任人 | 期限 | 状态 |
 |------|--------|------|------|
 | **交付 B 规格自审**（同基座，v1.1） | — | — | ✅ 10 项（3 P1 / 3 P2 / 4 P3）已修（DESIGN §9.5） |
-| **异基座独立 pass**（RULE-1/RULE-5） | — | — | 待触发 |
-| 交付 B（回写流契约变更）交 Review 裁决 | — | — | 待裁决（含 **R2** 词表覆盖档 / **R3** 是否需显式反向链） |
+| **异基座独立 pass**（RULE-1/RULE-5） | — | — | ✅ Step 8 独立审查已执行（子代理，**同基座降级**），7 项发现全整改（RESEARCH §5.5）；**真异基座**仍待触发 |
+| 交付 B（回写流契约变更）交 Review 裁决 | — | — | ✅ **已裁决并实施**（用户裁决「两项都做」）——`superseded` 入 design **一般档**，落 **4 权威位点 + 3 模板**（[IMPLEMENTATION §11](./IMPLEMENTATION.md)）；**R2** = 触发驱动（CHECKLIST 档 / `template` 类不增）/ **R3** = FTA 倾向否决（不设 `superseded_by`） |
 | **M7 样本 ㊲**（转述失真族）入账 | — | — | ✅ |
+| **M7 样本 ㊳**（增长型载体计数漂移第三度复发）入账 | — | — | ✅ |
 | H-CL2（L2 条目级真对账）/ H-CL3（skip 驱动收敛）观察 | — | — | 观察项 |
 | 更新 PROGRESS.md / CODE_WIKI.md | — | — | ✅ |

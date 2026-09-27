@@ -58,10 +58,12 @@ upstream: null
 | discovery | — | `open / resolved / toolized` |
 | process-spec / framework | — | `active / deprecated` |
 | template | — | `draft / in-review / verified`（当前全仓零使用，词表保留） |
-| design | 一般设计文档（id 不以 `-CHECKLIST` 结尾：RESEARCH / DESIGN / IMPLEMENTATION / AUDIT / 方案文档） | `draft / in-review / verified` |
+| design | 一般设计文档（id 不以 `-CHECKLIST` 结尾：RESEARCH / DESIGN / IMPLEMENTATION / AUDIT / 方案文档） | `draft / in-review / verified / superseded` |
 | design | CHECKLIST 实例（id 以 `-CHECKLIST` 结尾，含模板占位符 `<feature-kebab>-CHECKLIST`） | `pending / accepting / accepted` |
 
 > **消歧裁决（v1.6，2026-08-18）**: ① v1.5 及此前该表混轴——"template 实例 / CHECKLIST 实例"两行首列是**文档类别**而非 type 值，且 design 入词表（ADR-0007 D4）后 DC2 表一直缺 design 行（词表仅载于本文件头部注与 ADR）；② 判别规则机械化为 **id 后缀 `-CHECKLIST`**（id 是 front-matter 规范键，判别不依赖文件名，DC 校验器 M2 可直接 grep）；③ E1 全仓实证（2026-08-18）：14 份 `type: design` 文档中 2 份 id 以 `-CHECKLIST` 结尾（status = pending / accepting，均在 CHECKLIST 词表内），其余 12 份 status ∈ {draft, in-review, verified}——**零存量违规**，纯澄清无迁移成本。触发：[P-007 复验 P2-1](../precommit-dc-validator/DESIGN.md)；决策澄清追记：[ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md)。
+
+> **词表增补追记（2026-09-27，P-050 交付 B，用户裁决「两项都做」）**: design **一般档**增 `superseded`（作废态）——用于「上游 RESEARCH/DESIGN 被后继者取代」时**标记旧文档失效**；依据 = [ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md) 追记 + [P-050 DESIGN §7.2](../rework-and-decision-paths/DESIGN.md) **D-B2**（**只增一词、不增字段**，DC1 零改动）。**CHECKLIST 档与 `template` 类不增**（R2 判不可裁 ⇒ 回归触发驱动，等真实事例）；**不设** `superseded_by` 反向字段（R3 经 FTA **倾向否决**——反向字段引入「同一事实两处表达」的一致性割集）。
 
 > **双语取舍（P3-8 遗留，已裁决）**: ~~三选一悬置~~ 终态 = **英文 token 为准**（ADR-0007 D5）；不建双语映射表。
 

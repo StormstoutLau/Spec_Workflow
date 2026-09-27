@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-DESIGN
 type: design
-version: 1.3
+version: 1.5
 status: in-review
 date: 2026-09-27
 depends: [rework-and-decision-paths-RESEARCH, precommit-dc-validator-DESIGN, ADR-0007, ADR-0010]
@@ -12,12 +12,14 @@ upstream: null
 
 > **Feature**: 回写流与多方案决策路径（P-050 后续阶段）
 > **创建日期**: 2026-09-27
-> **状态**: 评审中（v1.1 同基座自审 10 项已全部修订；v1.2 补 R2/R3 的 FTA 判据；v1.3 登记 FTA 工具化观察项；**异基座独立 pass 待触发**）
+> **状态**: 评审中（v1.1 同基座自审 10 项已修订；v1.2 补 R2/R3 的 FTA 判据；v1.3 登记 FTA 工具化观察项；v1.4 Step 8 独立审查 7 项整改；**v1.5 交付 B 已实施**；**异基座独立 pass 仍待触发**）
 > **Spec 步骤**: Step 3-4
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.6**（24A+12B+5C+6H）
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.7**（24A+12B+5C+6H）
 > **v1.1 变更（2026-09-27，交付 B 规格自审批）**：对 §7 执行专项自审，**10 项发现（3 P1 / 3 P2 / 4 P3）全部修订**（明细见 §9.5）；核心订正 = **原语命令面**（`fork --seq-from` → `fork --session --seq --new`）与 **D-B2 收敛为「只增一词、不增字段」**（DC1 零改动）。同缺陷源 RESEARCH L103 同步修订；登记 **M7 样本 ㊲**（转述失真族）。
 > **v1.2 变更（2026-09-27，R2/R3 故障链判据批）**：用户提问「R2 R3 是否可以进行故障链方案分析」→ 以 **FTA**（RESEARCH §3.1 Q2 三项空白之一）对 R2/R3 建树，新增 **§7.6**：**R3 得倾向结论（否决显式反向链）**，且与 **I-10 的论证结构独立收敛**（两法互证）；**R2 判为不可裁**（两选项割集 3 vs 2 且方向相反 = 对称）⇒ 回归 ADR-0010 Q2 触发驱动。§7.4 两条裁决点同步改写；方法边界（给结构不给概率 / 粒度敏感 / 顶事件依赖）显式声明；**前置机械事实** = 文档 `status` 全仓**零语义消费方**（E1）。该应用登记为「故障链方法本仓首个真实用例」（RESEARCH §6），RESEARCH 升 **v1.4 → v1.5**。
 > **v1.3 变更（2026-09-27，FTA 工具化观察项登记）**：用户指令「补登为正式观察项」→ 将 **FTA 工具化**由「不立即工具化」升级为**正式观察项**：新增 **§10.2 H-FTA 行**（工具化触发条件），交叉引用 **RESEARCH §6** 的完整登记（3 条触发条件 / 载体预判 = Layer-0 判据 + Layer-1 纯图运算·零新依赖·须过 ADR-0010 三问 / 未触发处置 = 人建树 + 机器只做割集算术）。**本轮零实施、零代码改动**；同步订正「基于调研」版本引用（RESEARCH **v1.4 → v1.6**，原值系 v1.2 批未回写的**遗留漂移**）。
+> **v1.4 变更（2026-09-27，Step 8 独立审查整改）**：Step 8 独立审查（[RESEARCH §5.5](./RESEARCH.md)）发现 **S8-6 / S8-7** 两项订正：§7.2 引 `check_frontmatter` 行号 **L116-118 → L118-120**（与 RESEARCH A-13 对齐）；§4.1 伪码常量名 `RE_CL_STAT`（源码不存在）→ **`RE_CL_STAT_HEAD` / `RE_CL_STAT_ANY`**；「基于调研」同步 RESEARCH **v1.6 → v1.7**。**交付 B 规格本体零改动**（守 I-15）。
+> **v1.5 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」（先独立 pass → 再实施）⇒ **D-B2 已实施**——`superseded` 入 design **一般档**（**只增一词、不增字段**，DC1 零改动），落地 **4 权威位点**（`dc_validator` L36 / `precommit-dc-validator` DESIGN L271 副本 / `PLAN` §1 DC2 / `ADR-0007` **v1.6→v1.7** D4 追记 + 修订历史）+ **3 模板**（RESEARCH / DESIGN / IMPLEMENTATION 的状态枚举）；**R2 未实施**（CHECKLIST 档 / `template` 类不增，判不可裁 ⇒ 触发驱动）；**R3 未采纳**（不设 `superseded_by`，FTA 倾向否决）。§7 各节标题与状态由「待 Review / 不实施」改为「**已裁决并实施**」。
 > **本批范围**：用户指令「P-050 是否可以进入后续阶段，同样按照吃狗粮执行」+ 选定交付「① CHECKLIST 条目级重数（模板先行 + 渐进）/ ② 回写流如何实现」。**交付 A 本批实施；交付 B 本批止于设计规格（触及 DC2 词表契约，属契约变更，须交 Review 裁决后另批实施）**。
 
 ---
@@ -37,7 +39,7 @@ upstream: null
 
 | 调研发现 | 设计决策 | 引用 |
 |---------|---------|------|
-| CHECKLIST 条目级「通过/待办/失败」标记全仓 **37 行 / 9 文件**，而 `repo_stats` 只解析 PROGRESS P 号、`dc_validator` 四项检查均不解析条目 ⇒ R7 在此**唯一豁免** | **D-A1**：把 CHECKLIST §10.1 纳入 R7 射程（落点见 §4.1） | RESEARCH §3.8.3 |
+| CHECKLIST 条目级状态标记全仓 **661 行 / 58 文件**（口径 = 表格行含 `✅`/`❌`/`⬜`，读数日期 2026-09-27；历史值「37 行 / 9 文件」口径**不可复现**，经 **S8-8** 终验 grep 补捕获，见 RESEARCH §5.5），而 `repo_stats` 只解析 PROGRESS P 号、`dc_validator` 四项检查均不解析条目 ⇒ R7 在此**唯一豁免** | **D-A1**：把 CHECKLIST §10.1 纳入 R7 射程（落点见 §4.1） | RESEARCH §3.8.3 |
 | R7 的三个执行位点已存在：§0 断言统计表（`dc_validator` M4）/ M7 账本（`m7_stats`）/ 视图层（`repo_stats`）——**spec 四文档内部计数声明无人管** | **D-A2**：不新建校验器，**扩展 `dc_validator` M4 为双分支**（§0 断言 + §10.1 验收） | RESEARCH §3.1 Q1；`dc_validator.py` L172-193 |
 | Phase 0 实测：21 个 CHECKLIST 文件（含模板）的验收统计分**三族**（表格 6 / 散文 ≈10 / 章节 ≈5），表格族内部**四种子偏差**，**仅 1 个全规范**（§3） | **D-A3**：**模板先行**——先在模板定义规范形态，校验器**只认规范形态**；异形 → skip（不阻断） | 本文 §3.1-§3.2 |
 | `spec_runner fork`（`--session --seq --new`）是全仓**唯一能产出新事件流的命令**（「回到上游第 i 步」的通路已存在）；回写实践已发生但靠人工（P-028 v1.1 / P-023） | **D-B1**：回写**不新建工具**——规格 = 「何时用 `fork` + 如何标记失效」 | RESEARCH §3.1（A-2/A-3/A-4） |
@@ -118,7 +120,7 @@ upstream: null
 ```
 check_counting(file, text)
   ├─ 分支 ①（既有）：RE_STAT_SECTION 命中 `## 0. 断言统计表` → A/B/H 三类重数
-  └─ 分支 ②（新增）：RE_CL_STAT 命中 `### 10.1 验收统计`  → CHECKLIST 表重数
+  └─ 分支 ②（新增）：RE_CL_STAT_HEAD / RE_CL_STAT_ANY 命中 `### 10.1 验收统计` → CHECKLIST 表重数
 ```
 
 **零新增 hook**（复用既有 `dc-validator`）、**零新增脚本**、**零 API 破坏**（分支 ① 逐字保留）。
@@ -255,7 +257,7 @@ def check_counting(file, text):
 - 描述：新建 `scripts/checklist_stats.py` + 第 6 个 pre-commit hook。
 - 否决理由：`dc_validator` **已自称「+ R7」且已覆盖全 `.md`**；新建会**复制 R7 判定逻辑**（违背 I-10 语义同源，P-047 教训）并新增 hook（`declared.hooks` 5→6 的连带对账）。**R7 的位点应复用其既有宿主**。
 
-## 7. 交付 B：回写流实现规格（**本批止于设计**）
+## 7. 交付 B：回写流实现规格（**v1.5 已实施**）
 
 ### 7.1 现状（RESEARCH 取证）
 
@@ -279,7 +281,7 @@ python tools/spec_runner/spec_runner.py fork \
 | 目标已存在 | **拒绝**（不覆盖） |
 | 无 `seq <= N` 的行 / 源为空或缺失 | **拒绝**（`EXIT_USAGE`） |
 
-### 7.2 最小切口（规格，不实施）
+### 7.2 最小切口（**v1.5 已实施**）
 
 **D-B2**：**只增一词，不增字段**（与 ADR 层语义对齐）。
 
@@ -288,9 +290,11 @@ python tools/spec_runner/spec_runner.py fork \
 | 1 | design 词表增 **`superseded`** | `spec/doc-contract/PLAN.md` v1.6 §1 DC2 表（契约文本）+ `adr/ADR-0007` D4 | 适用**一般设计档**（`draft/in-review/verified`）——RESEARCH / DESIGN / IMPLEMENTATION |
 | 1b | **（待裁决）** CHECKLIST 档是否同步增 `superseded` | 同上 + `dc_validator` L39 `CHECKLIST_STATUS_VOCAB` | 见 §7.4 **R2**——被推翻批次的 CHECKLIST 是否同样需要失效态 |
 
+> **实施状态（v1.5，2026-09-27）**：**第 1 行已实施**——`superseded` 已入 design **一般档**，落地 **4 权威位点 + 3 模板**（明细见 [IMPLEMENTATION](./IMPLEMENTATION.md) §11）；**第 1b 行未实施**（R2 判不可裁 ⇒ 触发驱动）；**备选 `superseded_by` 未采纳**（R3 经 FTA 倾向否决）。
+
 **为何不新增 `superseded_by` 字段**（原稿作「front-matter 第 8 字段」；**订正 B-2/B-3**）：
 
-1. **DC1 = 七字段**（`dc_validator` L41 `SEVEN_FIELDS`；PLAN DC1）⇒ 加第 8 字段是**第二处契约变更**，而原稿**未列入 §7.3 影响面、未交 §7.4 裁决**；且 `check_frontmatter`（L116-118）只检「缺字段」不拒多余 ⇒ 冲突会**静默通过**机械校验，更危险。
+1. **DC1 = 七字段**（`dc_validator` L41 `SEVEN_FIELDS`；PLAN DC1）⇒ 加第 8 字段是**第二处契约变更**，而原稿**未列入 §7.3 影响面、未交 §7.4 裁决**；且 `check_frontmatter`（L118-120）只检「缺字段」不拒多余 ⇒ 冲突会**静默通过**机械校验，更危险。
 2. **后继链无需新字段**：回写产生的新文档，其 `upstream` 本就**正向指向被推翻者**（`upstream` = 上游权威源声明，PLAN L51）⇒ 反查「谁取代了我」= 检索 `upstream` 指向本 id 的文档。
 3. **不采用「`upstream` 反向设置」**（ADR-0006 §B 的纸面约定）：该字段在 `scripts/downstream_compliance.py` L181-185 有**语义消费**（输出「上游版本」列）⇒ 过载会产出**错误标签**；且该约定全仓**从未被执行过**（`status: superseded` 0 命中，RESEARCH A-22）——不宜作为首个执行样本的载体。
 4. **备选（仅当确需显式反向链时）**：新增 `superseded_by` ⇒ 届时**须同时把 DC1 列为第二处契约变更**（§7.3 已预留该条件行）。
@@ -319,13 +323,13 @@ python tools/spec_runner/spec_runner.py fork \
 
 ⇒ **默认方案**（D-B2 最小切口）权威改动 = **4 处**（`dc_validator` 常量 + 其 DESIGN 副本 + PLAN 契约文本 + ADR 决策），另模板 **3** 处、快照豁免、**DC1 零改动**。
 
-### 7.4 裁决点（为何本批不实施）
+### 7.4 裁决点（**v1.5 已裁决并实施**）
 
 - **ADR-0010 三问**（**补论证 B-8**）：
   - **Q1 分层 = Layer-0**：裁决对象是**契约文本的增词**（PLAN §1 DC2 = 纯文档/文件）；`dc_validator` 常量是 Layer-1 **镜像**，按「Layer-1 单向依赖 Layer-0」随契约文本同步 ⇒ **本体判 Layer-0**。（对照：交付 A 的裁决对象是**校验器收录**，本体即 Layer-1 工具行为——两判不同，因**裁决对象**不同。）
   - **Q2 激活条件 = 触发驱动**：一次真实的「上游被推翻且须机械留痕」事例。
   - **Q3 未激活副作用 = 0**：本批零运行时改动（I-15）。
-- **DC2 变更流程**：词表为全仓「固定、不得自造」，增词须走契约变更 + Review 裁决 → **本批只出规格，交 Review**。
+- **DC2 变更流程**：词表为全仓「固定、不得自造」，增词须走契约变更 + Review 裁决 → **v1.5 用户裁决「两项都做」后已执行契约变更**（契约文本 [PLAN §1 DC2](../doc-contract/PLAN.md) + [ADR-0007](../../adr/ADR-0007-unified-document-contract.md) **v1.7** + Layer-1 镜像 `dc_validator` L36）。
 - **R2（FTA 判为不可裁 → 回归触发驱动；收敛 B-5）**：`superseded` 是否**同时**覆盖 **CHECKLIST 档**（`pending/accepting/accepted`）与 **`template` 类**（二者共用同一词表副本 `dc_validator` L35/L39）？——**故障链分析呈「对称」（两选项最小割集 3 vs 2 且方向相反），FTA 不产生裁决** ⇒ 依 ADR-0010 **Q2 触发驱动**，等「一次真实的 CHECKLIST / 模板被推翻」事例（详见 §7.6）。
 - **R3（FTA 倾向否决；备选保留）**：是否需**显式反向链**（`superseded_by`）？——**故障链分析倾向否决**：反向字段**引入「同一事实两处表达」的一致性失效模式**（`A.superseded_by = B` ∧ `B.upstream ≠ A`，**新增 2 元素割集**），而正向链无此暴露；该结论与 **I-10 的论证结构独立收敛**（详见 §7.6）。
 - **与 I-2/I-4 的关系**：默认方案**不新增字段**（DC1 零改动）；不得引入浮点/编码（同 `confidence` 反例，RESEARCH §3.8）。

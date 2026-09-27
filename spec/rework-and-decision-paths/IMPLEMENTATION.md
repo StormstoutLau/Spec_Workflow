@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-IMPLEMENTATION
 type: design
-version: 1.0
+version: 1.2
 status: draft
 date: 2026-09-27
 depends: [rework-and-decision-paths-DESIGN, rework-and-decision-paths-RESEARCH, precommit-dc-validator-DESIGN]
@@ -14,9 +14,11 @@ upstream: null
 > **创建日期**: 2026-09-27
 > **状态**: draft（草稿）
 > **Spec 步骤**: Step 5-6
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.1**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.4**
-> **本批范围**：**交付 A 实施**（`dc_validator` M4 分支② + `CHECKLIST_TEMPLATE` §10.1 规范约束）；**交付 B 零改动**（DESIGN §7 规格，守 I-15）。
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.4**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.7**
+> **v1.1 变更（2026-09-27，Step 8 独立审查整改）**：Step 8 独立审查（[RESEARCH §5.5](./RESEARCH.md)）发现 **S8-2 / S8-7** 并订正——① 头部两条「基于」行**滞后**（设计 v1.1→**v1.4** / 调研 v1.4→**v1.7**）；② 交付物表「新增正则 **4**」实为 **3**（`RE_CL_STAT_HEAD` / `RE_CL_STAT_ANY` / `RE_CL_INT`）；③ 「`--selftest` **23/23→24/24**」前值失实 → **16/16→24/24**（`git show` 取前版重数 = 16）；④ 步骤 4「增 F12-F15 → **22/22**」→ **21/21**。**交付 A 实现本体零改动**。
+> **本批范围**：**交付 A 实施**（`dc_validator` M4 分支② + `CHECKLIST_TEMPLATE` §10.1 规范约束）；**交付 B**：v1.1 止于规格（守 I-15）→ **v1.2 已实施**（见 **§11**）。
+> **v1.2 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」（先独立 pass → 再实施）⇒ **D-B2 落地**——`superseded` 入 design **一般档**，改 **4 权威位点 + 3 模板**（明细见 **§11**）；**DC1 零改动**；R2 未实施 / R3 未采纳。IMPLEMENTATION 由「交付 B 零改动」改为「交付 B 亦实施」。
 
 ---
 
@@ -44,7 +46,7 @@ upstream: null
 
 | 文件 | 改动 | 行 |
 |------|------|----|
-| `scripts/dc_validator.py` | 新增分支②（正则 4 / 函数 4）+ `check_counting` 拆为双分支 + selftest F12-F18 | §3、§4 |
+| `scripts/dc_validator.py` | 新增分支②（正则 **3** / 函数 4）+ `check_counting` 拆为双分支 + selftest F12-F18 | §3、§4 |
 | `spec/templates/CHECKLIST_TEMPLATE.md` | §10.1 表后追加规范约束说明（2 行 blockquote） | §3.3 |
 | `spec/rework-and-decision-paths/{DESIGN,IMPLEMENTATION}.md` | 本批文档 | — |
 
@@ -141,7 +143,7 @@ def parse_checklist_stats(body):
 |---|---|---|
 | 分支① §0 断言统计表 | **逐字平移**，行为零变化 | selftest F4 `声明 3 实为 2` 仍 PASS |
 | 历史 CHECKLIST（Phase 0 时点 21 中 20 非规范） | 一律 skip，不阻断 | 全量实跑：6 条 §10.1 skip（5 历史文件 + 模板）、零 P1/P2 |
-| `Summary` 判定语义 | **不改**（异形用 `severity=""` 而非 P3，见 DESIGN §4.3 修正说明） | `--selftest` 23/23→24/24，F9 零违规仍 PASS |
+| `Summary` 判定语义 | **不改**（异形用 `severity=""` 而非 P3，见 DESIGN §4.3 修正说明） | `--selftest` **16/16→24/24**，F9 零违规仍 PASS |
 
 ### 5.2 首次全量实跑的自我命中 → 加固
 
@@ -225,7 +227,7 @@ def parse_checklist_stats(body):
 | 1 | `dc_validator.py` 增正则 + `_strip_fences` / `_cl_int` / `parse_checklist_stats` | ✅ |
 | 2 | `check_counting` 拆为 `_counting_assertions`（逐字平移）+ `_counting_checklist`（新） | ✅ |
 | 3 | `CHECKLIST_TEMPLATE.md` §10.1 追加规范约束 | ✅ |
-| 4 | selftest 增 F12-F15 → 22/22 | ✅ |
+| 4 | selftest 增 F12-F15（+5）→ **21/21** | ✅ |
 | 5 | **首跑全量暴露两处工具缺陷**（围栏 / 过宽正则）→ 加固 + F17/F18 | ✅ |
 | 6 | 复跑 `--selftest` 24/24 + 全量 123 文件 0 违规 | ✅ |
 
@@ -236,6 +238,26 @@ def parse_checklist_stats(body):
 | **DR-A1** | `dc_validator.Summary` 把非空 severity（含 P3）全算违规，与 `repo_stats` 的 P3 语义**相反** | 设计中即改用 `severity=""`（DESIGN §4.3 修正说明）；P3 语义统一另立观察项 |
 | **DR-A2** | 文档自我演示规范形态会误触本校验（围栏未跳） | `_strip_fences` + F17 |
 | **DR-A3** | `RE_CL_STAT_ANY` 过宽，吞掉普通小节标题 | 收紧正则 + F18 |
+
+## 11. 交付 B 实施记录（v1.2）
+
+**触发**：用户裁决「两项都做」（先独立 pass → 再实施）。**范围 = D-B2 最小切口**（只增 `superseded` 一词入 design **一般档**，**DC1 零改动**）。
+
+| # | 位点 | 改动 | 结果 |
+|---|---|---|---|
+| 1 | `scripts/dc_validator.py` L36（`TYPE_VOCAB["design"]`，Layer-1 镜像） | `{"draft","in-review","verified"}` → **`+ "superseded"`** | ✅ |
+| 2 | `spec/precommit-dc-validator/DESIGN.md` L271（§6.3 权威源副本，I-4 单一真值源） | 同 #1 | ✅ |
+| 3 | `spec/doc-contract/PLAN.md` §1 DC2（design 一般档，契约文本 = Layer-0 本体） | `draft / in-review / verified` → **`+ / superseded`** + 词表增补追记 | ✅ |
+| 4 | `adr/ADR-0007-unified-document-contract.md` D4 + 修订历史 | D4 词表 + 增补追记；**v1.6 → v1.7** | ✅ |
+| 5 | `spec/templates/{RESEARCH,DESIGN,IMPLEMENTATION}_TEMPLATE.md`（状态枚举行） | 各 **`+ superseded（已作废）`** | ✅ |
+| — | `CHECKLIST_STATUS_VOCAB`（L39） | **不改**（R2 判不可裁 ⇒ 触发驱动） | 未实施 |
+| — | `template` type 词表（L35） | **不改**（R2 同上） | 未实施 |
+| — | `superseded_by` 字段 / DC1 七字段 | **不增**（R3 经 FTA 倾向否决） | 未采纳 |
+| — | ARC 快照 `D-004-adr-0007-m7.md` | **不改**（导入时点快照、不追平，P-048 铁律） | 豁免 |
+
+**验证**：`dc_validator --selftest` **24/24 PASS**（新增词表成员不破坏既有 fixture）；全量 **123 文件 0 违规**（既有 design 文档 `status` ∈ 旧三值 ⇒ 零回归）。
+
+**边界**：本记录只覆盖**状态词**；回写通路的另两半（事件流 `fork` 回写 / 新流-原流关联登记）属**使用纪律**（DESIGN §7.2「使用时机」），非本次代码改动。
 
 ---
 
