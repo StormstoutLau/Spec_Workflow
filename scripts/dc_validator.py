@@ -168,9 +168,63 @@ RE_H_ITEM = re.compile(r"\[H\d+\]")                 # 附录 C 假设区条目
 RE_STAT_SECTION = re.compile(r"^##\s*0[\.、]?\s*断言统计表", re.M)
 # C 类首版不对账（DR-2：标记格式无统一契约——原生文档行首标记 vs 吸收文档语义计数）
 
+# --- M4 分支②：CHECKLIST §10.1 验收统计（P-050 交付 A，DESIGN §4-§5） ---
+RE_CL_STAT_HEAD = re.compile(r"^###\s*10\.1\s*验收统计\s*$", re.M)           # 规范标题（精确）
+RE_CL_STAT_ANY = re.compile(r"^#{2,4}\s*\d+\.\d+\s*验收统计\s*(?:[（(].*)?$", re.M)  # 异形标题探测（须含 major.minor，且「验收统计」后仅容许括注/行尾）
+CL_CATEGORIES = ("文档一致性", "功能", "接口", "不变式",
+                 "错误处理", "性能", "兼容性", "ADD 审计")
+RE_CL_INT = re.compile(r"\d+")
 
-def check_counting(file, text):
-    """M4：R7——§0 统计表声明计数 = 机械重数（A/B/H 三类）。"""
+
+def _strip_fences(text):
+    """丢弃 ``` 围栏块内内容（只认正文；避免文档自我演示规范形态时误触本校验）。"""
+    out, in_fence = [], False
+    for ln in text.splitlines():
+        if ln.strip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            out.append(ln)
+    return "\n".join(out)
+
+
+def _cl_int(cell):
+    """单元格 → int（纯十进制整数，允许 **加粗**）/ None（含非整数内容）。"""
+    s = cell.replace("*", "").strip()
+    return int(s) if RE_CL_INT.fullmatch(s) else None
+
+
+def parse_checklist_stats(body):
+    """解析 §10.1 表体（规范标题行之后）。返回 (rows, total)。
+
+    rows  = [(类别, (总数, 通过, 失败, 待办))]，仅 CL_CATEGORIES 行，保序
+    total = (总数, 通过, 失败, 待办) | None
+    单元格：纯整数 → int；含非整数内容 → None（触发异形 skip）。
+    """
+    rows, total, started = [], None, False
+    for ln in body.splitlines():
+        s = ln.strip()
+        if not s.startswith("|"):
+            if started:
+                break
+            continue
+        started = True
+        cells = [c.strip() for c in s.strip("|").split("|")]
+        if len(cells) < 5:
+            continue
+        label = cells[0].replace("*", "").strip()
+        if not label or set(label) <= set("-: "):
+            continue
+        vals = tuple(_cl_int(c) for c in cells[1:5])
+        if label == "总计":
+            total = vals
+        elif label in CL_CATEGORIES:
+            rows.append((label, vals))
+    return rows, total
+
+
+def _counting_assertions(file, text):
+    """M4 分支①：R7——§0 统计表声明计数 = 机械重数（A/B/H 三类）。"""
     if not RE_STAT_SECTION.search(text):
         return []
     declared = {}
@@ -191,6 +245,51 @@ def check_counting(file, text):
             results.append(CheckResult("r7", file, "P1",
                                        "§0 %s 类声明 %d 实为 %d" % (k, declared[k], actual[k])))
     return results
+
+
+def _counting_checklist(file, text):
+    """M4 分支②（P-050 交付 A）：CHECKLIST §10.1 验收统计 声明 = 机械重数（渐进）。
+
+    判定（DESIGN §4.3，只认规范形态）：
+      规范标题 + 模板 8 类行 + 总计行 + 全整数 + 两条算术自洽 → 通过（无结果）
+      规范标题 + 全整数 + 算术不自洽 → P1（真阻断）
+      规范标题 + 非整数单元格 / 未按模板 8 类行 → skip（severity=""，历史不追溯）
+      异形标题（非精确匹配）→ skip
+      均未命中 → 无结果
+    """
+    text = _strip_fences(text)   # 围栏内为示例/代码，不参与形态判定
+    head = RE_CL_STAT_HEAD.search(text)
+    if not head:
+        any_head = RE_CL_STAT_ANY.search(text)
+        if any_head:
+            return [CheckResult("r7", file, "",
+                                "§10.1 标题形态异形（不适用本校验；新批次请依模板）: %s"
+                                % any_head.group(0).strip()[:60])]
+        return []
+    rows, total = parse_checklist_stats(text[head.end():])
+    if total is None or {lb for lb, _ in rows} != set(CL_CATEGORIES):
+        return [CheckResult("r7", file, "",
+                            "§10.1 未按模板 8 类行/缺总计行（不适用本校验；新批次请依模板）")]
+    if any(v is None for v in total) or any(v is None for _, vals in rows for v in vals):
+        return [CheckResult("r7", file, "",
+                            "§10.1 单元格非纯整数（不适用本校验；新批次请依模板）")]
+    results = []
+    for cat, vals in rows:
+        n, p, f, t = vals
+        if n != p + f + t:
+            results.append(CheckResult("r7", file, "P1",
+                                       "§10.1 行「%s」总数 %d ≠ 通过+失败+待办 %d" % (cat, n, p + f + t)))
+    sums = [sum(vals[i] for _, vals in rows) for i in range(4)]
+    for i, name in enumerate(("总数", "通过", "失败", "待办")):
+        if total[i] != sums[i]:
+            results.append(CheckResult("r7", file, "P1",
+                                       "§10.1 总计列 %s %d ≠ 类行求和 %d" % (name, total[i], sums[i])))
+    return results
+
+
+def check_counting(file, text):
+    """M4：R7——① §0 断言统计表（A/B/H）② CHECKLIST §10.1 验收统计（P-050 交付 A）。"""
+    return _counting_assertions(file, text) + _counting_checklist(file, text)
 
 
 # ---------------------------------------------------------------- M5 linkcheck
@@ -333,7 +432,7 @@ FM_OK = ("---\nid: selftest-ok-RESEARCH\ntype: design\nversion: 1.0\n"
 
 
 def run_selftest():
-    """十四 fixture（IMPLEMENTATION §8.1 F1-F10 + F11（P-049 单点化），含 F3b/F3c/F8b 分支），tempfile 构造于系统临时目录（I-1 不触工作树）。"""
+    """内嵌自测（fixture 见 IMPLEMENTATION §8.1；F11 = P-049 单点化，F12-F16 = P-050 交付 A §10.1），tempfile 构造于系统临时目录（I-1 不触工作树）。"""
     import shutil
     import tempfile
 
@@ -432,6 +531,61 @@ def run_selftest():
                "F11b 常规路径不排除")
         expect(all(not is_excluded(f) for f in gather_md_files(tmp)),
                "F11c 遍历结果零排除项（.arc fixture 未入列）")
+
+        # --- P-050 交付 A：M4 分支② CHECKLIST §10.1 验收统计 ---
+        cl_head = ("\n## 10. 验收结论\n\n### 10.1 验收统计\n\n"
+                   "| 类别 | 总数 | 通过 | 失败 | 待办 |\n"
+                   "|------|------|------|------|------|\n")
+        cl_rows_ok = "".join("| %s | 1 | 1 | 0 | 0 |\n" % c for c in CL_CATEGORIES)
+        cl_total_ok = "| **总计** | 8 | 8 | 0 | 0 |\n"
+
+        # F12 规范标题 + 8 类行 + 算术自洽 → 零违规
+        f12 = w("f12.md", FM_OK + cl_head + cl_rows_ok + cl_total_ok)
+        r = check_counting(f12, _read(os.path.join(tmp, f12)))
+        expect(len(r) == 0, "F12 §10.1 规范+自洽 零违规")
+
+        # F13 规范标题 + 总计列与类行求和不符 → P1
+        f13 = w("f13.md", FM_OK + cl_head + cl_rows_ok + "| **总计** | 9 | 8 | 0 | 0 |\n")
+        r = check_counting(f13, _read(os.path.join(tmp, f13)))
+        expect(any(x.severity == "P1" and "总计列 总数" in x.message for x in r),
+               "F13 §10.1 总计列错报 P1")
+
+        # F13b 规范标题 + 行内 总数 ≠ 通过+失败+待办 → P1
+        cl_rows_bad = "".join("| %s | %d | 1 | 0 | 0 |\n" % (c, 2 if c == "功能" else 1)
+                              for c in CL_CATEGORIES)
+        f13b = w("f13b.md", FM_OK + cl_head + cl_rows_bad + cl_total_ok)
+        r = check_counting(f13b, _read(os.path.join(tmp, f13b)))
+        expect(any(x.severity == "P1" and "行「功能」" in x.message for x in r),
+               "F13b §10.1 行内算术错报 P1")
+
+        # F14 规范标题 + 非整数单元格（文字算术）→ skip（severity=""）
+        f14 = w("f14.md", FM_OK + cl_head + cl_rows_ok + "| **总计** | **8 项 + 0 发现** | 8 | 0 | 0 |\n")
+        r = check_counting(f14, _read(os.path.join(tmp, f14)))
+        expect(len(r) == 1 and r[0].severity == "" and "非纯整数" in r[0].message,
+               "F14 §10.1 非整数单元格 skip")
+
+        # F15 异形标题（§8.1）→ skip
+        f15 = w("f15.md", FM_OK + "\n## 8. 验收结论\n\n### 8.1 验收统计\n\n"
+                                 "| 类别 | 总数 | 通过 | 失败 | 待办 |\n")
+        r = check_counting(f15, _read(os.path.join(tmp, f15)))
+        expect(len(r) == 1 and r[0].severity == "" and "标题形态异形" in r[0].message,
+               "F15 §10.1 异形标题 skip")
+
+        # F16 无 §10.1 → 无结果（不误判散文族）
+        f16 = w("f16.md", FM_OK + "\n## 1. 功能验收\n\n**验收统计**: A1-A6 全部通过。\n")
+        r = check_counting(f16, _read(os.path.join(tmp, f16)))
+        expect(len(r) == 0, "F16 无 §10.1 无结果")
+
+        # F17 围栏内示例形态 → 不触发（文档自我演示规范形态）
+        f17 = w("f17.md", FM_OK + "\n```\n### 10.1 验收统计\n\n"
+                                 "| 类别 | 总数 | 通过 | 失败 | 待办 |\n| 功能 | N | N | N | N |\n```\n")
+        r = check_counting(f17, _read(os.path.join(tmp, f17)))
+        expect(len(r) == 0, "F17 围栏内示例不触发")
+
+        # F18 正文含「验收统计」的普通小节标题 → 不误判为异形
+        f18 = w("f18.md", FM_OK + "\n### 3.1 验收统计形态三族与子偏差\n\n正文。\n")
+        r = check_counting(f18, _read(os.path.join(tmp, f18)))
+        expect(len(r) == 0, "F18 普通小节标题不误判")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
