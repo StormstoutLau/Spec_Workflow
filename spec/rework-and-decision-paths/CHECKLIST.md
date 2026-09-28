@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-CHECKLIST
 type: design
-version: 1.3
+version: 1.4
 status: accepting
 date: 2026-09-27
 depends: [rework-and-decision-paths-IMPLEMENTATION, rework-and-decision-paths-DESIGN]
@@ -12,11 +12,12 @@ upstream: null
 
 > **Feature**: 回写流与多方案决策路径（P-050 后续阶段）
 > **创建日期**: 2026-09-27
-> **状态**: accepting（验收中；v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
+> **状态**: accepting（验收中；v1.4 版本引用收口 / v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.2**
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.5**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.7**
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.3**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.6**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.9**
+> **v1.4 变更（2026-09-27，跨仓对照观察项登记 + 版本引用收口）**：用户指令「D盘 RPC框架对本框架的意见 请分析是否合理」⇒ 观察项登记落 [RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)（**H-RPC1 / H-RPC2**）；本文件**收口版本引用 + 同步交付 B 状态**——§1 交叉表与三条「基于」行此前**滞后**于 RESEARCH v1.8 / DESIGN v1.5 / IMPL v1.2（与 S8-1/S8-2 同族复发），现同步至 **v1.9 / v1.6 / v1.3**；§10.2「交付 B 未实施」与 §11 矛盾（v1.3 遗漏）→ 改为「已实施」；§11 新增 **H-FTA / H-RPC1 / H-RPC2** 观察项行。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 > **v1.3 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」⇒ 记录 **D-B2 实施**（`superseded` 入 design 一般档，4 权威位点 + 3 模板；[IMPLEMENTATION §11](./IMPLEMENTATION.md)）+ §11 交付 B 行由此前「待裁决」改为「已裁决并实施」（R2 触发驱动 / R3 倾向否决）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 > **v1.2 变更（2026-09-27，Step 8 独立审查整改）**：记入 **Step 8 独立审查**（子代理 / 同基座降级）结果 —— **7 项发现（2 P2 + 5 P3）全部整改**（记录见 [RESEARCH §5.5](./RESEARCH.md)）；同步 §1 交叉版本表、§8.4、§11 与三条「基于」行版本（S8-1/S8-2）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 
@@ -28,7 +29,7 @@ upstream: null
 |--------|------|------|
 | RESEARCH → DESIGN 设计决策可追溯 | ✅ | DESIGN §2.1 逐条引 RESEARCH §3.1/§3.8 |
 | DESIGN → IMPLEMENTATION 模块可追溯 | ✅ | IMPLEMENTATION §3.1/§3.2 对应 DESIGN §4 |
-| 无文档间矛盾（RESEARCH v1.7 ↔ DESIGN v1.4 ↔ IMPL v1.1） | ✅ | 机械复核（v1.2 重数） |
+| 无文档间矛盾（RESEARCH v1.9 ↔ DESIGN v1.6 ↔ IMPL v1.3） | ✅ | 机械复核（v1.4 重数） |
 
 ## 2. 功能验收
 
@@ -160,7 +161,7 @@ upstream: null
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：交付 A 全部验收项通过（**32/33**）；**唯一待办 = 异基座独立 pass**（§8.4）；交付 B 按设计**止于规格、未实施**（I-15），其规格已经 **v1.1 同基座自审**并修订 10 项（DESIGN §9.5）
+- [x] **有条件通过**：交付 A 全部验收项通过（**32/33**）；**唯一待办 = 异基座独立 pass**（§8.4）；交付 B **已实施**（v1.3，[IMPLEMENTATION §11](./IMPLEMENTATION.md)），其规格已经 **v1.1 同基座自审**并修订 10 项（DESIGN §9.5）
 - [ ] **验收失败**
 
 ### 10.3 签字
@@ -180,4 +181,5 @@ upstream: null
 | **M7 样本 ㊲**（转述失真族）入账 | — | — | ✅ |
 | **M7 样本 ㊳**（增长型载体计数漂移第三度复发）入账 | — | — | ✅ |
 | H-CL2（L2 条目级真对账）/ H-CL3（skip 驱动收敛）观察 | — | — | 观察项 |
+| **H-FTA / H-RPC1 / H-RPC2** 观察项（工具化触发 / 跨仓对照可迁移性） | — | — | 观察项（[RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)） |
 | 更新 PROGRESS.md / CODE_WIKI.md | — | — | ✅ |

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "updated": "2026-09-27",
+  "owner": "Scott (鹏)",
+  "truth_source": "registry",
+  "trigger_kinds": [
+    "upstream-overturned",
+    "verify-failed",
+    "scope-change",
+    "user-verdict",
+    "undecided"
+  ],
+  "provenance_prefixes": [
+    "manual",
+    "tool",
+    "filetrack",
+    "hash"
+  ],
+  "forks": [],
+  "non_rework": [
+    {
+      "name": "p009-first-run-001-fork-demo",
+      "why": "P-009 首次真实运行时对 fork 原语的能力演示（fork --seq 1 复制 1 行），非因上游被推翻而回写",
+      "date": "2026-08-26"
+    }
+  ]
+}

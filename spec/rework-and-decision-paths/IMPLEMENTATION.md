@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-IMPLEMENTATION
 type: design
-version: 1.2
+version: 1.3
 status: draft
 date: 2026-09-27
 depends: [rework-and-decision-paths-DESIGN, rework-and-decision-paths-RESEARCH, precommit-dc-validator-DESIGN]
@@ -14,11 +14,12 @@ upstream: null
 > **创建日期**: 2026-09-27
 > **状态**: draft（草稿）
 > **Spec 步骤**: Step 5-6
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.4**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.7**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.6**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.9**
 > **v1.1 变更（2026-09-27，Step 8 独立审查整改）**：Step 8 独立审查（[RESEARCH §5.5](./RESEARCH.md)）发现 **S8-2 / S8-7** 并订正——① 头部两条「基于」行**滞后**（设计 v1.1→**v1.4** / 调研 v1.4→**v1.7**）；② 交付物表「新增正则 **4**」实为 **3**（`RE_CL_STAT_HEAD` / `RE_CL_STAT_ANY` / `RE_CL_INT`）；③ 「`--selftest` **23/23→24/24**」前值失实 → **16/16→24/24**（`git show` 取前版重数 = 16）；④ 步骤 4「增 F12-F15 → **22/22**」→ **21/21**。**交付 A 实现本体零改动**。
 > **本批范围**：**交付 A 实施**（`dc_validator` M4 分支② + `CHECKLIST_TEMPLATE` §10.1 规范约束）；**交付 B**：v1.1 止于规格（守 I-15）→ **v1.2 已实施**（见 **§11**）。
 > **v1.2 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」（先独立 pass → 再实施）⇒ **D-B2 落地**——`superseded` 入 design **一般档**，改 **4 权威位点 + 3 模板**（明细见 **§11**）；**DC1 零改动**；R2 未实施 / R3 未采纳。IMPLEMENTATION 由「交付 B 零改动」改为「交付 B 亦实施」。
+> **v1.3 变更（2026-09-27，跨仓对照观察项登记 + 版本引用收口）**：用户指令「D盘 RPC框架对本框架的意见 请分析是否合理」⇒ **观察项登记落 [RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)**（H-RPC1 / H-RPC2），本文件**仅收口「基于」版本引用**（设计 **v1.4 → v1.6** / 调研 **v1.7 → v1.9**——滞后于 v1.5/v1.8 的遗留漂移，与 S8-2 同族）；**实现本体零改动**。
 
 ---
 
