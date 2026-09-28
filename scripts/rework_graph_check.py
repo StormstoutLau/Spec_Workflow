@@ -65,7 +65,7 @@ def _blank(v) -> bool:
 
 
 def _prov_bad(prov, prefixes) -> str | None:
-    """`provenance` 的**六种「缺」**→ 错误串 / None（承 RPC `_bad_provenance` 口径）。"""
+    """`provenance` 的**7 类「缺」**→ 错误串 / None（承 RPC `_bad_provenance` 口径，免计数枚举）。"""
     if not isinstance(prov, str):
         return "非字符串"
     if prov == "":

@@ -66,7 +66,7 @@ A-4 **本仓已自登记该缺口**：P-050 RESEARCH A-2 / L109 / 洞察 1(c) �
 A-5 **命名后缀已是「非正式」lineage**：`tools/spec_runner/sessions/` 实测存在 `specwf-p020-20260908v2` / `p028-*v2`·`v3` / `p042-*v2`·`v3` / `p050-*v2`…`v9` 等同族多流——**人可读、机不可判**【E1】
 A-6 **本仓无 `inventory/` 目录**（根目录 = `adr/ docs/ scripts/ spec/ tools/`）⇒ RPC 的 `inventory/*.yaml` 载体**无现成落点**【E1】
 A-15 `dc_validator` 只扫 `**/*.md`（`gather_md_files` L348-355）⇒ 非 `.md` 数据文件**不在 DC 契约范围**（无 front-matter 义务）【E1】
-A-16 `CODE_WIKI` stats 块 declared 现值 = `spec_feature_dirs 34 / scripts 9 / hooks 5 / progress_tasks 50 / templates 5 / adr_files 8`【E1】
+A-16 `CODE_WIKI` stats 块 declared 现值 = `spec_feature_dirs 34 / scripts 9 / hooks 5 / progress_tasks 50 / templates 5 / adr_files 8`【E1】【**读数时点 = 本批落档前快照**（2026-09-27）；本批收束后已自推为 **35 / 10 / 51**（hooks/templates/adr_files 不变）——增长型载体计数声明，2026-09-29 独立 pass 补时点标注】
 
 ### 3.2 Q1 RPC 侧实测：两个半的**范式**都现成
 

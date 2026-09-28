@@ -45,7 +45,7 @@ python scripts/rework_graph_check.py --selftest # 内嵌自测（合成 fixture�
 | 函数 | 签名 | 职责 |
 |---|---|---|
 | `_s(v)` / `_blank(v)` | `(Any) -> str / bool` | 归一化 / 「空·仅空白·禁用词」三态判定 |
-| `_prov_bad(prov, prefixes)` | `(Any, list) -> str \| None` | `provenance` **六种「缺」**判定（承 RPC A-9） |
+| `_prov_bad(prov, prefixes)` | `(Any, list) -> str \| None` | `provenance` **7 类「缺」**判定（承 RPC A-9；免计数枚举口径，与 DESIGN §4.4-B8 一致） |
 | `scan(dir)` | `(Path) -> dict` | **实测**：`stem → {rows, first_session, head}`；不可解析记 `error` |
 | `fork_outputs(sessions)` | `(dict) -> set` | **关键信号**：行内 `session` ≠ 文件名 stem |
 | `check(reg, sessions)` | `(Any, dict) -> (list, list)` | **判定表**（DESIGN §4.4 A/B/C/D），**纯函数** |
@@ -94,7 +94,7 @@ python scripts/rework_graph_check.py --selftest # 内嵌自测（合成 fixture�
 ## 5. 测试策略
 
 - **内嵌自测 `--selftest` = 30 项**（F01-F30）：正例 3（F01/F27/F28）+ 反例 27，**合成 fixture**（`tempfile` 建临时 sessions 目录）⇒ **不读真表、不写仓库**（守 I-1；且真表内容漂移不影响判据自测）。
-- **真实仓首跑**（E2；**读数时点 = 本批 session 落地后**）：`[登记] forks=0 · non_rework=1 · trigger_kinds=5 · truth_source=registry` / `[实测] sessions=49 · fork 输出=1（p009-first-run-001-fork-demo）` ⇒ **`[PASS]` exit 0**。
+- **真实仓首跑**（E2；**读数时点 = 本批 session 落地后**）：`[登记] forks=0 · non_rework=1 · trigger_kinds=[upstream-overturned, verify-failed, scope-change, user-verdict, undecided]（5 值封闭集，stdout 打印为值列表非计数）· truth_source=registry` / `[实测] sessions=49 · fork 输出=1（p009-first-run-001-fork-demo）` ⇒ **`[PASS]` exit 0**。
 - **离线可正反夹测**：`check()` 为纯函数（只吃 `(reg, sessions)`）⇒ 无需真实仓即可夹测全部判定表。
 
 ## 6. 验证实录（Step 6）
