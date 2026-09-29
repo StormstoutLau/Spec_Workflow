@@ -27,6 +27,7 @@
 - 文档中的计数声明必须与机械重数一致（声明 = 重数纪律）
 - **同一文件的多个修改必须严格串行**（前一 Edit 结果返回确认后再发下一 Edit；DIS-008，并行 Edit 会以陈旧快照覆盖先发编辑产生静默回滚）；不同文件可并行
 - **batch 编辑后必须对全部修改行做全覆盖终验 grep**（不得抽样），再运行三校验器
+- **制品状态变更必须同步 front-matter**（`status` / `version` / `depends` 等），且与对外声称（`PROGRESS` 行 / `CODE_WIKI §9` 行 / ADR 索引行）保持一致——同族事故 = P-052 三份 CHECKLIST + P-053 ADR-0008 的「front-matter 回写欠账」（drift-gate §4.4 观察项**激活·方向 B**，Layer-0 弱纪律）
 
 ## 权威源指针
 

@@ -3,7 +3,7 @@
 ---
 id: drift-gate-RESEARCH
 type: design
-version: 1.2
+version: 1.3
 status: draft
 date: 2026-09-29
 depends: [community-ecosystem-RESEARCH, ADR-0010, SPEC-PROCESS]
@@ -19,6 +19,8 @@ upstream: null
 > **v1.1 变更（2026-09-29，P-052 落档批）**: 用户指令「先落档 细化调研待裁定事项 给出证据支持的确定结论」+「把『front-matter 状态 vs PROGRESS 声称』的一致性问题登记为一个观察项」——新增 **§4.4 补充登记**（3 处状态漂移的机械复核结论 + 2 项新增发现 + 观察项登记 + 本批已执行处置）。**零新增外部断言**（全 E1 本仓机械取证）；**零 drift-gate 实现改动**（DC2 判别规则扩宽落在既存工具 `dc_validator`，非本 feature 交付，见 §4.4.3）。
 >
 > **v1.2 变更（2026-09-29，P-053 追加）**: §4.4.2（三）同族登记表补**第 4 实例** —— [ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) front-matter 欠账（`v1.0/proposed` → **`v1.1/accepted`**，`depends` 补 ADR-0007），由 P-053 回写批同批落档；§4.4.3 增第 5 条。**零新增外部断言**（全 E1）。
+>
+> **v1.3 变更（2026-09-29，激活裁决批）**: 用户裁决「采判定：A 否决 / B 激活」——新增 **§4.4.4 激活评估（ADR-0010 三问）+ 判定**（方向 A = Layer-1 **显式否决**：定形判据 + 覆盖面 E1 实证 + 撞 I-10；方向 B = Layer-0 **激活**：弱纪律落 [AGENTS.md](../../AGENTS.md) 禁止事项第 7 条）；§4.4.2（五）加裁决指针；Q3 副作用 = 0；「禁止事项 6 条」两处为**时点快照**不追改（如实登记）。**零新增外部断言**（全 E1）。
 
 ---
 
@@ -111,7 +113,7 @@ upstream: null
 - **（二）机制定性** = **看护缺口（管辖空白），非工具 bug**。三者合力：① `dc_validator` M2 管「状态是否合法」不管「状态是否与外部声称一致」；② `repo_stats` drift-gate 管「意图（§9 版本）↔ 证据（front-matter 版本）」不管 status、且只对 registered doc；③ `doc_registry` 每个 feature 只登记 1 份代表文档 ⇒ 同 feature 的 CHECKLIST/RESEARCH 常在覆盖面外。
 - **（三）同族登记** = 同一「**声明 ≠ 实物/重数**」族的又一显形位点：[P-042 §7.11](../project-console/RESEARCH.md)（无决策事件的文档订正轮 ⇒ 控制台不可见，**视图层**显形位点）+ [rework-and-decision-paths §3.8.3](../rework-and-decision-paths/RESEARCH.md)（CHECKLIST 条目级状态无机械重数）+ **DIS-010**（[discoveries](../../docs/discoveries/README.md)，视图层计数漂移 = 真值源的「无失效检测缓存副本」）+ P-050 v1.2 P2-1 / **M7 样本 ㉛**（[M7 账本](../../docs/M7_EVIDENCE_LOG.md)，事件流 ≠ 文档最终状态）+ **本批新证**（[precommit-dc-validator IMPLEMENTATION §8.1](../precommit-dc-validator/IMPLEMENTATION.md) fixture 表声明 F1-F10 而代码实为 F1-F21——同类「声明未随实物更新」）+ **P-053 追加实例**（[ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md)：front-matter 停 `v1.0/proposed`，而其**自身修订历史**已记 `proposed → accepted`（v1.0 → v1.1、`depends` 增补 ADR-0007），且 [docs/adr/README](../../docs/adr/README.md) + ADR-0007 附录 A + [cpp-hub-absorption IMPLEMENTATION](../cpp-hub-absorption/IMPLEMENTATION.md) 三方一致 ⇒ **制品 front-matter 回写欠账**，本族**第 4 实例**）。
 - **（四）触发条件（任一即重审）** = ① 同类复现 **≥1 例**（本批已 4 例，达阈值）② 出现**由本缺口导致的误判**（据落后状态做错裁决或对外陈述）③ 用户显式裁决。
-- **（五）载体预判（均须先过 ADR-0010 三问）** = **方向 A（Layer-1，候选）** = 把「front-matter `status` 与 PROGRESS 声称 一致性」纳入 `repo_stats` drift-gate（现只比 version 不比 status；扩到 status + 覆盖非 registered 制品）；**方向 B（Layer-0，纪律）** = 补一条弱纪律「制品状态变更须同步 front-matter，且与 PROGRESS / CODE_WIKI 声称一致」。**预登记否决** = 不在 `dc_validator` 内解析 PROGRESS（跨契约耦合，撞 **I-10** 语义同源）。
+- **（五）载体预判（均须先过 ADR-0010 三问）** = **方向 A（Layer-1，候选）** = 把「front-matter `status` 与 PROGRESS 声称 一致性」纳入 `repo_stats` drift-gate（现只比 version 不比 status；扩到 status + 覆盖非 registered 制品）；**方向 B（Layer-0，纪律）** = 补一条弱纪律「制品状态变更须同步 front-matter，且与 PROGRESS / CODE_WIKI 声称一致」。**预登记否决** = 不在 `dc_validator` 内解析 PROGRESS（跨契约耦合，撞 **I-10** 语义同源）。**（已裁决 2026-09-29 —— 见 §4.4.4：方向 A 显式否决 / 方向 B 激活）**
 - **（六）未触发处置** = 维持现状；本批已把**可机械化的那一半**落地（DC2 判别规则扩宽 + 回写，见 §4.4.3）；**不新增门禁 / 不改 `console_gen` / 不新增校验器**。
 - **（七）边界声明** = 只登记观测、触发条件与载体预判，**不实施方向 A/B 任何机制**。
 
@@ -122,6 +124,26 @@ upstream: null
 3. **PROGRESS P-025 版本声称订正**：`v1.4.0` → **v1.3.0**（附机械取证注）。
 4. **视图层同步**：CODE_WIKI（§2.1 树 / §9 / 版本头）。
 5. **P-053 追加（ADR-0008 回写，2026-09-29）**：§4.4.2（三）同族登记表补**第 4 实例**（[ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) front-matter 欠账——`proposed → accepted` / `v1.0 → v1.1` / `depends` 补 ADR-0007）；回写与登记同批落档（[PROGRESS P-053](../../docs/PROGRESS.md)）。
+
+#### 4.4.4 激活评估（ADR-0010 三问）+ 判定（2026-09-29，用户裁决「采判定：A 否决 / B 激活」）
+
+**Q1 分层** = 方向 A（`repo_stats` 扩 status 一致性）= **Layer-1**；方向 B（弱纪律）= **Layer-0**。
+
+**Q2 激活条件（机械复核，E1）**：
+
+- 触发条件① 已达（4 实例）；**但方向 A 被本仓自定判据否决**：
+  - **机械复核①**：`repo_stats` 现有模式的 truth 键**全为 `fs.` / `hits.` / `derived.`（计数/百分比），零语义比对**（`"truth":` 去重实测）。
+  - **机械复核②**：`doc_registry` **每 feature 仅 1 条**（31 条）⇒ 漂移的三份 `CHECKLIST_FUNC` / `CHECKLIST` **不在覆盖面**（P-052 实证）。
+  - ⇒ 建 Layer-1 = 对**散文**（§9 行 / PROGRESS 行 / ADR 索引行）做**双侧语义比对** + bespoke 模式 ⇒ 正面撞 **I-10 语义同源**（同 **P-051 候选**的显式否决理由），且违反本仓判据「**有定形 + 有机械数据源 ⇒ 补位点；无定形 ⇒ 只立纪律**」（[M7 §4](../../docs/M7_EVIDENCE_LOG.md) P-051 候选）——**status 声称面无定形**。
+- **4 实例的即时根因均已闭环**（3 例 = DC2 判别规则过窄 → P-052 扩宽；1 例 = 人工疏忽 → P-053 回写；1 例 = 声明错误 → 已订正）；**P-052 / P-053 后零新增**。
+
+**Q3 未激活副作用** = **0**（方向 A 本未实现；方向 B 纯文档）。
+
+**判定**：
+
+- **方向 A 显式否决**（Layer-1）——理由 = 定形判据 + 覆盖面 E1 实证 + 撞 I-10；**否决理由就此固化**，免未来重复评估。
+- **方向 B 激活**（Layer-0）：弱纪律落 **[AGENTS.md 禁止事项](../../AGENTS.md)第 7 条**（仿 DIS-008 规则化先例）——「制品状态变更（`status` / `version` / `depends` 等）必须同步 front-matter，且与对外声称（`PROGRESS` 行 / `CODE_WIKI §9` 行 / ADR 索引行）保持一致」。
+- **已知快照滞后（本批不追改，如实登记为「快照」非「缺口」）**：[hook-surface §3.5](../hook-surface/RESEARCH.md) 与 [CER §3.5](../community-ecosystem/COMMUNITY_ECOSYSTEM_RESEARCH.md) 的「禁止事项 **6 条**」为**时点快照**（原文自带「全量原文核对，**2026-09-09**」时点）⇒ 新增第 7 条后**不追改**（同 README 门面 `as_of` 快照模式；此类历史值已入 `repo_stats` suppress 清单语义）。
 
 ## 5. 幻觉抑制审查（Step 2 Review）
 
