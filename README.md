@@ -40,7 +40,7 @@ Spec_Workflow 是一套**纯文档型方法论**：无源代码、无构建系�
 
 <img src="docs/assets/readme/evidence.svg" alt="M7 方法论自实证数据" width="840">
 
-这套工作流自身也被当作实验对象测量——每轮审查/审计追加样本至 [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md)。截至 2026-08-23：样本 ①-㉖，横跨 LLM 审查臂（同基座自查 / 异构双盲 / 真异基座独立 pass）与机械拦截臂（pre-commit 提交瞬间 / dry-run 重数），登记形态 II 复发 67 处、归纳 4 条复发规律——其中第 4 条「审计修正自身含计数错误」由异基座复验独立重跑发现，直接印证了 RULE-5 的实证基础。本段数字为时点快照，累积真值以 M7 账本为准。
+这套工作流自身也被当作实验对象测量——每轮审查/审计追加样本至 [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md)。截至 2026-09-29：样本 ①-㊳，横跨 LLM 审查臂（同基座自查 / 异构双盲 / 真异基座独立 pass）与机械拦截臂（pre-commit 提交瞬间 / dry-run 重数），登记形态 II 复发 97 处、归纳 4 条复发规律——其中第 4 条「审计修正自身含计数错误」由异基座复验独立重跑发现，直接印证了 RULE-5 的实证基础。本段数字为时点快照，累积真值以 M7 账本为准。
 
 ## 仓库结构
 
@@ -48,7 +48,7 @@ Spec_Workflow 是一套**纯文档型方法论**：无源代码、无构建系�
 Spec_Workflow/
 ├── SPEC_PROCESS.md            # 流程宪法 v1.4（10 步 + 6 规则 + ADD + 取证矩阵）
 ├── CODE_WIKI.md               # 全仓详解 wiki
-├── adr/                       # 架构决策记录 ×6（ADR-0004~0009，全 accepted）
+├── adr/                       # 架构决策记录 ×8（ADR-0004~0011，全 accepted）
 ├── docs/
 │   ├── ASSERTION_EVIDENCE_FRAMEWORK.md  # 断言分级证据框架 v1.4
 │   ├── M7_EVIDENCE_LOG.md     # 审查对比臂数据账本（唯一活载体）
@@ -76,7 +76,7 @@ Spec_Workflow/
 |------|------|
 | [SPEC_PROCESS.md](SPEC_PROCESS.md) | 流程宪法：唯一权威入口 |
 | [CODE_WIKI.md](CODE_WIKI.md) | 全仓 wiki：模块职责 + 依赖 + 历史教训案例库 |
-| [adr/](adr/) | 六份 ADR：异质性 / 证据绑定 / 权威源 / 文档契约 / 门禁 / 发现日志 |
+| [adr/](adr/) | 八份 ADR：异质性 / 证据绑定 / 权威源 / 文档契约 / 门禁 / 发现日志 |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言 A/B/C 分级 + 不对称配置 + 双盲重推导 |
 | [docs/M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md) | 方法论实证数据账本 |
 | [spec/templates/](spec/templates/) | 五份可直接复制的文档模板 |

@@ -40,7 +40,7 @@ A system of distrust. Five layers, each answered by a mechanism:
 
 <img src="docs/assets/readme/evidence.svg" alt="M7 self-verification data" width="840">
 
-The workflow measures itself. Every review or audit round appends a sample to [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md). As of 2026-08-23: samples ①–㉖ span both LLM review arms (same-base self-review / heterogeneous double-blind / true heterogeneous independent pass) and mechanical interception arms (pre-commit / dry-run recounts), with 67 logged recurrences of Pattern II and four induced recurrence laws — the fourth, *"a correction to an audit can itself contain a counting error,"* was caught by an independent heterogeneous re-run of the grep probes, directly confirming the empirical basis of RULE-5. The figures here are point-in-time snapshots; the M7 ledger is the source of truth.
+The workflow measures itself. Every review or audit round appends a sample to [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md). As of 2026-09-29: samples ①–㊳ span both LLM review arms (same-base self-review / heterogeneous double-blind / true heterogeneous independent pass) and mechanical interception arms (pre-commit / dry-run recounts), with 97 logged recurrences of Pattern II and four induced recurrence laws — the fourth, *"a correction to an audit can itself contain a counting error,"* was caught by an independent heterogeneous re-run of the grep probes, directly confirming the empirical basis of RULE-5. The figures here are point-in-time snapshots; the M7 ledger is the source of truth.
 
 ## Repository Layout
 
@@ -48,7 +48,7 @@ The workflow measures itself. Every review or audit round appends a sample to [M
 Spec_Workflow/
 ├── SPEC_PROCESS.md            # Process constitution v1.4 (10 steps + 6 rules + ADD + forensics)
 ├── CODE_WIKI.md               # Full-repository wiki
-├── adr/                       # Architecture decision records ×6 (ADR-0004–0009, all accepted)
+├── adr/                       # Architecture decision records ×8 (ADR-0004–0011, all accepted)
 ├── docs/
 │   ├── ASSERTION_EVIDENCE_FRAMEWORK.md  # Assertion evidence framework v1.4
 │   ├── M7_EVIDENCE_LOG.md     # Review comparison-arm ledger (single living carrier)
@@ -76,7 +76,7 @@ Optional: `docs/ASSERTION_EVIDENCE_FRAMEWORK.md` for assertion grading during St
 |----------|------|
 | [SPEC_PROCESS.md](SPEC_PROCESS.md) | Process constitution: the single authoritative entry point |
 | [CODE_WIKI.md](CODE_WIKI.md) | Wiki: module responsibilities + dependencies + lessons-learned case library |
-| [adr/](adr/) | Six ADRs: heterogeneity / evidence binding / authority / contract / gates / discoveries |
+| [adr/](adr/) | Eight ADRs: heterogeneity / evidence binding / authority / contract / gates / discoveries |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | A/B/C grading + asymmetric configuration + double-blind rederivation |
 | [docs/M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md) | Self-verification evidence ledger |
 | [spec/templates/](spec/templates/) | Five copy-ready document templates |
