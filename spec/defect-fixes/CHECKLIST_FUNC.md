@@ -4,8 +4,8 @@
 id: defect-fixes-CHECKLIST-FUNC
 type: design
 version: 1.0
-status: draft
-date: 2026-09-08
+status: accepting
+date: 2026-09-29
 depends: [defect-fixes-DESIGN, spec-runner-DESIGN, ADR-0010, ADR-0009]
 upstream: null
 ---
@@ -83,3 +83,4 @@ upstream: null
 | 日期 | 变更 |
 |------|------|
 | 2026-09-08 | v1.0 创建——P-022 实施批验收清单（D×2 + F×6 + T×2 + W×5 + ADD 审计） |
+| 2026-09-29 | v1.0 front-matter 回写（P-052）：§7 独立 pass 已于 2026-09-08 签字「通过（accepted）」但 front-matter 停 draft、本表缺该行；`-CHECKLIST-FUNC` 类 id 被 DC2 误判「一般设计文档」（词表无 `accepting`）致回写**机械不可表达**；DC2 判别规则扩宽（id 含 `CHECKLIST` 段）后，front-matter 同步为 accepting |

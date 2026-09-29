@@ -4,8 +4,8 @@
 id: independent-verify-CHECKLIST
 type: design
 version: 1.0
-status: pending
-date: 2026-09-09
+status: accepting
+date: 2026-09-29
 depends: [independent-verify-DESIGN, independent-verify-RESEARCH]
 upstream: null
 ---
@@ -31,3 +31,4 @@ upstream: null
 ## 验收记录
 
 - **2026-09-09**：C1-C8 逐项核验通过（实施 + 吃狗粮实证 + 三通道）。C9 独立 pass 复核通过（2026-09-09，四通道：三通道重跑 + selftest 38/38 + 调用点 grep + 历史 session 全量取证）。
+- **2026-09-29（P-052 front-matter 回写）**：正文 C1-C9 与上行验收记录早已闭环，front-matter 停 `pending` → 同步为 `accepting`；同批一并回写同 feature 的 DESIGN/RESEARCH（front-matter `draft` → `verified`，兑现 C8 声称）。

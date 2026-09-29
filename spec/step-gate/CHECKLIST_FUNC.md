@@ -3,9 +3,9 @@
 ---
 id: step-gate-CHECKLIST-FUNC
 type: design
-version: 1.0
-status: draft
-date: 2026-09-08
+version: 1.1
+status: accepting
+date: 2026-09-29
 depends: [step-gate-DESIGN, step-gate-CHECKLIST, FWK-DECISION-RECORD, spec-runner-DESIGN]
 upstream: null
 ---
@@ -89,3 +89,4 @@ upstream: null
 |------|------|
 | 2026-09-08 | v1.0 创建——实施批验收清单（D×2 + F×8 + T×3 + Q3c 对比表 + ADD 审计） |
 | 2026-09-08 | v1.0 → v1.1：状态 draft → accepting；I-4 补 T-1 复验实证（selftest 26/26 回归零破坏）；独立 pass 机械复核闭环（§7，2026-09-08 签字） |
+| 2026-09-29 | front-matter 回写（P-052）：上行 2026-09-08 已记 draft → accepting，但 front-matter 停 v1.0/draft——`-CHECKLIST-FUNC` 类 id 被 DC2 误判「一般设计文档」（词表无 `accepting`）致回写**机械不可表达**；DC2 判别规则扩宽（id 含 `CHECKLIST` 段）后，front-matter 同步为 v1.1/accepting |

@@ -3,9 +3,9 @@
 ---
 id: precommit-dc-validator-IMPLEMENTATION
 type: design
-version: 1.2
+version: 1.3
 status: verified
-date: 2026-08-19
+date: 2026-09-29
 depends: [precommit-dc-validator-DESIGN, precommit-dc-validator-RESEARCH]
 upstream: null
 ---
@@ -18,6 +18,7 @@ upstream: null
 > **基于调研**: [RESEARCH.md](./PRECOMMIT_DC_VALIDATOR_RESEARCH.md) v1.1
 > **审查状态**: v1.1 经独立 pass（2026-08-20，DeepSeek V4 Pro **真异基座**——生成端 GLM-5.3，RULE-1 时序独立 + RULE-5 模型异质性双满足）：E1 四通道复核全过（selftest 13/13 重跑 / 全仓 dry-run 39 文件 0 违规 / 双跑逐字节一致 I-2 / pre-commit 通道 Passed）；词表常量与 DESIGN §6.3 逐字符核对一致（I-4）；DR-5/DR-6 修复重验通过。发现 3 P3（§4.3/§4.5 签名声明未覆盖 `root=ROOT` 实施参数 / CHECKLIST §8.1 跨模块映射断言不实 / DESIGN §10.1-4 LOC 核对缺位）→ v1.2 修正注 + DR-7；M7 样本⑬（映射闭合 1 处）
 > **v1.2 变更（2026-08-20）**: 独立 pass 修正——§4.3/§4.5 补 `root=ROOT` 实施参数声明（P3-1）；§10 增 DR-7（LOC 对账登记）；status draft → verified
+> **v1.3 变更（2026-09-29，P-052 DC2 判别规则扩宽）**: M2 副轴判别由「id **后缀** `-CHECKLIST`」扩宽为「id **含 `CHECKLIST` 段**」——修复 `step-gate/defect-fixes` 两份 `-CHECKLIST-FUNC` 被误判一般档致 `accepting` **机械不可表达**；selftest **24/24 → 27/27**（新增 F19-F21）；§8.1 fixture 表补 F19-F21 行（**注**：本表 F11-F18 为 v1.1/v1.2 历史增量，未逐一回填，**以代码为准**——属「声明未随实物更新」同族，登记见 [drift-gate RESEARCH 观察项](../drift-gate/RESEARCH.md)）。契约文本见 [doc-contract PLAN §1 DC2 v1.7](../doc-contract/PLAN.md)。
 
 ---
 
@@ -319,6 +320,9 @@ Windows（主控站，entry 走 `python` 前缀规避 `/bin/sh`，RESEARCH §2.1
 | F8 断链 + 档 2 标注链接 + 引文行链接 | DC3 分档 | 仅真断链报 P2 |
 | F9 合规七字段文件 | 零误报 | 零结果 |
 | F10 无 front-matter 但含装饰性 `---` 分隔线 | 范围判定（dry-run 首跑 5 误报的回归覆盖） | [skip] 非违规 |
+| F19 段判别 `accepting` 合法（id `x-CHECKLIST-FUNC`） | P-052 DC2 扩宽：CHECKLIST **段**（含 `-CHECKLIST-<变体>`） | 零 status 违规 |
+| F20 段判别 `draft` 非法（id `x-CHECKLIST-FUNC`） | P-052 DC2 扩宽反向 | 报 `非法 status` |
+| F21 段判别**非子串**（id `x-FOOCHECKLIST`） | P-052 防扩宽过界 | 走一般档，零 status 违规 |
 
 selftest 输出 `N/N PASS` 或首条失败详情，退出码 0/1。
 

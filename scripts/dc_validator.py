@@ -33,9 +33,10 @@ TYPE_VOCAB = {
     "process-spec":     {"active", "deprecated"},
     "framework":        {"active", "deprecated"},
     "template":         {"draft", "in-review", "verified"},
-    "design":           {"draft", "in-review", "verified", "superseded"},  # 一般设计文档（id 不以 -CHECKLIST 结尾）；superseded 由 P-050 交付 B 增补（ADR-0007 D4 追记）
+    "design":           {"draft", "in-review", "verified", "superseded"},  # 一般设计文档（id 不含 CHECKLIST 段）；superseded 由 P-050 交付 B 增补（ADR-0007 D4 追记）
 }
-# 副轴（PLAN v1.6 DC2 消歧）：id 以 "-CHECKLIST" 结尾的 design 文档用 CHECKLIST 词表
+# 副轴（PLAN v1.6 DC2 消歧；P-052 扩宽）：id 含 CHECKLIST 段（"-" 分隔）的 design 文档用 CHECKLIST 词表——
+#   覆盖 "-CHECKLIST" 后缀（独立验证等）与 "-CHECKLIST-<变体>"（step-gate-CHECKLIST-FUNC / defect-fixes-CHECKLIST-FUNC）
 CHECKLIST_STATUS_VOCAB = {"pending", "accepting", "accepted"}
 
 SEVEN_FIELDS = ("id", "type", "version", "status", "date", "depends", "upstream")
@@ -108,7 +109,7 @@ def parse_frontmatter(text):
 
 
 def check_frontmatter(file, text):
-    """M2：DC1 七字段 + DC2 词表（design 二档判定 = id 后缀 -CHECKLIST）。"""
+    """M2：DC1 七字段 + DC2 词表（design 二档判定 = id 含 CHECKLIST 段，P-052 扩宽）。"""
     fm, _ = parse_frontmatter(text)
     if fm == UNPARSABLE:
         return [CheckResult("dc1", file, "P1", "front-matter 非合法 YAML: 围栏内存在无 key: value 结构的行")]
@@ -124,7 +125,7 @@ def check_frontmatter(file, text):
                                    "DC2 非法 type: %r（允许: %s）" % (t, "/".join(sorted(TYPE_VOCAB)))))
     elif t is not None and s is not None:
         vocab = (CHECKLIST_STATUS_VOCAB
-                 if t == "design" and fm.get("id", "").endswith("-CHECKLIST")
+                 if t == "design" and "CHECKLIST" in fm.get("id", "").split("-")
                  else TYPE_VOCAB.get(t, set()))
         if s not in vocab:
             results.append(CheckResult("dc2", file, "P1",
@@ -586,6 +587,18 @@ def run_selftest():
         f18 = w("f18.md", FM_OK + "\n### 3.1 验收统计形态三族与子偏差\n\n正文。\n")
         r = check_counting(f18, _read(os.path.join(tmp, f18)))
         expect(len(r) == 0, "F18 普通小节标题不误判")
+
+        # F19-F21 P-052 DC2 扩宽：CHECKLIST 段判别（含 -CHECKLIST-<变体>），且为「段」而非「子串」
+        f19 = w("f19.md", FM_OK.replace("id: selftest-ok-RESEARCH", "id: x-CHECKLIST-FUNC")
+                .replace("status: draft", "status: accepting"))
+        r = check_frontmatter(f19, _read(os.path.join(tmp, f19)))
+        expect(not any("status" in x.message for x in r), "F19 CHECKLIST 段判别 accepting 合法")
+        f20 = w("f20.md", FM_OK.replace("id: selftest-ok-RESEARCH", "id: x-CHECKLIST-FUNC"))
+        r = check_frontmatter(f20, _read(os.path.join(tmp, f20)))
+        expect(any("非法 status" in x.message for x in r), "F20 CHECKLIST 段判别 draft 非法")
+        f21 = w("f21.md", FM_OK.replace("id: selftest-ok-RESEARCH", "id: x-FOOCHECKLIST"))
+        r = check_frontmatter(f21, _read(os.path.join(tmp, f21)))
+        expect(not any("status" in x.message for x in r), "F21 段判别非子串（x-FOOCHECKLIST 走一般档）")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

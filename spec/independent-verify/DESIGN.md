@@ -4,8 +4,8 @@
 id: independent-verify-DESIGN
 type: design
 version: 1.0
-status: draft
-date: 2026-09-09
+status: verified
+date: 2026-09-29
 depends: [independent-verify-RESEARCH, ADR-0011, ADR-0010, step-gate-DESIGN, SPEC-PROCESS]
 upstream: null
 ---
