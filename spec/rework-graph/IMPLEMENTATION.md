@@ -94,7 +94,7 @@ python scripts/rework_graph_check.py --selftest # 内嵌自测（合成 fixture�
 ## 5. 测试策略
 
 - **内嵌自测 `--selftest` = 30 项**（F01-F30）：正例 3（F01/F27/F28）+ 反例 27，**合成 fixture**（`tempfile` 建临时 sessions 目录）⇒ **不读真表、不写仓库**（守 I-1；且真表内容漂移不影响判据自测）。
-- **真实仓首跑**（E2；**读数时点 = 本批 session 落地后**）：`[登记] forks=0 · non_rework=1 · trigger_kinds=[upstream-overturned, verify-failed, scope-change, user-verdict, undecided]（5 值封闭集，stdout 打印为值列表非计数）· truth_source=registry` / `[实测] sessions=49 · fork 输出=1（p009-first-run-001-fork-demo）` ⇒ **`[PASS]` exit 0**。
+- **真实仓首跑**（E2；**读数时点 = 2026-09-27（v1 session 落地后）**；**2026-09-29 v2 追记轮补建后复读 = 50**）：`[登记] forks=0 · non_rework=1 · trigger_kinds=[upstream-overturned, verify-failed, scope-change, user-verdict, undecided]（5 值封闭集，stdout 打印为值列表非计数）· truth_source=registry` / `[实测] sessions=49 · fork 输出=1（p009-first-run-001-fork-demo）` ⇒ **`[PASS]` exit 0**。
 - **离线可正反夹测**：`check()` 为纯函数（只吃 `(reg, sessions)`）⇒ 无需真实仓即可夹测全部判定表。
 
 ## 6. 验证实录（Step 6）
@@ -102,7 +102,7 @@ python scripts/rework_graph_check.py --selftest # 内嵌自测（合成 fixture�
 | 验证 | 命令 | 结果 |
 |---|---|---|
 | 自测 | `python scripts/rework_graph_check.py --selftest` | **30/30 PASS** |
-| 真实仓 | `python scripts/rework_graph_check.py` | **PASS**（exit 0；`sessions=49` / `fork 输出=1`） |
+| 真实仓 | `python scripts/rework_graph_check.py` | **PASS**（exit 0；`sessions=49`（**2026-09-27 读数**） / `fork 输出=1`；**2026-09-29 v2 补建后 = 50**） |
 | 对仓库只读 | `rg -n -e 'write_text' -e "open\(.*'w'" scripts/rework_graph_check.py` | 命中 **1 处**（`_selftest` 的 `tempfile` fixture，L242）⇒ **仓库路径零写入** |
 | 零依赖 | 源码 import 清单 | `argparse/json/sys/pathlib`（+ selftest `tempfile/shutil`） |
 | 确定性 | 双跑比对 stdout | 一致（无 wall clock） |
