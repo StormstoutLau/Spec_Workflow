@@ -1,7 +1,7 @@
 ---
 id: doc-contract-refactor
 type: design
-version: 1.7
+version: 1.8
 status: verified
 date: 2026-09-29
 depends: [SPEC-PROCESS, ADR-0004, ADR-0005, ADR-0006, ADR-0007, DIS-007, FWK-ASSERTION]
@@ -28,6 +28,7 @@ upstream: null
 | v1.5 | 2026-08-18 | ① G1-G4 全文改名 DC1-DC4（[ADR-0007](../../adr/ADR-0007-unified-document-contract.md) D2，防 Cpp_Hub 基准门禁 G1-G4 跨仓撞车）；② §6 M7 数据降为指针（D1：账本 `docs/M7_EVIDENCE_LOG.md` 为唯一活载体，两轮样本已迁入）；③ §3 配套新增四份实体全部落盘，条目状态改判；④ §8 P3-1/P3-2 按 ADR-0007 D4/D5 裁决闭环 | ADR-0007 accepted（2026-08-17） |
 | v1.6 | 2026-08-18 | §1 DC2 状态词表消歧（P-007 复验 P2-1 触发）：① 增 `design` 两行（一般设计文档 `draft/in-review/verified`；CHECKLIST 实例 `pending/accepting/accepted`，判别规则 = id 后缀 `-CHECKLIST`）；② 原"template 实例"行改判 `template` type 行（当前全仓零使用，词表保留）；③ DC2 表 v1.5 前一直缺 design 行（词表仅载于头部注 + ADR-0007 D4）一并修复；E1 全仓实证 14 份 design 文档零违规，纯澄清无迁移 | [DESIGN §6.3](../precommit-dc-validator/DESIGN.md) P2-1 + [ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md) 澄清追记 |
 | v1.7 | 2026-09-29 | §1 DC2 判别规则扩宽：id **后缀** `-CHECKLIST` → id **含 `CHECKLIST` 段**（覆盖 `-CHECKLIST-<变体>`，如 `step-gate-CHECKLIST-FUNC`）；修复两份 `-CHECKLIST-FUNC` 被误判「一般设计文档」致其 `accepting` 状态**机械不可表达**；机械承载 `dc_validator` M2 + selftest F19-F21；E1 全仓仅 2 份受影响，零迁移 | P-052（用户裁决「扩宽 DC2 判别规则」）+ drift-gate 观察项 |
+| v1.8 | 2026-09-29 | §1 新增 **DC2.1 任务状态词表（+「来源」列）**——把**任务粒度状态**词表从 `PROGRESS` L3 载体声明上提到契约面（与 DC2 **type 主轴轴正交**的独立子块）；重申词表四取值**零改动**（`pending / in-progress / blocked / done`），仅**新增「来源」列**（执行态可派生 → 「机器派生」；决策态不可派生 → 「人工」）；§1 增设轴正交消歧注；`docs/PROGRESS.md` L3 声明**改指向 DC2.1**（单一权威）。**零代码、零词表取值变更**（DC1 零改动） | [P-042 v1.8 状态归属契约 Layer-0](../project-console/DESIGN.md) D16（C-20）+ [RESEARCH §7.13](../project-console/RESEARCH.md) |
 
 ---
 
@@ -69,6 +70,26 @@ upstream: null
 > **判别规则扩宽追记（2026-09-29，P-052，用户裁决「扩宽 DC2 判别规则」）**: v1.6 的判别规则（**id 后缀 `-CHECKLIST`**）**过窄**——`step-gate-CHECKLIST-FUNC` / `defect-fixes-CHECKLIST-FUNC` 两类「实施批验收清单」的 id 以 `-FUNC` 结尾，**逃出 CHECKLIST 档**被误判为「一般设计文档」，其词表（draft/in-review/verified/superseded）**无 `accepting`** ⇒ 独立 pass 后的状态回写**机械不可表达**（写入即 `dc_validator` M2 报 P1），故二者长期停 `draft` 而 PROGRESS/CODE_WIKI 声称 `accepting`（**声明 ≠ 制品状态**，与本批观察项同族）。**修正** = DC2 判别由「id **后缀** `-CHECKLIST`」扩宽为「id **含 `CHECKLIST` 段**（`-` 分隔）」——覆盖 `-CHECKLIST` 后缀与 `-CHECKLIST-<变体>`；**E1 全仓影响面** = 全仓仅这两份 id 含 `CHECKLIST` 段但非后缀（其余 12 份 CHECKLIST 文档均已是 `-CHECKLIST` 后缀）⇒ **零迁移、零误伤**。机械承载 = `dc_validator` M2（`"CHECKLIST" in id.split("-")`）+ selftest **F19**（段判别 `accepting` 合法）/ **F20**（段判别 `draft` 非法）/ **F21**（**段非子串**：`x-FOOCHECKLIST` 走一般档，防子串过宽）。**不改** DC1（七字段）与词表本身（只改判别边界）。
 
 > **双语取舍（P3-8 遗留，已裁决）**: ~~三选一悬置~~ 终态 = **英文 token 为准**（ADR-0007 D5）；不建双语映射表。
+
+### DC2.1 任务状态词表（+「来源」列，v1.8 新增）
+
+> **轴正交声明（v1.8）**: DC2 是 **`type` 主轴**（文档类别 → 文档状态词表，机器可校验）；DC2.1 是**任务粒度状态**词表（`PROGRESS` 事项 / 批次状态），**与 DC2 不同轴**，故**独立成子块、不合表**——避免两类维度合表后污染按轴分派的校验分支（DC2 表首列是 type 值；本表首列是任务态取值，二者值域与消费方均不同）。编号 `DC2.1` 表示「DC2 轴的正交补充」，非 DC2 表内一行。
+
+**词表（四取值零改动，仅增「来源」列）**：
+
+| 任务态取值 | 来源（归属） | 语义 / 判据 |
+|------------|--------------|-------------|
+| `done` | **机器派生**（可派生） | **执行态**——由证据机械判定：事件流 step 序表走完 + feature 四文档管道齐备（`四文档 front-matter`）|
+| `in-progress` | **机器派生**（可派生） | **执行态**——事件流已开始（有 step 事件）但未走完 / 制品链未齐 |
+| `blocked` | **人工**（不可派生） | **决策态**——需外部输入 / 裁决 / 依赖未就绪，仅人能声明 |
+| `pending` | **人工**（不可派生） | **决策态**——已登记未启动，仅人能声明 |
+
+> **「来源」列的效力（v1.8）**: 本列**仅在契约面声明归属**——`done` / `in-progress` 的**真值源**为派生面（「事件流 step 序表 ∪ feature 四文档 front-matter」），`blocked` / `pending` 的**真值源**为人工裁决面；**同一位点单来源（禁双写）**：同一任务态位点不得同时由机器与本人生成（否则一致性割集）。**本批只定义契约，不接机械强制**（无校验器读本表 ⇒ 属 Layer-0 契约层；派生 `done` / `in-progress` 的生成端实现 = Layer-1）。
+
+**位点单来源与分布**：`PROGRESS.md` 状态列**当前为唯一人工位点**（`done` 与 `pending` 同表手写，v1.8 前的形态）；Layer-1 拟将其**执行态位点迁往派生面**（事件流 + front-matter），决策态位点留在人工面——**该迁移不在本批**（属 P2 / Layer-1 高风险，须先修订 `console_gen` 不变式 **I-7** 并经 ADR-0010 三问）。
+
+**轴正交消歧注（v1.8）**: ① 本表**不改** DC2 表任何行、**不改** DC1 七字段（零 schema 改动）；② 本表**无机械校验器**（不新增 `dc_validator` 规则；`PROGRESS` L3 原声明行改为**指向本表**的指针，原四取值字符串**逐字保留**——守 `console_gen` **I-7 词表对齐**）；③ 本表**不是** `PROGRESS` 的替代真值源——它只声明「任务态取值 → 归属方」，真值仍随位点（人工列 / 派生面）。
+> **v1.8 依据**: [P-042 v1.8 RESEARCH §7.13](../project-console/RESEARCH.md) S-1~S-3 契约条款 + [DESIGN §5.1 D16](../project-console/DESIGN.md)（C-20）；§8 否决替代 = DESIGN §8 方案 G（并入 DC2 主轴）/ 方案 H（只改 `PROGRESS` 不上提）。
 
 ### DC3. 引用标注四档（P2-3 修正：三→四档）
 
