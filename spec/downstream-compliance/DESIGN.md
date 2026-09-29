@@ -3,9 +3,9 @@
 ---
 id: downstream-compliance-DESIGN
 type: design
-version: 1.0
+version: 1.1
 status: draft
-date: 2026-09-26
+date: 2026-09-29
 depends: [downstream-compliance-RESEARCH, ADR-0006, ADR-0010, independent-verify-DESIGN]
 upstream: null
 ---
@@ -114,8 +114,10 @@ exit：`0` 全部满足 / `1` 有阻塞项（指针缺失/未入库、版本差�
   "branch": str,        # 比对 origin 的分支名（J-2）
   "table":  str,        # 判定表相对路径（归该仓）
   "copies": [{"path": str, "authority": str}],   # 副本 ↔ 权威源配对
-  "reflux_since": str,  # J-4 观测窗起点（ISO 日期）
-  "reflux_pattern": str # J-4 回流标记 grep 模式
+  "reflux_since": str,  # J-4 观测窗起点——**须为含时区的完整时刻**（如 "2026-08-17
+                        # 00:00:00 +0800"）。裸日期会被 git approxidate 以**当前时钟**
+                        # 补齐时刻 ⇒ 截止点随执行时刻漂移、读数不可复算（实测 39/36/35）
+  "reflux_pattern": str # J-4 回流标记 grep 模式（**须配 `-E`**：BRE 下 `|` 是字面量）
 }
 ```
 

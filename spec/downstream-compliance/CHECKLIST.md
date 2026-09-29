@@ -3,9 +3,9 @@
 ---
 id: downstream-compliance-CHECKLIST
 type: design
-version: 1.0
+version: 1.1
 status: accepting
-date: 2026-09-26
+date: 2026-09-29
 depends: [downstream-compliance-IMPLEMENTATION, downstream-compliance-DESIGN]
 upstream: null
 ---
@@ -54,7 +54,7 @@ upstream: null
 | J-1 双事实判定 | 实跑（IMPL §3.1） | AEF 判 ✓ / DIS-007 判 ✗，两者读数不同 | ✅ | 首轮输出表 |
 | J-2 同步判定 | 实跑 | `ahead=0 behind=0` → ✓ | ✅ | 同上 |
 | J-3 版本差异读数 | 实跑 | 报出 1.1-vs-1.4.2 / 1.1-vs-1.3 | ✅ | 同上 |
-| J-4 回流计数 | 实跑 | 回流 0 / 总提交 39 | ✅ | 同上 |
+| J-4 回流计数 | 实跑 | 回流 0 / 总提交 39〔**订正 2026-09-29，P-056**：分母 39→**40**、标记 **1**（= 指针提交自身）；原读数系裸日期漂移，见 [IMPLEMENTATION §3.4](./IMPLEMENTATION.md)〕 | ✅ | 同上 |
 | `--emit-table` | 实跑 | 三列骨架 + 权威版本自动填入，exit 0 | ✅ | IMPL §3.2 |
 
 ### 2.2 连带单点化修复（`scripts/dc_validator.py`）

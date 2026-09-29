@@ -41,7 +41,10 @@ CONSUMERS = [
             {"path": "docs/discoveries/007_hallucination_audit_asymmetric_evidence.md",
              "authority": "docs/007_hallucination_audit_asymmetric_evidence.md"},
         ],
-        "reflux_since": "2026-08-17",             # 决策 4 回流通道首次批量使用日
+        # 窗口起点必须**钉死到确切时刻（含时区）**：裸日期（`2026-08-17`）会被 git 的
+        # approxidate 用**当前时钟**补齐时刻 ⇒ 截止点随执行时刻漂移、读数不可复算
+        # （实测同一冻结仓：09-26 上午 39 / 09-29 22:10 36 / 09-29 23:0x 35）。
+        "reflux_since": "2026-08-17 00:00:00 +0800",   # 决策 4 回流通道首次批量使用日（本地 0 点）
         "reflux_pattern": "回流|absorb|absorption",
     },
 ]
@@ -159,16 +162,23 @@ def check_consumer(c):
                           % (name, c["table"]))
 
     # ── J-4 回流频度 ──────────────────────────────────────────────────
-    rc, out = _git(root, "log", "--since=%s" % c["reflux_since"],
-                   "--oneline", "--grep=%s" % c["reflux_pattern"], "-i")
-    total_rc, total = _git(root, "log", "--since=%s" % c["reflux_since"], "--oneline")
+    # 计数一律取 git 的权威整数（`rev-list --count`），不用 stdout 字符串切分
+    # （`splitlines()` 对空行 / 分页器 / 解码差异无防护，非重数纪律所需形态）。
+    # `--grep` 必须带 `-E`（extended-regexp）——BRE 下 `|` 是**字面量**而非交替，
+    # 原实现 `--grep="回流|absorb|absorption"` 恒不匹配 ⇒ 回流标记假阴性。
+    rc, out = _git(root, "rev-list", "--count", "--since=%s" % c["reflux_since"],
+                   "--grep=%s" % c["reflux_pattern"], "-E", "-i", "HEAD")
+    total_rc, total = _git(root, "rev-list", "--count",
+                           "--since=%s" % c["reflux_since"], "HEAD")
     if rc != 0:
-        structural.append("J-4 %s: git log 失败" % name)
+        structural.append("J-4 %s: git rev-list 失败" % name)
     else:
-        hits = [l for l in out.splitlines() if l.strip()]
+        hits = int(out.strip() or "0")
         rows.append(("J-4", "since %s" % c["reflux_since"],
-                     "回流提交 %d 条 / 窗口内总提交 %d 条" % (len(hits), len(total.splitlines())),
-                     "✓" if hits else "— 窗口内 0 次（未满窗不判负）"))
+                     "回流标记 %d 条 / 窗口内总提交 %s 条（标记≠真实回流：须剔除非回流项，"
+                     "如指针提交自身）" % (hits, total.strip() or "?"),
+                     "— 窗口内有标记 %d 条（判读归人）" % hits if hits
+                     else "— 窗口内 0 次（未满窗不判负）"))
     return rows, blocking, structural
 
 
