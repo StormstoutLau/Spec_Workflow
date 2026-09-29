@@ -39,7 +39,7 @@
 | loop-engineering | loop engineering 循环工作流调研 | ✓——— | 调研 | P-028 | research |
 | m7-hits-block | M7 hits 机读块 + 样本登记脚本化 | ✓✓✓✓ | 验收 | P-011 | — |
 | precommit-dc-validator | pre-commit + DC 契约校验器调研报告 v1.1 | ✓✓✓✓ | 验收 | P-007 | — |
-| project-console | 项目控制台 | ✓✓✓✓ | 验收 | P-042 | research |
+| project-console | 项目控制台 | ✓✓✓✓ | 验收 | P-042 | finalize |
 | promptfoo-first-run | promptfoo 首轮评测 | ✓——— | 调研 | P-036 | finalize |
 | promptfoo-m7-eval | Promptfoo M7 对比臂声明式评测 | ✓✓✓✓ | 验收 | P-010 | — |
 | repo-stats | repo_stats 视图层机械枚举校验器 | ✓✓✓✓ | 验收 | P-014 | — |
@@ -66,7 +66,7 @@ stateDiagram-v2
     finalize --> [*]
 ```
 
-各 step 到达数（由 sessions 决策链机械重数）：research 33 / design 30 / implement 30 / verify 30 / finalize 30
+各 step 到达数（由 sessions 决策链机械重数）：research 33 / design 31 / implement 31 / verify 31 / finalize 31
 
 ## 架构与流程
 ```mermaid
@@ -595,7 +595,7 @@ flowchart LR
 
 <a name="feat-project-console" id="feat-project-console"></a>
 <details>
-<summary><b>project-console</b> ｜ 验收 ｜ P-042 ｜ 4 轮</summary>
+<summary><b>project-console</b> ｜ 验收 ｜ P-042 ｜ 6 轮</summary>
 
 **派生状态**：`done` —— PROGRESS 状态列 = done
 
@@ -608,13 +608,13 @@ flowchart LR
 
 | 步骤 | 制品 | 主题（本步做什么） | 创建时间 | 简要描述（本步结论） | 修改历史 |
 |------|------|--------------------|---------|--------------------|---------|
-| research | RESEARCH.md ✓ | P-042 追记轮（2026-09-29，用户指令「把『无决策事件的文档订正轮 ⇒ 控制台不可见… | 2026-09-29 11:00 | 落档完成：RESEARCH v1.4→v1.5（§7.11 七段式观察项登记 = 登记缘由 / … | 4 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 · #4 2026-09-29 |
-| design | DESIGN.md ✓ | P-042 补充分析 design 步——三题四项判定（C-9 描述列 / C-10 交互形态 … | 2026-09-11 18:15 | 四项判定定稿；C-12 明确标注为对 C-8 的部分修正（非推翻）；本批边界仍为零工具改动（补分… | 3 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 |
-| implement | IMPLEMENTATION.md ✓ | P-042 补充分析 implement 步——RESEARCH v1.1 → v1.2 落档（… | 2026-09-11 18:30 | RESEARCH v1.2 落档（dc_validator 单文件 0 违规；R7 声明 36/… | 3 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 |
-| verify | CHECKLIST.md ✓ | P-042 补充分析 verify 步——三校验器 + 锚点复验，**不复用 v1.1 的改号教… | 2026-09-11 18:45 | 三校验器全绿 + 三条 session 锚点全真实 + 无改号连锁 + 全覆盖终验通过 | 3 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 |
-| finalize | —（finalize 不新增制品） | P-042 补充分析收束——PROGRESS P-042 行追记 v1.2 + CODE_WIK… | 2026-09-11 19:00 | P-042 done（v1.0 + v1.1 + v1.2 三轮）：实施批输入清单新增 C-9~… | 3 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 |
+| research | RESEARCH.md ✓ | P-042 v1.7 外部依赖开放假设候选矩阵轮（2026-09-29，用户指令「如果允许引入外… | 2026-09-29 22:00 | 取证结论：外部依赖开放假设下仍得**三路线**（① 只读派生视图仅破 I-1 / ② 载体变更破… | 6 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 · #4 2026-09-29 · #5 2026-09-29 · #6 2026-09-29 |
+| design | DESIGN.md ✓ | P-042 v1.7 design 步——登记形态裁定（依 ADR-0010 三问与既有收敛纪律… | 2026-09-29 22:05 | 登记形态定稿 = **§7.12（八）「允许外部依赖」假设下的候选矩阵（C-19）**；断言 *… | 5 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 · #5 2026-09-29 · #6 2026-09-29 |
+| implement | IMPLEMENTATION.md ✓ | P-042 v1.7 实施步——RESEARCH §7.12（八）+ C-19 落档 + 视图层… | 2026-09-29 22:10 | 落档完成：RESEARCH v1.7（§7.12（八）+ C-19 + 变更行 + front-… | 5 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 · #5 2026-09-29 · #6 2026-09-29 |
+| verify | CHECKLIST.md ✓ | P-042 v1.7 验证步——三校验器 + 门禁链 + 版本令牌对账 + 全覆盖终验。 | 2026-09-29 22:15 | 三校验器全绿（dc_validator 0 违规 / m7_stats 1 条 by-desig… | 5 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 · #5 2026-09-29 · #6 2026-09-29 |
+| finalize | —（finalize 不新增制品） | P-042 v1.7 收束步——全景复核与遗留登记。 | 2026-09-29 22:20 | 收束：本会话为 v3（`specwf-p042-20260929v3`，同日第 3 轮；命名遵守… | 5 轮：#1 2026-09-11 · #2 2026-09-11 · #3 2026-09-11 · #5 2026-09-29 · #6 2026-09-29 |
 
-**决策链**（sessions 机械重数）：research
+**决策链**（sessions 机械重数）：research → design → implement → verify → finalize
 
 </details>
 
