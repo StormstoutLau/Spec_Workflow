@@ -61,11 +61,32 @@
 | P-052 | 制品状态漂移治理（三处状态漂移机械复核 + DC2 判别规则扩宽 + 一致性看护观察项登记） | 用户指令「先对那 3 处状态漂移跑一次机械复核，帮我判断以谁为准」→「先落档 细化调研待裁定事项 给出证据支持的确定结论」+「把『front-matter 状态 vs PROGRESS 声称』的一致性问题登记为一个观察项」→ 裁决「扩宽 DC2 判别规则」+「落档 + 全部执行（含 independent-verify）」 | done | — | 治理批（2026-09-29）：**① 三处状态漂移机械复核（结论 = 以 PROGRESS/CODE_WIKI 为准）** = `spec/step-gate/CHECKLIST_FUNC.md`（front-matter `v1.0/draft` vs 声称 v1.1 accepting——**铁证 = 该文件 §8 修订历史自身记「v1.0 → v1.1：状态 draft → accepting」**）/ `spec/defect-fixes/CHECKLIST_FUNC.md`（`v1.0/draft` vs v1.0 accepting；§7 独立 pass 已签字）/ `spec/independent-verify/CHECKLIST.md`（`v1.0/pending` vs v1.0 accepting；C1-C9 全 ✅）——三处均为**制品 front-matter 回写欠账**，非「未验收」（selftest 38/38 含 F26/F27/F30/F36 判据今日仍成立）。**② 两项新增发现** = (A) PROGRESS P-025 声称 `spec_runner.py v1.4.0` 与代码 `VERSION` 常量 **1.3.0** 不符（`git log -S 'VERSION = "1.4.0"'` **零命中** ⇒ 1.4.0 从未存在）；(B) `independent-verify` 的 DESIGN/RESEARCH 仍 `draft` 而同 feature CHECKLIST **C8** 声称 `verified`。**③ 根因（DC 契约层新发现）** = 两份 id（`step-gate-CHECKLIST-FUNC` / `defect-fixes-CHECKLIST-FUNC`）**不以 `-CHECKLIST` 结尾** ⇒ `dc_validator` M2 的 DC2 副轴判别（`id.endswith("-CHECKLIST")`）将其归为**「一般设计文档」**，词表 `draft/in-review/verified/superseded` **无 `accepting`** ⇒ 独立 pass 后的状态回写**机械不可表达**（写入即 P1）——**非疏忽，是被判别规则挡住**。**④ 用户裁决「扩宽 DC2 判别规则」** = `dc_validator` M2 判别由 id **后缀** `-CHECKLIST` 扩宽为 id **含 `CHECKLIST` 段**（`"CHECKLIST" in id.split("-")`，取「段」非「子串」）+ selftest **24/24 → 27/27**（**F19** 段判别 `accepting` 合法 / **F20** 段判别 `draft` 非法 / **F21** 段非子串 `x-FOOCHECKLIST` 走一般档）+ 契约文本 [doc-contract PLAN §1 DC2 **v1.6 → v1.7**](../spec/doc-contract/PLAN.md)（E1 全仓仅这 2 份受影响 ⇒ 零迁移零误伤）。**⑤ 全部执行（回写）** = step-gate/CHECKLIST_FUNC **v1.0/draft → v1.1/accepting**（§8 补回写行）/ defect-fixes/CHECKLIST_FUNC **draft → accepting**（§8 补 promotion 行）/ independent-verify CHECKLIST **pending → accepting** / independent-verify DESIGN 与 RESEARCH **draft → verified** / PROGRESS **P-025 版本声称订正 v1.4.0 → v1.3.0**（附机械取证注）；`dc_validator` 全仓复跑 **127 文件 0 违规**。**⑥ 观察项正式登记** = [drift-gate RESEARCH **§4.4**](../spec/drift-gate/RESEARCH.md)（v1.0 → **v1.1**）：落档调研结论表（5 项待裁定 → 确定结论）+ **七段式观察项**（登记缘由 E1 / 机制定性 = **看护缺口非 bug** / **同族登记表**（P-042 §7.11 + rework-and-decision-paths §3.8.3 + DIS-010 + P-050 P2-1 与 M7 ㉛ + 本批新证）/ 触发条件 3 条（同类复现 ≥1 例**已达阈值**）/ 载体预判（方向 A `repo_stats` drift-gate 扩 status / 方向 B Layer-0 弱纪律；**预登记否决** dc_validator 内解析 PROGRESS——撞 I-10）/ 未触发处置 / 边界声明）；同族实例补录 = [precommit-dc-validator IMPLEMENTATION §8.1](../spec/precommit-dc-validator/IMPLEMENTATION.md) fixture 表（声明 F1-F10 实为 F1-F21）补 F19-F21 行 + **v1.2 → v1.3** 追记。**⑦ 校验** = `dc_validator --selftest` **27/27** + `dc_validator` **127 文件 0 违规** + 决策流 `specwf-p052-20260929` **五步链 `step-gate` exit 0** + `verify-anchor` **10 锚点全真实 exit 0** + `step-enforce spec/drift-gate/RESEARCH.md` **exit 0** + 三校验器全绿；**零新增 M7 样本**；CODE_WIKI **v1.76 → v1.77**（banner + §2.1 树 + §9 + §10 declared `progress_tasks` 51 → 52 + PT-11 两处）；`declared` 其余不变（无新 feature 目录 / 新脚本 / 新 hook） |
 | P-053 | ADR-0008 状态回写（front-matter 欠账修复：proposed → accepted） | 承接 P-052 机械复核的同族发现（制品的 front-matter 状态 vs 实际生效/声称 不一致）：ADR-0008 front-matter 停 `v1.0/proposed` | done | — | 治理批（2026-09-29）：**ADR-0008 状态回写**——其 front-matter 停 `v1.0/proposed`，但**本 ADR 自身修订历史**（2026-08-17 行）已记 `proposed → accepted`（v1.0 → v1.1、depends 增补 ADR-0007），且 [docs/adr/README](../docs/adr/README.md) / [ADR-0007 附录 A](../adr/ADR-0007-unified-document-contract.md) / [cpp-hub-absorption IMPLEMENTATION](../spec/cpp-hub-absorption/IMPLEMENTATION.md)（commit `8ea38bf`「ADR-0007 v1.1 + ADR-0008 v1.1 定版」）**三方一致**佐证已 accepted，[SPEC_PROCESS v1.4](../SPEC_PROCESS.md) 亦已按 D4/D6 生效 ⇒ **P-052 观察项「声明 ≠ 制品状态」第 4 实例**（同族：P-052 三处 CHECKLIST 回写欠账）。**处置** = front-matter `version 1.0 → 1.1` / `status proposed → accepted` / `depends` 补 `ADR-0007`（兑现其 v1.1 记录的增补）/ `date → 2026-09-29`；正文元数据表「状态」行与「决策（Decision）」节标题同步；修订历史补回写行（含四方佐证）。**adr-only 批次**（无 `spec/` 四文档改动 ⇒ `step-enforce` 不触发，同 P-048 先例）。**同批追加（用户指令「先把 ADR-0008 补进 drift-gate §4.4 的同族登记表再提交」）** = [drift-gate RESEARCH §4.4.2（三）](../spec/drift-gate/RESEARCH.md) 同族登记表补 **第 4 实例**（ADR-0008 front-matter 欠账）+ §4.4.3 增第 5 条 ⇒ RESEARCH **v1.1 → v1.2**。**校验** = 三校验器全绿；**零新增 M7 样本**；CODE_WIKI **v1.77 → v1.78**（banner + §2.1 树 + §9，含 drift-gate RESEARCH v1.2 同步 + §10 declared `progress_tasks` 52 → 53 + PT-11 两处）；`declared` 其余不变 |
 | P-054 | drift-gate §4.4 观察项激活裁决（方向 A 显式否决 / 方向 B 激活） | 用户指令「执行 drift-gate §4.4 是否激活任务」→ 裁决「采判定：A 否决 / B 激活」+「复核无误后落档」 | done | — | 激活裁决批（2026-09-29）：**ADR-0010 三问评估（机械复核，E1）** —— **Q1** = 方向 A（`repo_stats` 扩 status 一致性）**Layer-1** / 方向 B（弱纪律）**Layer-0**；**Q2** = 触发① 已达（4 实例），但**方向 A 被否决**：机械复核① `repo_stats` 的 truth 键**全为 `fs.` / `hits.` / `derived.`（计数 / 百分比，零语义比对）**、复核② `doc_registry` **每 feature 仅 1 条**（31）⇒ 三份漂移制品 `CHECKLIST_FUNC` / `CHECKLIST` **不在覆盖面** ⇒ 建 Layer-1 = 对**散文**做双侧语义比对 + bespoke 模式 ⇒ 撞 **I-10 语义同源**（同 **P-051 候选**否决理由）+ 违本仓判据「**有定形 ⇒ 补位点 / 无定形 ⇒ 只立纪律**」（status 声称面**无定形**）；且 **4 实例即时根因已闭环**（3 例 = DC2 规则过窄 → P-052 扩宽；1 例 = 人工疏忽 → P-053 回写；1 例 = 声明错误 → 已订正）、**P-052 / P-053 后零新增**；**Q3** = 副作用 **0**。**判定** = **方向 A 显式否决**（否决理由**就此固化**，免未来重复评估）/ **方向 B 激活** → 弱纪律落 [AGENTS.md](../AGENTS.md) 禁止事项**第 7 条**（仿 DIS-008 规则化先例）。**已知快照滞后（本批不追改，如实登记为「快照」非「缺口」）** = [hook-surface §3.5](../spec/hook-surface/RESEARCH.md) 与 [CER §3.5](../spec/community-ecosystem/COMMUNITY_ECOSYSTEM_RESEARCH.md) 的「禁止事项 **6 条**」为**时点快照**（原文自带「全量原文核对，**2026-09-09**」）。**落档** = [drift-gate RESEARCH **§4.4.4**](../spec/drift-gate/RESEARCH.md)（v1.2 → **v1.3**）+ [AGENTS.md](../AGENTS.md) + CODE_WIKI **v1.78 → v1.79**（banner + §2.1 树 + §9 + `declared.progress_tasks` 53 → 54 + PT-11 两处）；**零新增 M7 样本**；三校验器全绿 |
+| P-055 | 剩余 open issue 盘点 + 待办优先级裁决刷新（吃狗粮适用性判定 + 闭环方案） | 用户指令「剩余未闭环 open issue 是否可以采用吃狗粮方式执行 分析方案优先级 给出闭环方案」→「把优先级表落档到 PROGRESS」 | done | — | 盘点批（2026-09-29）：**① 判定口径** = 吃狗粮（10 步 + `step-gate` + 独立 pass）是给**有交付物、有判据**的批次用的；**触发未满却主动开全套 = 形式化审查表演**（本仓核心目标明令抑制）⇒ 逐项判 **可 / 轻批 / 不该**。**② 优先级 + 闭环方案** = **P1** ADR-0006 失效条件复核（到期 2026-11-15；唯一「有硬期限 + 有机械判据」的批，`downstream_compliance.py` 可复算 J-1~J-4 → 落 ADR-0006 §B 重审 #3 + 独立 pass）；**P2** 门面快照刷新（`repo_stats` P3 提示；其中 `fs.adr_files` 声明值 < 实际 = **内容真滞后**）+ R-1 残余（**不需批**——本仓可机械复核，真闭合动作在消费仓，**其仓库自治不代改**）；**P3** arc-probe 陈旧勾选 / m7 形态（并入他批）；**P4（不该主动执行，等触发）** M7 §4 两条候选 + hook-surface §4.1 / rework-and-decision-paths §6（H-FTA、H-RPC1/2）/ rework-graph §11 / project-console §7.11（H9）观察项（触发全未满）+ academic-writing-workflow（独立域，依赖论文仓侧动作）。**③ 落档** = **本节**「待办事项优先级裁决 **2026-09-29 刷新**」——原 2026-08-20 版**裁决对象已全部 done** ⇒ 整体过期（其四维矩阵 / 依赖链 / 综合排序结论整体失效），**原文折叠为 `<details>` 历史快照（不再维护）**，保留其「评估维度定义」（仍通用）与「H 编号命名空间消歧」（仍有效）。**④ 校验** = 三校验器全绿；**零新增 M7 样本**；CODE_WIKI v1.79 → v1.80（banner + §2.1 树 + §9 + `declared.progress_tasks` 54 → 55 + PT-11 两处） |
 
-## 待办事项优先级裁决（2026-08-20）
+## 待办事项优先级裁决（2026-09-29 刷新）
 
-> 对 4 项 pending（P-008/P-009/P-010/P-011）的综合排序。四维（ROI / 依赖 / 难度 / 风险）分析，断言全部追溯至源文档：[LANGGRAPH_UPGRADE_RESEARCH](../spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md) §5/§6/§8/附录、[M7 账本](M7_EVIDENCE_LOG.md) §1/§4、[SPEC_PROCESS](../SPEC_PROCESS.md)、P-012/P-013 调研报告。
-> 样本数「12」为 2026-08-20 快照值（M7 样本登记表 12 行，样本⑫ 为最新），随账本追加顺延。
+> **刷新缘由**：原 2026-08-20 版的裁决对象（4 项 pending）**已全部 done**，其四维矩阵 / 依赖链 / 综合排序结论整体过期 ⇒ 本节据 **2026-09-29 open issue 实测盘点**重写（原版原文折叠于本节末 `<details>`，**不再维护**）。
+> **判定口径（关键）**：本仓核心目标 = 抑制**形式化审查表演** ⇒ 对**触发未满**的观察项，正确处置是「**等触发**」；**触发未满却主动开全套吃狗粮流程 = 表演**。故本节对「能否吃狗粮」逐项判 **可 / 轻批 / 不该**。
+
+### 剩余 open issue 优先级表（2026-09-29）
+
+| 优先 | 项 | 性质 | 吃狗粮? | 触发 / 判据现状 |
+|------|----|------|--------|----------------|
+| **P1** | ADR-0006 失效条件复核（到期 2026-11-15） | 有**硬期限** + 有**机械判据**（J-1~J-4） | **✅ 最该做** | 唯一「到期须裁决 + 已有可复算命令」的批；非阻断，可提前执行 |
+| **P2** | 门面快照刷新（`repo_stats` P3 提示） | 快照滞后（by-design「择机」） | **✅ 轻批** | 其中 `fs.adr_files` 声明值 < 实际（**内容真滞后**，非纯快照） |
+| **P2** | R-1 残余（Cpp_Hub `.gitignore` 忽略 `docs/discoveries/`） | 跨仓未闭合 | **⚠ 不需批** | 本仓有 `downstream_compliance.py` 可机械复核；真闭合须消费仓改规则（**其仓库自治，本仓不代改**） |
+| **P3** | arc-probe RESEARCH 陈旧勾选 / `m7_stats` 形态 P3 | 微残留 | **▶ 并入他批** | 单行 / 单形态，单开批不经济 |
+| **P4** | M7 §4 候选①（增长型载体计数口径）/ 候选②（R7 管辖边界） | Layer-0 候选（**未激活**） | **❌ 不该** | 触发 = 同类复现 ≥1 例 **或** 用户裁决；**当前无新例** |
+| **P4** | hook-surface §4.1 / rework-and-decision-paths §6（H-FTA、H-RPC1/2）/ rework-graph §11 / project-console §7.11（H9） | 观察项 | **❌ 不该** | 触发全**未满**（连续三裁决未引三问未现 / 结构分叉仅 1 例 / 真实返工 fork 为 0 / 文档订正轮仅 1 次） |
+| **P4** | academic-writing-workflow（H6/H7/H12–H16 + 挂起登记） | 独立域（论文仓） | **❌ 不适用** | 依赖用户论文仓侧动作与裁决 |
+| — | drift-gate §4.4 观察项 | **已闭环（P-054）** | — | 方向 A 显式否决 / 方向 B 激活（AGENTS.md 禁止事项第 7 条） |
+
+### 闭环方案
+
+1. **ADR-0006 复核（开吃狗粮批）**：Step 1 机械取证（`python scripts/downstream_compliance.py` 复算 J-1~J-4 + `git rev-list --left-right --count` 复核）→ Step 2-4 裁决条件③（回流频度）与条件②（R-1 持久性）→ 落 **ADR-0006 §B 重审 #3** + 修订历史；若判「通道名存实亡」则 `superseded` / 改判 → **独立 pass**（RULE-1 时序 + RULE-5 异基座）。
+2. **R-1（不需批）**：跑一次 `downstream_compliance.py` 取实测，据实在 ADR-0006 §B 记「R-1 持续 / 收窄」；**闭环动作在消费仓**，本仓只留证据指针。
+3. **门面快照（轻批）**：更新 `CODE_WIKI §10 facade_baseline` 的 `as_of` + 三处门面（README / README.en / evidence.svg）的 `hits.samples` / `hits.form2_total`；**并修正 `fs.adr_files`（内容真滞后）**。仿 P-042 / P-043「门面快照同步」先例。
+4. **微残留**：arc-probe 陈旧勾选 + m7 形态 → 并入下一次相关批。
 > **H 编号命名空间消歧（跨文档撞名防误读）**：PROGRESS 中裸「H」分属两套独立假设编号——[LANGGRAPH](../spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md)（P-006）H1-H7 与 [DEEPSEEK_HARNESS](../spec/deepseek-harness/DEEPSEEK_HARNESS_RESEARCH.md)（P-012）H1-H4。P-009 依据列「H2/H7 PoC」= LANGGRAPH（H2=LOC 估算、H7=事件流状态）；P-009 验收列「以 H2 实测为输入（P-012 层 3）」与 P-012 行「H2/H3/H4 实测」= dsh/P-012（H2=SDK 工作站可用性）；「~500-1000 LOC 待 H2 实测」= LANGGRAPH H2。
 
 ### 评估维度定义
@@ -74,6 +95,12 @@
 - **依赖**：零（独立可执行）/ 弱（依赖其他低优先级项）/ 强（依赖未完成前置）
 - **难度**：低（≤0.5 人天）/ 中（1-2 人天）/ 高（>2 人天或架构级）
 - **风险**：高（形态选型/技术选型/悬置成本）/ 中（实测依赖/验收标准）/ 低（流程性/机械性）
+
+<details>
+<summary>历史快照：待办事项优先级裁决（2026-08-20 原文，仅供追溯，勿追加）</summary>
+
+> 对 4 项 pending（P-008/P-009/P-010/P-011）的综合排序。四维（ROI / 依赖 / 难度 / 风险）分析，断言全部追溯至源文档：[LANGGRAPH_UPGRADE_RESEARCH](../spec/langgraph-upgrade/LANGGRAPH_UPGRADE_RESEARCH.md) §5/§6/§8/附录、[M7 账本](M7_EVIDENCE_LOG.md) §1/§4、[SPEC_PROCESS](../SPEC_PROCESS.md)、P-012/P-013 调研报告。
+> 样本数「12」为 2026-08-20 快照值（M7 样本登记表 12 行，样本⑫ 为最新），随账本追加顺延。
 
 ### 四维评估矩阵
 
@@ -104,6 +131,8 @@
 4. **P-009（优先级 5，触发驱动，不主动启动）**：方向性候选，待自动化需求出现。LG H2（LOC 估算）/LG H7（事件流状态）PoC 与 dsh SDK vs 裸 API 选型（P-012 层 3）为前置，P-008 并行 dsh 试点可顺产部分实测输入。
 
 > **优先级编号说明**：1/2/3 为主动执行队列序（P-008 → P-011 → P-010）；P-009 记为 5 而非 4，标识其属「触发驱动」异质类（不排队、等外部条件），语义上与主动队列隔开，避免被误读为「下一个要做的第 4 项」。
+
+</details>
 
 ## 已完成（近期）
 
