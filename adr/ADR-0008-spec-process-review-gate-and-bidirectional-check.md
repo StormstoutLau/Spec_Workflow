@@ -1,10 +1,10 @@
 ---
 id: ADR-0008
 type: adr
-version: 1.0
-status: proposed
-date: 2026-08-17
-depends: [CPP_HUB_ABSORPTION_DESIGN, CPP_HUB_GAP_ANALYSIS_RESEARCH, SPEC-PROCESS, FWK-ASSERTION]
+version: 1.1
+status: accepted
+date: 2026-09-29
+depends: [CPP_HUB_ABSORPTION_DESIGN, CPP_HUB_GAP_ANALYSIS_RESEARCH, SPEC-PROCESS, FWK-ASSERTION, ADR-0007]
 upstream: null
 ---
 
@@ -16,7 +16,7 @@ upstream: null
 |------|-----|
 | 编号 | ADR-0008 |
 | 日期 | 2026-08-17 |
-| 状态 | proposed（草案，待用户确认） |
+| 状态 | accepted（2026-08-17 用户确认 D4+D6 双决策；front-matter 回写 2026-09-29） |
 | 决策者 | Scott (鹏) + Claude GLM-5.3（草案生成） |
 | 相关文档 | [SPEC_PROCESS.md](../SPEC_PROCESS.md) v1.3、[CPP_HUB_ABSORPTION_DESIGN.md](../spec/cpp-hub-absorption/CPP_HUB_ABSORPTION_DESIGN.md) §4.3/§4.5（D4/D6 接口）、[CPP_HUB_GAP_ANALYSIS_RESEARCH.md](../spec/cpp-hub-gap-analysis/CPP_HUB_GAP_ANALYSIS_RESEARCH.md) §3.1-1/2/8 |
 | 取代 | 无 |
@@ -41,7 +41,7 @@ SPEC_PROCESS v1.3 的 Step 2 Review 是 **checklist 语义**（五项勾选，�
 
 吸收设计将 D6 归为"随 D4 同版"但未给决策记录载体。若 ADR-0008 只覆盖 D4，D6 的裁剪依据（F1-F8 模式取两项、集成点选择）无据可查，违反设计自身不变式 4 的精神。
 
-## 决策（Decision，proposed 待确认）
+## 决策（Decision，accepted）
 
 ### 决策 1（D4）: Step 2 Review 升格为门禁语义
 
@@ -217,3 +217,4 @@ Step 2 Review 章末新增【门禁】块，**满足前禁止进入 Step 3**：
 | 2026-08-17 | 初始草案（proposed）：scope 修正为 D4+D6 双决策（Step 4 Review 缺口 B 修复），待用户确认 |
 | 2026-08-17 | 补充"决策分析"节（依据 × 收益 × 成本：内部 E1 实证五例 + 库内文献锚点 + 外部 1 篇页面级复核 + 组合效应），供用户确认参考 |
 | 2026-08-17 | proposed → **accepted**（用户确认 D4+D6 双决策通过）；版本 v1.0 → v1.1；depends 增补 ADR-0007（词表与载体语境）。执行序待办：框架 v1.3（D1）先行 → 本 ADR 与 SPEC_PROCESS v1.4 同提交落地 |
+| 2026-09-29 | **front-matter 回写（P-053）**：上行 2026-08-17 已记 proposed → accepted（v1.0 → v1.1、depends 增补 ADR-0007），但 front-matter 停 `v1.0/proposed`、`depends` 缺 ADR-0007，正文元数据表与「决策」标题亦未同步 —— 经 **P-052 机械复核同族检出**（「声明 ≠ 制品状态」，drift-gate RESEARCH §4.4 观察项第 4 实例）。**四方佐证** = 本表上行 + [docs/adr/README](../docs/adr/README.md) + [ADR-0007 附录 A](./ADR-0007-unified-document-contract.md) + [cpp-hub-absorption IMPLEMENTATION](../spec/cpp-hub-absorption/IMPLEMENTATION.md)（commit `8ea38bf` 定版 v1.1）⇒ 回写为 **accepted / v1.1** + depends 补 ADR-0007 |

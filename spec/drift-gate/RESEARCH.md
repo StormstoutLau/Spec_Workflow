@@ -3,7 +3,7 @@
 ---
 id: drift-gate-RESEARCH
 type: design
-version: 1.1
+version: 1.2
 status: draft
 date: 2026-09-29
 depends: [community-ecosystem-RESEARCH, ADR-0010, SPEC-PROCESS]
@@ -17,6 +17,8 @@ upstream: null
 > **任务来源**: 用户指令「针对 drift-gate / 意图图-证据图概念吸收任务进行吃狗粮测试 按照 spec 工作流开始 运行到懒加载 gate 部分即可」——吃狗粮立项，走到 ADR-0010 懒加载 gate 三问判定处驻留（不实施 repo_stats 演进本身）。
 >
 > **v1.1 变更（2026-09-29，P-052 落档批）**: 用户指令「先落档 细化调研待裁定事项 给出证据支持的确定结论」+「把『front-matter 状态 vs PROGRESS 声称』的一致性问题登记为一个观察项」——新增 **§4.4 补充登记**（3 处状态漂移的机械复核结论 + 2 项新增发现 + 观察项登记 + 本批已执行处置）。**零新增外部断言**（全 E1 本仓机械取证）；**零 drift-gate 实现改动**（DC2 判别规则扩宽落在既存工具 `dc_validator`，非本 feature 交付，见 §4.4.3）。
+>
+> **v1.2 变更（2026-09-29，P-053 追加）**: §4.4.2（三）同族登记表补**第 4 实例** —— [ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) front-matter 欠账（`v1.0/proposed` → **`v1.1/accepted`**，`depends` 补 ADR-0007），由 P-053 回写批同批落档；§4.4.3 增第 5 条。**零新增外部断言**（全 E1）。
 
 ---
 
@@ -107,7 +109,7 @@ upstream: null
 
 - **（一）登记缘由（E1）** = 本批机械复核（§4.4.1）——3 处 CHECKLIST + 1 处 DESIGN/RESEARCH 的 front-matter 状态与 PROGRESS 声称**不一致**，而三校验器**全绿**（`dc_validator` 只校验 `status ∈ 词表`；`repo_stats` drift-gate 只比 **version** 不比 **status**、且仅覆盖 `doc_registry` **已登记**制品；两份 `CHECKLIST_FUNC` **未登记** ⇒ 完全逃逸）。**无任何机械看护。**
 - **（二）机制定性** = **看护缺口（管辖空白），非工具 bug**。三者合力：① `dc_validator` M2 管「状态是否合法」不管「状态是否与外部声称一致」；② `repo_stats` drift-gate 管「意图（§9 版本）↔ 证据（front-matter 版本）」不管 status、且只对 registered doc；③ `doc_registry` 每个 feature 只登记 1 份代表文档 ⇒ 同 feature 的 CHECKLIST/RESEARCH 常在覆盖面外。
-- **（三）同族登记** = 同一「**声明 ≠ 实物/重数**」族的又一显形位点：[P-042 §7.11](../project-console/RESEARCH.md)（无决策事件的文档订正轮 ⇒ 控制台不可见，**视图层**显形位点）+ [rework-and-decision-paths §3.8.3](../rework-and-decision-paths/RESEARCH.md)（CHECKLIST 条目级状态无机械重数）+ **DIS-010**（[discoveries](../../docs/discoveries/README.md)，视图层计数漂移 = 真值源的「无失效检测缓存副本」）+ P-050 v1.2 P2-1 / **M7 样本 ㉛**（[M7 账本](../../docs/M7_EVIDENCE_LOG.md)，事件流 ≠ 文档最终状态）+ **本批新证**（[precommit-dc-validator IMPLEMENTATION §8.1](../precommit-dc-validator/IMPLEMENTATION.md) fixture 表声明 F1-F10 而代码实为 F1-F21——同类「声明未随实物更新」）。
+- **（三）同族登记** = 同一「**声明 ≠ 实物/重数**」族的又一显形位点：[P-042 §7.11](../project-console/RESEARCH.md)（无决策事件的文档订正轮 ⇒ 控制台不可见，**视图层**显形位点）+ [rework-and-decision-paths §3.8.3](../rework-and-decision-paths/RESEARCH.md)（CHECKLIST 条目级状态无机械重数）+ **DIS-010**（[discoveries](../../docs/discoveries/README.md)，视图层计数漂移 = 真值源的「无失效检测缓存副本」）+ P-050 v1.2 P2-1 / **M7 样本 ㉛**（[M7 账本](../../docs/M7_EVIDENCE_LOG.md)，事件流 ≠ 文档最终状态）+ **本批新证**（[precommit-dc-validator IMPLEMENTATION §8.1](../precommit-dc-validator/IMPLEMENTATION.md) fixture 表声明 F1-F10 而代码实为 F1-F21——同类「声明未随实物更新」）+ **P-053 追加实例**（[ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md)：front-matter 停 `v1.0/proposed`，而其**自身修订历史**已记 `proposed → accepted`（v1.0 → v1.1、`depends` 增补 ADR-0007），且 [docs/adr/README](../../docs/adr/README.md) + ADR-0007 附录 A + [cpp-hub-absorption IMPLEMENTATION](../cpp-hub-absorption/IMPLEMENTATION.md) 三方一致 ⇒ **制品 front-matter 回写欠账**，本族**第 4 实例**）。
 - **（四）触发条件（任一即重审）** = ① 同类复现 **≥1 例**（本批已 4 例，达阈值）② 出现**由本缺口导致的误判**（据落后状态做错裁决或对外陈述）③ 用户显式裁决。
 - **（五）载体预判（均须先过 ADR-0010 三问）** = **方向 A（Layer-1，候选）** = 把「front-matter `status` 与 PROGRESS 声称 一致性」纳入 `repo_stats` drift-gate（现只比 version 不比 status；扩到 status + 覆盖非 registered 制品）；**方向 B（Layer-0，纪律）** = 补一条弱纪律「制品状态变更须同步 front-matter，且与 PROGRESS / CODE_WIKI 声称一致」。**预登记否决** = 不在 `dc_validator` 内解析 PROGRESS（跨契约耦合，撞 **I-10** 语义同源）。
 - **（六）未触发处置** = 维持现状；本批已把**可机械化的那一半**落地（DC2 判别规则扩宽 + 回写，见 §4.4.3）；**不新增门禁 / 不改 `console_gen` / 不新增校验器**。
@@ -119,6 +121,7 @@ upstream: null
 2. **5 处 front-matter 回写**：step-gate/CHECKLIST_FUNC（v1.0/draft → **v1.1/accepting**）/ defect-fixes/CHECKLIST_FUNC（draft → **accepting**）/ independent-verify/CHECKLIST（pending → **accepting**）/ independent-verify/DESIGN 与 RESEARCH（draft → **verified**）。
 3. **PROGRESS P-025 版本声称订正**：`v1.4.0` → **v1.3.0**（附机械取证注）。
 4. **视图层同步**：CODE_WIKI（§2.1 树 / §9 / 版本头）。
+5. **P-053 追加（ADR-0008 回写，2026-09-29）**：§4.4.2（三）同族登记表补**第 4 实例**（[ADR-0008](../../adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md) front-matter 欠账——`proposed → accepted` / `v1.0 → v1.1` / `depends` 补 ADR-0007）；回写与登记同批落档（[PROGRESS P-053](../../docs/PROGRESS.md)）。
 
 ## 5. 幻觉抑制审查（Step 2 Review）
 
