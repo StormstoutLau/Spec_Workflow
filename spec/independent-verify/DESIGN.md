@@ -3,7 +3,7 @@
 ---
 id: independent-verify-DESIGN
 type: design
-version: 1.0
+version: 1.1
 status: verified
 date: 2026-09-29
 depends: [independent-verify-RESEARCH, ADR-0011, ADR-0010, step-gate-DESIGN, SPEC-PROCESS]
@@ -12,9 +12,10 @@ upstream: null
 
 > **Feature**: 独立验证（P-025——ADR-0011 出路 C：审查臂从「读事件流」→「查系统真实状态」）
 > **创建日期**: 2026-09-09
-> **状态**: draft
+> **状态**: verified（**v1.1 就地订正**：原 banner 写 `draft` 而 front-matter 为 `verified` ⇒ 两者矛盾，按 front-matter 与 P-052 族纪律订正为 `verified`；同族第 5 实例）
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH](./RESEARCH.md) v1.0（形态 = verify-anchor 只读命令 + 审查臂规则 + 纯登记型查证范围）
+> **v1.1 变更（P-042 v1.18「DR-19 + DR-21 合并小批」，用户裁决「合并开一小批」）**: **新增 §4.1.1 锚点形态契约（`ANCHOR_RE` / `_resolve_anchor`）与受支持形态表**——把原**隐式**约束（DR-21 登记的「契约未成文」）显式化，并**以变量隔离实测**订正三处原记述：① §4.1 步骤 2 原写「其他 → 形态不可解析（hard，因为 `ANCHOR_RE` 应已拦截——防御性）」**不成立**（实测反例 `CODE_WIKI.md#L3` → `ANCHOR_RE` 不匹配却判**真实**）；② §7 原写「JSON 损坏行 → 跳过 + 警告计入违规」**与实现不符**（实为解析异常中断 → exit 1；v1.1 起报错附 `<路径>:<行号>`，见 [project-console IMPLEMENTATION DR-19](../../spec/project-console/IMPLEMENTATION.md)）；③ 载体与行号形态的判别因素由二候选收窄为**实测结论**（`.py` 单行 `#L` **受理**、**行号区间**不受支持、**前缀白名单**仅存在于 `ANCHOR_RE`）。**边界** = 本批只**登记契约**（文档面）：`ANCHOR_RE` 正则逻辑与判定行为**零改动**（判真实/硬性/软性的边界与 v1.0 逐例一致）。
 
 ---
 
@@ -85,19 +86,47 @@ python tools/spec_runner/spec_runner.py verify-anchor --session <sid>
 ```
 
 - `--session`：必填，目标 session
+- `--detail`：**可选，默认关闭**（v1.1 新增，DR-21 方向 B(i)）——开启时在 hard/soft 汇总**之前**输出**逐锚点明细**（`[DETAIL] seqN 真实|硬性|软性 <锚点原文> —— <依据>`），供开发期定位失败锚点；**默认关闭保证输出与 v1.0 逐字节一致**（守确定性 I-2；selftest F39/F40 锁死）
 - 流程：
   1. `read(sid)` 过滤 `event=="decision"` → 提取每条 `metadata.evidence[].anchor`
   2. 锚点解析（三形态）：
      - `path §N`（N = 数字+点序列，如 `3.5`）→ 章节引用
      - `path#Lxx`（xx = 正整数）→ 行号引用
      - `https?://...` → URL（外部证据，本地不可核 → soft）
-     - 其他 → 形态不可解析（hard，因为 ANCHOR_RE 应已拦截——防御性）
+     - 其他 → 形态不可解析（hard）——**实测说明（v1.1 订正）**：此处**不是**「`ANCHOR_RE` 应已拦截后的防御性分支」。两处的**形态集合不同**：`ANCHOR_RE`（step-gate 软性面）含**前缀白名单**（`spec|adr|docs|tools|scripts` + `/`），而 `_resolve_anchor` **无前缀限制** ⇒ 存在 `ANCHOR_RE` 不匹配、本命令仍判**真实**的形态（实测：`CODE_WIKI.md#L3`）。完整形态表见 §4.1.1。
   3. 真实性核查（`path` 相对仓库根解析，仓库根 = spec_runner.py parents[1]）：
      - **文件存在**：`(ROOT_REPO / path).is_file()`，否则 hard
      - **章节 §N**：文件全文 `^#{1,6}\s+<N>(?:\s|$)` 精确匹配（`3.5` 只匹配标题 token `3.5`，不匹配 `3.5.1`；`3` 不匹配 `3.5`）——否则 hard
      - **行号 #Lxx**：`len(content.splitlines()) >= xx`——否则 hard
   4. 分级报告：hard 汇总 → exit 1；soft（URL/不可解析）汇总 → exit 2；全真实 → exit 0
 - **只读**：不创建/修改 session，无 git 操作
+
+### 4.1.1 锚点形态契约（`ANCHOR_RE` / `_resolve_anchor`）与受支持形态表（v1.1 新增）
+
+> **登记缘由（DR-21，P-042 v1.13 首例）**：原约束**隐式**——前缀白名单与载体/行号形态限制只存在于源码正则，未落本文档 ⇒ 锚点写法只能靠逐条试错定位（该轮实测多花 3 次往返）。本表把契约显式化。
+> **方法**：**变量隔离实测**（P-042 v1.18 首步，用户裁决「合并开一小批」的**前置 Ⅰ**）——探针 session 置于**仓外**临时目录（`SR_SESSIONS_DIR` 注入），九条锚点单变量对照，同一会话同跑 `verify-anchor` 与 `step-gate`（读数 = 2026-09-30 本机实测）。
+
+**两处形态集合不同（关键）**：`ANCHOR_RE` 与 `_resolve_anchor` 是**两套判定**，交集之外的方向**不对称**。
+
+| # | 锚点形态实例 | `verify-anchor`（`_resolve_anchor` + `_check_anchor`） | `step-gate` 软性面（`ANCHOR_RE`） | 说明 |
+|---|---|---|---|---|
+| 1 | `spec/project-console/RESEARCH.md §7.16` | **真实** | 匹配 | 白名单 `.md` + §章节（推荐形态） |
+| 2 | `docs/PROGRESS.md#L3` | **真实** | 匹配 | 白名单 `.md` + **单行** `#L` |
+| 3 | `scripts/spec_map.py#L76` | **真实** | 匹配 | **`.py` 载体 + 单行 `#L` 亦受理** ⇒ **原候选①「仅 `.md` 可作载体」证伪** |
+| 4 | `docs/PROGRESS.md#L3-L5` | **硬性**（形态不可解析） | **不匹配**（soft） | **行号区间不受支持** ⇒ **原候选②确认** |
+| 5 | `scripts/spec_map.py#L76-L83` | **硬性** | 不匹配（soft） | 同 #4（区间），**与载体扩展名无关** |
+| 6 | `CODE_WIKI.md` | **硬性**（形态不可解析） | 不匹配（soft） | 根级 `.md` + 无定位符 |
+| 7 | `CODE_WIKI.md#L3` | **真实** | **不匹配**（soft） | **前缀白名单只在 `ANCHOR_RE` 存在** ⇒ **第三因素（新发现）** |
+| 8 | `scripts/spec_map.py` | **硬性**（形态不可解析） | 匹配 | 白名单内**纯文件**：本命令不受理，`step-gate` 却放行 |
+| 9 | `spec/project-console/RESEARCH.md` | **硬性** | 匹配 | 同 #8 |
+
+**受支持形态（推荐写法，方向 A 弱纪律的显式化）**：
+1. **首选** = `spec|adr|docs|tools|scripts` 前缀的 **`.md`** + **`§章节号`**（如 `spec/project-console/RESEARCH.md §7.16`）；
+2. **次选** = 同上前缀的 `.md` + **单行** `#L数字`（如 `docs/PROGRESS.md#L3`）；
+3. **禁止** = **行号区间**（`#L3-L5`）、**纯文件无定位符**（`docs/PROGRESS.md`）、**根级无白名单前缀**（`CODE_WIKI.md`）——三者至少在一处判硬性或不匹配。
+4. **`.py` 载体单行 `#L` 虽被受理，仍不推荐**：`ANCHOR_RE` 与 `_resolve_anchor` 对它的判定路径不同（前者允许无定位符、后者要求定位符），混用会放大二者不对称面。
+
+**边界**：本表**只描述现状契约**，**不改判定行为**（`ANCHOR_RE` 正则与 `_resolve_anchor` 判定在 v1.1 逐例不变）；「是否支持行号区间 / 是否统一两处形态集合」属**另一次裁决**（登记为待决项，不随本批扩大）。
 
 ### 4.2 SPEC_PROCESS RULE-1 取证清单（修订）
 
@@ -148,7 +177,7 @@ RULE-1 条目追加取证要求（独立 pass 执行时）:
 | 锚点章节标题不存在 | hard → exit 1，列 §N 与文件 |
 | 锚点行号越界 | hard → exit 1，列 Lxx 与总行数 |
 | 锚点为 URL（外部证据） | soft → exit 2（本地不可核，人工/审查臂处理） |
-| JSON 损坏行 | 跳过 + 警告计入违规（exit ≥ 1） |
+| JSON 损坏行 | **v1.1 订正**：原写「跳过 + 警告计入违规」**与实现不符**——`EventWriter.read/next_seq` 解析失败即**中断**并报 `spec_runner: session 解析失败 -> <路径>:<行号>: <msg>` → **exit 1**（DR-19 方向 B，P-042 v1.18；此前只报被解析行内偏移、不带文件名与行号）|
 
 ## 8. 对实施的输入
 
@@ -159,12 +188,23 @@ RULE-1 条目追加取证要求（独立 pass 执行时）:
 3. **兼容既有命令面**：run/gate/status/replay/fork/step-gate/step-enforce 行为逐字节不变（I-4 三通道对比实证）
 4. **仓库根解析**：锚点路径相对仓库根（spec_runner.py parents[1]），与既有锚点写法（`spec/...` 前缀）一致
 5. selftest 覆盖：真实锚点 pass / 文件不存在 fail / 章节不存在 fail / 行号越界 fail / URL soft / §3 不命中 §3.5
+6. **v1.1 增补**：**坏行报错定位**（报错含 `<路径>:<行号>`，exit 1 不变）/ **`--detail` 默认关闭**（默认输出与 v1.0 逐字节一致）/ **行号区间判硬性**（隔离实测结论固化为回归）
 
 ### 8.2 验证计划
 
 - selftest 增 F30-F34：verify-anchor 五场景（真实 / 文件缺失 / 章节缺失 / 行号越界 / URL soft + §3≠§3.5 精确性）
+- **v1.1 增补**：selftest 增 **F37-F41**（坏行报错含 `<路径>:<行号>`——verify-anchor 与 step-gate 双命令 / `--detail` 逐锚点明细 / 默认关闭零明细 / 行号区间判硬性）；`spec_runner` selftest **38/38 → 43/43**
 - 三通道复跑：dc-validator / m7-stats / repo-stats 全绿（spec/ 新 feature 目录 → repo-stats 对账）
 - **吃狗粮实证**：本批（P-025）decision 锚点自身过 verify-anchor → exit 0；历史 session（p020/p023/p024）跑 verify-anchor 暴露既有表演空间 → 取证修正或登记
+
+---
+
+## 9. 修订历史
+
+| 版本 | 日期 | 变更 |
+|---|---|---|
+| v1.0 | 2026-09-09 | 初版（P-025 出路 C 实施设计：verify-anchor 命令 + RULE-1 取证清单） |
+| **v1.1** | **2026-09-30** | **P-042 v1.18「DR-19 + DR-21 合并小批」**：新增 **§4.1.1 锚点形态契约与受支持形态表**（变量隔离实测，订正原二候选推断：候选① 证伪 / 候选② 确认 / 新发现「前缀白名单仅存在于 `ANCHOR_RE`」）；新增 `--detail` 接口（默认关闭）；订正 §4.1 步骤 2 与 §7 两处与实现不符的记述；banner `状态` 由 `draft` 订正为 `verified`（同 front-matter，P-052 族第 5 实例）；selftest 38/38 → 43/43 |
 
 ---
 

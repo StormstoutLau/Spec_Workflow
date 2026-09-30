@@ -22,7 +22,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -48,6 +48,15 @@ def now_iso() -> str:
 
 
 # ---- 模块 1：事件流写入器（L1/L2/L3/L7——唯一写路径，无 rewrite 代码路径） ----
+class SessionParseError(ValueError):
+    """session JSONL 解析失败（DR-19 方向 B，P-042 v1.18）。
+
+    异常消息**自带上游定位** `<文件路径>:<文件行号>: <msg>`。
+    背景 = DR-19 实录：坏行只报**被解析行内**偏移（`line 1 column 834`），
+    不报文件名与文件行号 ⇒ 与「line 1」的字面直觉冲突，定位须逐行试错。
+    """
+
+
 class EventWriter:
     def __init__(self, base: Path):
         self.base = base
@@ -67,17 +76,26 @@ class EventWriter:
         if event == "gate" and not gate:
             raise ValueError("gate event requires gate payload")
 
-    def next_seq(self, sid: str) -> int:
-        p = self.path(sid)
-        if not p.exists():
-            return 1
-        last = 0
-        with p.open("r", encoding="utf-8") as f:
-            for line in f:
+    def _read_rows(self, path: Path):
+        """逐行解析（DR-19 方向 B：坏行异常附 `<路径>:<行号>`，不再只给行内偏移）。"""
+        rows = []
+        if not path.exists():
+            return rows
+        with path.open("r", encoding="utf-8") as f:
+            for lineno, line in enumerate(f, 1):
                 line = line.strip()
-                if line:
-                    last = json.loads(line).get("seq", 0)
-        return last + 1
+                if not line:
+                    continue
+                try:
+                    rows.append(json.loads(line))
+                except json.JSONDecodeError as e:
+                    raise SessionParseError(
+                        f"{path}:{lineno}: {e.msg} (col {e.colno})") from e
+        return rows
+
+    def next_seq(self, sid: str) -> int:
+        rows = self._read_rows(self.path(sid))
+        return (rows[-1].get("seq", 0) if rows else 0) + 1
 
     def append(self, sid, source, event, input_=None, output=None,
                gate=None, model=None, provider=None):
@@ -94,16 +112,7 @@ class EventWriter:
         return row
 
     def read(self, sid):
-        p = self.path(sid)
-        if not p.exists():
-            return []
-        rows = []
-        with p.open("r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    rows.append(json.loads(line))
-        return rows
+        return self._read_rows(self.path(sid))
 
 
 # ---- 模块 6：git 持久化薄封装（P-022 A+B 修复——opt-in 默认关 + 精确 sid 文件 + 会话目录所在 git 根） ----
@@ -311,6 +320,7 @@ def cmd_verify_anchor(args) -> int:
         print(f"verify-anchor[{args.session}]: 无 decision 事件（无可验锚点）")
         return 1
     hard, soft, ok = [], [], 0
+    details = []  # DR-21 方向 B(i)：开发期逐锚点明细（默认关闭，守 I-2 确定性）
     for r in decisions:
         inp = r.get("input") if isinstance(r.get("input"), dict) else {}
         md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
@@ -322,10 +332,19 @@ def cmd_verify_anchor(args) -> int:
             res = _check_anchor(path, kind, loc)
             if res == "soft":
                 soft.append(f"seq{r.get('seq')} {anchor[:60]!r}（外部证据，本地不可核）")
+                details.append((r.get("seq"), "软性", anchor, "外部证据，本地不可核"))
             elif res:
                 hard.append(f"seq{r.get('seq')} {res}")
+                details.append((r.get("seq"), "硬性", anchor, res))
             else:
                 ok += 1
+                details.append((r.get("seq"), "真实", anchor,
+                                f"位置可达（{kind} {path}"
+                                + (f" §{loc}" if kind == "section" else
+                                   f"#L{loc}" if kind == "line" else "") + "）"))
+    if getattr(args, "detail", False):
+        for seq, verdict, anchor, why in details:
+            print(f"  [DETAIL] seq{seq} {verdict} {anchor!r} —— {why}")
     for m in hard:
         print(f"  [HARD] {m}")
     for m in soft:
@@ -552,6 +571,8 @@ def build_parser() -> argparse.ArgumentParser:
     se.set_defaults(func=cmd_step_enforce)
     va = sub.add_parser("verify-anchor", help="锚点真实性取证（P-025，ADR-0011 出路 C：文件存在 + 章节/行号核查，只读）")
     va.add_argument("--session", required=True, help="目标 session")
+    va.add_argument("--detail", action="store_true",
+                    help="逐锚点明细（DR-21 方向 B：开发期定位用；默认关闭，守确定性 I-2）")
     va.set_defaults(func=cmd_verify_anchor)
     st = sub.add_parser("selftest", help="内置自测（stdlib mock server）")
     st.set_defaults(func=lambda a: run_selftest())
@@ -560,7 +581,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
-    return args.func(args)
+    try:
+        return args.func(args)
+    except SessionParseError as e:  # DR-19 方向 B：坏行报错含 <路径>:<行号>，退出码不变（1）
+        print(f"spec_runner: session 解析失败 -> {e}", file=sys.stderr)
+        print("spec_runner: 提示 = 该行须为合法 JSON（内嵌正则等反斜杠须按 JSON 转义；"
+              "同一文件内写法不一致即此故障类）", file=sys.stderr)
+        return 1
 
 
 # ---- selftest（R7 同构：计数自增机械计数，不硬编码——样本⑨ 教训） ----
@@ -800,6 +827,29 @@ def run_selftest() -> int:
         w_va.append("va-sec53", "assistant", "decision", input_=_va_d("spec/independent-verify/RESEARCH.md §5.3"))
         p_va6 = run_cli("verify-anchor", "--session", "va-sec53")
         check("F36 verify-anchor §5.3 精确命中子章节 → exit 0", p_va6.returncode == 0, p_va6.stdout[-80:])
+
+        # F37-F41: DR-19 / DR-21 方向 B 回归（P-042 v1.18——报错定位 + 明细开关 + 锚点形态）
+        bad = tmp / "bad-json.jsonl"
+        bad.write_text('{"ts": "t", "seq": 1, "session": "bad-json", "event": "decision"}\n'
+                       '{"broken": }\n', encoding="utf-8")
+        p_b1 = run_cli("verify-anchor", "--session", "bad-json")
+        check("F37 坏行报错含 <路径>:<行号>（verify-anchor，exit 1 不变）",
+              p_b1.returncode == 1 and "bad-json.jsonl:2" in p_b1.stderr, p_b1.stderr[-100:])
+        p_b2 = run_cli("step-gate", "--session", "bad-json")
+        check("F38 同族命令报错一致（step-gate 亦给 <路径>:<行号>）",
+              p_b2.returncode == 1 and "bad-json.jsonl:2" in p_b2.stderr, p_b2.stderr[-100:])
+        w_va.append("va-detail", "assistant", "decision", input_=_va_d("spec/step-gate/DESIGN.md §4"))
+        w_va.append("va-detail", "assistant", "decision", input_=_va_d("spec/step-gate/DESIGN.md §99"))
+        p_d1 = run_cli("verify-anchor", "--session", "va-detail", "--detail")
+        check("F39 --detail 逐锚点明细（真实 + 硬性 各一行）",
+              p_d1.stdout.count("[DETAIL]") == 2 and "硬性" in p_d1.stdout, p_d1.stdout[-120:])
+        p_d0 = run_cli("verify-anchor", "--session", "va-detail")
+        check("F40 默认关闭：无 --detail 时明细零出现（守 I-2 确定性）",
+              "[DETAIL]" not in p_d0.stdout)
+        w_va.append("va-range", "assistant", "decision",
+                    input_=_va_d("spec/independent-verify/RESEARCH.md#L1-L3"))
+        p_r1 = run_cli("verify-anchor", "--session", "va-range")
+        check("F41 行号区间形态 → 硬性 exit 1（隔离实测结论固化为回归）", p_r1.returncode == 1)
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))
