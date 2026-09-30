@@ -1,8 +1,8 @@
 ---
 id: project-console-DESIGN
 type: design
-version: 1.5
-status: verified
+version: 1.6
+status: draft
 date: 2026-09-11
 depends: [project-console-RESEARCH, board-generator-DESIGN, ADR-0010, FWK-DECISION-RECORD]
 upstream: null
@@ -11,7 +11,7 @@ upstream: null
 # 设计文档：项目控制台（多视图控制台生成器 + 归属迁移，P-043 / 视图增补 P-044 / 承载与步骤表 P-046 / 锚点与映射收敛 P-047）
 
 > **Feature**: 项目控制台（`spec/project-console/`）——本仓通用底座的**只读可视化层**
-> **设计来源**: [RESEARCH v1.8](./RESEARCH.md)（16A+3B+4C+4H → 28A+5B+8C+1H → 36A+7B+12C+3H → 45A+9B+16C+4H → 45A+9B+16C+5H → 45A+9B+18C+5H → 45A+9B+19C+5H → **47A+10B+20C+5H**；裁定 C-1~C-20）
+> **设计来源**: [RESEARCH v1.13](./RESEARCH.md)（16A+3B+4C+4H → 28A+5B+8C+1H → 36A+7B+12C+3H → 45A+9B+16C+4H → 45A+9B+16C+5H → 45A+9B+18C+5H → 45A+9B+19C+5H → 47A+10B+20C+5H → 49A+11B+21C+5H → 50A+12B+22C+5H → 52A+13B+23C+5H → 53A+14B+24C+5H → **55A+15B+26C+5H**；裁定 C-1~C-26）
 > **前身**: [board-generator DESIGN](../board-generator/DESIGN.md)（P-041，I-1~I-6 不变式被本设计继承并扩展）
 > **Spec 步骤**: Step 3-4
 > **本批范围**: P-043 = 归属迁移 + 多视图扩展；P-044 = 视图增补（描述列 / per-feature 流程 / 架构图口径）；P-046 = 承载修复与步骤级动态描述（hook 链表形态 / 步骤四字段）；P-047 = 锚点双属性（C-15）+ 映射来源语义反转与共享模块收敛（C-16）；**P-047 收口修正批 = §6 缺映射清单落地 + §9 兜底面归零**——均为 **Layer-1 生成端派生视图（+ hook 入口的只读映射）**，不接验证端门禁
@@ -19,6 +19,8 @@ upstream: null
 > **v1.3 变更（P-047，用户指令「执行 C-15 和 C-16」）**: 新增 **D13 锚点双属性**（C-15：`<a name=… id=…>` 覆盖「只认 name / 只认 id」两类渲染器；失效退化面登记 H8）/ **D14 映射来源语义反转与共享模块**（C-16：`CODE_WIKI §9` 行标注**优先** → `PROGRESS` 行内链接**兜底** → `—`；两处实现收敛为共享纯函数模块 `scripts/spec_map.py` → 新不变式 **I-10 语义同源**）；**本批首次新增 `scripts/` 文件**（`declared.scripts` 7 → 8）。
 > **v1.4 变更（P-047 收口修正批，用户指令「P-047 是否完全闭环 → 执行 A+B+C+D」）**: ① **D15 §6 缺映射清单落地**（`_trace_section` 增「缺映射（I-8 显式缺口）」行——修正 v1.3 的**声明未落地**：v1.3 §6.8 已要求「计入 §6 缺映射清单」，但实现只落到 §2 的 `—`）；② **`CODE_WIKI §9` 补两行标注**（`cpp-hub-absorption → P-002` / `cpp-hub-gap-analysis → P-004`）→ **兜底面归零**（残余 A-33 实例与 `cpp-hub-absorption → P-011` 错值一并消解）；③ 记入**判据教训**：C-16 的「缺口 4 → 0」只覆盖**缺值**，不覆盖**错值**——指标**必要不充分**。
 > **v1.5 变更（状态归属契约实施轮 · Layer-0，P-042 v1.8，用户指令「先按照结论顺序执行 符合完整spec工作流规范」；**零代码改动**）**: 依 [RESEARCH v1.8 §7.13](./RESEARCH.md) 的 **C-20** 新增 **D16 状态归属契约（Layer-0）**——确立**任务粒度状态真值源 = 「事件流 step 序表 ∪ feature 四文档 front-matter」（派生面）∪「人工裁决」（非派生面）**、**按值域分流**（**执行态** `done` / `in-progress` **可派生 → 机器写**；**决策态** `pending` / `blocked` **不可派生 → 人写**）、**同一位点单来源（禁双写）**；契约落 **`PLAN §1` 新增 `DC2.1 任务状态词表（+「来源」列）`**（与 DC2 **type 主轴轴正交**，四取值**零改动**、仅加「来源」列 = 「机器派生」/「人工」，守 I-7），`PROGRESS` L3 声明**改指向 DC2.1**。**§5 标题扩为「派生状态机与状态归属契约（D3 / D16）」并新增 §5.1**（**不改 §5 既有状态表**——「派生状态机」的实现面仍属 Layer-1）；**§8 增方案 G/H/I（并列否决）**。**Layer-1 边界** = `derive_state` 首参改派生值 / `PROGRESS` 状态列载体迁移 / 修订 I-7 **均属 P2（Layer-1 高风险）**，**不在本批**。
+
+> **v1.6 变更（P0 批实施设计落档轮，P-042 v1.15，用户指令「待裁决项目细化分析 给出明确建议」→「请生成 P0 批的四文档实施设计草稿」→「先落档这一轮与上一轮结果」；**零代码改动**、**P0 只落设计不落实施**）**: 依 [RESEARCH v1.13 §7.18](./RESEARCH.md) 落 **D17「未开工 vs 确无 session 的判别」**——**§5 派生标注② 修订**（原「② 活动且 `PROGRESS` 无对应 session → `Needs Attention`（决策链缺失）」→ 拆为「**② `in-progress` 且无 session → `Needs Attention`（决策链缺失）**」「**③ `pending` 且无 session → `Recommended`（未开工）**」）+ **新增 §5.2 判据表**；**§8 增方案 J（`pending` 无 session 落 `tier=""`）/ K（直接改 `state`）并列否决**。**缘由** = 现表与实现存在不一致（§5 表 `pending` 行动优先级标 `Recommended`，而 `console_gen.py` L305 对 `pending` 且无 session 实落 `Needs Attention`）——D17 把 §5 表的「`pending` → `Recommended`」**补全为显式分支**，使**表 = 实现**（P2a 尚未实施，故本批只改**设计面**，实现面留 P2a）。**唯一设计点裁定 = `pending` 无 session 落 `Recommended`（非 `""`）**——理由 = 与 §5 原表一致，否则修一处表-实现不一致又留一处。**本批边界** = **只改设计面**：**不改** `scripts/console_gen.py`（P2a 实施留 P0 批）/ **不落 P0 实施** / **零代码** / **不激活 P2**。**status → draft**（D17 属未实施设计）。
 
 ## 1. 设计目标
 
@@ -142,7 +144,7 @@ CODE_WIKI.md §9 索引  ──────────────────�
 | `in-progress` | 状态列 = `in-progress` **且** 有 session 且最远 step ≠ `finalize` | 状态列改 `done` 或最远 step = `finalize` | Recommended |
 | `pending` | 状态列 = `pending` | 状态列改 `in-progress` / `done` | Recommended |
 | `done` | 状态列 = `done` | —（终态） | （入折叠段） |
-| **派生标注**（不是状态） | ① `gate exit 2`（软性存疑）→ `Ready to Verify`；② 活动且 `PROGRESS` 无对应 session → `Needs Attention`（决策链缺失） | — | 影响 §1 分级 |
+| **派生标注**（不是状态） | ① `gate exit 2`（软性存疑）→ `Ready to Verify`；② `in-progress` 且 `PROGRESS` 无对应 session → `Needs Attention`（决策链缺失）；③ `pending` 且 `PROGRESS` 无对应 session → `Recommended`（**未开工**，见 §5.2 D17） | — | 影响 §1 分级 |
 
 > 退出条件复用本仓现成机制：`step-gate` 三类规则（exit 0/1/2）即机械退出判据（RESEARCH A-19）。
 
@@ -168,6 +170,29 @@ CODE_WIKI.md §9 索引  ──────────────────�
 **Layer-1 边界（P2，本批不做）** = ① `console_gen.derive_state` 第一参照**改派生值**（现抄 `task.status` → 因全 `done` 致三档队列恒空，A-47）② `PROGRESS` 状态列**载体迁移**（执行态改机器写）③ **修订 I-7**（决策态原词 / 执行态派生）。三者**须另立批 + 过 ADR-0010 三问 + 设可回退点**。
 
 **回退点** = 本批**零代码**，回退 = 撤销 `PLAN §1 DC2.1` 新增块 + `PROGRESS` L3 指向（**纯文档可逆**，无代码 / 产物 / 门禁面影响）。
+
+### 5.2 未开工 vs 确无 session 的判别（D17，C-24 ③ / C-26，Layer-0 设计面）
+
+> **本小节 = 设计面判据（Layer-0，零代码）**；其**实现面**（`derive_state` 拆支）属 **P2a（Layer-1）**，留 P0 批。来源 = [RESEARCH v1.13 §7.18](./RESEARCH.md)（A-54 / A-55 / B14）。
+
+**问题** = `derive_state` 的 `sess is None` 分支把**两种情形混同**（B13）：① **未开工**（`pending` 立项已登记、本就无决策流）与 ② **确无 session**（`in-progress` 执行态却缺决策链）——两者产生**同一句不成立的依据**（「无 session（决策链缺失）」）与**同一误标的行动档**（`Needs Attention`）⇒ V1a 前移一生效即把「正常开工中的事项」标成「需要关注」。
+
+**判据表（D17）**：
+
+| 状态 | 有 session？ | 依据（basis） | 行动档（tier） | 语义 |
+|---|---|---|---|---|
+| `pending` | 否 | 「未开工（立项已登记，无决策流）」 | **`Recommended`** | **正常**（V1a 立项即登记，尚未开工） |
+| `pending` | 是 | （按 §5 主表派生） | `Recommended` | 正常（罕见：登记后即开决策流） |
+| `in-progress` | 否 | 「执行态但无 session（决策链缺失）」 | **`Needs Attention`** | **缺口**（V2 族：执行态缺决策链） |
+| `done` | — | （首分支短路早退） | `""` | 终态，不参与队列 |
+
+**判别要点** = 分支键 **不是「有无 session」单独**，而是 **「`status` × 有 session？」组合**：`pending` 无 session 是**预期态**（不是缺口），`in-progress` 无 session 才是**缺口**。
+
+**落点** = **实现面**（P2a）= 在 `sess is None` 分支内**再拆一支**，仅 3 行（RESEARCH §7.18【二】）；**不改** `state` 来源（永远 `return task.status` 原词）/ **不动** I-7（`tier` 三档本不在 `PROGRESS` 词表内）/ **不加开关**（回退 = 改回原字符串常量）。
+
+**唯一设计点裁定 = `pending` 无 session 落 `Recommended`（非 `""`）**——理由 = **与 §5 主表一致**（主表 `pending` 的行动优先级即 `Recommended`）；若落 `""`，则本批修一处表-实现不一致（主表 `Recommended` vs 代码 `Needs Attention`）又留一处。
+
+**Layer-1 边界（P0 批，本批不做）** = 本小节**只落设计面**（判据表）；`derive_state` 拆支 / 三 fixture / 真机 `docs/CONSOLE.md` 复核**均属 P0 批**（须用户裁决后另立批）。
 
 ## 6. 承载、依赖图与视图增补（D4 / D5 / D8-D10）
 
@@ -314,6 +339,12 @@ A-35 实测本仓 import 图为空（7 脚本 + `spec_runner` 相互零 import�
 ### 方案 I：本批直接实施派生（改 `derive_state` + 迁移状态列）（否决）
 - 理由否决：属 **Layer-1 高风险**——须先修订 I-7、过 ADR-0010 三问、设可回退点；且状态列**全 `done`**（A-47）下贸然改派生会**同时改变**三档队列与折叠段形态，须独立批 + 门禁复跑。本批严守「**Layer-0 零代码**」边界。
 
+### 方案 J：`pending` 且无 session 落 `tier=""`（无行动档）（否决）
+- 理由否决：与 §5 主表不一致——主表 `pending` 的行动优先级为 `Recommended`；§5.2（D17）把 `pending` 无 session 显式定为 `Recommended`（**与主表对齐**）。若改落 `""`，则本批修一处表-实现不一致（主表 `Recommended` vs 代码 `Needs Attention`）又留一处（**新引入表-实现分歧**）。`pending` 是**正常预期态**、**非终态** ⇒ 应留在行动队列而非落「无档」。
+
+### 方案 K：直接改 `state`（把 `pending` 派生为重标签）（否决）
+- 理由否决：违 **I-7 词表对齐**——`state` 必须永远 `return task.status` 原词（A-3 / B13 源码实读）；D17 只改 `basis` / `tier`（**不在 `PROGRESS` 词表内的派生列**）⇒ **不触 I-7**；改 `state` 即把「派生状态机」的实现面（P2b：状态来源迁移 + I-7 扩写 + 回退点）**提前到 P2a**，混淆两级、放大风险面（C-24 ③(3a) 的解耦依据被破坏）。
+
 ## 9. 对实施的输入
 
 - **必改（P-043，已完成）**：`scripts/console_gen.py`（新建）/ `docs/CONSOLE.md`（新产物）/ `.pre-commit-config.yaml`（hook 更名 `console-gen`）/ 移除前身 `scripts/board_gen.py` 与 `docs/BOARD.md`
@@ -325,6 +356,7 @@ A-35 实测本仓 import 图为空（7 脚本 + `spec_runner` 相互零 import�
 - **门禁行为验证（P-047 特有）**：映射语义变更**直接影响 `step-enforce` hook 的 P 定位**，故须对**全部真实 feature** 逐一模拟 hook 调用并核对退出码（不得只验新增用例）；收口批后须**复跑**该复核（兜底归零改变 2 个 feature 的 P 指向）
 - **视图层同步**：CODE_WIKI（版本头 / §2.1 脚本树与 docs 树 / §9 索引 / 覆盖对象 / declared / PT-11）
 - **本批（P-042 v1.8 / Layer-0，零代码）**：**不做任何代码改动**——只落 **`spec/doc-contract/PLAN.md §1` 新增 `DC2.1 任务状态词表（+「来源」列）`** + `docs/PROGRESS.md` L3 声明**改指向 DC2.1**；`DESIGN §5.1`（D16）为**契约定义**，其 Layer-1 实现（`derive_state` 改派生值 / 状态列迁移 / 修订 I-7）**留待 P2**
+- **本批（P-042 v1.15 / P0 批实施设计，零代码）**：**不做任何代码改动**——只落 **D17 / §5.2**（判定表）与 **§5 派生标注② 修订**、**§8 方案 J/K**；P2a 的实现面（`derive_state` 拆支 + 3 fixture + CONSOLE 真机复核）**属 P0 批**（须用户裁决后另立批）
 - **边界**：不接验证端门禁（Layer-1）；不改三个校验器语义；不改 `sessions` 写入路径；**不改历史 PROGRESS 行**（读取端解决）；**C-11 ①（`—` 显式缺口）由 C-16 继承并强化，不单独实施**
 
 ---

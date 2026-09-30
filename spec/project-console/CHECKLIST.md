@@ -1,8 +1,8 @@
 ---
 id: project-console-CHECKLIST
 type: design
-version: 1.5
-status: accepted
+version: 1.6
+status: accepting
 date: 2026-09-11
 depends: [project-console-IMPLEMENTATION, project-console-DESIGN]
 upstream: null
@@ -11,13 +11,14 @@ upstream: null
 # 验收清单：项目控制台实施批（P-043）/ 视图增补批（P-044）/ 承载与步骤表批（P-046）/ 锚点与映射收敛批（P-047，含收口修正批）
 
 > **Feature**: 项目控制台（`spec/project-console/`）
-> **被验收物**: [DESIGN v1.5](./DESIGN.md) + [IMPLEMENTATION v1.5](./IMPLEMENTATION.md)
+> **被验收物**: [DESIGN v1.6](./DESIGN.md) + [IMPLEMENTATION v1.9](./IMPLEMENTATION.md)
 > **Spec 步骤**: Step 7-8
 > **v1.1 变更（P-044）**: 新增功能验收 **F11-F15**（描述列 / 描述回退链 / per-feature 折叠与锚点 / 三口径架构图 / I-8 缺口清单）+ 不变式 **I-8** 行；§8 补 P-044 复跑记录；§9 回填 H6/H7 实测部分。
 > **v1.2 变更（P-046，用户指令「先执行 C-13 和 C-14，C-16 共享模块单独处理」）**: 新增功能验收 **F16**（hook 链列表块 + `name` + 安全化通则）/ **F17**（步骤级动态描述六列 + 多轮 + 无 session 显式缺失）+ 不变式 **I-9** 行；§8 补 P-046 复跑记录（含 **I-9 全表机械核对**）；§9 再回填 H6/H7；**C-15 / C-16 显式登记为「不在本批」**。
 > **v1.3 变更（P-047，用户指令「执行 C-15 和 C-16」）**: 新增功能验收 **F18**（锚点双属性）/ **F19**（映射来源语义反转 + 共享模块唯一实现）+ 不变式 **I-10** 行；新增 **门禁面验收 F20**（映射变更后全 feature 复核 0 阻断）；§8 补 P-047 复跑记录；§9 关闭 C-15/C-16 并登记新维护纪律（`CODE_WIKI §9` 行须与 feature 主 P 同步）。
 > **v1.4 变更（P-047 收口修正批，用户指令「P-047 是否完全闭环 → 执行 A+B+C+D」）**: ① 新增 **F21**（§6 缺映射清单落地——修正 v1.3「声明未落地」）+ **F22**（兜底面归零 / 错值消解）；② §8 补收口批复跑 + **§8.2 独立 pass 记录**（同基座降级标注）；③ 三文档 status 升级（DESIGN / IMPLEMENTATION → `verified`，CHECKLIST → `accepted`）。
 > **v1.5 变更（状态归属契约实施轮 · Layer-0，P-042 v1.8，用户指令「先按照结论顺序执行 符合完整spec工作流规范」；**零代码改动**）**: 新增功能验收 **F23**（`PLAN §1 DC2.1` 任务状态词表落档 + **轴正交**（不与 DC2 合轴）+ `PROGRESS` L3 声明**改指向 DC2.1**）/ **F24**（四取值**零改动** / I-7 词表对齐 / 同一位点**单来源**不双写）；§1 增一致性项（DESIGN **D16** → IMPLEMENTATION §7 零代码落地表可追溯 + D1-D16 逐条对应）；§8 补 v1.8 复跑记录（零代码：三校验器全绿 + selftest **37/37** + 门禁链）+ **§8.3 独立 pass 记录**（RULE-1 时序独立机械复核 / RULE-5 同基座降级标注）；§9 登记 **Layer-1（P2）边界**为后续行动。**被验收物**改为 DESIGN v1.5 + IMPLEMENTATION v1.5。
+> **v1.6 变更（三项待裁决细化分析 + P0 批实施设计落档轮，P-042 v1.15，用户指令「待裁决项目细化分析 给出明确建议」→「请生成 P0 批的四文档实施设计草稿」→「先落档这一轮与上一轮结果」；**零代码改动**）**: 新增功能验收 **F25**（`pending` 且无 session → `tier=Recommended` fixture）/ **F26**（`pending` 且有 session，行为不变）/ **F27**（`done` 无 session 短路早退不变）/ **F28**（**门面回归**：`tier` 三处可见位点真机 CONSOLE 对照，A-54 / DR-22）/ **F29**（**幂等**：拆支后 I-3 保持）；§1 增一致性项（DESIGN **D17 → §5.2 → 本 CHECKLIST F25** 可追溯）；§8 补 **P-042 v1.15 复跑记录**（零代码：三校验器全绿 + selftest **37/37** + 门禁链）；§9 登记 **P0 批（V1a/V1a′/V2a/P2a）为后续行动**、**P2b 边界**顺延。**被验收物**改为 DESIGN **v1.6** + IMPLEMENTATION **v1.9**。
 
 ## 1. 文档一致性验收（Step 8）
 
@@ -35,6 +36,7 @@ upstream: null
 - [x] **C-20 → DESIGN §5.1 → IMPLEMENTATION §7 三段可追溯**（状态归属契约 Layer-0：真值源定义 / 值域分流 / 位点单来源）；D16 的**实现面**（派生状态机落地）显式登记为 **Layer-1 / P2**，不在本批
 - [x] **DC2.1 与 DC2 轴正交**：任务状态词表作为**独立子块**承载（`PLAN §1` 新增 `DC2.1`），不与 DC2（type 主轴）合表——避免污染按轴分派的校验分支（DESIGN §8 方案 G 否决）
 - [x] **`PROGRESS` L3 词表声明改指向 DC2.1**（单一权威）：原散落声明改为指针，四取值**零改动**（守 I-7 词表对齐）
+- [x] **DESIGN D17 → §5.2 → 本 CHECKLIST F25~F28 三段可追溯**（P-042 v1.15 零代码：D17「未开工 vs 确无 session 判别」落在 DESIGN §5.2 判据表，本批**只落设计**、实施面 `derive_state` 拆支留 P0 批；F25 为唯一形态裁决 fixture，F28 为可见位点回归，DR-22 登记「验收不得只跑 `--selftest`」）
 
 ## 2. 功能验收
 
@@ -64,6 +66,11 @@ upstream: null
 | **F22** | **兜底面归零 + 错值消解**（32 feature 全部由 §9 人工标注覆盖；`cpp-hub-absorption` P-011 → P-002） | ✅ 依赖兜底 **2 → 0**；CONSOLE §2 该行关联 P 纠正为 P-002；门禁复跑 **32/32 exit 0**（A-11） |
 | **F23** | **状态归属契约落档（Layer-0）**：`PLAN §1` 新增 `DC2.1 任务状态词表（+「来源」列）`（**与 DC2 轴正交**）+ `PROGRESS` L3 声明**改指向 DC2.1** | ✅ `PLAN §1` 新增 `DC2.1`（独立子块 + 轴正交声明 + 四行词表 + 位点单来源 + 轴正交消歧注）；`PROGRESS` L3 改为指向指针（四取值逐字保留） |
 | **F24** | **四取值零改动 + 词表对齐 + 位点单来源**：`done` / `in-progress` / `blocked` / `pending` **取值不变**；「来源」列 = 执行态「机器派生」/ 决策态「人工」；同一位点不双写 | ✅ `DC2.1` 四取值与 `PROGRESS` L3 逐字一致（守 I-7）；「来源」列两档明确；`derive_state` 行为**零改动**（selftest 37/37 复跑一致） |
+| **F25** | **`pending` 且无 session → `tier=Recommended`**（唯一设计点裁决，D17 / DESIGN §5.2）：拆支后该行 `tier` 由 `Needs Attention` 变 `Recommended`，**`state` 保持原词 `pending`** | ⏳ **设计已落**（D17 + §5.2 判据表）；**实施留 P0 批**（fixture 待建） |
+| **F26** | **`pending` 且有 session**：走既有分支，`tier` = `Recommended`，行为与拆支前**一致**（回归不变量） | ⏳ 设计已落；实施留 P0 批 |
+| **F27** | **`done` 无 session 短路早退不变**（A-55：存量 `done` 首分支短路 ⇒ 拆支影响面预期为零）：`if task.status == "done"` 优先于 `sess is None` 分支 | ⏳ 设计已落；实施留 P0 批（fixture 待建） |
+| **F28** | **门面回归（`tier` 三处可见位点真机 CONSOLE 对照）**：① §状态表「行动档」列 ② 三级行动队列 ③ per-feature 折叠块——**单跑 `--selftest` 不可观测**该变更（A-54 / DR-22） | ⏳ 设计已落；实施留 P0 批（真机 CONSOLE 三处位点对照） |
+| **F29** | **幂等（I-3）**：拆支后生成器双跑字节一致（首写 True / 二次 False）保持不变 | ⏳ 设计已落；实施留 P0 批 |
 
 ## 3. 接口验收
 
@@ -120,6 +127,19 @@ upstream: null
 | 新增契约面 | `DECLARED_SOURCES` 属**架构契约声明**（非业务真值）：Layer-0 文档化于 DESIGN §6.4 / §3.1、只对实际存在的脚本绘边、漂移由「未声明关系」清单兜底（I-8）；P-047 新增 `spec_map → PROGRESS + CODE_WIKI §9` 一条同性质声明 |
 
 ## 8. 验收结论与复跑记录
+
+**P-042 v1.15 复跑（2026-09-30，本机实测；P0 批实施设计落档轮，零代码）**:
+
+| 命令 / 核对 | 结果 |
+|------|------|
+| `python scripts/dc_validator.py` | **0 违规（127 文件）**——本 IMPLEMENTATION §0 声明 **14A / 6B / 0C / 0H** 与机械重数一致 |
+| `python scripts/m7_stats.py` | **0 违规**（P3 提示 1——发现列非标准形态，样本③ 历史形态 by-design，**禁止回改**） |
+| `python scripts/repo_stats.py` | **0 违规、P3 0** |
+| `python scripts/console_gen.py --selftest` | **37/37 PASS**（**零改动复跑一致**——本批零代码，`derive_state` 行为与 P-047 收口批完全相同；F25~F29 为**设计面验收项**，实施留 P0 批） |
+| `spec_runner step-gate --session specwf-p042-20260930v2 --expect research design implement verify finalize` | **决策链一致 pass → exit 0**（5/5 步） |
+| `spec_runner verify-anchor --session specwf-p042-20260930v2` | 锚点全真实 → **exit 0** |
+| `spec_runner step-enforce --pid P-042` | **exit 0**（session 定位 `specwf-p042-20260930v2`，5/5 步） |
+| 代码面核对（零代码声明） | `git status` 无 `scripts/` / `.pre-commit-config.yaml` 变更 ⇒ `declared.scripts` 不变；`docs/CONSOLE.md` 未重生成 |
 
 **P-042 v1.8 复跑（2026-09-29，本机实测；Layer-0 契约批，零代码）**:
 
@@ -218,7 +238,9 @@ upstream: null
 
 ## 9. 后续行动
 
-- **Layer-1（P2）边界——状态归属契约的派生端实现（本批外置，P-042 v1.8）**：本批**只定义契约**（真值源归属 / 「来源」列 / 位点单来源），**不含任何派生端实现**。Layer-1 三件 = ① `console_gen.derive_state` **第一参改取派生值**（现直取 `PROGRESS` 状态列）；② `PROGRESS` **执行态位点迁往派生面**（事件流 step 序表 ∪ feature 四文档 front-matter），**决策态位点留人工面**；③ 须**先修订 `console_gen` 不变式 I-7**（词表对齐）并经 **ADR-0010 三问** + **设可回退点**。**风险面 = 高**（触及真值源与单写路径 I-1）；**触发** = 用户裁决 / 需求激活；**不由本批启动**。
+- **P0 批（V1a / V1a′ / V2a / P2a）——本批只落设计、实施留 P0 批（P-042 v1.15）**：本批（v1.15）**只落四文档实施设计**（RESEARCH §7.18【二】/ DESIGN D17 + §5.2 / IMPLEMENTATION DR-22 / 本 CHECKLIST F25~F29），**零代码 / 不补建 session / 不落 P0 实施**。P0 批四件 = ① **V2a** 补建 4 条 session（P-048 / P-053 / P-054 / P-055）② **V1a** 立项即登记纪律 ③ **V1a′** 过渡期判据三件 ④ **P2a** `derive_state` 拆支（`pending` 无 session → `Recommended`；属**可见行为变更**，验收须含 F28 真机位点对照，见 DR-22）。**批内执行顺序与验证命令**见 RESEARCH §7.18【二】。
+- **P2 拆分（C-23 / C-24）**：P2 拆为 **P2a**（改 `basis` / `tier`，即 `derive_state` 拆支，已并入 P0 批）与 **P2b**（**状态来源迁移 + 载体迁移 + I-7 扩写**，属 Layer-1 高风险）。**P2b 边界顺延**——其前置 = P0 批完成（V2a 补齐决策链 + P2a 生效）；**P2b 设计批（P1）**须先落「完整迁移计划」（Usage Inventory / 依赖矩阵 / 批次表，留作 P1 的 RESEARCH 输入）。
+- **Layer-1（P2b）边界——状态归属契约的派生端实现（本批外置，P-042 v1.8）**：本批**只定义契约**（真值源归属 / 「来源」列 / 位点单来源），**不含任何派生端实现**。Layer-1 三件 = ① `console_gen.derive_state` **第一参改取派生值**（现直取 `PROGRESS` 状态列）；② `PROGRESS` **执行态位点迁往派生面**（事件流 step 序表 ∪ feature 四文档 front-matter），**决策态位点留人工面**；③ 须**先修订 `console_gen` 不变式 I-7**（词表对齐）并经 **ADR-0010 三问** + **设可回退点**。**风险面 = 高**（触及真值源与单写路径 I-1）；**触发** = 用户裁决 / 需求激活；**不由本批启动**。
 - **H6（描述列单行长度上限）部分回填（P-044 / P-046 / P-047 三次）**：P-044 取设计时值 `DESC_CAP = 40`，真实仓 32 行描述**无一触顶**；P-046 新增步骤表，主题 / 简要描述取 `STEP_CAP = 48`（扫描性阈值），真实仓步骤表**未见触顶报告**（P-046 时 81 行 / P-047 归位后 69 行）——「渲染宽度校准」仍**待真机渲染实测**（本机无法验证宿主渲染宽度）。
 - **H7（per-feature 折叠块体积预算）四度回填**：P-044 **514 行 / 20027 B**（折叠块 26 个）→ P-046 **729 行 / 45709 B**（+ 步骤表 81 行）→ P-047 **722 行 / 44526 B**（映射归位后步骤表降至 69 行，体积**略降**）→ **收口批 723 行 / 44588 B**（§6 增缺映射行 +1 行）——体积始终在展开面内；「26 个折叠块 × 六列步骤表是否仍属认知负载内」仍需真机浏览体验确认（A-45：折叠块**无数量上限**，属认知负载而非技术限制）。
 - **H8（锚点真机存活率）仍待验，但风险面已收窄**：C-15 已把锚点改为**双属性** `<a name="feat-{f}" id="feat-{f}"></a>`（覆盖「只认 name」与「只认 id」两类渲染器）；**残余风险仅剩「两者皆被剥离」** → 退化为「可折叠不可跳转」（默认视图与折叠功能不受影响）。真机存活率**本机不可验**（需远端/宿主渲染），登记为待触发项。
@@ -234,3 +256,4 @@ upstream: null
 
 **验收签字**: 自查（`console_gen --selftest` **37/37** / 三校验器 **0 违规** / 门禁新语义 **32/32 exit 0** / `step-enforce --pid P-047` exit 0 / `verify-anchor` **10 锚点全真实**）· **独立 pass 已执行（同基座降级，§8.2）** 日期: 2026-09-11
 **验收签字（P-042 v1.8 / Layer-0 契约批，**零代码**）**: 自查（`console_gen --selftest` **37/37**（零改动复跑）/ 三校验器 **0 违规**（dc 127 文件 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步）/ `verify-anchor --session specwf-p042-20260929v4` **9 锚点全真实**）· **独立 pass 已执行（同基座降级，§8.3）** 日期: 2026-09-29
+**验收签字（P-042 v1.15 / P0 批实施设计落档轮，**零代码**）**: 自查（`console_gen --selftest` **37/37**（零改动复跑）/ 三校验器 **0 违规**（dc 127 文件 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20260930v2`）/ `verify-anchor --session specwf-p042-20260930v2` 锚点全真实）；**F25~F29 为设计面验收项，实施留 P0 批**） 日期: 2026-09-30
