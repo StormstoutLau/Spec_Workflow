@@ -1,7 +1,7 @@
 ---
 id: project-console-CHECKLIST
 type: design
-version: 1.7
+version: 1.8
 status: accepting
 date: 2026-09-11
 depends: [project-console-IMPLEMENTATION, project-console-DESIGN]
@@ -11,7 +11,7 @@ upstream: null
 # 验收清单：项目控制台实施批（P-043）/ 视图增补批（P-044）/ 承载与步骤表批（P-046）/ 锚点与映射收敛批（P-047，含收口修正批）
 
 > **Feature**: 项目控制台（`spec/project-console/`）
-> **被验收物**: [DESIGN v1.6](./DESIGN.md) + [IMPLEMENTATION v1.10](./IMPLEMENTATION.md)
+> **被验收物**: [DESIGN v1.6](./DESIGN.md) + [IMPLEMENTATION v1.11](./IMPLEMENTATION.md)
 > **Spec 步骤**: Step 7-8
 > **v1.1 变更（P-044）**: 新增功能验收 **F11-F15**（描述列 / 描述回退链 / per-feature 折叠与锚点 / 三口径架构图 / I-8 缺口清单）+ 不变式 **I-8** 行；§8 补 P-044 复跑记录；§9 回填 H6/H7 实测部分。
 > **v1.2 变更（P-046，用户指令「先执行 C-13 和 C-14，C-16 共享模块单独处理」）**: 新增功能验收 **F16**（hook 链列表块 + `name` + 安全化通则）/ **F17**（步骤级动态描述六列 + 多轮 + 无 session 显式缺失）+ 不变式 **I-9** 行；§8 补 P-046 复跑记录（含 **I-9 全表机械核对**）；§9 再回填 H6/H7；**C-15 / C-16 显式登记为「不在本批」**。
@@ -20,6 +20,7 @@ upstream: null
 > **v1.5 变更（状态归属契约实施轮 · Layer-0，P-042 v1.8，用户指令「先按照结论顺序执行 符合完整spec工作流规范」；**零代码改动**）**: 新增功能验收 **F23**（`PLAN §1 DC2.1` 任务状态词表落档 + **轴正交**（不与 DC2 合轴）+ `PROGRESS` L3 声明**改指向 DC2.1**）/ **F24**（四取值**零改动** / I-7 词表对齐 / 同一位点**单来源**不双写）；§1 增一致性项（DESIGN **D16** → IMPLEMENTATION §7 零代码落地表可追溯 + D1-D16 逐条对应）；§8 补 v1.8 复跑记录（零代码：三校验器全绿 + selftest **37/37** + 门禁链）+ **§8.3 独立 pass 记录**（RULE-1 时序独立机械复核 / RULE-5 同基座降级标注）；§9 登记 **Layer-1（P2）边界**为后续行动。**被验收物**改为 DESIGN v1.5 + IMPLEMENTATION v1.5。
 > **v1.6 变更（三项待裁决细化分析 + P0 批实施设计落档轮，P-042 v1.15，用户指令「待裁决项目细化分析 给出明确建议」→「请生成 P0 批的四文档实施设计草稿」→「先落档这一轮与上一轮结果」；**零代码改动**）**: 新增功能验收 **F25**（`pending` 且无 session → `tier=Recommended` fixture）/ **F26**（`pending` 且有 session，行为不变）/ **F27**（`done` 无 session 短路早退不变）/ **F28**（**门面回归**：`tier` 三处可见位点真机 CONSOLE 对照，A-54 / DR-22）/ **F29**（**幂等**：拆支后 I-3 保持）；§1 增一致性项（DESIGN **D17 → §5.2 → 本 CHECKLIST F25** 可追溯）；§8 补 **P-042 v1.15 复跑记录**（零代码：三校验器全绿 + selftest **37/37** + 门禁链）；§9 登记 **P0 批（V1a/V1a′/V2a/P2a）为后续行动**、**P2b 边界**顺延。**被验收物**改为 DESIGN **v1.6** + IMPLEMENTATION **v1.9**。
 > **v1.7 变更（迭代调研回写机制评估 + DR-18 两条裁定回写轮 · 登记批，P-042 v1.16，用户裁决「落档『迭代调研回写机制』结论」「落档 DR-18 两条裁定」；**零代码改动**）**: 新增 §1 一致性项 **两条**（① **RESEARCH §7.19 / A-56 / B16 / C-27 四段可追溯**——登记项 ↔ 附录 A/B/C ↔ §0 计数；② **IMPLEMENTATION DR-18 正文与 C-25 一致**——触发条件① 语义已改写为「外部语境复现 ≥1 例（排除自指）」且方向 A 已标「即刻生效 + 作用域 5 视图载体」，**原文「留用户裁决」的悬置态已消除**）；§8 补 **P-042 v1.16 复跑记录**（零代码：三校验器全绿 + selftest **37/37** + 门禁链）；§9 登记 **§7.19 三处缺口（A 四元登记块 / B 多维度决策矩阵模板 / C 净收敛纪律 + Type-1/2 委派）为待裁决项**（**Layer-0、零代码、须用户裁决后另立批**）。**被验收物**改为 DESIGN **v1.6** + IMPLEMENTATION **v1.10**。
+> **v1.8 变更（P0 小实施批 · Layer-1 实施轮，P-042 v1.17，用户指令「先处理 P0 小实施批」）**: **F25~F29 实测回填**——本批四件全部落地：① **P2a** `scripts/console_gen.py` `derive_state` 拆支（`pending` 无 session → `tier=Recommended`）+ **DR-23 第四处可见位点**（`_trace_section` 缺口行按派生行动档分流）；② **V2a** 补建 4 条 session（P-048 / P-053 / P-054 / P-055）；③ **V1a** 立项即登记纪律；④ **V1a′** 过渡期判据三件（机械边界 = **P 编号 ≥ P-058**）。§2 表 **F25~F29** 实测列由 `⏳ 设计已落；实施留 P0 批` 回填为 ✅（实测读数见 A-15）；§1 增一致性项 **RESEARCH §7.20 / A-57 / B17 / C-28 → §0 计数 57A+17B+28C+5H 四段可追溯**；§8 补 **P-042 v1.17 复跑记录**（Layer-1：selftest **41/41** + 4 条补建 session 门禁 4/4 全绿 + 真机 CONSOLE 四处位点对照）；§9 把 **P0 批由「后续行动」改为「已实施」**并登记 **P2b 边界仍在**。**被验收物**改为 DESIGN **v1.6** + IMPLEMENTATION **v1.11**。
 
 ## 1. 文档一致性验收（Step 8）
 
@@ -40,12 +41,14 @@ upstream: null
 - [x] **DESIGN D17 → §5.2 → 本 CHECKLIST F25~F28 三段可追溯**（P-042 v1.15 零代码：D17「未开工 vs 确无 session 判别」落在 DESIGN §5.2 判据表，本批**只落设计**、实施面 `derive_state` 拆支留 P0 批；F25 为唯一形态裁决 fixture，F28 为可见位点回归，DR-22 登记「验收不得只跑 `--selftest`」）
 - [x] **RESEARCH §7.19 → 附录 A（A-56）/ 附录 B（B16）/ 附录 C（C-27）→ §0 计数 55A+15B+26C+5H → 56A+16B+27C+5H 四段一致**（P-042 v1.16 零代码：§7.19 为**评估登记项**，其**三处缺口实施面不在本批**；A-56 为 E1 组件在位盘点，B16 为可实现性推断，C-27 为三缺口与边界裁定）
 - [x] **IMPLEMENTATION DR-18 正文与 RESEARCH C-25 一致**（P-042 v1.16 零代码：触发条件① 已改写为「**外部语境**复现 ≥1 例」并**显式排除自指**；方向 A 已标「**v1.13 起即刻生效、不等触发**」+ 作用域精确化为 **5 个视图载体**——**原文「该次是否计入「复现」留用户裁决」的悬置态已消除**）
+- [x] **RESEARCH §7.20 / 附录 A（A-57）/ 附录 B（B17）/ 附录 C（C-28）→ §0 计数 56A+16B+27C+5H → 57A+17B+28C+5H 四段一致**（P-042 v1.17 Layer-1：§7.20 为本批实施记录，A-57 为 P0 批本机读数（V2a 4 session 门禁 4/4 / P2a selftest 37/37→41/41 / 四处可见位点对照），B17 为「拆支只收窄告警面」推断，C-28 为范围与边界 + **DR-23 第四处位点** + V2a 重建纪律 + 机械边界 P-058）
+- [x] **DR-23 与 DR-22 一致**（两 DR 同辖 P2a 可见行为：DR-22 列**三处**可见位点、DR-23 补**第四处**（§6 追溯覆盖缺口行）——**实施期发现并就地登记，未静默扩大设计口径**；本 CHECKLIST §2 F28 据此扩为「四处」对照）
 
 ## 2. 功能验收
 
 | # | 验收项 | 实测 |
 |---|--------|------|
-| F1 | 生成器自测 **37/37** | ✅ `37/37 PASS`（S1-S37；P-043 16/16 → P-044 27/27 → P-046 34/34 → P-047 36/36 → 收口批 +1） |
+| F1 | 生成器自测 **41/41** | ✅ `41/41 PASS`（S1-S41；P-043 16/16 → P-044 27/27 → P-046 34/34 → P-047 36/36 → 收口批 37/37 → **P0 批 +4 = S38~S41**） |
 | F2 | 词表对齐：输出含 PROGRESS 原词、**不含**升格标签 | ✅ selftest S2 |
 | F3 | 三级行动队列 Needs Attention → Ready to Verify → Recommended | ✅ selftest S3 |
 | F4 | feature 级制品链投影（R/D/I/C + 阶段） | ✅ selftest S4（**首轮拦截 DR-1 后修正**） |
@@ -69,11 +72,11 @@ upstream: null
 | **F22** | **兜底面归零 + 错值消解**（32 feature 全部由 §9 人工标注覆盖；`cpp-hub-absorption` P-011 → P-002） | ✅ 依赖兜底 **2 → 0**；CONSOLE §2 该行关联 P 纠正为 P-002；门禁复跑 **32/32 exit 0**（A-11） |
 | **F23** | **状态归属契约落档（Layer-0）**：`PLAN §1` 新增 `DC2.1 任务状态词表（+「来源」列）`（**与 DC2 轴正交**）+ `PROGRESS` L3 声明**改指向 DC2.1** | ✅ `PLAN §1` 新增 `DC2.1`（独立子块 + 轴正交声明 + 四行词表 + 位点单来源 + 轴正交消歧注）；`PROGRESS` L3 改为指向指针（四取值逐字保留） |
 | **F24** | **四取值零改动 + 词表对齐 + 位点单来源**：`done` / `in-progress` / `blocked` / `pending` **取值不变**；「来源」列 = 执行态「机器派生」/ 决策态「人工」；同一位点不双写 | ✅ `DC2.1` 四取值与 `PROGRESS` L3 逐字一致（守 I-7）；「来源」列两档明确；`derive_state` 行为**零改动**（selftest 37/37 复跑一致） |
-| **F25** | **`pending` 且无 session → `tier=Recommended`**（唯一设计点裁决，D17 / DESIGN §5.2）：拆支后该行 `tier` 由 `Needs Attention` 变 `Recommended`，**`state` 保持原词 `pending`** | ⏳ **设计已落**（D17 + §5.2 判据表）；**实施留 P0 批**（fixture 待建） |
-| **F26** | **`pending` 且有 session**：走既有分支，`tier` = `Recommended`，行为与拆支前**一致**（回归不变量） | ⏳ 设计已落；实施留 P0 批 |
-| **F27** | **`done` 无 session 短路早退不变**（A-55：存量 `done` 首分支短路 ⇒ 拆支影响面预期为零）：`if task.status == "done"` 优先于 `sess is None` 分支 | ⏳ 设计已落；实施留 P0 批（fixture 待建） |
-| **F28** | **门面回归（`tier` 三处可见位点真机 CONSOLE 对照）**：① §状态表「行动档」列 ② 三级行动队列 ③ per-feature 折叠块——**单跑 `--selftest` 不可观测**该变更（A-54 / DR-22） | ⏳ 设计已落；实施留 P0 批（真机 CONSOLE 三处位点对照） |
-| **F29** | **幂等（I-3）**：拆支后生成器双跑字节一致（首写 True / 二次 False）保持不变 | ⏳ 设计已落；实施留 P0 批 |
+| **F25** | **`pending` 且无 session → `tier=Recommended`**（唯一设计点裁决，D17 / DESIGN §5.2）：拆支后该行 `tier` 由 `Needs Attention` 变 `Recommended`，**`state` 保持原词 `pending`** | ✅ selftest **S38**（`derive_state(Task(…,"pending",…), None)` → `tier=Recommended` / `state` 保持 `pending` / `basis="未开工（立项已登记，无决策流）"`）；真机 CONSOLE 位点见 F28（A-15） |
+| **F26** | **`pending` 且有 session**：走既有分支，`tier` = `Recommended`，行为与拆支前**一致**（回归不变量） | ✅ selftest **S39**（`pending` 且有 session → 走既有 `sess is not None` 分支，`tier=Recommended` 与拆支前一致；拆支未外溢到该路） |
+| **F27** | **`done` 无 session 短路早退不变**（A-55：存量 `done` 首分支短路 ⇒ 拆支影响面预期为零）：`if task.status == "done"` 优先于 `sess is None` 分支 | ✅ selftest **S40**（`done` 无 session → 首分支短路早退；另证**执行态无 session 仍判缺口** `Needs Attention`，拆支未误收窄该路） |
+| **F28** | **门面回归（`tier` 可见位点真机 CONSOLE 对照）**：① §事项视图「行动档」列 ② 三级行动队列 ③ per-feature 折叠块 ④ **§6 追溯覆盖缺口行**（**第四处 = DR-23 实施期发现**）——**单跑 `--selftest` 不可观测**该变更（A-54 / DR-22 / DR-23） | ✅ selftest **S41**（§6 缺口行按派生行动档分流：未开工与真缺口分列）+ **真机四处位点对照已执行**（见 §8 P-042 v1.17 复跑记录：真实仓四处均呈「无活动项」——**A-55 预测成立，零真机差异**；差异只能由 fixture S38~S41 观测，A-15 / B17） |
+| **F29** | **幂等（I-3）**：拆支后生成器双跑字节一致（首写 True / 二次 False）保持不变 | ✅ selftest S12/S13 复跑一致 + 真机 `console_gen` 双跑（首写 `True` / 二次 `False`）；A-15 |
 
 ## 3. 接口验收
 
@@ -130,6 +133,23 @@ upstream: null
 | 新增契约面 | `DECLARED_SOURCES` 属**架构契约声明**（非业务真值）：Layer-0 文档化于 DESIGN §6.4 / §3.1、只对实际存在的脚本绘边、漂移由「未声明关系」清单兜底（I-8）；P-047 新增 `spec_map → PROGRESS + CODE_WIKI §9` 一条同性质声明 |
 
 ## 8. 验收结论与复跑记录
+
+**P-042 v1.17 复跑（2026-09-30，本机实测；P0 小实施批 · Layer-1，实施轮）**:
+
+| 命令 / 核对 | 结果 |
+|------|------|
+| `python scripts/console_gen.py --selftest` | **41/41 PASS**（37/37 → **P0 批 +4 = S38~S41**，A-15） |
+| `python scripts/dc_validator.py` | **0 违规**——RESEARCH §0 声明 **57A / 17B / 28C / 5H**、本 IMPLEMENTATION §0 声明 **15A / 6B / 0C / 0H** 均与机械重数一致 |
+| `python scripts/m7_stats.py` | **0 违规**（P3 提示 1——样本③ 历史形态 by-design，**禁止回改**） |
+| `python scripts/repo_stats.py` | **0 违规、P3 0** |
+| `spec_runner step-gate --session specwf-p042-20260930v4 --expect research design implement verify finalize` | **决策链一致 pass → exit 0**（5/5 步） |
+| `spec_runner verify-anchor --session specwf-p042-20260930v4` | 锚点全真实 → **exit 0** |
+| `spec_runner step-enforce --pid P-042` | **exit 0**（session 定位 `specwf-p042-20260930v4`，5/5 步） |
+| **V2a 4 条补建 session 门禁** | `step-gate` **4/4 exit 0**（P-048 / P-053 / P-054 / P-055）+ `verify-anchor` 各 **5 锚点全真实**（0 硬性 / 0 软性）+ `step-enforce --pid P-048 / P-053 / P-054 / P-055` 全 **exit 0**（A-15） |
+| **真机 CONSOLE 四处可见位点对照（F28 / DR-22 / DR-23）** | **执行结果 = 四处位点在真实仓均呈「无活动项」**（**A-55 预测成立**：PROGRESS **57 行全 `done`** ⇒ `derive_state` 首分支短路、后四分支不可达 ⇒ P2a 影响面预期为零）：① §事项视图「行动档」列 → 表未生成（「（无——PROGRESS 无活动事项）」）；② 三级行动队列 → 三档皆「（无）」；③ per-feature 折叠块「派生状态」→ 均 `done`（PROGRESS 状态列 = done）；④ §6 追溯覆盖 → 「决策链缺失：无」+「未开工（立项已登记，无决策流）：无」**两行皆在**（DR-23 分流已生效，I-8 显式列出）。**故 P2a 的可见差异只能由 fixture（S38~S41）观测**（B17：真实收益待含「起点为 `pending` 的新批次」入流）——如实登记的**零真机差异**，非失败 |
+| **V2a 真机可观测变化** | 已完成段可见的 **P-053 / P-054 / P-055** 最远 step = `finalize`（补建前 `—`）；**P-048** 同批补建（落在 49 条折叠区内，同由 `—` 变 `finalize`） |
+| **幂等（F29 / I-3）** | `console_gen` 双跑：首写 `True` / 二次 `False`（字节一致，未重写） |
+| 代码面核对 | `git status` 仅 `scripts/console_gen.py` + `tools/spec_runner/sessions/` 4 新文件 + 文档变更；`docs/CONSOLE.md` 由 hook 重生成（四处位点已对照）；**无 push**（待用户裁决） |
 
 **P-042 v1.16 复跑（2026-09-30，本机实测；迭代回写评估 + DR-18 裁定回写轮，零代码）**:
 
@@ -255,7 +275,7 @@ upstream: null
 ## 9. 后续行动
 
 - **§7.19 迭代调研回写机制三处缺口——待裁决项（Layer-0、零代码、本批只登记，P-042 v1.16）**：**判定 = 机制可实现且本仓已在运行**（§7.14~§7.18 连续五轮即活实例）。**三处缺口** = **A** 未决项未一等公民化（建议**四元登记块**：判据 / 触发条件 / 当前倾向 / 证据等级）/ **B** 无**多维度决策矩阵模板**（维度 = 成本·收益·可维护性·兼容·升级潜力·短期·长期；每格附**证据等级 + 读数日期**；格内含计数须 = 机械重数 ⇒ **R7 同构**）——**此件直击「避免随机选择」** / **C** 无**迭代收敛停止规则**（**净收敛纪律** + **Type-1/2 委派**）。**硬边界** = 三件全落 Layer-0、**零 Layer-1 位点 / 不加门禁**，且**可机械化仅「格齐全 / 证据等级非空 / 触发条件存在 / 引用完整」，绝不核结论正确性**（否则重犯 A-33 / DR-21 之病）。**实施须用户裁决后另立批**（可三件合批，或**仅取 B 单件**先试）。
-- **P0 批（V1a / V1a′ / V2a / P2a）——本批只落设计、实施留 P0 批（P-042 v1.15）**：本批（v1.15）**只落四文档实施设计**（RESEARCH §7.18【二】/ DESIGN D17 + §5.2 / IMPLEMENTATION DR-22 / 本 CHECKLIST F25~F29），**零代码 / 不补建 session / 不落 P0 实施**。P0 批四件 = ① **V2a** 补建 4 条 session（P-048 / P-053 / P-054 / P-055）② **V1a** 立项即登记纪律 ③ **V1a′** 过渡期判据三件 ④ **P2a** `derive_state` 拆支（`pending` 无 session → `Recommended`；属**可见行为变更**，验收须含 F28 真机位点对照，见 DR-22）。**批内执行顺序与验证命令**见 RESEARCH §7.18【二】。
+- **P0 批（V1a / V1a′ / V2a / P2a）——已实施（P-042 v1.17，Layer-1）**：四件全部落地（RESEARCH §7.20 / 附录 A-57 / 本 CHECKLIST F25~F29 实测 ✅）：① **V2a** 补建 4 条 session（P-048 / P-053 / P-054 / P-055，依 commit body + PROGRESS 回溯重建，首步明示【补建】）；② **V1a** 立项即登记纪律（`PROGRESS` L5）；③ **V1a′** 过渡期判据三件（`PROGRESS` L6，机械边界 = **P 编号 ≥ P-058**）；④ **P2a** `derive_state` 拆支（`pending` 无 session → `Recommended`；属**可见行为变更**，F28 真机四处位点对照已执行——**结果 = 真实仓四处均呈「无活动项」（零真机差异，A-55 预测成立）**，差异只能由 fixture S38~S41 观测，含 DR-23 第四处）。**验收完成**：selftest **41/41** + 4 条补建 session 门禁 4/4 全绿 + 幂等保持。**P2b 边界仍在**（下述）。
 - **P2 拆分（C-23 / C-24）**：P2 拆为 **P2a**（改 `basis` / `tier`，即 `derive_state` 拆支，已并入 P0 批）与 **P2b**（**状态来源迁移 + 载体迁移 + I-7 扩写**，属 Layer-1 高风险）。**P2b 边界顺延**——其前置 = P0 批完成（V2a 补齐决策链 + P2a 生效）；**P2b 设计批（P1）**须先落「完整迁移计划」（Usage Inventory / 依赖矩阵 / 批次表，留作 P1 的 RESEARCH 输入）。
 - **Layer-1（P2b）边界——状态归属契约的派生端实现（本批外置，P-042 v1.8）**：本批**只定义契约**（真值源归属 / 「来源」列 / 位点单来源），**不含任何派生端实现**。Layer-1 三件 = ① `console_gen.derive_state` **第一参改取派生值**（现直取 `PROGRESS` 状态列）；② `PROGRESS` **执行态位点迁往派生面**（事件流 step 序表 ∪ feature 四文档 front-matter），**决策态位点留人工面**；③ 须**先修订 `console_gen` 不变式 I-7**（词表对齐）并经 **ADR-0010 三问** + **设可回退点**。**风险面 = 高**（触及真值源与单写路径 I-1）；**触发** = 用户裁决 / 需求激活；**不由本批启动**。
 - **H6（描述列单行长度上限）部分回填（P-044 / P-046 / P-047 三次）**：P-044 取设计时值 `DESC_CAP = 40`，真实仓 32 行描述**无一触顶**；P-046 新增步骤表，主题 / 简要描述取 `STEP_CAP = 48`（扫描性阈值），真实仓步骤表**未见触顶报告**（P-046 时 81 行 / P-047 归位后 69 行）——「渲染宽度校准」仍**待真机渲染实测**（本机无法验证宿主渲染宽度）。
@@ -274,3 +294,4 @@ upstream: null
 **验收签字**: 自查（`console_gen --selftest` **37/37** / 三校验器 **0 违规** / 门禁新语义 **32/32 exit 0** / `step-enforce --pid P-047` exit 0 / `verify-anchor` **10 锚点全真实**）· **独立 pass 已执行（同基座降级，§8.2）** 日期: 2026-09-11
 **验收签字（P-042 v1.8 / Layer-0 契约批，**零代码**）**: 自查（`console_gen --selftest` **37/37**（零改动复跑）/ 三校验器 **0 违规**（dc 127 文件 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步）/ `verify-anchor --session specwf-p042-20260929v4` **9 锚点全真实**）· **独立 pass 已执行（同基座降级，§8.3）** 日期: 2026-09-29
 **验收签字（P-042 v1.15 / P0 批实施设计落档轮，**零代码**）**: 自查（`console_gen --selftest` **37/37**（零改动复跑）/ 三校验器 **0 违规**（dc 127 文件 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20260930v2`）/ `verify-anchor --session specwf-p042-20260930v2` 锚点全真实）；**F25~F29 为设计面验收项，实施留 P0 批**） 日期: 2026-09-30
+**验收签字（P-042 v1.17 / P0 小实施批 · Layer-1）**: 自查（`console_gen --selftest` **41/41**（+S38~S41）/ 三校验器 **0 违规**（dc 声明 57A+17B+28C+5H 与机械重数一致 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20260930v4`）/ `verify-anchor` 锚点全真实 / **V2a 4 条补建 session 门禁 4/4 全绿** / 真机 CONSOLE **四处位点对照** + 幂等保持）；**F25~F29 全部实测 ✅**） 日期: 2026-09-30

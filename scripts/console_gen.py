@@ -302,7 +302,12 @@ def derive_state(task: Task, sess) -> Derived:
     if task.status == "blocked":
         return Derived("blocked", "PROGRESS 状态列 = blocked", "Needs Attention")
     if sess is None:
-        return Derived(task.status, "无 session（决策链缺失）", "Needs Attention")
+        # P2a（v1.11）：把「未开工（已登记、无决策流）」与「执行态确无 session（决策链缺失）」
+        # 分开——前者是正常状态（Recommended），后者才是缺口（Needs Attention）。
+        # 仅拆此分支：不改 state 来源（永远 return task.status 原词）/ 不动 I-7 / 不加开关。
+        if task.status == "pending":
+            return Derived("pending", "未开工（立项已登记，无决策流）", "Recommended")
+        return Derived(task.status, "执行态但无 session（决策链缺失）", "Needs Attention")
     if sess.soft:
         return Derived(task.status, f"gate exit 2 软性存疑（最远 {sess.last_step}）", "Ready to Verify")
     if sess.last_step == "finalize":
@@ -685,7 +690,11 @@ def _trace_section(tasks, sessions, features, mapping) -> list:
     active = [t for t in tasks if t.status != "done"]
     with_sess = [t for t in active if t.pid in sessions]
     complete = [t for t in with_sess if sessions[t.pid].last_step == "finalize"]
-    gaps = [t.pid for t in active if t.pid not in sessions]
+    # P2a（v1.11 / DR-23）：无 session 项按派生行动档分流——「pending = 未开工」不是缺口，
+    # 与「执行态确无 session = 真缺口」分列，避免 §6 与行动档自相矛盾（I-8：两类都显式列出）
+    no_sess = [t for t in active if t.pid not in sessions]
+    gaps = [t.pid for t in no_sess if derive_state(t, None).tier == "Needs Attention"]
+    idle = [t.pid for t in no_sess if derive_state(t, None).tier != "Needs Attention"]
     # C-16 ④ / I-8：映射缺位（两源皆无）必须在此**显式列出**，不得静默省略
     unmapped = [f for f in features if f not in mapping]
     unmapped_line = ("- **缺映射（I-8 显式缺口）**：" + "、".join(f"`{f}`" for f in unmapped)
@@ -694,6 +703,8 @@ def _trace_section(tasks, sessions, features, mapping) -> list:
     return [
         f"- 活动事项 {len(active)} / 有 session {len(with_sess)} / 五步完整 {len(complete)}",
         (f"- **决策链缺失（Needs Attention）**：{'、'.join(gaps)}" if gaps else "- 决策链缺失：无"),
+        (f"- **未开工（立项已登记，无决策流）**：{'、'.join(idle)}" if idle
+         else "- 未开工（立项已登记，无决策流）：无"),
         unmapped_line,
         "- 证据账本与三通道真值不在此复制（I-6 不增真值）："
         "[M7 证据账本](./M7_EVIDENCE_LOG.md)（由 `scripts/m7_stats.py` 看护）；"
@@ -1037,6 +1048,23 @@ def run_selftest() -> int:
           "- **缺映射（I-8 显式缺口）**：`gamma`" in text
           and any("（无——1 个 feature 全部有映射）" in ln for ln in
                   _trace_section([], {}, ["a"], {"a": "P-001"})))
+
+    _S = SessionInfo("specwf-p900", "design", False, "2026-09-11T10:00:00+08:00",
+                    ("research", "design"), ())
+    _d1 = derive_state(Task("P-900", "未开工项", "pending", "—"), None)
+    _d2 = derive_state(Task("P-901", "未开工但已入流", "pending", "—"), _S)
+    _d3 = derive_state(Task("P-902", "已完成项", "done", "—"), None)
+    _d4 = derive_state(Task("P-903", "执行中但确无 session", "in-progress", "—"), None)
+    check("S38 pending 且无 session → tier=Recommended（未开工，非缺口；A-55/F25）",
+          _d1.status == "pending" and _d1.tier == "Recommended" and "未开工" in _d1.basis)
+    check("S39 pending 且有 session → 走既有分支（Recommended，行为与拆支前一致；F26）",
+          _d2.tier == "Recommended" and "最远 step" in _d2.basis)
+    check("S40 done 无 session → 首分支短路早退 + 执行态无 session 仍判缺口（A-55/F27）",
+          _d3.status == "done" and _d3.tier == "" and _d3.basis == "PROGRESS 状态列 = done"
+          and _d4.tier == "Needs Attention" and "执行态" in _d4.basis)
+    check("S41 §6 缺口行按行动档分流（DR-23：未开工与真缺口分列，二者皆显式列出）",
+          "- **决策链缺失（Needs Attention）**：P-004" in text
+          and "- **未开工（立项已登记，无决策流）**：P-002、P-007、P-008、P-009、P-010" in text)
 
     shutil.rmtree(root, ignore_errors=True)
     print(f"selftest: {passed}/{total} PASS")
