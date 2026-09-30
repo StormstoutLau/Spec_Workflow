@@ -55,7 +55,7 @@ Spec_Workflow/
 │   ├── discoveries/           # 发现三态索引（学习回路载体）
 │   └── dev-log/               # 开发日志
 └── spec/
-    ├── templates/             # 5 个模板（四件套 + ADR）
+    ├── templates/             # 6 个模板（四件套 + ADR + 决策矩阵）
     ├── doc-contract/          # 文档规范改造方案 v1.5（verified）
     └── <feature>/             # 各 feature 四件套实例
 ```
@@ -65,7 +65,7 @@ Spec_Workflow/
 迁移到你的项目只需三步：
 
 1. 复制 `SPEC_PROCESS.md`——v1.2.1 起自包含，正文中的 M6/M2 等历史案例可替换为你自己项目的教训，规则本身不变
-2. 复制 `spec/templates/` 下 5 个模板到目标项目
+2. 复制 `spec/templates/` 下 6 个模板到目标项目
 3. 在 `spec/<feature>/` 下按 10 步流程开发，从 Step 1 调研开始
 
 可选：`docs/ASSERTION_EVIDENCE_FRAMEWORK.md` 用于 Step 1–2 的调研断言分级；`CODE_WIKI.md` 是全仓详解，迁移前可通读。
@@ -79,7 +79,7 @@ Spec_Workflow/
 | [adr/](adr/) | 八份 ADR：异质性 / 证据绑定 / 权威源 / 文档契约 / 门禁 / 发现日志 |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | 断言 A/B/C 分级 + 不对称配置 + 双盲重推导 |
 | [docs/M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md) | 方法论实证数据账本 |
-| [spec/templates/](spec/templates/) | 五份可直接复制的文档模板 |
+| [spec/templates/](spec/templates/) | 六份可直接复制的文档模板 |
 
 ## 许可
 

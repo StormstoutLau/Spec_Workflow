@@ -3,7 +3,7 @@
 ---
 id: SPEC-PROCESS
 type: process-spec
-version: 1.4
+version: 1.5
 status: active
 date: 2026-08-17
 depends: [ADR-0004, ADR-0005, ADR-0008, ADR-0009, FWK-ASSERTION]
@@ -11,7 +11,7 @@ upstream: null
 ---
 
 > **建立日期**：2026-08-01
-> **修订**：v1.1（2026-08-01，M6 元审计后增补 Review 独立性规则）→ v1.2（2026-08-01，外部对标后：规则 3 升级为隔离四要素、新增规则 5 异质性约束、Step 8 增派生需求项）→ **v1.2.1**（2026-08-16，自包含化：全部教训内联正文，移除对 ADR/元审计报告/本地 skill 路径的内容依赖，可跨项目迁移复用）→ **v1.3**（2026-08-16，新增规则 6 审计证据绑定：Step 10 审计报告取证矩阵标准化——证据五分类 E1-E5、双向映射、诚实结果列、最高等级绑定、风险分级执行）→ **v1.4**（2026-08-17，cpp-hub-absorption Tier2：Step 2 Review 升格门禁语义 D4 + Step 8 双向引用/断言延续两项 D6（[ADR-0008](adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md)）+ Step 2/10 发现记录集成点 D5（[ADR-0009](adr/ADR-0009-discoveries-log-mechanism.md)））
+> **修订**：v1.1（2026-08-01，M6 元审计后增补 Review 独立性规则）→ v1.2（2026-08-01，外部对标后：规则 3 升级为隔离四要素、新增规则 5 异质性约束、Step 8 增派生需求项）→ **v1.2.1**（2026-08-16，自包含化：全部教训内联正文，移除对 ADR/元审计报告/本地 skill 路径的内容依赖，可跨项目迁移复用）→ **v1.3**（2026-08-16，新增规则 6 审计证据绑定：Step 10 审计报告取证矩阵标准化——证据五分类 E1-E5、双向映射、诚实结果列、最高等级绑定、风险分级执行）→ **v1.4**（2026-08-17，cpp-hub-absorption Tier2：Step 2 Review 升格门禁语义 D4 + Step 8 双向引用/断言延续两项 D6（[ADR-0008](adr/ADR-0008-spec-process-review-gate-and-bidirectional-check.md)）+ Step 2/10 发现记录集成点 D5（[ADR-0009](adr/ADR-0009-discoveries-log-mechanism.md)））→ **v1.5**（2026-09-30，P-058「迭代回写形态件 · Layer-0」：新增「**迭代收敛与未决项登记**」节——把 [P-042 §7.19](spec/project-console/RESEARCH.md) 登记的三处缺口定形为**四元登记块**（判据 / 触发条件 / 当前倾向 / 证据等级）+ **净收敛纪律** + **Type-1/2 委派**，并指向新建 `spec/templates/DECISION_MATRIX_TEMPLATE.md`；**不新增 RULE 编号**、**不动** DC4 `rules` 机读块、零代码）
 > **适用范围**：math-finance-reasoning 项目的所有功能开发（**迁移说明**：本文档自 v1.2.1 起自包含，所有教训、规则依据、ADD 原则均已内联；其他项目可直接复制使用，正文中的 M6/M2 等历史案例为本项目实测教训，迁移时可替换为新项目自身案例，规则本身不变）
 > **命名空间说明（DC4）**：文中 M2/M6 等为源项目元审计里程碑编号（M1-M7），全局登记见 [ADR-0007 附录 A](adr/ADR-0007-unified-document-contract.md)；M7 审计轮证据账本：[docs/M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md)
 > **核心原则**：调研先行 → 文档驱动 → 多轮 Review 抑制幻觉 → TDD 实现 → 审查验收
@@ -331,6 +331,44 @@ ADR 存放于 `adr/`（编号登记入口: docs/adr/README.md），spec 文档�
 4. 每步完成后更新 `docs/PROGRESS.md`
 5. 关键决策记录为 ADR
 6. 完成后记录开发日志
+
+## 迭代收敛与未决项登记
+
+> **来源（2026-09-30，P-058「迭代回写形态件 · Layer-0」，用户裁决「三件合批落地」）**：本节把 [P-042 §7.19](spec/project-console/RESEARCH.md) 登记的三处缺口**定形**——① 未决项未一等公民化 ② 无多维度决策矩阵模板 ③ 无迭代收敛停止规则。**全落 Layer-0（模板 + 纪律）**：不改任何校验器、不新增门禁、零代码；**不新增 RULE 编号**（不触 DC4 命名空间扩权，故无需另立 ADR）。
+
+### 未决项登记（四元块）
+
+任何「未闭合、需留待后续轮次」的问题**须以四元块登记**——四元**字段名与顺序固定**：
+
+- **判据**：<如何判定「已解决」；须可机械核查，或明确指向人工裁决点>
+- **触发条件**：<何时重审；**优先可机械识别**（编号边界 / 计数阈值 / 差集非空 / 事件发生）>
+- **当前倾向**：<当前最可能结论或建议（可写「无倾向」）>
+- **证据等级**：E1~E5 或「待核」（见 [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](docs/ASSERTION_EVIDENCE_FRAMEWORK.md)）
+
+多条目汇总时可用**表形态**（列 = 四元，顺序同上）。**就近骨架** = [spec/templates/RESEARCH_TEMPLATE.md](spec/templates/RESEARCH_TEMPLATE.md) §6.4 与 [spec/templates/DESIGN_TEMPLATE.md](spec/templates/DESIGN_TEMPLATE.md) §11.1。
+
+### 净收敛纪律（迭代批的停止规则）
+
+每一轮迭代批（**调研 → 初步结论 → 再调研 → 裁定**）**须满足其一**，否则**不予立项**：
+
+1. **关闭 ≥1 个未决项**（附判据达成证据）；或
+2. **新开 ≥1 个未决项，且必带触发条件**（可机械识别）。
+
+### Type-1 / Type-2 委派
+
+| 类别 | 判据 | 取证要求 |
+|------|------|----------|
+| **Type-2（可逆）** | 有可回退点 / 无常驻副作用 | **先做再改**，**不启动决策矩阵** |
+| **Type-1（不可逆）** | 无回退点 / 变更真值源或契约 | **全维度取证**（决策矩阵，模板见 [spec/templates/DECISION_MATRIX_TEMPLATE.md](spec/templates/DECISION_MATRIX_TEMPLATE.md)） |
+
+### 反模式（须显式避免）
+
+- **分析瘫痪**：维度无限扩张；每轮只新增未决项而不关闭。
+- **criteria gaming**：指标被优化而非被满足（四元被填满而结论未推进）。
+
+### 诚实边界
+
+本纪律为**过程性**约定：**不可机械拦截**（无门禁、无校验器）；**可机械化的仅「四元是否齐全 / 触发条件是否非空 / 引用是否完整」**，**绝不核「结论是否正确」**——为「判断」造门禁会重犯「对账抓不住两实现同错」与「未成文约束」之病。
 
 ## 规则登记（DC4，RULE 命名空间）
 

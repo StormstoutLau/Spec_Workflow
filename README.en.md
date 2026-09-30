@@ -55,7 +55,7 @@ Spec_Workflow/
 │   ├── discoveries/           # Three-state discovery index (learning loop)
 │   └── dev-log/               # Development logs
 └── spec/
-    ├── templates/             # 5 templates (four-document set + ADR)
+    ├── templates/             # 6 templates (four-document set + ADR + decision matrix)
     ├── doc-contract/          # Document contract refactor plan v1.5 (verified)
     └── <feature>/             # Per-feature four-document instances
 ```
@@ -65,7 +65,7 @@ Spec_Workflow/
 Migrating to your project takes three steps:
 
 1. Copy `SPEC_PROCESS.md` — self-contained since v1.2.1. The historical M6/M2 cases inline in the text can be replaced with your own project's lessons; the rules themselves do not change.
-2. Copy the 5 templates under `spec/templates/` into your project.
+2. Copy the 6 templates under `spec/templates/` into your project.
 3. Develop under `spec/<feature>/` following the 10-step process, starting from Step 1 research.
 
 Optional: `docs/ASSERTION_EVIDENCE_FRAMEWORK.md` for assertion grading during Steps 1–2; `CODE_WIKI.md` as a full guided tour before migrating.
@@ -79,7 +79,7 @@ Optional: `docs/ASSERTION_EVIDENCE_FRAMEWORK.md` for assertion grading during St
 | [adr/](adr/) | Eight ADRs: heterogeneity / evidence binding / authority / contract / gates / discoveries |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | A/B/C grading + asymmetric configuration + double-blind rederivation |
 | [docs/M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md) | Self-verification evidence ledger |
-| [spec/templates/](spec/templates/) | Five copy-ready document templates |
+| [spec/templates/](spec/templates/) | Six copy-ready document templates |
 
 ## License
 
