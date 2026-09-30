@@ -22,7 +22,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.5.0"
+VERSION = "1.6.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -183,11 +183,17 @@ def gate_passed(w: EventWriter, sid: str, name: str) -> bool:
 # ---- 模块 2b：step-gate 决策产物管线校验（P-020，CER §3.5——只读校验，三类规则分级 exit） ----
 STEP_SEQUENCE = ("research", "design", "implement", "verify", "finalize")
 DREQ = ("category", "scenario", "reasoning", "outcome", "confidence")
+# P-064「§ 编号空间收口」：J1（ANCHOR_RE）与 J2（_resolve_anchor）的**交集口径单点定义**——
+# 数字，或「字母 + 可选数字」，点分隔分段（`3.5` / `B` / `B4` / `D1` / `B4.2`）；
+# **大小写敏感**（与标题 token 逐字符一致）；**多字母词形不受理**（`§selftest` 仍属形态不可解析）。
+# 两处**共用本常量** ⇒ 「两实现漂移」在构造上不可发生（B25 / I-10 / A-33 教训）。
+# 注：前缀白名单与「是否要求定位符」属**差集口径**，仍由两处各自显式表达（B19 正确分工）。
+SECTION_ID = r"(?:[0-9]+|[A-Za-z][0-9]*)(?:\.(?:[0-9]+|[A-Za-z][0-9]*))*"
 ANCHOR_RE = re.compile(
     r"^(https?://\S+|"
     r"(?:spec|adr|docs|tools|scripts)/"
     r"[A-Za-z0-9_./\-]*(?:\.(?:md|py|jsonl))?"
-    r"(?:#[L]\d+|L\d+|\s*§[0-9.]+)?)$")
+    r"(?:#[L]\d+|L\d+|\s*§" + SECTION_ID + r")?)$")
 
 
 def cmd_gate_step(args) -> int:
@@ -272,8 +278,13 @@ ROOT_REPO = ROOT.parent.parent  # 仓库根（锚点路径相对仓库根解析�
 
 
 def _resolve_anchor(anchor: str):
-    """锚点解析 → (kind, path, loc)。kind ∈ section/line/url/unresolved。"""
-    m = re.match(r"^([A-Za-z0-9_./\-]+\.(?:md|py|jsonl))\s*§([0-9.]+)$", anchor)
+    """锚点解析 → (kind, path, loc)。kind ∈ section/line/url/unresolved。
+
+    § 编号空间 = `SECTION_ID`（**与 `ANCHOR_RE` 共用同一常量**，P-064 收口）：
+    数字或「字母 + 可选数字」、点分隔；大小写敏感；多字母词形不受理。
+    """
+    m = re.match(r"^([A-Za-z0-9_./\-]+\.(?:md|py|jsonl))\s*§("
+                 + SECTION_ID + r")$", anchor)
     if m:
         return ("section", m.group(1), m.group(2))
     m = re.match(r"^([A-Za-z0-9_./\-]+\.(?:md|py|jsonl))#L(\d+)$", anchor)
@@ -937,6 +948,39 @@ def run_selftest() -> int:
         check("F45 全量扫描（无 --session）：确定性双跑一致 + 命中已登记实例 exit 1",
               p_aa4.returncode == 1 and p_aa4.stdout == p_aa5.stdout
               and "aa-trigger" in p_aa4.stdout, p_aa4.stdout[-140:])
+
+        # F46-F52: `§` 编号空间收口（P-064——字母编号受理 / 词形不受理 / 大小写敏感 / 精确性 / 守门）
+        w_va.append("p064-alpha", "assistant", "decision",
+                    input_=_va_d("adr/ADR-0006-assertion-framework-dual-copy-authority.md §B4"))
+        p_a1 = run_cli("verify-anchor", "--session", "p064-alpha")
+        check("F46 字母 + 数字章节号受理（ADR-0006 §B4 真实）→ exit 0",
+              p_a1.returncode == 0, p_a1.stdout[-100:])
+        p_a2 = run_cli("step-gate", "--session", "p064-alpha")
+        check("F47 同一锚点 step-gate 亦受理（两处同改收口，soft=0）→ exit 0",
+              p_a2.returncode == 0, p_a2.stdout[-100:])
+        _p064_samples = ["spec/project-console/RESEARCH.md §7.16",
+                         "adr/ADR-0006-assertion-framework-dual-copy-authority.md §B4",
+                         "adr/ADR-0007-unified-document-contract.md §D3",
+                         "docs/PROGRESS.md#L3", "scripts/spec_map.py#L76"]
+        check("F48 J2 ⊆ J1 机械守门（§ 编号空间同源：样本 J2 可解析 ⇒ J1 必匹配）",
+              all(_resolve_anchor(a)[0] in ("section", "line") for a in _p064_samples)
+              and all(ANCHOR_RE.match(a) for a in _p064_samples))
+        w_va.append("p064-word", "assistant", "decision",
+                    input_=_va_d("tools/spec_runner/spec_runner.py §selftest"))
+        p_a3 = run_cli("verify-anchor", "--session", "p064-word")
+        check("F49 多字母词形不受理（§selftest 仍不可解析）→ verify-anchor 硬性 exit 1",
+              p_a3.returncode == 1)
+        p_a4 = run_cli("step-gate", "--session", "p064-word")
+        check("F50 同锚点 step-gate 形态存疑（soft）→ exit 2", p_a4.returncode == 2)
+        w_va.append("p064-case", "assistant", "decision",
+                    input_=_va_d("adr/ADR-0006-assertion-framework-dual-copy-authority.md §b4"))
+        p_a5 = run_cli("verify-anchor", "--session", "p064-case")
+        check("F51 大小写敏感（§b4 ≠ 标题 B4）→ verify-anchor 章节不存在 exit 1",
+              p_a5.returncode == 1)
+        w_va.append("p064-exact", "assistant", "decision",
+                    input_=_va_d("adr/ADR-0006-assertion-framework-dual-copy-authority.md §B1"))
+        p_a6 = run_cli("verify-anchor", "--session", "p064-exact")
+        check("F52 精确匹配（§B1 不前缀命中 B/B2/B3/B4）→ exit 1", p_a6.returncode == 1)
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))
