@@ -22,7 +22,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.4.0"
+VERSION = "1.5.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -360,6 +360,62 @@ def cmd_verify_anchor(args) -> int:
     return 0
 
 
+# ---- 模块 2e：anchor-audit 锚点形态集合对账（P-042 v1.20，DR-25——只读诊断；不接门禁） ----
+def cmd_anchor_audit(args) -> int:
+    """锚点形态集合对账：列出 J2\\J1 实例——只读零副作用。
+
+    J1 = ANCHOR_RE（step-gate 软性面；经 step_enforce.py 的「非 0 即 fail」升级为阻断级）
+    J2 = _resolve_anchor 可解析的位置形态（section / line）
+    不变量 J2 ⊆ J1（independent-verify DESIGN §4.1.2）：差集非空即「候选扩权」触发条件已满足
+    ——把 DR-24 的「≥1 例真实返工」由不可核声称改为可机械判定（同 B15 判据边界教训）。
+    exit 0 = 触发未满足（差集空）；1 = 触发已满足（列出实例）；2 = 目录无 session 文件
+    （坏行沿用 EventWriter 语义：解析失败即中断并报 `<路径>:<行号>` → exit 1，不静默跳过）
+    """
+    w = EventWriter(sessions_dir())
+    if getattr(args, "session", None):
+        paths = [w.path(args.session)]
+    else:
+        paths = sorted(w.base.glob("*.jsonl"))
+    total = j1_ok = j2_pos = j1_not_j2 = other = 0
+    diff = []
+    for p in paths:
+        sid = p.name[:-len(".jsonl")]
+        for r in w._read_rows(p):
+            if r.get("event") != "decision":
+                continue
+            inp = r.get("input") if isinstance(r.get("input"), dict) else {}
+            md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
+            for ev in md.get("evidence") or []:
+                a = ev.get("anchor") if isinstance(ev, dict) else str(ev)
+                if not a:
+                    continue
+                total += 1
+                m1 = bool(ANCHOR_RE.match(a))
+                pos2 = _resolve_anchor(a)[0] in ("section", "line")
+                if m1:
+                    j1_ok += 1
+                if pos2:
+                    j2_pos += 1
+                if pos2 and not m1:
+                    diff.append((sid, r.get("seq"), a))
+                elif m1 and not pos2:
+                    j1_not_j2 += 1
+                elif not m1 and not pos2:
+                    other += 1
+    print(f"anchor-audit: 扫描 {len(paths)} session / {total} 锚点")
+    print(f"  J1 匹配（ANCHOR_RE）: {j1_ok}；J2 可解析（section/line）: {j2_pos}")
+    print(f"  J2\\J1（取证放行但门禁不匹配 = 候选扩权触发条件）: {len(diff)}")
+    print(f"  J1\\J2（门禁放行但取证判硬性 = 正确分工面）: {j1_not_j2}；两处皆不支持: {other}")
+    for sid, seq, a in diff:
+        print(f"  [TRIGGER] {sid} seq{seq} {a!r}")
+    if diff:
+        print(f"anchor-audit: 触发条件已满足（{len(diff)} 例）→ exit 1"
+              "（建议裁决：DR-24 候选扩权）")
+        return 1
+    print("anchor-audit: 触发条件未满足（0 例）→ exit 0")
+    return 0
+
+
 # ---- 模块 3：adapter 接口 + NativeHTTP（D4/D5——stdlib urllib，预检门控 + 重试） ----
 class LLMAdapter:
     """协议面（D4 开放结构单点）：chat / endpoint_ready。"""
@@ -574,6 +630,10 @@ def build_parser() -> argparse.ArgumentParser:
     va.add_argument("--detail", action="store_true",
                     help="逐锚点明细（DR-21 方向 B：开发期定位用；默认关闭，守确定性 I-2）")
     va.set_defaults(func=cmd_verify_anchor)
+    aa = sub.add_parser("anchor-audit",
+                        help="锚点形态集合对账（P-042 v1.20，DR-25：J1/J2 差集 = 候选扩权触发条件；只读、不接门禁）")
+    aa.add_argument("--session", help="仅审该 session（缺省 = 扫描 sessions 目录全部）")
+    aa.set_defaults(func=cmd_anchor_audit)
     st = sub.add_parser("selftest", help="内置自测（stdlib mock server）")
     st.set_defaults(func=lambda a: run_selftest())
     return p
@@ -850,6 +910,33 @@ def run_selftest() -> int:
                     input_=_va_d("spec/independent-verify/RESEARCH.md#L1-L3"))
         p_r1 = run_cli("verify-anchor", "--session", "va-range")
         check("F41 行号区间形态 → 硬性 exit 1（隔离实测结论固化为回归）", p_r1.returncode == 1)
+
+        # F42-F45: anchor-audit 锚点形态集合对账（P-042 v1.20，DR-25——触发条件可核化）
+        w_va.append("aa-trigger", "assistant", "decision",
+                    input_=_va_d("spec/step-gate/DESIGN.md §4"))
+        w_va.append("aa-trigger", "assistant", "decision",
+                    input_=_va_d("CODE_WIKI.md#L3"))
+        p_aa1 = run_cli("anchor-audit", "--session", "aa-trigger")
+        check("F42 J2\\J1 差集非空 → 触发已满足 exit 1 且列实例（d 类识别）",
+              p_aa1.returncode == 1 and "[TRIGGER]" in p_aa1.stdout
+              and "CODE_WIKI.md#L3" in p_aa1.stdout, p_aa1.stdout[-140:])
+        p_aa2 = run_cli("anchor-audit", "--session", "va-real")
+        check("F43 仅白名单 .md + §章节 → 差集空，触发未满足 exit 0",
+              p_aa2.returncode == 0, p_aa2.stdout[-100:])
+        w_va.append("aa-pure", "assistant", "decision",
+                    input_=_va_d("scripts/spec_map.py"))
+        p_aa3 = run_cli("anchor-audit", "--session", "aa-pure")
+        check("F44 纯文件属正确分工面（J1 放行 / J2 硬性）→ exit 0 且分工面计数 1",
+              p_aa3.returncode == 0 and "正确分工面）: 1；" in p_aa3.stdout,
+              p_aa3.stdout[-140:])
+        # 坏行 fixture 已由 F37/F38 用毕：全量扫描须在清洁目录上进行
+        # （否则继承 EventWriter 的中断语义 → 报错定位 exit 1，掩盖差集读数）
+        bad.unlink()
+        p_aa4 = run_cli("anchor-audit")
+        p_aa5 = run_cli("anchor-audit")
+        check("F45 全量扫描（无 --session）：确定性双跑一致 + 命中已登记实例 exit 1",
+              p_aa4.returncode == 1 and p_aa4.stdout == p_aa5.stdout
+              and "aa-trigger" in p_aa4.stdout, p_aa4.stdout[-140:])
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))

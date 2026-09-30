@@ -1,7 +1,7 @@
 ---
 id: project-console-CHECKLIST
 type: design
-version: 1.10
+version: 1.11
 status: accepting
 date: 2026-09-11
 depends: [project-console-IMPLEMENTATION, project-console-DESIGN]
@@ -23,6 +23,7 @@ upstream: null
 > **v1.8 变更（P0 小实施批 · Layer-1 实施轮，P-042 v1.17，用户指令「先处理 P0 小实施批」）**: **F25~F29 实测回填**——本批四件全部落地：① **P2a** `scripts/console_gen.py` `derive_state` 拆支（`pending` 无 session → `tier=Recommended`）+ **DR-23 第四处可见位点**（`_trace_section` 缺口行按派生行动档分流）；② **V2a** 补建 4 条 session（P-048 / P-053 / P-054 / P-055）；③ **V1a** 立项即登记纪律；④ **V1a′** 过渡期判据三件（机械边界 = **P 编号 ≥ P-058**）。§2 表 **F25~F29** 实测列由 `⏳ 设计已落；实施留 P0 批` 回填为 ✅（实测读数见 A-15）；§1 增一致性项 **RESEARCH §7.20 / A-57 / B17 / C-28 → §0 计数 57A+17B+28C+5H 四段可追溯**；§8 补 **P-042 v1.17 复跑记录**（Layer-1：selftest **41/41** + 4 条补建 session 门禁 4/4 全绿 + 真机 CONSOLE 四处位点对照）；§9 把 **P0 批由「后续行动」改为「已实施」**并登记 **P2b 边界仍在**。**被验收物**改为 DESIGN **v1.6** + IMPLEMENTATION **v1.11**。
 > **v1.9 变更（DR-19 + DR-21 合并小批 · Layer-1 实施轮，P-042 v1.18，用户裁决「DR-19 + DR-21 合并开一小批」→「执行吧」）**: 新增验收 **F30 ~ F34**——F30（**锚点变量隔离实测**：九条锚点单变量对照 ⇒ 候选① 证伪 / 候选② 确认 / 新发现「前缀白名单只存在于 `ANCHOR_RE`」，A-16）/ F31（**坏行报错定位**：报错含 `<路径>:<行号>`，verify-anchor 与 step-gate 双命令，**exit 码仍 1**）/ F32（**`--detail` 逐锚点明细**）/ F33（**默认关闭**：无旗标时输出与改造前逐字节一致，守 I-2）/ F34（**判定面零改动**：行号区间仍判硬性、真实锚点仍 exit 0）；§1 增一致性项（C-26 三前置 ↔ F30/F33/F34 可追溯）；§8 补 **P-042 v1.18 复跑记录**；§9 把 **C-26 小批由「待启动」改为「已实施」**，并登记**待决项**（是否支持行号区间 / 是否统一两处形态集合）。**被验收物**改为 DESIGN **v1.6**（**本批不动**，见 C-29）+ IMPLEMENTATION **v1.12**。
 > **v1.10 变更（锚点形态待决项裁定轮 · Layer-0 登记，P-042 v1.19，用户指令「待决项：是否支持行号区间 / 是否统一 `ANCHOR_RE` 与 `_resolve_anchor` 两处形态集合（属契约扩权） 展开分析 给出明确结论建议」→「执行吧」；**零代码、零判定改动**）**: 新增验收 **F35**（**形态包含不变量 `J2 ⊆ J1` 与已知偏离登记**落 [`independent-verify DESIGN v1.1 → v1.2 §4.1.2`](../independent-verify/DESIGN.md)）+ **F36**（**存量形态盘点与「零现存实例」判据**：74 文件 / 502 锚点 ⇒ **d 类（根级载体）与 e 类（行号区间）现存实例均为 0**，故扩权**无即时收益**）；§1 增一致性项两条（RESEARCH §7.22 ↔ 附录 A（A-59）/附录 B（B19）/附录 C（C-30）↔ §0 计数 **59A+19B+30C+5H** 四段一致；**IMPLEMENTATION DR-24 ↔ 本 CHECKLIST F35/F36 ↔ [`independent-verify DESIGN §4.1.2`](../independent-verify/DESIGN.md) 三处同向**——Q-A/Q-B 结论与候选扩权触发条件不得有一处留旧表述）；§8 补 **P-042 v1.19 复跑记录**（零代码：三校验器全绿 + `spec_runner selftest` **43/43**（零改动复跑）+ `console_gen --selftest` **41/41** + 门禁链 exit 0）；§9 把 **v1.18 登记的「待决项（锚点形态是否扩权）」改为「已裁决」**，并登记**候选扩权（未激活，触发驱动）**。**被验收物**改为 DESIGN **v1.6**（**本批不动**，同 C-29 / C-30 归属裁定）+ IMPLEMENTATION **v1.13**。
+> **v1.11 变更（触发条件可核化 · Layer-1 实施轮，P-042 v1.20，用户指令「先处理候选扩权触发条件」→ 用户裁决「把触发条件做成机械可核」）**: 新增验收 **F37**（**触发条件可核化**：DR-24 触发条件① 由「真实返工」改写为**可机械判定**的「`anchor-audit` 报出 `J2\J1` 差集非空」+ 只读命令 `anchor-audit` 落档 [`independent-verify DESIGN v1.3 §4.1.3`](../independent-verify/DESIGN.md)）+ **F38**（**触发未满足的真机读数与边界复验**：**76 session / 520 锚点 / `J2\J1` = 0** ⇒ 触发未满足；且 `ANCHOR_RE` 与 `_resolve_anchor` **判定逐例不变**、既有命令 exit 码零改动、不接门禁）；§1 增一致性项两条（RESEARCH §7.23 ↔ 附录 A（A-60）/附录 B（B20）/附录 C（C-31）↔ §0 计数 **60A+20B+31C+5H** 四段一致；**IMPLEMENTATION DR-25 ↔ [`independent-verify DESIGN §4.1.3`](../independent-verify/DESIGN.md) ↔ 本 CHECKLIST F37/F38 三处同向**——触发条件表述不得有一处留「真实返工」旧形）；§8 补 **P-042 v1.20 复跑记录**（Layer-1：`spec_runner selftest` **47/47** + 三校验器全绿 + 门禁链 exit 0 + 真机 `anchor-audit` 读数）；§9 把 **「候选扩权」由「触发驱动待激活」改为「触发条件已可核（当前未满足）」**。**被验收物**改为 DESIGN **v1.6**（本批不动）+ IMPLEMENTATION **v1.14**。
 
 ## 1. 文档一致性验收（Step 8）
 
@@ -50,6 +51,8 @@ upstream: null
 - [x] **DR-21 的「变量未隔离」登记 ↔ 实测结论一致**（原文如实标注未隔离；v1.18 就地在同条目补隔离结果，并**改写两项归因**——`.py` 载体 / 无白名单前缀**均非真因**（真因 = 行号区间与「无定位符」）⇒ IMPLEMENTATION DR-21 与 [`independent-verify DESIGN §4.1.1`](../independent-verify/DESIGN.md) **同向**，无一处留下旧归因）
 - [x] **RESEARCH §7.22 / 附录 A（A-59）/ 附录 B（B19）/ 附录 C（C-30）→ §0 计数 58A+18B+29C+5H → 59A+19B+30C+5H 四段一致**（P-042 v1.19 零代码：§7.22 为**裁定登记项**（事实基座 + 六类差异定性 + 存量盘点）；A-59 = 源码级事实基座 + 502 锚点形态盘点（**E1**）；B19 = 「单向包含 `J2 ⊆ J1`」推断；C-30 = Q-A/Q-B 裁定 + 候选扩权与触发条件）
 - [x] **IMPLEMENTATION DR-24 ↔ 本 CHECKLIST F35/F36 ↔ [`independent-verify DESIGN §4.1.2`](../independent-verify/DESIGN.md) 三处同向**（P-042 v1.19 零代码：**Q-A = 不扩展行号区间**、**Q-B = 认单向包含不做集合合一**、**唯一偏离 = d 类（根级载体）**、**候选扩权触发条件 = ≥1 例真实返工或用户裁决**——四处表述**逐项一致，无一处留「待决」旧表述**；载体归属同 C-29：契约本体随 CR 指定文档走，**project-console DESIGN 不动**）
+- [x] **RESEARCH §7.23 / 附录 A（A-60）/ 附录 B（B20）/ 附录 C（C-31）→ §0 计数 59A+19B+30C+5H → 60A+20B+31C+5H 四段一致**（P-042 v1.20 Layer-1：§7.23 为本批实施记录（触发条件改写 + `anchor-audit` 交付 + 真机读数 + 实现归属）；A-60 = selftest **47/47** + 真机 76 session / 520 锚点 / **`J2\J1` = 0**（**E1**）；B20 = 触发条件须可机械判定的推断；C-31 = 触发条件改写与边界裁定）
+- [x] **IMPLEMENTATION DR-25 ↔ [`independent-verify DESIGN v1.3 §4.1.3`](../independent-verify/DESIGN.md) ↔ 本 CHECKLIST F37/F38 三处同向**（P-042 v1.20 Layer-1：**触发条件① = 「`anchor-audit` 报出 `J2\J1` 差集非空」**、**exit 语义 0/1/2**、**不接门禁**、**触发已满足 ≠ 自动扩权**——四处表述**逐项一致，无一处留「真实返工」旧形**）
 
 ## 2. 功能验收
 
@@ -91,6 +94,8 @@ upstream: null
 | **F34** | **判定面零改动**（C-26 前置 Ⅲ，B18）：exit 码与「真实 / 硬性 / 软性」边界**逐例不变**（含**行号区间仍判硬性**） | ✅ selftest **F41**（行号区间 → 硬性 exit 1）+ 门禁链复跑（`step-gate` / `verify-anchor` / `step-enforce --pid P-042` 全 exit 0）+ 三校验器全绿；A-16 ④ |
 | **F35** | **形态包含不变量与已知偏离登记**（P-042 v1.19，C-30）：`J2 ⊆ J1` 写成契约 + **六类差异定性** + **唯一偏离 d 类（根级载体 + 定位符）显式登记** + **候选扩权（未激活）与触发条件** | ✅ 落 [`independent-verify DESIGN v1.1 → v1.2 §4.1.2`](../independent-verify/DESIGN.md)（+ §7 错误处理两行 + §8.1 第 7 条 + §9 修订历史）；**Q-A = 不扩展行号区间 / Q-B = 认单向包含、不做集合合一**；**判定逐例不变**（`ANCHOR_RE` 与 `_resolve_anchor` 零改动）——**零代码**（A-17） |
 | **F36** | **存量形态盘点与「零现存实例」判据**（P-042 v1.19）：扩权**无即时收益**的机械依据 —— `tools/spec_runner/sessions/` 全量锚点分类计数 | ✅ **74 文件 / 502 锚点**：§章节 **390** / 单行 `#L` **105** / URL **3** / **行号区间 0** / 纯文件 **4** ⇒ **d 类与 e 类现存实例均为 0**（**潜在风险，非存量债**）；另证**全仓无锚点落于根级载体**（A-17 ①②） |
+| **F37** | **触发条件可核化**（P-042 v1.20，DR-25 / C-31）：触发条件① 由「**真实返工**」（不可核）改写为**可机械判定**的「**`anchor-audit` 报出 `J2\J1` 差集非空**」（不变量 `J2 ⊆ J1` 被实际违反）；新增**只读子命令** `anchor-audit` | ✅ 落 [`independent-verify DESIGN v1.3 §4.1.3`](../independent-verify/DESIGN.md)（接口 / 输出 / exit 语义 0 未满足·1 已满足·2 无 session / 不接门禁 / 实现归属 = `spec_runner` 子命令直接复用两套正则守 I-10）；selftest **F42/F43**（触发臂 exit 1 列实例 / 未触发臂 exit 0）；**触发已满足 ≠ 自动扩权**（仍须用户裁决） |
+| **F38** | **触发未满足的真机读数与边界复验**（P-042 v1.20）：真机重数 + 判定面零改动 | ✅ `anchor-audit` **76 session / 520 锚点**：J1 匹配 519 / J2 可解析 513 / **`J2\J1` = 0** ⇒ **触发未满足** / `J1\J2` 分工面 6 / 两处皆不支持 1（**F44 锁分工面计数** / **F45 锁全量扫描确定性与命中**）；`ANCHOR_RE` 与 `_resolve_anchor` **判定逐例不变**、**既有命令** exit 码零改动、**不接门禁**、零新依赖（`spec_runner selftest` 47/47 + 三校验器全绿 + 门禁链 exit 0；A-18） |
 
 ## 3. 接口验收
 
@@ -147,6 +152,21 @@ upstream: null
 | 新增契约面 | `DECLARED_SOURCES` 属**架构契约声明**（非业务真值）：Layer-0 文档化于 DESIGN §6.4 / §3.1、只对实际存在的脚本绘边、漂移由「未声明关系」清单兜底（I-8）；P-047 新增 `spec_map → PROGRESS + CODE_WIKI §9` 一条同性质声明 |
 
 ## 8. 验收结论与复跑记录
+
+**P-042 v1.20 复跑（2026-09-30，本机实测；触发条件可核化轮 · Layer-1，实施轮）**:
+
+| 命令 / 核对 | 结果 |
+|------|------|
+| `python tools/spec_runner/spec_runner.py selftest` | **47/47 PASS**（43 → **+4 = F42~F45**，A-18） |
+| **真机 `anchor-audit`（F37/F38，A-60）** | **76 session / 520 锚点**：J1 匹配 **519** / J2 可解析 **513** / **`J2\J1` 差集 0**（⇒ **触发未满足**）/ `J1\J2` 正确分工面 **6** / 两处皆不支持 **1** → **exit 0**；增量溯源 = 较 v1.19 的 74 文件 / 502 锚点 **+2 文件 / +18 锚点恰为 v6 与 v7 两轮 session 贡献**（两套口径一致） |
+| `python scripts/dc_validator.py` | **0 违规**——RESEARCH §0 声明 **60A / 20B / 31C / 5H**、本 IMPLEMENTATION §0 声明 **18A / 6B / 0C / 0H** 均与机械重数一致 |
+| `python scripts/m7_stats.py` | **0 违规**（P3 提示 1——样本③ 历史形态 by-design，**禁止回改**） |
+| `python scripts/repo_stats.py` | **0 违规、P3 0**（`CODE_WIKI §2.1/§9` 的 project-console 令牌同步至 **v1.18 / 60A+20B+31C+5H**、independent-verify 行首令牌同步至 **DESIGN v1.3**） |
+| `python tools/spec_runner/spec_runner.py verify-anchor --session specwf-p042-20260930v7` | 锚点全真实 → **exit 0** |
+| `spec_runner step-gate --session specwf-p042-20260930v7 --expect research design implement verify finalize` | **决策链一致 pass → exit 0**（5/5 步） |
+| `spec_runner step-enforce --pid P-042` | **exit 0**（session 定位 `specwf-p042-20260930v7`，5/5 步） |
+| `python scripts/console_gen.py --selftest` | **41/41 PASS**（`console_gen` 本批**零改动**，复跑一致） |
+| **零新依赖 / 不接门禁 / 判定零改动声明（A-18 / DR-25）** | `spec_runner.py` **1 文件**改（+`cmd_anchor_audit` + argparse 子命令 + F42~F45；VERSION **1.4.0 → 1.5.0**），**零新依赖**；`anchor-audit` **不接门禁**（未入 `.pre-commit-config.yaml`）；`ANCHOR_RE` 正则与 `_resolve_anchor` 判定**逐例不变**、既有命令 exit 码**零改动**；`docs/CONSOLE.md` 因**新增 session** 由 hook 重生成；**无 push**（待用户裁决） |
 
 **P-042 v1.19 复跑（2026-09-30，本机实测；锚点形态待决项裁定轮 · Layer-0，**零代码**）**:
 
@@ -324,6 +344,7 @@ upstream: null
 - **P0 批（V1a / V1a′ / V2a / P2a）——已实施（P-042 v1.17，Layer-1）**：四件全部落地（RESEARCH §7.20 / 附录 A-57 / 本 CHECKLIST F25~F29 实测 ✅）：① **V2a** 补建 4 条 session（P-048 / P-053 / P-054 / P-055，依 commit body + PROGRESS 回溯重建，首步明示【补建】）；② **V1a** 立项即登记纪律（`PROGRESS` L5）；③ **V1a′** 过渡期判据三件（`PROGRESS` L6，机械边界 = **P 编号 ≥ P-058**）；④ **P2a** `derive_state` 拆支（`pending` 无 session → `Recommended`；属**可见行为变更**，F28 真机四处位点对照已执行——**结果 = 真实仓四处均呈「无活动项」（零真机差异，A-55 预测成立）**，差异只能由 fixture S38~S41 观测，含 DR-23 第四处）。**验收完成**：selftest **41/41** + 4 条补建 session 门禁 4/4 全绿 + 幂等保持。**P2b 边界仍在**（下述）。
 - **DR-19 + DR-21 合并小批——已实施（P-042 v1.18，Layer-1）**：按 C-26 三前置全部落地——① **前置 Ⅰ 变量隔离实测**（F30：候选① 证伪 / 候选② 确认 / **新发现「前缀白名单只存在于 `ANCHOR_RE`」**）；② **前置 Ⅱ `--detail` 默认关闭**（F33）；③ **前置 Ⅲ 判定面零改动**（F34）。**交付三件** = DR-19 方向 B（`spec_runner.py` **1 文件**：`SessionParseError` + `_read_rows()` 报 `<路径>:<行号>`，**exit 码保持 1**；VERSION **1.3.0 → 1.4.0**）/ DR-21 方向 B(i)（`verify-anchor --detail`）/ DR-21 方向 B(ii)（契约登记落 [`spec/independent-verify/DESIGN.md`](../independent-verify/DESIGN.md) **v1.1 §4.1.1** 九例形态表 + 两处记述订正 + banner `状态` 对齐）。**验收完成**：selftest **43/43** + 三校验器全绿 + 门禁链全 exit 0 + 真机默认输出逐字节一致。
 - **待决项「锚点形态是否扩权」——已裁决（P-042 v1.19，Layer-0）**：**① Q-A 是否支持行号区间（`#L3-L5`）= 不扩展**——0 需求（502 锚点中区间 0 例）+ 区间「真实性」不可机械核（连续性无判据，会破坏「判定全机械」）+ 与「锚点 = 单点定位」语义冲突（范围属**叙述**、应在 `outcome`/`reasoning` 写明）+ 有零成本替代（单点 `#L` 或 `§章节`）；**可选补强（属可用性，非扩权）** = 区间 `unresolved` 报错**专名化**，并入下次任意 Layer-1 批。**② Q-B 是否统一两处形态集合 = 认「单向包含 `J2 ⊆ J1`」，不做集合合一**——六类差异中 a/b/c 属**正确分工**（J1 放行 / J2 硬性）、e/f 属**一致双拦**、**唯一方向性偏离 = d 类（根级载体 + 定位符）**（`verify-anchor` 判真实而 `ANCHOR_RE` 不匹配 ⇒ 经 `step_enforce.py` 的「非 0 即 fail」升级为**提交阻断** = **误拦**，属**可用性**类非覆盖缺口）。**落点** = [`independent-verify DESIGN v1.2 §4.1.2`](../independent-verify/DESIGN.md)（不变量 + 六类定性表 + 偏离登记 + 裁定）。**候选扩权（已登记，未激活）** = 修 d 类**触发条件** ① **≥1 例**「根级锚点被门禁 soft 阻断」的**真实返工** 或 ② **用户裁决**；触发后 = `ANCHOR_RE` **去前缀白名单**（变体①最小彻底；变体②具名白名单制造第三集合，**不推荐**）+ **清空偏离集** + 补 **`J2 ⊆ J1` 机械守门用例**（九例矩阵 → selftest 断言，防两处正则再度漂移，同 I-10 教训）；**不激活的代价已量化** = 写锚点者只需遵守 §4.1.1「首选 = 白名单 `.md` + §章节」（v1.18 已实证可行），且 d 类与 e 类**现存实例均为 0**（F36）。**边界** = 不改 `ANCHOR_RE` 正则 / 不改 `_resolve_anchor` 判定 / 不改任何 exit 码 / **零代码**
+- **候选扩权触发条件——已可核（P-042 v1.20，Layer-1）**：v1.19 登记的候选扩权**触发条件①「≥1 例真实返工」不可机械识别**（提交被 hook 拦下后无从复算，与 B15 同族）⇒ 本批**只修触发条件的可核性、不实施扩权**：① **改写** = 触发条件① 定为「**`anchor-audit` 报出 `J2\J1` 差集非空**」（不变量 `J2 ⊆ J1` 被**实际违反**，**语义等价且更强**）；② **交付** = `spec_runner` **只读子命令 `anchor-audit`**（exit 0 = 触发未满足 / 1 = 已满足 / 2 = 无 session；**不接门禁**；复用 `ANCHOR_RE` 与 `_resolve_anchor` 两套正则防双实现，守 I-10）；VERSION **1.4.0 → 1.5.0**、selftest **43/43 → 47/47**（+F42~F45）；③ **真机读数（A-60）** = **76 session / 520 锚点 / `J2\J1` = 0** ⇒ **触发未满足**（候选扩权仍为**触发驱动待激活**）；④ **落点** = [`independent-verify DESIGN v1.3 §4.1.3`](../independent-verify/DESIGN.md) + 本 IMPLEMENTATION **DR-25**；⑤ **边界** = 不改 `ANCHOR_RE` 正则 / 不改 `_resolve_anchor` 判定 / 既有命令 exit 码零改动 / **不接门禁** / 零新依赖 / **不实施扩权**（触发已满足亦须用户裁决）
 - **P2 拆分（C-23 / C-24）**：P2 拆为 **P2a**（改 `basis` / `tier`，即 `derive_state` 拆支，已并入 P0 批）与 **P2b**（**状态来源迁移 + 载体迁移 + I-7 扩写**，属 Layer-1 高风险）。**P2b 边界顺延**——其前置 = P0 批完成（V2a 补齐决策链 + P2a 生效）；**P2b 设计批（P1）**须先落「完整迁移计划」（Usage Inventory / 依赖矩阵 / 批次表，留作 P1 的 RESEARCH 输入）。
 - **Layer-1（P2b）边界——状态归属契约的派生端实现（本批外置，P-042 v1.8）**：本批**只定义契约**（真值源归属 / 「来源」列 / 位点单来源），**不含任何派生端实现**。Layer-1 三件 = ① `console_gen.derive_state` **第一参改取派生值**（现直取 `PROGRESS` 状态列）；② `PROGRESS` **执行态位点迁往派生面**（事件流 step 序表 ∪ feature 四文档 front-matter），**决策态位点留人工面**；③ 须**先修订 `console_gen` 不变式 I-7**（词表对齐）并经 **ADR-0010 三问** + **设可回退点**。**风险面 = 高**（触及真值源与单写路径 I-1）；**触发** = 用户裁决 / 需求激活；**不由本批启动**。
 - **H6（描述列单行长度上限）部分回填（P-044 / P-046 / P-047 三次）**：P-044 取设计时值 `DESC_CAP = 40`，真实仓 32 行描述**无一触顶**；P-046 新增步骤表，主题 / 简要描述取 `STEP_CAP = 48`（扫描性阈值），真实仓步骤表**未见触顶报告**（P-046 时 81 行 / P-047 归位后 69 行）——「渲染宽度校准」仍**待真机渲染实测**（本机无法验证宿主渲染宽度）。
@@ -345,3 +366,4 @@ upstream: null
 **验收签字（P-042 v1.17 / P0 小实施批 · Layer-1）**: 自查（`console_gen --selftest` **41/41**（+S38~S41）/ 三校验器 **0 违规**（dc 声明 57A+17B+28C+5H 与机械重数一致 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20260930v4`）/ `verify-anchor` 锚点全真实 / **V2a 4 条补建 session 门禁 4/4 全绿** / 真机 CONSOLE **四处位点对照** + 幂等保持）；**F25~F29 全部实测 ✅**） 日期: 2026-09-30
 **验收签字（P-042 v1.18 / DR-19 + DR-21 合并小批 · Layer-1）**: 自查（`spec_runner selftest` **43/43**（+F37~F41）/ 三校验器 **0 违规**（dc 声明 58A+18B+29C+5H 与机械重数一致 / m7 1 条 by-design P3 / repo **首跑 2 P2 → 令牌同步后 P3 0**）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20260930v5`）/ `verify-anchor` 锚点全真实 / **真机默认输出与改造前逐字节一致** + `--detail` 新增 9 行 / **判定面零改动**（坏行仍 exit 1、行号区间仍硬性））；**F30~F34 全部实测 ✅**；**待决项**（行号区间是否支持 / 两处形态集合是否统一）登记为须另裁） 日期: 2026-09-30
 **验收签字（P-042 v1.19 / 锚点形态待决项裁定 · Layer-0，**零代码**）**: 自查（`spec_runner selftest` **43/43**（零改动复跑一致）/ `console_gen --selftest` **41/41**（零改动复跑一致）/ 三校验器 **0 违规**（dc 声明 **59A+19B+30C+5H** 与机械重数一致 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20260930v6`）/ `verify-anchor` 锚点全真实 / **`scripts/` 与 `tools/` 零变更**（零代码声明成立））；**F35~F36 全部实测 ✅**；**待决项（锚点形态是否扩权）已裁决**——Q-A 不扩展 / Q-B 认单向包含，d 类偏离显式登记为**候选扩权（触发驱动）**） 日期: 2026-09-30
+**验收签字（P-042 v1.20 / 触发条件可核化 · Layer-1）**: 自查（`spec_runner selftest` **47/47**（+F42~F45）/ 三校验器 **0 违规**（dc 声明 **60A+20B+31C+5H** 与机械重数一致 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20260930v7`）/ `verify-anchor` 锚点全真实 / **真机 `anchor-audit` = 76 session / 520 锚点 / `J2\J1` = 0**（触发未满足，exit 0）/ **零新依赖、不接门禁、判定面与既有命令 exit 码零改动**）；**F37~F38 全部实测 ✅**；**候选扩权触发条件已可核（当前未满足）**） 日期: 2026-09-30
