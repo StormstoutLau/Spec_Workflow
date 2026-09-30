@@ -14,7 +14,8 @@
   I-1 单写路径（只写 docs/CONSOLE.md）/ I-2 确定性（禁 wall clock，同源双跑字节一致）
   I-3 幂等（内容未变不写盘）/ I-4 零依赖（stdlib only）
   I-5 纯派生（可重生成，覆盖无需备份）/ I-6 不增真值（不复制他处真值，只引用指针）
-  I-7 词表对齐（状态只用 PROGRESS 原词，不重贴标签）
+  I-7 词表对齐（状态只用 PROGRESS 原词，不重贴标签；P2b 开关 --derived 开启时执行态改采机器派生、
+      决策态仍为原词 → 词表对齐不变，见 DESIGN §5.3 / 本文件 I-7 声明行随开关态分流）
   I-8 显式缺口（派生不出的关系必须显式列出，不得静默省略——缺映射 `—` / 未声明脚本清单）
   I-9 承载安全（外部文本入表格单元格一律过 `_cell()`；长无断点 token 不入表格单元格）
   I-10 语义同源（feature ↔ P 映射只有一份实现：`spec_map`，两处复用，禁双实现）
@@ -295,24 +296,48 @@ def feature_desc(feature: str, mapping: dict, tasks_by_pid: dict, spec_dir: Path
     return feature
 
 
-def derive_state(task: Task, sess) -> Derived:
-    """派生状态机（DESIGN §5）：状态取 PROGRESS 原词，派生的是依据与行动档。"""
-    if task.status == "done":
-        return Derived("done", "PROGRESS 状态列 = done", "")
-    if task.status == "blocked":
+def _eff_status(task, sess, derived: bool) -> str:
+    """有效状态（P2b，DESIGN §5.3 裁定一/二）：非派生模式 = `PROGRESS` 原词（I-7 现形）；派生模式 = 执行态机器派生。
+
+    DC2.1 值域分流（S-2）：**决策态**（`pending` / `blocked`）不可派生 ⇒ **保留人工原词**；
+    **执行态**（`done` / `in-progress`）可派生 ⇒ `done` = 最远 step == `finalize`，否则 `in-progress`。
+    开关**默认关**（= 现行为，回退点 R-1）；本函数是「迁移盲区」的统一判据——`derive_state` 与三处
+    直取 `task.status` 的分区筛（`_active_table` / `_done_table` / `_trace_section`）**同源复用**（防视图分裂，A-61 含义二）。
+    """
+    if not derived:
+        return task.status
+    if task.status in ("pending", "blocked"):
+        return task.status
+    if sess is not None and sess.last_step == "finalize":
+        return "done"
+    return "in-progress"
+
+
+def derive_state(task: Task, sess, derived: bool = False) -> Derived:
+    """派生状态机（DESIGN §5 / §5.3）：非派生模式状态取 `PROGRESS` 原词（守 I-7），派生的是依据与行动档。
+
+    `derived=True`（P2b 开关）时**执行态第一参照改派生值**（`_eff_status`）——'状态来源迁移'；
+    决策态仍为原词。默认 `False` = 现行为（回退点 R-1）。
+    """
+    st = _eff_status(task, sess, derived)
+    if st == "done":
+        basis = ("执行态派生：决策链五步完整（最远 finalize）" if derived
+                 else "PROGRESS 状态列 = done")
+        return Derived("done", basis, "")
+    if st == "blocked":
         return Derived("blocked", "PROGRESS 状态列 = blocked", "Needs Attention")
     if sess is None:
         # P2a（v1.11）：把「未开工（已登记、无决策流）」与「执行态确无 session（决策链缺失）」
         # 分开——前者是正常状态（Recommended），后者才是缺口（Needs Attention）。
-        # 仅拆此分支：不改 state 来源（永远 return task.status 原词）/ 不动 I-7 / 不加开关。
-        if task.status == "pending":
+        if st == "pending":
             return Derived("pending", "未开工（立项已登记，无决策流）", "Recommended")
-        return Derived(task.status, "执行态但无 session（决策链缺失）", "Needs Attention")
+        return Derived(st, "执行态但无 session（决策链缺失）", "Needs Attention")
     if sess.soft:
-        return Derived(task.status, f"gate exit 2 软性存疑（最远 {sess.last_step}）", "Ready to Verify")
+        return Derived(st, f"gate exit 2 软性存疑（最远 {sess.last_step}）", "Ready to Verify")
     if sess.last_step == "finalize":
-        return Derived(task.status, "决策链五步完整（最远 finalize）", "Ready to Verify")
-    return Derived(task.status, f"最远 step = {sess.last_step}", "Recommended")
+        # 派生模式下 `finalize` 已在 `_eff_status` 判为 `done`（上方短路）⇒ 本支仅非派生模式可达
+        return Derived(st, "决策链五步完整（最远 finalize）", "Ready to Verify")
+    return Derived(st, f"最远 step = {sess.last_step}", "Recommended")
 
 
 def next_step(last_step: str) -> str:
@@ -411,10 +436,10 @@ def list_branches(root: Path) -> list:
 
 # ---------------------------------------------------------------- 渲染（纯函数）
 
-def _tier_lines(tasks, sessions) -> list:
+def _tier_lines(tasks, sessions, derived) -> list:
     buckets = {t: [] for t in TIER_ORDER}
     for t in tasks:
-        d = derive_state(t, sessions.get(t.pid))
+        d = derive_state(t, sessions.get(t.pid), derived)
         if d.tier:
             note = d.basis
             if d.tier == "Recommended" and sessions.get(t.pid):
@@ -468,23 +493,29 @@ def _feature_table(features, mapping, sessions, spec_dir, tasks_by_pid) -> list:
     return lines
 
 
-def _active_table(tasks, sessions) -> list:
-    active = [t for t in tasks if t.status != "done"]
+def _active_table(tasks, sessions, derived) -> list:
+    # P2b（v1.22）迁移盲区 (b)：分区筛改走 `_eff_status`（与 `derive_state` 同源，A-61 含义二）
+    active = [t for t in tasks if _eff_status(t, sessions.get(t.pid), derived) != "done"]
     if not active:
         return ["（无——PROGRESS 无活动事项）"]
     shown, hidden = active[:ACTIVE_CAP], active[ACTIVE_CAP:]
-    lines = ["| P | 事项 | 状态（PROGRESS 原词） | 派生依据 | 行动档 |",
+    # P2b 实施期发现（第三处 I-7 承载位点，见 IMPLEMENTATION DR-27）：表头文案须随开关态分流，
+    # 否则派生态下「状态」列实为派生值却仍标「PROGRESS 原词」＝声明与实现不符
+    st_hdr = "状态（PROGRESS 原词）" if not derived else "状态（执行态派生／决策态原词）"
+    lines = [f"| P | 事项 | {st_hdr} | 派生依据 | 行动档 |",
              "|---|------|--------------------|---------|--------|"]
     for t in shown:
-        d = derive_state(t, sessions.get(t.pid))
+        d = derive_state(t, sessions.get(t.pid), derived)
         lines.append(f"| {t.pid} | {_cell(t.title)} | `{d.status}` | {_cell(d.basis)} | {d.tier or '—'} |")
     if hidden:
         lines.append(f"| … | **另有 {len(hidden)} 项活动事项已折叠**（活动区上限 {ACTIVE_CAP}） | — | — | — |")
     return lines
 
 
-def _done_table(tasks, sessions) -> list:
-    done = sorted((t for t in tasks if t.status == "done"), key=lambda x: x.pid)
+def _done_table(tasks, sessions, derived) -> list:
+    # P2b（v1.22）迁移盲区 (b)：完成段分区筛改走 `_eff_status`（同源，A-61 含义二）
+    done = sorted((t for t in tasks if _eff_status(t, sessions.get(t.pid), derived) == "done"),
+                  key=lambda x: x.pid)
     if not done:
         return ["（无）"]
     lines = ["| P | 事项 | 最远 step | 上次事件 | 优先级 |",
@@ -587,7 +618,7 @@ def _hook_list(hooks) -> list:
     return lines
 
 
-def _feature_process_section(features, mapping, sessions, spec_dir, tasks_by_pid) -> list:
+def _feature_process_section(features, mapping, sessions, spec_dir, tasks_by_pid, derived) -> list:
     """per-feature 流程（C-10）：锚点目录 + 每 feature 一个默认折叠的 `<details>`。
 
     收敛策略（RESEARCH H7 待实测）：仅对「四文档不全 **或** 有关联 session」的 feature 出图，
@@ -613,7 +644,7 @@ def _feature_process_section(features, mapping, sessions, spec_dir, tasks_by_pid
     for name, am, pid in picked:
         s = sessions.get(pid)
         task = tasks_by_pid.get(pid)
-        d = derive_state(task, s) if task else Derived("—", "无关联 P（映射缺口，见 §2「—」）", "")
+        d = derive_state(task, s, derived) if task else Derived("—", "无关联 P（映射缺口，见 §2「—」）", "")
         flow = " --> ".join(
             f'{k}["{label} {"✓" if am[k] else "—"}"]'
             for k, label in (("R", "RESEARCH"), ("D", "DESIGN"),
@@ -685,16 +716,17 @@ def _fmt_ts(ts) -> str:
     return s[:16].replace("T", " ") if len(s) >= 16 and s[10:11] == "T" else s
 
 
-def _trace_section(tasks, sessions, features, mapping) -> list:
+def _trace_section(tasks, sessions, features, mapping, derived) -> list:
     """§6 追溯覆盖：决策链完整性 + **缺映射清单**（I-8 显式缺口，C-16 ④ 要求「计入 §6」）。"""
-    active = [t for t in tasks if t.status != "done"]
+    # P2b（v1.22）迁移盲区 (b)：活动集分区筛改走 `_eff_status`（同源，A-61 含义二）
+    active = [t for t in tasks if _eff_status(t, sessions.get(t.pid), derived) != "done"]
     with_sess = [t for t in active if t.pid in sessions]
     complete = [t for t in with_sess if sessions[t.pid].last_step == "finalize"]
     # P2a（v1.11 / DR-23）：无 session 项按派生行动档分流——「pending = 未开工」不是缺口，
     # 与「执行态确无 session = 真缺口」分列，避免 §6 与行动档自相矛盾（I-8：两类都显式列出）
     no_sess = [t for t in active if t.pid not in sessions]
-    gaps = [t.pid for t in no_sess if derive_state(t, None).tier == "Needs Attention"]
-    idle = [t.pid for t in no_sess if derive_state(t, None).tier != "Needs Attention"]
+    gaps = [t.pid for t in no_sess if derive_state(t, None, derived).tier == "Needs Attention"]
+    idle = [t.pid for t in no_sess if derive_state(t, None, derived).tier != "Needs Attention"]
     # C-16 ④ / I-8：映射缺位（两源皆无）必须在此**显式列出**，不得静默省略
     unmapped = [f for f in features if f not in mapping]
     unmapped_line = ("- **缺映射（I-8 显式缺口）**：" + "、".join(f"`{f}`" for f in unmapped)
@@ -719,30 +751,34 @@ def _basis(tasks, sessions, features) -> str:
 
 
 def render(tasks, sessions, features, mapping, edges, dyn, hooks, branches, spec_dir,
-           tasks_by_pid, script_names) -> str:
+           tasks_by_pid, script_names, derived=False) -> str:
+    # I-7（P2b 件③，只加不删）：开关关闭时本行与现行为**逐字节一致**；开启时**追加**执行态派生条款
+    i7_line = "> 状态词表 = PROGRESS 原词（I-7）；本视图不重贴标签，只补派生依据与行动档"
+    if derived:
+        i7_line += "；**执行态**（`done` / `in-progress`）采**机器派生**（DC2.1 值域分流），**决策态**（`pending` / `blocked`）仍为 `PROGRESS` 原词"
     out = [
         "# CONSOLE｜项目控制台（派生视图）",
         "<!-- GENERATED by scripts/console_gen.py —— 纯派生产物，请勿手改；重跑即刷新 -->",
         f"> 生成基准：{_basis(tasks, sessions, features)}",
-        "> 状态词表 = PROGRESS 原词（I-7）；本视图不重贴标签，只补派生依据与行动档",
+        i7_line,
         "",
         "## ⚑ 需要你 / NEXT",
     ]
-    out += _tier_lines(tasks, sessions)
+    out += _tier_lines(tasks, sessions, derived)
     out += ["## feature 视图（分组键）"]
     out += _feature_table(features, mapping, sessions, spec_dir, tasks_by_pid)
     out += ["", f"## 事项视图（卡片键 · 活动区上限 {ACTIVE_CAP}）"]
-    out += _active_table(tasks, sessions)
+    out += _active_table(tasks, sessions, derived)
     out += ["", "## 决策链状态机"]
     out += _state_machine(sessions)
     out += ["", "## 架构与流程"]
     out += _arch_section(edges, dyn, hooks, DECLARED_SOURCES, script_names)
     out += ["", "### per-feature 流程（默认折叠）"]
-    out += _feature_process_section(features, mapping, sessions, spec_dir, tasks_by_pid)
+    out += _feature_process_section(features, mapping, sessions, spec_dir, tasks_by_pid, derived)
     out += ["", "## 追溯覆盖"]
-    out += _trace_section(tasks, sessions, features, mapping)
+    out += _trace_section(tasks, sessions, features, mapping, derived)
     out += ["", f"## ✅ 已完成（最近 {DONE_TAIL} 条）"]
-    out += _done_table(tasks, sessions)
+    out += _done_table(tasks, sessions, derived)
     out += ["", "## ⑂ fork / 支线"]
     out += [f"- {b}" for b in branches] if branches else ["（git 不可用或无分支）"]
     out += [""]
@@ -786,7 +822,7 @@ def _read_text(path: Path) -> str:
         return ""
 
 
-def build(root: Path = ROOT) -> str:
+def build(root: Path = ROOT, derived: bool = False) -> str:
     """从真值源构建控制台文本（纯读 + 纯函数）。"""
     try:
         prog = (root / "docs" / "PROGRESS.md").read_text(encoding="utf-8")
@@ -807,7 +843,7 @@ def build(root: Path = ROOT) -> str:
     hooks = hook_chain(root / ".pre-commit-config.yaml")
     branches = list_branches(root)
     return render(tasks, sessions, features, mapping, edges, dyn, hooks, branches, spec_dir,
-                  tasks_by_pid, script_names)
+                  tasks_by_pid, script_names, derived)
 
 
 # ---------------------------------------------------------------- selftest
@@ -1047,7 +1083,7 @@ def run_selftest() -> int:
     check("S37 §6 缺映射清单（I-8 显式缺口：有缺口列出 / 无缺口显式标无）",
           "- **缺映射（I-8 显式缺口）**：`gamma`" in text
           and any("（无——1 个 feature 全部有映射）" in ln for ln in
-                  _trace_section([], {}, ["a"], {"a": "P-001"})))
+                  _trace_section([], {}, ["a"], {"a": "P-001"}, False)))
 
     _S = SessionInfo("specwf-p900", "design", False, "2026-09-11T10:00:00+08:00",
                     ("research", "design"), ())
@@ -1066,6 +1102,39 @@ def run_selftest() -> int:
           "- **决策链缺失（Needs Attention）**：P-004" in text
           and "- **未开工（立项已登记，无决策流）**：P-002、P-007、P-008、P-009、P-010" in text)
 
+    # --- P2b（v1.22）：状态来源迁移开关（件①）+ I-7 扩写（件③）---
+    _S_full = SessionInfo("specwf-p902", "finalize", False, "2026-09-11T15:00:00+08:00",
+                          STEP_SEQUENCE, ())
+    check("S42 默认关 = 现行为（回退点 R-1）：build(root) 与显式 derived=False 逐字节一致",
+          build(root, derived=False) == text and build(root, derived=True) != text)
+    _d5 = derive_state(Task("P-904", "链已完整但状态列非 done", "in-progress", "—"), _S_full, True)
+    check("S43 派生臂：执行态第一参照改派生值（最远 finalize ⇒ state=done，非 task.status；件①）",
+          _d5.status == "done" and _d5.tier == "" and "执行态派生" in _d5.basis)
+    _d6 = derive_state(Task("P-905", "阻塞项", "blocked", "—"), None, True)
+    _d7 = derive_state(Task("P-906", "未开工项", "pending", "—"), None, True)
+    check("S44 派生臂：决策态保原词（blocked / pending 人工面不可派生，守 DC2.1 S-2 与 I-7）",
+          _d6.status == "blocked" and _d6.tier == "Needs Attention"
+          and _d7.status == "pending" and _d7.tier == "Recommended")
+    _d8 = derive_state(Task("P-907", "done 但确无证据", "done", "—"), None, True)
+    _t_done_nosess = Task("P-908", "done 无 session", "done", "—")
+    _t_cap = Task("P-909", "P 行状态列滞后", "in-progress", "—")
+    check("S45 派生臂：执行态未 finalize ⇒ in-progress（done 无 session 暴露为缺口）+ `_eff_status` 为 (b) 同源唯一判据",
+          _d8.status == "in-progress" and _d8.tier == "Needs Attention"
+          and _eff_status(_t_done_nosess, None, True) == "in-progress"
+          and _eff_status(_t_cap, _S_full, True) == "done"
+          and _eff_status(_t_cap, _S_full, False) == "in-progress")
+    text_d = build(root, derived=True)
+    check("S46 I-7 扩写（只加不删）：原声明句保留 + 追加执行态派生条款 + §3 表头随开关态分流（件③）",
+          "> 状态词表 = PROGRESS 原词（I-7）；本视图不重贴标签，只补派生依据与行动档" in text
+          and "> 状态词表 = PROGRESS 原词（I-7）；本视图不重贴标签，只补派生依据与行动档；" in text_d
+          and "采**机器派生**（DC2.1 值域分流）" in text_d
+          and "状态（PROGRESS 原词）" in text and "状态（执行态派生／决策态原词）" in text_d)
+    _tgt2 = root / "docs" / "CONSOLE_D.md"
+    _w1 = write_console(_tgt2, text_d)
+    _w2 = write_console(_tgt2, text_d)
+    check("S47 派生态确定性与幂等（I-2 双跑一致 / I-3 首写 True 二次 False）",
+          _w1 and not _w2 and build(root, derived=True) == text_d)
+
     shutil.rmtree(root, ignore_errors=True)
     print(f"selftest: {passed}/{total} PASS")
     if failures:
@@ -1083,6 +1152,8 @@ def main(argv=None) -> int:
     parser.add_argument("--stage", action="store_true", help="变化时 git add（pre-commit L0）")
     parser.add_argument("--selftest", action="store_true", help="内嵌自测")
     parser.add_argument("--root", default=None, help="仓库根（selftest 用）")
+    parser.add_argument("--derived", action="store_true",
+                        help="派生态（P2b 开关）：执行态采机器派生（DC2.1）；默认关 = PROGRESS 原词")
     args = parser.parse_args(argv)
 
     if args.selftest:
@@ -1090,7 +1161,7 @@ def main(argv=None) -> int:
 
     root = Path(args.root).resolve() if args.root else ROOT
     try:
-        content = build(root)
+        content = build(root, derived=args.derived)
     except Exception as e:  # noqa: BLE001 —— 顶层兜底（exit 2）
         print(f"[tool-error] {e}", file=sys.stderr)
         return 2
