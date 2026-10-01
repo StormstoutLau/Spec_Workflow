@@ -1,26 +1,27 @@
 ---
 id: community-ecosystem-RESEARCH
 type: design
-version: 1.23
+version: 1.24
 status: in-review
-date: 2026-09-08
+date: 2026-10-01
 depends: [SPEC-PROCESS, FWK-ASSERTION, ADR-0007, ADR-0010]
 upstream: null
 ---
 
-# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇——补强复用评估 v1.23 (2026-09-10)
+# 社区同类框架生态调研：spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测 / 自主研究运行时五簇——补强复用评估 v1.24 (2026-10-01)
 
 > **任务来源**: 用户提问「调研分析社区当前类似优秀的开源框架 是否可以补强复用」+ 补充提问「当前工作流规定了流程 但每个步骤比如调研 审查 设计方案 实施方案等具体步骤 社区是否有类似的框架 skill MCP工具可以补强 同时当前是否可以强制要求每个步骤给出决策 引用信息依据 提供给下一轮审查」
 > **调研方法**: 本框架 §3/§7 自举——A/B/C 断言分级 + 机读登记 + 假设区隔离；WebSearch 六轮取证（2026-09-08，四方向 + 本轮步骤级工具两方向）。
 > **审查状态**: `自查（单视角）`——调研收束轮，同 P-012/P-013/P-015 先例（RESEARCH-only，无独立 pass）。
 > **v1.23 变更（编排重构批，用户指令「这份文档需要重构一下 顺序 编排 请分析」+ 裁决 = 保守收敛 + 压缩移附录）**: **结构重构（零内容丢失、编号框架全不动**——§2.2/§2.5/§3.1/§3.4/§3.4.1/§3.5/§4/§5.3/§5.4 等外部引用保持稳定）：① **21 条逐轮变更日志（v1.2~v1.22 mega-line）压缩为下方「§0.1 版本历史摘要表」**，逐轮详细日志原文迁附录 D（可追溯性保留）；② **新增目录（TOC）**；③ **新增 §3.0 候选状态总表**（单一权威位点，§3.4 矩阵 + §3.4.1 + §5.1 状态叙事改为指针引用）；④ **§5.1 候选池指针化**（指向 §3.4 矩阵消除双源维护）；⑤ 版本 1.22→1.23。**断言计数不变（36/4/14/4——纯结构编排，零新增断言/零内容删改）**。逐轮详档见 [附录 D](#附录-d变更日志详档v122--v12-迁入)。
+> **v1.24 变更（第五簇回填批，2026-10-01）**: 承接 2026-10-01 自主研究框架调研（DeepScientist 本地只读盘点 + 社区同族检索 + 本仓 P-040 学术推理工作流结合分析），新增 **§2.7 第五簇「自主研究运行时与证据账本」**——前四簇（spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测）均止于**单次开发任务**尺度，本簇补入**长周期自主研究运行时**（组织单位 = 一次研究一个仓 + 内置证据账本 + 覆盖度机械门禁）及其**引用接地子轴**。**新增 5 条 A（A-37 DeepScientist / A-38 PaperQA / A-39 PaperQA2 / A-40 SciRAG / A-41 CiteME）+ 1 条 B（B5）+ 1 条 C（C-15）**；计数 **A 36→41 / B 4→5 / C 14→15 / H 4 不变**。**本批对簇 B 引用接地四条做一手核验并逐条标注读数口径**（PaperQA 的 Hallucinated 为组表头跨三子列、无单一列直读值；SciRAG 的 6.0%/5.3%/6.6% 为**三名 LLM judge 对同一批输出的判定差异**而非跨模型性能差；CiteME 的 4.2–18.5% 是 **accuracy** 而非幻觉率）——核验过程另**删除**一条仅以厂商内容页为源的断言（Elicit / Consensus / Scite 商业对照，依赖源降为 E5，不入档）。**裁定 = 零吸收**（Layer-0 概念已与本仓既有机制同构，不引入任何外部运行时/依赖）+ **两条指针登记**（六档伪造风险词表并入 CHECKLIST/审计报告的「发现类型」枚举；M7 账本对比臂登记「不信任 ready counts、手工重算」的外部同构实证）。**零工具改动**。
 >
 > ## 目录
 >
 > - §0 断言统计表（审计入口）
-> - §0.1 版本历史摘要表（v1.1→v1.23 一句话要点）
+> - §0.1 版本历史摘要表（v1.1→v1.24 一句话要点）
 > - §1 调研目标与实体盘点（A-01~A-16）
-> - §2 同构分析（2.1 spec 宪法 / 2.2 AGENTS.md 生态 / 2.3 决策溯源 / 2.4 LLM 评测 / 2.5 步骤级工具盘点 / 2.6 兼容与可行性矩阵）
+> - §2 同构分析（2.1 spec 宪法 / 2.2 AGENTS.md 生态 / 2.3 决策溯源 / 2.4 LLM 评测 / 2.5 步骤级工具盘点 / 2.6 兼容与可行性矩阵 / **2.7 第五簇：自主研究运行时与证据账本**）
 > - §3 补强可行性评估（3.0 候选状态总表 / 3.1 立即做 / 3.2 候选议程 / 3.3 不复用 / 3.4 补强判定矩阵 / 3.4.1 候选逐项深入调研 / 3.4.2 hook 面独立评估 / 3.5 强制决策产物管线 / 3.6 每阶段定制 agent / 3.7 全环节增强工具全景 / 3.8 多工具吸收方法论）
 > - §4 幻觉排除审查（4.1 来源验证 / 4.2 技术声明验证 / 4.3 已知局限）
 > - §5 对设计的输入（5.1 候选池 / 5.2 关键约束 / 5.3 风险 / 5.4 假设区）
@@ -53,25 +54,26 @@ upstream: null
 > | v1.20 | 2026-09-10 | 每阶段定制 agent 可行性批 | 新增 §3.6 环节-工具映射；阶段 agent 可行（学术+生态双实证） | A 30 / B 4 / C 14 |
 > | v1.21 | 2026-09-10 | 全环节增强工具扩展批 | 新增 §3.7 全景（调研/审查两链补证 STORM/Cloudflare 等） | A 33 |
 > | v1.22 | 2026-09-10 | 工具吸收方法论批 | 新增 §3.8 五问（适配/边际/去重/防缝合/对齐；OSS 选型 + Agent Atlas + ToolScope + OPENTOOLS） | A 36 |
-> | v1.23 | 2026-09-10 | 编排重构批（本次） | 结构重构：TOC + 版本史表 + §3.0 状态总表 + §5.1 指针化 + 日志移附录 D；编号框架全不动 | 不变 |
+> | v1.23 | 2026-09-10 | 编排重构批 | 结构重构：TOC + 版本史表 + §3.0 状态总表 + §5.1 指针化 + 日志移附录 D；编号框架全不动 | 不变 |
+> | v1.24 | 2026-10-01 | 第五簇回填批（本次） | 新增 §2.7 第五簇「自主研究运行时与证据账本」（DeepScientist + 引用接地四源一手核验）；零吸收、仅两条指针登记 | A 36→41 / B 4→5 / C 14→15 |
 > **裁决建议**: 不变（分层吸收 + §3.5 强制决策产物管线可行且优先；v1.5 增补：ARC 升级为优先候选待用户裁决）。待用户裁决（P-018 登记）。
 
 ## 0. 断言统计表（必填，审计入口）
 
 | 级别 | 条数 | 说明 |
 |------|------|------|
-| A 事实类 | 36 | 每条附 URL 来源；取证日期 2026-09-08（v1.1 +9 条步骤级工具；v1.4 +A-26 ponytail；v1.5 无新增行首断言——ARC 快照就地修订 A-10；v1.20 +A-27~A-30 每阶段定制 agent 五路取证；v1.21 +A-31~A-33 全环节工具链补证；v1.22 +A-34~A-36 工具吸收方法论多轮取证） |
-| B 推断类 | 4 | 登记于附录 B（v1.20 +B4 阶段化 agent 可行性推断） |
-| C 判断类 | 14 | §3.1-3.3 补强评估 10 条 + §3.5 强制决策产物管线裁定 3 条 + v1.20 +C14 阶段化 agent 分层判定（v1.2 修正：v1.1 声明 10 实为 12，M7 样本 ㉙；v1.4 +1 Ponytail 判定；v1.22 工具吸收方法论不涉新裁定，C 14 不变） |
+| A 事实类 | 41 | 每条附 URL 来源；取证日期 2026-09-08（v1.1 +9 条步骤级工具；v1.4 +A-26 ponytail；v1.5 无新增行首断言——ARC 快照就地修订 A-10；v1.20 +A-27~A-30 每阶段定制 agent 五路取证；v1.21 +A-31~A-33 全环节工具链补证；v1.22 +A-34~A-36 工具吸收方法论多轮取证；v1.24 +A-37~A-41 第五簇自主研究运行时与引用接地四源一手核验） |
+| B 推断类 | 5 | 登记于附录 B（v1.20 +B4 阶段化 agent 可行性推断；v1.24 +B5 自主研究运行时与本仓同构且「不信任 ready counts、手工重算」获外部同构实证） |
+| C 判断类 | 15 | §3.1-3.3 补强评估 10 条 + §3.5 强制决策产物管线裁定 3 条 + v1.20 +C14 阶段化 agent 分层判定 + v1.24 +C15 第五簇零吸收裁定（v1.2 修正：v1.1 声明 10 实为 12，M7 样本 ㉙；v1.4 +1 Ponytail 判定；v1.22 工具吸收方法论不涉新裁定，C 14 不变） |
 | 假设区 | 4 | H1-H4（H1/H2/H3 已实测已闭合——读取兼容 P-021 / ARC 导入 P-031+P-035 / red team 价值 P-036 已研判；H4 仍待触发——MCP 服务形态） |
 
-> **计数说明（R7 机械重数）**: A 类 36 条（行首 `【A】` 标记）；附录 B 4 条（`"id": "B\d+"` 机读块）；C 类 14 条（`【C】` 标记——**不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 声明 10 实为 12 由 v1.2 吃狗粮 review 重数捕获（M7 样本 ㉙）；v1.4 +1 C（ponytail 判定）人工重数核对；v1.5 + v1.6 无新增行首断言，重数 26/13/4 复核通过（v1.6 吃狗粮审计轮机械复核）；v1.20 +A-27~30 +B4 +C14 人工重数核对 = 30/4/14 通过；v1.21 +A-31~33 人工重数核对 = 33/4/14 通过；v1.22 +A-34~36 人工重数核对 = 36/4/14 通过**）；假设区 4 条（`[H\d+]` 列表项）。
+> **计数说明（R7 机械重数）**: A 类 41 条（行首 `【A】` 标记）；附录 B 5 条（`"id": "B\d+"` 机读块）；C 类 15 条（`【C】` 标记——**不参与 R7 机械对账，按 P-011 教训先行人工重数再写声明；v1.1 声明 10 实为 12 由 v1.2 吃狗粮 review 重数捕获（M7 样本 ㉙）；v1.4 +1 C（ponytail 判定）人工重数核对；v1.5 + v1.6 无新增行首断言，重数 26/13/4 复核通过（v1.6 吃狗粮审计轮机械复核）；v1.20 +A-27~30 +B4 +C14 人工重数核对 = 30/4/14 通过；v1.21 +A-31~33 人工重数核对 = 33/4/14 通过；v1.22 +A-34~36 人工重数核对 = 36/4/14 通过；v1.24 +A-37~41 +B5 +C15 人工重数核对 = 41/5/15 通过**）；假设区 4 条（`[H\d+]` 列表项）。
 
 ## 1. 调研目标与实体盘点
 
 **核心问题**: ① 社区是否存在与本框架（spec 驱动开发规范 + 反幻觉证据账本 + 机械对账 + 流程门禁物理化）同族的优秀开源框架；② 哪些可以补强复用（吸收/候选/不复用），边界在哪；③（v1.1）每个流程步骤（调研/审查/设计/实施）的具体执行是否有社区框架/skill/MCP 可补强；④（v1.1）可否强制每步产出「决策 + 引用依据」供下一轮审查。
 
-社区同类项目分四簇盘点（A 类断言，A-01~A-16）：
+社区同类项目分五簇盘点（第一至四簇 = 本节 A 类断言 A-01~A-16；**第五簇 = §2.7**，A-37~A-41）：
 
 【A】spec 宪法类（流程强制管线）：**Superpowers**（github.com/obra/superpowers，Jesse Vincent）——spec-first pipeline：brainstorming（强制产出 `docs/superpowers/specs/` 规范文档 + **spec-document-reviewer 子代理五维验证**：completeness/consistency/clarity/scope/YAGNI）→ planning → TDD 强制实施；130k+ 星（2026-03 报道数）；支持 Claude Code / Cursor / Copilot CLI / Gemini CLI / Codex。优先级体系 = 用户指令 > skills > 默认行为。【来源：https://spec-coding.dev/blog/superpowers-spec-first-ai-agent-skills】
 
@@ -196,6 +198,35 @@ upstream: null
 | promptfoo（P-010） | ✅（双臂模板端点运行时注入，已实测） | n/a | 24.9k★ / 并入 OpenAI / MIT | CLI | 已落地 |
 
 > v1.6 更新版盲区登记（v1.9 再更新）：v1.5 快照已核验 **ARC（v0.8.0）/ kschlt-adr-kit（v0.2.x）/ Ponytail（v4.8.x）** 版本；**v1.9（2026-09-09）再核验 u14app（v1.0.0@2026-05-21）/ AAT（PyPI v0.1.2）/ Alibaba DeepResearch（19.4k★ 但 repo 停滞）/ Gigaxity（53★ 无版本号）**——四个模糊项判定已落地（可行×2 / 不可行×2）；剩余无版本号标注 = **gpt-researcher MCP（v1.0.0 已标注）** + Gigaxity（已排除）——采纳任一前须 P-015 v1.2 式源码/API 直读核验（§4.3 局限 5）。
+
+### 2.7 第五簇：自主研究运行时与证据账本（v1.24 新增，2026-10-01）
+
+> **缘起**: v1.1~v1.23 的四簇（spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测）覆盖「流程强制 + 规则桥 + 决策留痕 + 评测」四条轴，但**四条轴均止于「单次开发任务」尺度**——任务结束即收束，不含"跨数月的研究推进"。本簇补入**长周期自主研究运行时**：其组织单位不是"一次提交"而是"一次研究"，因而必须自带**证据账本、覆盖度门禁与来源分级**——恰与本仓 R7 机械重数、M7 证据账本、A/B/C 分级同题。
+> **取证方式**: 本地框架只读盘点（`D:\Github\DeepScientist-main`，2026-10-01，零写入）+ 社区同族检索；**引用接地子轴另做一手核验**（arXiv 摘要/正文页直读，逐条 URL + 读数口径，另见 §4.1/§4.2 增补行）。
+> **两个子轴**: ① 运行时与证据账本（A-37）；② 引用接地与文献合成（A-38~A-41）——自主研究 agent 的输出必须"接地到真文献"，与 A-54（引用幻觉 18–69%）同族。
+
+#### ① 运行时与证据账本（A-37）
+
+【A】A-37: **DeepScientist**（西湖大学 WestlakeNLP，ICLR 2026，Apache-2.0）——local-first autonomous research studio。**组织原则「one quest = one git repo」**（一次研究任务 = 一个独立仓 → 天然隔离 + 版本可回溯 + 研究边界即仓边界）；技术栈 = npm 启动器 + Python 3.11；**内置三个 MCP 命名空间** memory / artifact / bash_exec；**21 个 stage skill**，以 **prompt-led + skill-led 双驱动**推进。与本仓最相关的五项机制：**① Evidence Ledger（JSON + MD 双写）**——证据同时以机读块与人类可读文档落盘（与 M7 账本「机读 hits 块 + 散文声明」双载体同构）；**② 覆盖度机械门禁**（覆盖度不由自评给出，而由脚本重数）；**③ 六档伪造风险词表**（对"可能被伪造的表述形态"分级枚举）；**④ trust-rank 五档来源分级**；**⑤ 文本契约测试**（对 skill 的输出格式做断言测试，非人工抽查）。【来源：https://github.com/WestlakeNLP/DeepScientist（本地只读盘点：README 583 行 / src/deepscientist/evidence_packets.py 590 行 / src/skills/intake-audit/SKILL.md 321 行 / tests/test_skill_contracts.py 761 行）】
+
+#### ② 引用接地与文献合成（A-38~A-41，一手核验）
+
+【A】A-38: **PaperQA**（arXiv:2312.07559，2023）——RAG 式科学问答基线，附 LitQA 数据集。**读数口径（v1.24 核验）**：其幻觉汇总表的 **Hallucinated (%) 是组表头、跨三子列**（Full Hallucination / Citation Inaccuracy / Context Irrelevance），**不存在单一"Hallucinated"列可直读**；总幻觉率 = 三子列之和——GPT-3.5 47.50%、GPT-4 39.21%、Claude-2 60.30%（n = 80 / 51 / 68），PaperQA 自身 0%（n = 237）。**故常被转述的「40–60% 幻觉率」须标注为"读者自行加总"而非原表直读值**。【来源：https://arxiv.org/abs/2312.07559】
+
+【A】A-39: **PaperQA2**（arXiv:2409.13740，2024）——**与本簇 A-38 分列，不可合并**：PaperQA 与 PaperQA2 属不同年份、不同系统版本、不同评测数据集（LitQA vs LitQA2）的两个独立工作；PaperQA2 报告在文献检索与合成上超过人类基准的表现。【来源：https://arxiv.org/abs/2409.13740】
+
+【A】A-40: **SciRAG**（arXiv:2511.14362）——科学文献合成的引用支撑核查。**读数口径（v1.24 核验，三条限定条件缺一即误读）**：报告值 **6.0% / 5.3% / 6.6%** 是**三名 LLM judge（GPT-4o / DeepSeek-R1 / Gemini 2.5 Pro）对同一批输出的判定差异**，**不是三个被评模型之间的性能差异**；口径 = n=100 随机抽样 · judge 本身是 LLM · **仅评"未被显式引用的句子"**。【来源：https://arxiv.org/abs/2511.14362】
+
+【A】A-41: **CiteME**（arXiv:2407.12861）——LLM 引文归属（citation attribution）评测，题量 130。**读数口径（v1.24 核验）**：`4.2–18.5%` 是 **accuracy（正确归属率）**，**不是幻觉率/伪造率**——摘要逐字为 "with LMs achieving only 4.2-18.5% accuracy and humans 69.7%"（人类基线 69.7%），据此**失败率 ≈ 81.5–95.8%**；区间两端出处 = Table 4 "No Commands"（4.2 = LLaMA-3-70B w/o Demo；18.5 = Claude 3 Opus w/ Demo）；基线 SPECTER / SPECTER2 = 0%。【来源：https://arxiv.org/abs/2407.12861】
+
+**本簇与既有轴的关系**: 本簇**不新增候选工具**——它的价值在于证明「自主研究运行时的**主要失效面**是引用接地，且**该失效面的公开读数极易被转述者口径污染**」（须区分 accuracy 与 hallucination rate、须区分 judge 间判定差异与模型间性能差异、须区分组表头与子列直读），与 A-54 一族互为印证。
+
+#### ③ 簇外未核验项（显式登记，不入断言）
+
+- **「验证层架构与多智能体失效归因」子轴**（四失效模式分类 / intrinsic self-correction 不可靠性等）——**仅取得转述级线索，未完成一手核验**，按 E5 推测级**不入断言**；登记为**触发式核验项**（触发 = 本仓需要在 agent 失效归因上落机制时）。**未核验的线索不作证据**（同 P-040 §18.1 纪律）。
+- **Elicit / Consensus / Scite 商业对照**——唯一来源为厂商内容页，回查一手仅得厂商自述，依赖源降为 **E5** → **删除，不入档**。
+
+【C】C-15: **第五簇裁定 = 零吸收 + 两条指针登记**（Layer-0，零工具改动）。理由：① 运行时本体（DeepScientist 的 npm 启动器 + Python 栈 + 21 stage skill）与本仓「纯文档 + stdlib 薄壳」哲学冲突，引入即违反零依赖不变式（D6），且其价值**已被本仓既有机制覆盖**（Evidence Ledger ≙ M7 账本双载体；覆盖度机械门禁 ≙ R7「声明 = 机械重数」；trust-rank ≙ A/B/C 分级 + E1–E5；文本契约测试 ≙ dc_validator / step-enforce）；② 引用接地四源（A-38~A-41）的价值在**口径纠偏**而非工具，本仓已以「【A】行须附 URL + E1 证据分级」承担同一职责（A-54 / C-11 已有对应纪律）。**两条指针登记**：**①** 六档伪造风险词表 → 并入 CHECKLIST / 审计报告的「发现类型」枚举候选（触发 = 下一次 CHECKLIST 模板修订）；**②** 「不信任 ready counts、手工重算」的外部同构实证 → 登记入 M7 账本对比臂。**验证端零改动**。A 36→**41**（+A-37~A-41）；B 4→**5**（+B5）；C 14→**15**（+C-15）。
 
 ## 3. 补强可行性评估（候选议程明细）
 
@@ -490,6 +521,12 @@ git 原生 pre-commit/pre-push 均可被 `--no-verify` 跳过（git 官方文档
 | Ponytail（DietrichGebert v4.8.x） | github.com/DietrichGebert/ponytail + CSDN/openclawapi 评测文 | WebSearch 命中 README + 两篇评测 | ✅ |
 | ARC（v0.8.0） | npm @kegesch/arc 页 + github.com/kegesch/arc issues #20/#15 | WebSearch 命中（v1.5 快照核验） | ✅ |
 | ADR Kit（kschlt） | github.com/kschlt/adr-kit README/TECHNICAL/CHANGELOG | WebSearch 命中（v1.5 快照核验） | ✅ |
+| DeepScientist（A-37，v1.24 增） | github.com/WestlakeNLP/DeepScientist | **本地只读盘点**（`D:\Github\DeepScientist-main`，2026-10-01，零写入；README + evidence_packets.py + intake-audit/SKILL.md + test_skill_contracts.py 四文件直读） | ✅ |
+| PaperQA（A-38，v1.24 增） | arXiv:2312.07559 | **arXiv 摘要/正文页一手核验**（幻觉表列结构逐格复核） | ✅ |
+| PaperQA2（A-39，v1.24 增） | arXiv:2409.13740 | **arXiv 摘要页一手核验**（与 PaperQA 分离性确认） | ✅ |
+| SciRAG（A-40，v1.24 增） | arXiv:2511.14362 | **arXiv 摘要页一手核验**（judge 口径确认；全文截断处已标注） | ✅ |
+| CiteME（A-41，v1.24 增） | arXiv:2407.12861 | **arXiv 摘要页一手核验**（accuracy 口径 + Table 4 取值端确认） | ✅ |
+| Elicit / Consensus / Scite（v1.24 删） | 厂商内容页 | 一手回查仅得厂商自述 → 依赖源 **E5** | ❌ 已删除，不入档 |
 
 ### 4.2 技术声明验证
 
@@ -525,10 +562,15 @@ git 原生 pre-commit/pre-push 均可被 `--no-verify` 跳过（git 官方文档
 | ADR Kit 三层 enforcement 细节：policy 块生成 lint / MCP / ContractRelations（v1.5 增） | kschlt/adr-kit README/TECHNICAL/CHANGELOG | ✅ 已验证（README/文档级，未源码直读） |
 | Alibaba DeepResearch / u14app / Agent Leaderboard（v1.2 补 4.2 表缺行） | github topics / 仓库 README | ⚠️ 声明级（星数为快照，功能细节未展开） |
 | 三起事故 / 星数 / 采用数 | 见 4.1 标注 | ⚠️ 声明级 |
+| DeepScientist 「one quest = one git repo」+ Evidence Ledger 双写 + 六档伪造风险词表 + trust-rank 五档 + 21 stage skill（A-37，v1.24 增） | 本地仓直读（README / evidence_packets.py / intake-audit SKILL.md / test_skill_contracts.py） | ✅ 已验证（**本地源文件直读级**，无转述层） |
+| PaperQA 幻觉表列结构 = 组表头跨三子列、无单列直读值（A-38，v1.24 增） | arXiv:2312.07559 正文表格 | ✅ 已验证（**一手逐格复核**；「40–60%」标注为读者加总） |
+| PaperQA2 与 PaperQA 须分列（A-39，v1.24 增） | arXiv:2409.13740 摘要页 | ✅ 已验证（一手；年份/版本/数据集三重分离） |
+| SciRAG 6.0/5.3/6.6% = 三名 LLM judge 对同一批输出的判定差异（A-40，v1.24 增） | arXiv:2511.14362 摘要页 | ✅ 已验证（一手；口径三限定条件已标注） |
+| CiteME 4.2–18.5% = accuracy 而非幻觉率（A-41，v1.24 增） | arXiv:2407.12861 摘要 + Table 4 | ✅ 已验证（一手；失败率 ≈81.5–95.8%） |
 
 ### 4.3 已知局限
 
-1. A 类断言均为 README/文档级（声明级）——未做源码直读级核验（区别于 P-015 v1.2）；候选议程触发时升级证据等级。
+1. A 类断言原均为 README/文档级（声明级）——未做源码直读级核验（区别于 P-015 v1.2）；候选议程触发时升级证据等级。**v1.24 例外**：第五簇 A-37（本地源文件直读）与 A-38~A-41（arXiv 一手核验）已达直读级；余 A-01~A-36 仍为声明级。
 2. Superpowers / SpecKit / gpt-researcher 星数为第三方报道或主题页快照，非 API 快照；锁引用时须复核。
 3. 三起事故描述来自中文综述转述，个别细节未经官方确认——仅作动机佐证。
 4. ADR Kit 的 LOC/接口细节未核验（README 级）——采纳其模式时须 P-015 式源码直读。
@@ -614,14 +656,20 @@ git 原生 pre-commit/pre-push 均可被 `--no-verify` 跳过（git 官方文档
 - Agent Atlas 使用频率审计：https://github.com/Pycomet/agent-atlas
 - OPENTOOLS 社区驱动工具框架（Notre Dame）：https://arxiv.org/pdf/2604.00137v1 ; https://github.com/hydang99/opentools
 - Stormhelm AI 开发框架对比分析：https://github.com/yeison-gutierrez-simetrik/stormhelm
+- DeepScientist（WestlakeNLP，ICLR 2026，Apache-2.0）：https://github.com/WestlakeNLP/DeepScientist（v1.24；本地只读盘点 D:\Github\DeepScientist-main）
+- PaperQA（2023，LitQA）：https://arxiv.org/abs/2312.07559（v1.24 一手核验）
+- PaperQA2（2024，LitQA2）：https://arxiv.org/abs/2409.13740（v1.24 一手核验）
+- SciRAG：https://arxiv.org/abs/2511.14362（v1.24 一手核验）
+- CiteME（LLM 引文归属评测，题量 130）：https://arxiv.org/abs/2407.12861（v1.24 一手核验）
 
 ---
 
 ## 附录 A：A/B 类断言明细
 
-### A 类（事实类，36 条）
+### A 类（事实类，41 条）
 
-- A-01 至 A-36：见 §1/§2.5/§3.8 各 `【A】` 行（编号按文中出现顺序，来源已随行标注）。
+- A-01 至 A-36：见 §1/§2.5/§3.6/§3.7/§3.8 各 `【A】` 行（编号按文中出现顺序，来源已随行标注）。
+- A-37 至 A-41：见 §2.7 各 `【A】` 行（v1.24 第五簇；A-37 = 本地源文件直读，A-38~A-41 = arXiv 一手核验）。
 
 ### 附录 B：B 类推断机读块
 
@@ -631,19 +679,21 @@ git 原生 pre-commit/pre-push 均可被 `--no-verify` 跳过（git 官方文档
 | B2 | AGENTS.md 桥文件可获工具互操作性收益（主流工具原生识别，进入本仓即行为对齐） | A-05/A-06 标准事实归纳 |
 | B3 | 「每步决策产物管线」（§3.5）可行——已具备全部基础资产（FWK-DECISION-RECORD 格式 + Spec_Runner 事件流/gate + FWK-ASSERTION 证据分级 + RULE-1/RULE-5 审查臂），且社区三独立项目（adr-governance/ADR Kit/ADR 侵食防御）已演化出同构「决策产物化 + 机械强制」模式 | C-11/C-12/C-13 裁定 + A-23/A-24/A-25 佐证归纳（v1.6 修正：v1.4 插入 ponytail 致 §3.5 三裁定编号 +1，表版 C-08/09/10 与 JSON 版 C-10/11/12 均为旧编号） |
 | B4 | 每阶段定制 agent 可行且与本仓「每步决策产物 + evidence 锚点 + step-gate」验证同一机制（阶段证据锚定提升可靠性）——Spec Kit Agents 学术实证 + Spec-Kit/Pocock/addyosmani 生态分阶段封装为双重印证；但 phase gate 为 prompt 级非机械门禁，本仓以更硬机制已覆盖，仅生成端纪律模块化作 Layer-0 概念吸收 | A-27/A-28/A-29 事实归纳（v1.20） |
+| B5 | 长周期自主研究运行时与本仓同构，且两者**独立演化出同一核心纪律**——「声明的统计量必须由机械重算得出，不得信任 agent 自报的 ready counts」；本仓四件机制（M7 双载体账本 / R7 声明=重数 / A-B-C 分级 + E1-E5 / 文本契约门禁）与 DeepScientist 五件机制（Evidence Ledger 双写 / 覆盖度机械门禁 / trust-rank 五档 / 六档伪造风险词表 / 文本契约测试）**一一对应**，构成该「不信任自报计数」纪律的**外部同构实证** | A-37 事实归纳 + 本仓 R7 / M7 / DC 契约对照（v1.24） |
 
 ```json
 [
   {"id": "B1", "inference": "社区 spec 宪法类框架与本框架流程同构（Constitution≙SPEC_PROCESS、drift gate≙对账制、spec-reviewer≙独立 pass）", "basis": "A-02/A-04/SGE 能力清单归纳"},
   {"id": "B2", "inference": "AGENTS.md 桥文件可获工具互操作性收益（主流工具原生识别，进入本仓即行为对齐）", "basis": "A-05/A-06 标准事实归纳"},
   {"id": "B3", "inference": "每步决策产物管线可行（基础资产齐备 + 社区三项目独立演化同构模式）", "basis": "C-11/C-12/C-13 + A-23/A-24/A-25（v1.6 修正：§3.5 三裁定编号同步至 C-13 体系）"},
-  {"id": "B4", "inference": "每阶段定制 agent 可行且与阶段证据锚定机制同构——学术（Spec Kit Agents +0.15）+ 生态（Spec-Kit/Pocock/addyosmani 分阶段封装）双实证；phase gate 属 prompt 级 vs 本仓机械门禁，故仅生成端 Layer-0 概念吸收", "basis": "A-27/A-28/A-29（v1.20）"}
+  {"id": "B4", "inference": "每阶段定制 agent 可行且与阶段证据锚定机制同构——学术（Spec Kit Agents +0.15）+ 生态（Spec-Kit/Pocock/addyosmani 分阶段封装）双实证；phase gate 属 prompt 级 vs 本仓机械门禁，故仅生成端 Layer-0 概念吸收", "basis": "A-27/A-28/A-29（v1.20）"},
+  {"id": "B5", "inference": "长周期自主研究运行时与本仓同构，两者独立演化出同一核心纪律「声明的统计量必须由机械重算得出，不信任 agent 自报的 ready counts」——本仓 M7 双载体账本 / R7 声明=重数 / A-B-C 分级+E1-E5 / 文本契约门禁 与 DeepScientist 的 Evidence Ledger 双写 / 覆盖度机械门禁 / trust-rank 五档 / 六档伪造风险词表 / 文本契约测试 一一对应", "basis": "A-37 事实归纳 + 本仓 R7/M7/DC 契约对照（v1.24）"}
 ]
 ```
 
 ### 附录 C：C 类判断复盘
 
-- C-01 至 C-14：见 §3 各 `【C】` 行；§0 声明 14 条（v1.2 吃狗粮 review 重数修正自 v1.1 的 10——P-011 教训的 reverse：声明写少漏计 2，M7 样本 ㉙；v1.4 +1 Ponytail 判定；v1.20 +1 C-14 阶段化 agent 分层判定）。
+- C-01 至 C-14：见 §3 各 `【C】` 行；§0 声明 15 条（v1.2 吃狗粮 review 重数修正自 v1.1 的 10——P-011 教训的 reverse：声明写少漏计 2，M7 样本 ㉙；v1.4 +1 Ponytail 判定；v1.20 +1 C-14 阶段化 agent 分层判定；v1.24 +1 C-15 第五簇零吸收裁定，见 §2.7）。
 
 ---
 

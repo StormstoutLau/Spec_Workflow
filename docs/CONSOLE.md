@@ -22,7 +22,7 @@
 | arc-probe | ARC 决策图谱试点调研 | ✓——— | 调研 | P-031 | finalize |
 | arc-rollout | ARC 升级实施 | ✓✓✓✓ | 验收 | P-035 | finalize |
 | board-generator | board-generator / 任务看板生成器 | —✓✓✓ | 验收 | P-041 | finalize |
-| community-ecosystem | spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测四簇 | ✓——— | 调研 | P-018 | — |
+| community-ecosystem | spec 宪法 / AGENTS.md 规则 / 决策溯源 / LLM 评测 /… | ✓——— | 调研 | P-018 | — |
 | cpp-hub-absorption | Spec_Workflow 吸收复用 Cpp_Hub 规范设计文档 v1.1 | —✓✓✓ | 验收 | P-002 | — |
 | cpp-hub-gap-analysis | Cpp_Hub spec 规范体系差距分析调研报告 v1.0 | ✓——— | 调研 | P-004 | — |
 | decision-schema | 决策记录 schema 吸收 | —✓—✓ | 验收 | P-016 | — |
