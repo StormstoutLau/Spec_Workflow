@@ -59,7 +59,9 @@ def main(argv) -> int:
             return 2
         # P-020 前历史批次豁免（P-027 盲区修复）：决策流纪律 P-020 起建立，
         # 早于 P-020 的 feature（遗留前缀命名为主）无 specwf session，不追溯强制。
-        if int(pid.split("-")[1]) < 20:
+        # P-068（I-10 / B25 / B26）：边界改为**单点定义**（`spec_map.is_historical_exempt`），
+        # 与 `console_gen` 的派生态豁免面共用同一判据（原为本地字面量 `< 20`）。
+        if spec_map.is_historical_exempt(pid):
             print(f"step-enforce: {feat} ({pid}) 为 P-020 前历史批次 → 豁免（不追溯强制）")
             continue
         r = subprocess.run([sys.executable, str(RUNNER), "step-enforce",

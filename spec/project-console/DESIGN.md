@@ -1,7 +1,7 @@
 ---
 id: project-console-DESIGN
 type: design
-version: 1.11
+version: 1.12
 status: draft
 date: 2026-09-11
 depends: [project-console-RESEARCH, board-generator-DESIGN, ADR-0010, FWK-DECISION-RECORD]
@@ -202,6 +202,8 @@ CODE_WIKI.md §9 索引  ──────────────────�
 **Layer-1 边界（P0 批，本批不做）** = 本小节**只落设计面**（判据表）；`derive_state` 拆支 / 三 fixture / 真机 `docs/CONSOLE.md` 复核**均属 P0 批**（须用户裁决后另立批）。
 
 ### 5.3 P2b 状态来源迁移计划（D18，Layer-0 设计面）
+
+> **P-068 追记（v1.12，U-6 裁决 A′ · Layer-1 实施）**：本节设计的派生面补一条**定义域约束**——**「无派生输入面 ⇒ 不派生」**：**结构性豁免面**（P ≤ P-019，**P-027 裁定「P-020 前不追溯强制」**）在派生态下**保原词、无行动档**，依据固定为 `EXEMPT_BASIS`（**不得**声称「五步完整」）。**边界单点化** = 豁免判据落 [`scripts/spec_map.py`](../../scripts/spec_map.py) 的 `DECISION_STREAM_MIN_P` + `is_historical_exempt()`，由 `step_enforce.py`（feature 级，原本地字面量）与 `console_gen.py`（P 行级）**同源复用**（守 **I-10 / B25 / B26**）。**§6 三分** = 无 session 项须分「真缺口（Needs Attention）/ 未开工（Recommended）/ 豁免面（tier=""，I-8 显式行列）」——`idle` 判据由「非 Needs Attention」**收窄为 `== Recommended`**，否则豁免面被静默并入「未开工」。**豁免行仅派生态 emit**（非派生态逐字节不变，守 R-1 / I-2 / I-3）。**新回退点 R-4** = 删豁免分支与 §6 该行即回退（单点可逆）。**边界** = 开关仍默认关（**不启用派生态**）；**R-1 的「默认关」不变**（B′ / C-36 已裁）。
 
 > **本小节 = 迁移计划的设计裁定（Layer-0，零代码）**；**计划本体（Usage Inventory / 依赖矩阵 / 批次表 / 回退点 / 未决项）在 [RESEARCH §7.24](./RESEARCH.md)**，本节**只落 DESIGN 拥有的裁定**，不复制计划数据（I-6 精神）。来源 = [RESEARCH v1.19 §7.24](./RESEARCH.md)（A-61 / A-62 / B21 / C-32）。
 

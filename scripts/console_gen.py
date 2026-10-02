@@ -296,15 +296,24 @@ def feature_desc(feature: str, mapping: dict, tasks_by_pid: dict, spec_dir: Path
     return feature
 
 
+# P-068（U-6 裁决 A′，RESEARCH §7.29）：结构性豁免面的统一依据文案。豁免面**无派生输入面**
+# ⇒ 派生态下不派生、保原词；**不得**沿用「执行态派生：决策链五步完整」（那会声称一个不存在的证据）。
+EXEMPT_BASIS = "结构性豁免面（P-027 不追溯；无决策流）"
+
+
 def _eff_status(task, sess, derived: bool) -> str:
     """有效状态（P2b，DESIGN §5.3 裁定一/二）：非派生模式 = `PROGRESS` 原词（I-7 现形）；派生模式 = 执行态机器派生。
 
     DC2.1 值域分流（S-2）：**决策态**（`pending` / `blocked`）不可派生 ⇒ **保留人工原词**；
     **执行态**（`done` / `in-progress`）可派生 ⇒ `done` = 最远 step == `finalize`，否则 `in-progress`。
+    **结构性豁免面**（P ≤ P-019，P-027 不追溯）**无派生输入面** ⇒ 落定义域之外，**保原词**（P-068）。
     开关**默认关**（= 现行为，回退点 R-1）；本函数是「迁移盲区」的统一判据——`derive_state` 与三处
     直取 `task.status` 的分区筛（`_active_table` / `_done_table` / `_trace_section`）**同源复用**（防视图分裂，A-61 含义二）。
     """
     if not derived:
+        return task.status
+    # P-068：豁免面判据**先于**执行态派生（边界单点复用 `spec_map`，不与 `step_enforce` 形成第二实现，守 I-10 / B26）
+    if spec_map.is_historical_exempt(task.pid):
         return task.status
     if task.status in ("pending", "blocked"):
         return task.status
@@ -321,14 +330,22 @@ def derive_state(task: Task, sess, derived: bool = False) -> Derived:
     """
     st = _eff_status(task, sess, derived)
     if st == "done":
-        basis = ("执行态派生：决策链五步完整（最远 finalize）" if derived
-                 else "PROGRESS 状态列 = done")
+        if not derived:
+            basis = "PROGRESS 状态列 = done"
+        elif spec_map.is_historical_exempt(task.pid):
+            basis = EXEMPT_BASIS          # P-068：豁免面不得声称「五步完整」
+        else:
+            basis = "执行态派生：决策链五步完整（最远 finalize）"
         return Derived("done", basis, "")
     if st == "blocked":
         return Derived("blocked", "PROGRESS 状态列 = blocked", "Needs Attention")
     if sess is None:
         # P2a（v1.11）：把「未开工（已登记、无决策流）」与「执行态确无 session（决策链缺失）」
         # 分开——前者是正常状态（Recommended），后者才是缺口（Needs Attention）。
+        if derived and spec_map.is_historical_exempt(task.pid):
+            # P-068：仅**派生态**适用——豁免面既非「未开工」也非「真缺口」⇒ 无行动档，依据如实标豁免；
+            # 非派生态保持原判据（「未开工」文案），保 R-1 逐字节一致。
+            return Derived(st, EXEMPT_BASIS, "")
         if st == "pending":
             return Derived("pending", "未开工（立项已登记，无决策流）", "Recommended")
         return Derived(st, "执行态但无 session（决策链缺失）", "Needs Attention")
@@ -726,22 +743,35 @@ def _trace_section(tasks, sessions, features, mapping, derived) -> list:
     # 与「执行态确无 session = 真缺口」分列，避免 §6 与行动档自相矛盾（I-8：两类都显式列出）
     no_sess = [t for t in active if t.pid not in sessions]
     gaps = [t.pid for t in no_sess if derive_state(t, None, derived).tier == "Needs Attention"]
-    idle = [t.pid for t in no_sess if derive_state(t, None, derived).tier != "Needs Attention"]
+    # P-068（U-6 裁决 A′）：无 session 项须**三分**——真缺口（Needs Attention）/ 未开工（Recommended）/
+    # 结构性豁免面（tier=""，由下方豁免行单列）⇒ idle 判据由「非 Needs Attention」收窄为「== Recommended」，
+    # 否则豁免面会被静默并入「未开工」清单（与豁免行自相矛盾）。
+    idle = [t.pid for t in no_sess if derive_state(t, None, derived).tier == "Recommended"]
     # C-16 ④ / I-8：映射缺位（两源皆无）必须在此**显式列出**，不得静默省略
     unmapped = [f for f in features if f not in mapping]
     unmapped_line = ("- **缺映射（I-8 显式缺口）**：" + "、".join(f"`{f}`" for f in unmapped)
                      if unmapped
                      else f"- **缺映射（I-8 显式缺口）**：（无——{len(features)} 个 feature 全部有映射）")
-    return [
+    lines = [
         f"- 活动事项 {len(active)} / 有 session {len(with_sess)} / 五步完整 {len(complete)}",
         (f"- **决策链缺失（Needs Attention）**：{'、'.join(gaps)}" if gaps else "- 决策链缺失：无"),
         (f"- **未开工（立项已登记，无决策流）**：{'、'.join(idle)}" if idle
          else "- 未开工（立项已登记，无决策流）：无"),
-        unmapped_line,
+    ]
+    # P-068（U-6 裁决 A′，RESEARCH §7.29）：结构性豁免面**仅在派生态**显式登记（I-8 不静默省略）；
+    # 非派生态不 emit ⇒ 默认输出与改造前逐字节一致（R-1 / I-2 / I-3）。
+    if derived:
+        exempt = [t.pid for t in tasks if spec_map.is_historical_exempt(t.pid)]
+        lines.append(
+            f"- **结构性豁免面（I-8 显式登记）**：{'、'.join(exempt)} 共 {len(exempt)} 条"
+            "（P-027 不追溯，无决策流 ⇒ 依 B22 排除出派生态）" if exempt
+            else "- 结构性豁免面（I-8 显式登记）：无")
+    lines.append(unmapped_line)
+    lines.append(
         "- 证据账本与三通道真值不在此复制（I-6 不增真值）："
         "[M7 证据账本](./M7_EVIDENCE_LOG.md)（由 `scripts/m7_stats.py` 看护）；"
-        "契约/命名空间/视图层对账见 `scripts/dc_validator.py` + `scripts/repo_stats.py`",
-    ]
+        "契约/命名空间/视图层对账见 `scripts/dc_validator.py` + `scripts/repo_stats.py`")
+    return lines
 
 
 def _basis(tasks, sessions, features) -> str:
@@ -1134,6 +1164,31 @@ def run_selftest() -> int:
     _w2 = write_console(_tgt2, text_d)
     check("S47 派生态确定性与幂等（I-2 双跑一致 / I-3 首写 True 二次 False）",
           _w1 and not _w2 and build(root, derived=True) == text_d)
+
+    # --- P-068（U-6 裁决 A′，RESEARCH §7.29）：结构性豁免面处置（判据 + 边界 + I-8 显式登记）---
+    _t_exempt = Task("P-001", "豁免面 done", "done", "—")
+    _d_ex = derive_state(_t_exempt, None, True)
+    check("S48 派生臂：结构性豁免面保原词、无行动档、依据为豁免（不得声称「五步完整」）",
+          _eff_status(_t_exempt, None, True) == "done"
+          and _d_ex.status == "done" and _d_ex.tier == ""
+          and _d_ex.basis == EXEMPT_BASIS and "五步完整" not in _d_ex.basis)
+    _d_a = derive_state(Task("P-910", "非豁免执行态无 session", "done", "—"), None, True)
+    _d_b = derive_state(Task("P-911", "非豁免有 finalize 链", "in-progress", "—"), _S_full, True)
+    check("S49 派生臂：豁免未外溢——非豁免执行态无 session 仍判缺口；非豁免有 finalize 链仍派生 done",
+          _d_a.status == "in-progress" and _d_a.tier == "Needs Attention"
+          and _d_b.status == "done" and _d_b.tier == "" and "五步完整" in _d_b.basis
+          and not spec_map.is_historical_exempt("P-910")
+          and spec_map.is_historical_exempt("P-001") and spec_map.is_historical_exempt("P-019")
+          and not spec_map.is_historical_exempt("P-020"))
+    _m_ex = re.search(r"结构性豁免面（I-8 显式登记）\*\*：(.+?) 共 (\d+) 条", text_d)
+    check("S50a 派生态 §6 含豁免面行，且声明条数 = 列举 P 号个数（I-8 不静默省略）",
+          _m_ex is not None
+          and int(_m_ex.group(2)) == len([x for x in _m_ex.group(1).split("、") if x.strip()]))
+    check("S50b 派生态 §6：豁免面退出「未开工」清单；非豁免真缺口（P-004 blocked）仍单列",
+          "- 未开工（立项已登记，无决策流）：无" in text_d
+          and "- **决策链缺失（Needs Attention）**：P-004" in text_d)
+    check("S50c 默认态（R-1）：输出既不含豁免面显式行、也不含豁免依据文案",
+          "结构性豁免面" not in text)
 
     shutil.rmtree(root, ignore_errors=True)
     print(f"selftest: {passed}/{total} PASS")

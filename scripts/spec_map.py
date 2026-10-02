@@ -82,3 +82,19 @@ def build_pid_map(progress_text: str, wiki_text: str = "") -> dict:
     merged = progress_pid_map(progress_text)
     merged.update(wiki_pid_map(wiki_text))
     return merged
+
+
+# ---------------------------------------------------------------- 决策流纪律边界
+# P-027 裁定：决策流纪律自 P-020 起建立，**P-020 前批次不追溯强制**。该边界被两个消费者共享
+# （`step_enforce.py` feature 级豁免 / `console_gen.py` P 行级豁免面），故在此**单点定义**
+# （I-10 语义同源 / B25·B26）：凡第二处再写字面量，即构成「两实现同错」风险。
+DECISION_STREAM_MIN_P = 20
+
+
+def is_historical_exempt(pid: str) -> bool:
+    """P-027 豁免面：`P-020` 之前的批次（决策流纪律建立前，结构性无派生输入面）。
+
+    解析失败（非 `P-\\d{3}` 形态）落**非豁免**侧——绝不因解析失败而放宽约束。
+    """
+    m = re.search(r"P-(\d{3})", pid or "")
+    return bool(m) and int(m.group(1)) < DECISION_STREAM_MIN_P
