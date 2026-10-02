@@ -1,9 +1,9 @@
 ---
 id: academic-writing-workflow-PILOT_TASK_CARD
 type: template
-version: 0.4
+version: 0.5
 status: draft
-date: 2026-09-13
+date: 2026-10-01
 depends: [academic-writing-workflow-RESEARCH]
 upstream: academic-writing-workflow-RESEARCH
 ---
@@ -25,7 +25,7 @@ upstream: academic-writing-workflow-RESEARCH
 | **实测基线** | 单批盘点（2026-09-13）：一级目录 12 子 + 8 顶层文件；lean4=16 非 14；paper/ 24 编译产物；状态词文件名 21；同名文件集中在 `data/co_pricing_zoo`/`OpenSourceAP_CrossSection` 子仓 |
 | **数据策略** | `data/policy.md` 定稿前施行**只读**：本卡所有判据只扫描、不删改（H14 裁决前不删任何文件） |
 | **首个迁移动作** | §2.1（编译产物排除）——最无争议、纯机械、零风险 |
-| **进入门槛** | H12/H13 裁决不跳过；**Lean 双源判据已修正**（见 §2.3）：`LGMM_Lean/` 为 mathlib 全量（7735 .lean），非第二专有源
+| **进入门槛** | H12/H13 裁决不跳过；**Lean 双源判据已修正**（见 §2.3 与 §2.8 实测矩阵）：**双源真实存在**——`LGMM 8.0/lean4/`（16 专有）与 `LGMM_Lean/LGMM/`（同项目另一副本）同名 13 = **12 内容一致 + 1 DIFF（`EWNLS.lean`）+ 3 仅本仓**；真值源暂记 `undecided`，**裁决前不删任一份** |
 
 ---
 
@@ -138,3 +138,4 @@ upstream: academic-writing-workflow-RESEARCH
 | 0.2 | 2026-09-13 | **LGMM 8.0 实测定档**：填充 pilot 仓；判据全部替换为真实 PowerShell 命令；**修正 Lean 双源判据**（`LGMM_Lean` = mathlib 全量 7735 .lean，非第二专有源，原 H13 双源假设不成立）；检出 README/MANIFEST 声明冲突 |
 | 0.3 | 2026-09-13 | **§2 只读实测**：跑完全部判据产出矩阵；**推翻 v0.2 结论**——`LGMM_Lean/LGMM/` 是一项目根非 mathlib，双源漂移真实存在（hash=12 一致/1 DIFF/3 仅本仓）；2.3 判据改回 hash 对比；补 §2.8 实测报告与 H12 观测 |
 | 0.4 | 2026-09-13 | 补 **§5 共享层 `INDEX.md` 模板**（B25 交付物之二；登记 LGMM 8.0 为 #1，其余待补；只放指针纪律） |
+| 0.5 | 2026-10-01 | **G-13 订正（消除同文档自相矛盾）**：§0「进入门槛」原写「`LGMM_Lean/` 为 mathlib 全量（7735 .lean），非第二专有源」——系 **v0.2 的结论**，已被本条变更记录 v0.3 的 hash 实测**明确推翻**，却未随 §2.3/§2.8 同步 ⇒ 同一文档内两处相反结论。本批据 v0.3 实测口径改写 §0 该格（**双源真实存在** = 12 一致 + 1 DIFF + 3 仅本仓；真值暂记 `undecided`；裁决前不删任一份），与 [RESEARCH §17.6 G-13](RESEARCH.md) 登记及 §17.2 订正口径一致。**性质 = 表述同步欠账，非新实测**（判据与读数零改动） |

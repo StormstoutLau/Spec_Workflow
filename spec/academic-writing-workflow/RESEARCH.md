@@ -1,7 +1,7 @@
 ---
 id: academic-writing-workflow-RESEARCH
 type: design
-version: 1.12
+version: 1.14
 status: in-review
 date: 2026-10-01
 depends: [community-ecosystem-RESEARCH, loop-engineering-RESEARCH, DISTRIBUTED_AGENT_RESEARCH, ADR-0010]
@@ -28,6 +28,8 @@ upstream: null
 > **v1.10 pilot 实测批（用户指令「基于 LGMM 8.0 升级任务卡」→「按这个方案来」）**: 新增 [PILOT_TASK_CARD.md](PILOT_TASK_CARD.md)（P-040 落地执行清单，type: template，v0.4），并在 **`D:\Article\Working paper\LGMM\LGMM 8.0` 只读跑全部迁移判据（零写入，守 H14）**。**实测矩阵** = 编译产物 26（live 20 + archive 6）/ 状态词 18（其中约 12 属第三方子仓 `data/co_pricing_zoo`，非本仓缺陷）/ **Lean 双源 hash**（16 专有 → 与 `LGMM_Lean/LGMM/` 同名 13，**12 内容一致 + 1 DIFF（`EWNLS.lean`）+ 3 仅本仓**）/ 根层同名 0 / **README 仍引 `MAPPING.md` vs MANIFEST 已归档（声明冲突）** / **MANIFEST 声明 lean=14 实测 16（声明漂移）** / 脚本分层已合规（`code/scripts/` 七子层）/ `data/CODEBOOK.md` 缺失 / `data/manual_llm/` 2 文件待归红线。**观察项状态更新**：**H12 由"未实测"→"部分实测"**（骨架层充分、**判据层不足**：最小充分集须含"可跑命令 + 排除第三方子仓 + hash 对比"）；**H13 由"未实测"→"数据齐备待裁决"**（真值源方向趋于 `lean4/`，**确认前不删任一份**）。**断言计数不变（92A+26B+23C+16H）**——本轮为既有 H12/H13 的状态更新与实测回填，无新增断言行；**零工具改动**；参考文献仍 **§18**。
 > **v1.11 裁决证据落档批（用户指令「基于 LGMM 8.0 文件夹相对规范 请在此基础上升级」→「先做派生物清理」→「现将论文工作 裁决证据完整落档 挂起」）**: 新增 **§17 补充调研十——分步走策略、pilot 执行与裁决证据**（**补写 v1.9 横幅已声明但正文缺失的节**；参考文献顺延 **§18**）。**执行实录**：派生物清理三档 **T1 485 + T2 48 + T3 61 = 594 条目**（→ `_trash\2026-09-14-derived`，**911 文件 / 28,385,385 B**）；3 个非 TeX `.log` **fail-closed 挂起后单独处置**（脚本生成 / 输入法垃圾 / `tee` 捕获三类，**同名不同性质**）；五仓 **tracked-artifacts = 0** → 移动产生**零 git 变更**；`LGMM 8.0` 1 项 + `CDO_8.1` 5 项 tracked 删除经核为**先前遗留**（既不在工作区亦不在隔离区）。**裁决证据包** = 6 个多版本目录 / 22 个 `.tex` / 推荐真值 6 个（其中 2 项**信号矛盾**需人工指认）。**四条新增发现**：**孤儿派生物**（`AL model_old` 9 PDF vs 5 `.tex`，含名带拼写错误的 `…Mode-working paperl.pdf`）/ **版本入名的实证危害**（`SABR-v1` 560 行 > `SABR-v2` 288 行）/ **`.log` 须 fail-closed + allowlist** / **v1.7「`.lake/` 入库」记载证伪**（实测零追踪）——四条均定位为 **H12 最小充分集增补**，不新增编号断言。**挂起登记 G-01~G-13**（真值指认 / 命名规则 / T4 `.lake` / 承 H14-H16 / PILOT_TASK_CARD 自相矛盾待订正）。**§0 计数据实订正**：A 90→**92**、假设区 15→**16**（H16 补入）——修正跨文档计数漂移（CODE_WIKI 早已声明 92A+16H）；断言计数保持 **92A+26B+23C+16H**；**零工具改动**。
 > **v1.12 引文二次核验批（用户指令「回到学术推理框架 先根据之前学术仓库情况 补充学术文件规范 写一份任务卡 交给学术仓库agent执行」；本批 = 「先落档」之 B 项）**: 对 P-040 自身的高风险引文做**独立二次核验**（时序独立于原取证轮）——**A-17 原引《The Agentic AI Oversight Problem》（署名微软 / UC Berkeley / 清华，含 POMDP 模型 + 监督准确率 92%/62%/17% + 注意容量 C≈3–5）**：arXiv 官方 API 精确短语检索 `all:"Agentic AI Oversight Problem"` **totalResults = 0**、Semantic Scholar / DBLP **零条目**、MSR 与会议页**无匹配**、两条具名细节（所谓通讯作者 **Sarah Sterman 实为 UIUC HCI 研究者**；术语"**AI brain fry**"另属 **BCG × UC Riverside**）**均可证伪** → **判定疑似虚构引文（形态 III）**。**处置 = 据实换源**：命题保留、**原引具体数字一律撤回**、**断言编号 A-17 保留 → 计数不变**（92A+26B+23C+16H），全文既有下游引用（§10.1 的 B8 引 / 附录 B 的 B5·B8 `basis`）**继续有效**。新增 **§18 补充调研十一——外部引文二次核验**（可复现检索式与入口清单 / 不可核验线索不作证据 / 三条同轴替代一手来源逐字 / 三条取证纪律收获），**参考文献顺延 §19**；同步改写 §7.3 标题与正文、§0 的 A-17 条目、§17.7 追加说明、§19 原条目划线存档并补替换来源。**零工具改动**。
+> **v1.13 G-13 订正批（用户指令「先修复 G-13 矛盾」；Layer-0 文档批、零代码）**: 订正 §17.6 挂起登记 **G-13**——[PILOT_TASK_CARD.md](PILOT_TASK_CARD.md) §0「进入门槛」原写「`LGMM_Lean/` 为 mathlib 全量（7735 .lean）、非第二专有源」（该结论出自卡 v0.2，已被**卡自身 v0.3 行明文推翻**），与同文档 §2.3 / §2.8 的 hash 实测结论**自相矛盾**（同一文档内两处相反结论）。本批据 **v0.3 口径**改写 §0 该格（**双源真实存在**——`LGMM 8.0/lean4/` 16 专有与 `LGMM_Lean/LGMM/` 同名 13 = **12 内容一致 + 1 DIFF（`EWNLS.lean`）+ 3 仅本仓**；真值源暂记 `undecided`，**裁决前不删任一份**）+ 卡补变更记录 **v0.5** 行（含「性质 = 表述同步欠账，非新实测」定性）+ front-matter `version 0.4 → 0.5`。**性质与边界** = 表述同步欠账，**判据列与实测矩阵一字未动**；本文件断言编号与计数 **零改动**（92A + 26B + 23C + 16H）；§17.6 该行状态转「**已订正**」，其余 **G-01~G-12 仍挂**（其中 **G-12** 即承 **H13** 的双源真值指认，属内容判断，仍待用户裁决）。**零工具改动**。
+> **v1.14 G-12 双源真值取证批（用户指令「继续处理 G-12 的双源真值指认」；Layer-0 文档批、零代码）**: 对 §17.6 **G-12** 做**只读取证**（`D:\Article` 侧**零写入**），新增 **§17.8 G-12 双源真值取证与指认建议**（十一项判据表 + 结论 + 三条派生发现 + 处置三档建议）。**结论 = 内容真值源为 `LGMM 8.0/lean4/`**——四路判据同向（文件集 ⊂ / 文本行 99.84% ⊂ / 声明集 34 ⊂ 43 且 B 零独有 / mtime 晚），且**由该仓自身 changelog 自证**（A 侧根模块头部「v8.1」+「v9.1 Changelog（2026-08-01）」明列实测到的 A 独有声明 5 个与 +2 公理）⇒ **该指认属机械可判，非内容判断**；G-12 状态由「数据齐备待裁决」改为「**证据齐备·机械可判，待用户追认 + 处置裁决**」。**三条派生发现** = **F-1** v9.1 证明集**当前不可构建**（A 有源无工程、B 有工程但根模块 import 面仅 13 且内容停 v5.0 时代 ⇒ 「No sorry placeholders remain」类声明无法用 `lake build` 复现）/ **F-2** v9.0/v9.1 全部改动**未提交**（内层仓 HEAD `e200be9` 落后工作区，`lean4/` 4 文件已改未提交，`EWNLS.lean` **+178 −1** ⇒ 一次干净克隆即丢失）/ **F-3** 朴素 `grep sorry` **假阳性 10 例**（全为 changelog 散文提及，剥注释后真实 0 —— 同族 = 本仓 P-061 M5 假阳性）。**边界** = `D:\Article` 侧零写入（未提交 / 未同步 / 未删除任何文件）；**不新增编号断言**（读数以 §17.8 实测表承载，口径保持 **92A + 26B + 23C + 16H**）。**零工具改动**。
 > **核心目的**: 确认"学术推理写作工作流"与本仓 Spec 驱动框架的**同构性**——把 LGMM 场景的痛点映射到本仓既有机制，识别社区可借鉴构件，判定是否需吸收/承接。
 
 ## 0. 断言统计表（必填，审计入口）
@@ -571,7 +573,7 @@ upstream: null
 【C】C-17（见附录 C）: **blueprint（A-77）是用户仓中"性价比最高的一项新增"**。理由：用户已投入 **134 个 `.lean`**（CDO 21 / JOL 10 / LGMM 62 / MIDAS 24 / Volsurface_Heston 17），但**证明依赖关系只存在于人脑与散落 md 中**；blueprint 把「**定理依赖图 + 证明完成度**」变成**可机械导出的产物**，社区有现成实现（`leanblueprint` / LeanArchitect），且**与本仓既有的"派生视图"哲学同构**。**但仍懒加载**：本轮**仅登记**，触发条件 = 用户决定把某个论文仓做成"**可被第三方独立核查**"的制品（即 A-81 的 **Artifacts Available** 门槛）——**规范化到"能被别人复现"的那一天，blueprint 与 compendium 就是同一件事的两面**。
 
 - **[H12] 规范化契约的"最小充分集"未实测**——"一页契约 + 三模板"是否足以覆盖 7 个仓库的全部差异（尤其 `Coupla` 已有 `spec/templates/`、`LGMM 8.0` 已有 `MANIFEST.md` 的既成事实），需一次真实迁移验证后方可定稿。**v1.10 部分实测（2026-09-13，LGMM 8.0 只读扫描，零写入）**：以 [PILOT_TASK_CARD.md](PILOT_TASK_CARD.md)（type: template）对 pilot 仓跑全部迁移判据，得 **"骨架层充分、判据层不足"**——骨架已备（`MANIFEST.md` 双向溯源 + `.gitignore` LaTeX 段 + `code/scripts/` 七子层 + 根层同名 0），但"最小充分集"须**再含判据层三件**：① 判据须为**可跑命令**而非语义勾选（实测七项判据全部落为 PowerShell 命令后方可判对错）② 须**排除第三方子仓**（`data/co_pricing_zoo/` 的 `_v2` 文件约 12 个属依赖库，非本仓缺陷）③ 须 **hash 级对比**（仅凭文件名/目录名无法判"漂移"，见 H13）。→ **H12 由"未实测"改为"部分实测"**；全量迁移实测仍待 H16（广播粒度）裁决后执行。
-- **[H13] Lean 双源漂移中哪一份是真值未裁决**——`LGMM 8.0/lean4/`（15 文件）与 `LGMM_Lean/LGMM/`（12 文件）**文件集不一致**，需逐文件 diff 后才能定"保留哪份、另一份降为指针"；**在裁决前不得删除任一份**（AGENTS.md 破坏性操作纪律）。**v1.10 实测修正（2026-09-13，只读 SHA256）**：读数修正为 `lean4/` = **16** 个 `.lean`（v1.7 记 15，实际 16）；`LGMM_Lean/LGMM/` 与其中 **13** 个同名，逐对哈希比对 = **12 内容一致** + **1 内容不同（`EWNLS.lean`）**；另有 **3 个仅在 `lean4/`**（`BahadurBoundary.lean` / `JointDistribution.lean` / `LGMM.lean`）。**澄清一处误判**：`LGMM_Lean/` 根含 mathlib 全量 **7735** 个 `.lean`（依赖库），**项目根是其 `LGMM/` 子目录**，故"双源"确为两个 LGMM 制品，而非"专有源 vs 依赖库"。→ **裁决方向收敛**：真值源取 `LGMM 8.0/lean4/`（16 完整）；12 一致者降为指针（内容等价）；`EWNLS.lean` 需人工判定（两版语义不同）；**裁决仍待用户确认，确认前不删任一份**。
+- **[H13] Lean 双源漂移中哪一份是真值未裁决**——`LGMM 8.0/lean4/`（15 文件）与 `LGMM_Lean/LGMM/`（12 文件）**文件集不一致**，需逐文件 diff 后才能定"保留哪份、另一份降为指针"；**在裁决前不得删除任一份**（AGENTS.md 破坏性操作纪律）。**v1.10 实测修正（2026-09-13，只读 SHA256）**：读数修正为 `lean4/` = **16** 个 `.lean`（v1.7 记 15，实际 16）；`LGMM_Lean/LGMM/` 与其中 **13** 个同名，逐对哈希比对 = **12 内容一致** + **1 内容不同（`EWNLS.lean`）**；另有 **3 个仅在 `lean4/`**（`BahadurBoundary.lean` / `JointDistribution.lean` / `LGMM.lean`）。**澄清一处误判**：`LGMM_Lean/` 根含 mathlib 全量 **7735** 个 `.lean`（依赖库），**项目根是其 `LGMM/` 子目录**，故"双源"确为两个 LGMM 制品，而非"专有源 vs 依赖库"。→ **裁决方向收敛**：真值源取 `LGMM 8.0/lean4/`（16 完整）；12 一致者降为指针（内容等价）；`EWNLS.lean` **原记「需人工判定（两版语义不同）」已由 §17.8 收口**——实为 **A 超前而非分歧**（A ⊃ B：多 9 个声明 / 单文件 +2 公理 / 非空行仅 A 有 147 且 B 零独有）。**原记「裁决仍待用户确认，确认前不删任一份」继续有效**。**v1.14 补（P-066 §17.8）**：方向已由**机械判据**锁定（文件集 ⊂ / 文本行 99.84% ⊂ / 声明集 34 ⊂ 43 且 B 零独有 / mtime 晚，四路独立同向 + 该仓 changelog 自证）⇒ **H13 状态「数据齐备待裁决」→「证据齐备待追认」**。
 
 ## 16. 补充调研九：共享层与辅助资产归属（v1.8）
 
@@ -741,8 +743,8 @@ v1.7 之后用户追问「真实仓库里面存在问题，解决方案是否已
 | **G-09** | 承 **H14** 归档快照（`LGMM_0727.rar` 2.4 GB / `MIDAS-Granger.rar`） | 留档 vs 冗余未判 | 逐个人工判定（**裁决前不得删除**） |
 | **G-10** | 承 **H15** 363 个 PDF 版本构成（VoR/AM/preprint） | 需 DOI 逐篇判定 | 判定前默认**不可再分发** |
 | **G-11** | 承 **H16** 广播推进粒度（gap-fill vs strangler-fig） | 依赖 H12 实测完成度 | pilot 全量判据跑完 |
-| **G-12** | 承 **H13** Lean 双源真值（12 一致 + 1 DIFF `EWNLS.lean`） | 需人工判哪版是当前真理 | 用户指认（**确认前不删任一份**） |
-| **G-13** | `PILOT_TASK_CARD.md` §0 与 §2.3 表述不一致 | §0 仍写「`LGMM_Lean/` 为 mathlib 全量（7735）、非第二专有源」，§2.3 已改 hash 对比 → **同文档自相矛盾** | 待订正（同 §17.2 订正口径） |
+| **G-12** | 承 **H13** Lean 双源真值（12 一致 + 1 DIFF `EWNLS.lean`） | 需判哪版是当前真理 | **证据齐备 · 机械可判（P-066 §17.8）**——**真值源 = `LGMM 8.0/lean4/`**（四路判据同向 + 该仓 changelog 自证）；**指认已追认**（由处置档位裁决蕴含）**· 动作未执行**（用户裁决档位 = **全部 P0 + P1 + P2**，可逐条执行清单见 **§17.9**；执行须再获显式指令）；**确认前不删任一份** |
+| **G-13** | `PILOT_TASK_CARD.md` §0 与 §2.3 表述不一致 | §0 仍写「`LGMM_Lean/` 为 mathlib 全量（7735）、非第二专有源」，§2.3 已改 hash 对比 → **同文档自相矛盾** | **已订正（P-065，`PILOT_TASK_CARD` v0.4 → v0.5）**——§0 据 v0.3 实测口径改写为「双源真实存在（12 一致 + 1 DIFF + 3 仅本仓）+ 真值暂记 `undecided` + 裁决前不删任一份」；**判据与读数零改动**（性质 = 表述同步欠账） |
 
 **执行纪律（本轮固化）**：派生物清理**只隔离不删除**（move 至 `_trash` + 保相对路径 + 可原路回滚 + 计数守卫 + 内容签名 fail-closed），观察期无异常后再释放；此后**已由 §17.3 实测**：5 仓 tracked-artifacts = 0，故"隔离"不与版本控制冲突。
 
@@ -751,6 +753,133 @@ v1.7 之后用户追问「真实仓库里面存在问题，解决方案是否已
 本节为**实测回填 + 挂起登记**，**不新增编号断言**——方法论层面的三条增补件（孤儿检测 / 日志白名单 / 版本入名实证）均定性为 **H12 最小充分集的增补**与对 **A-79** 的本仓补证，非新断言。断言计数保持 **92A + 26B + 23C + 16H**；§0 两处陈旧计数（A 90→92、假设区 15→16）据实订正使与视图层声明一致。
 
 > **v1.12 追加**：§18 二次核验使 **A-17 据实换源**（原引文判为疑似虚构、具体数字撤回，命题与编号保留）——**属证据替换而非新增/删除断言**，故 92A 口径不变；§0 与附录 A 的编号映射无需改动。
+
+> **v1.13 追加**：**G-13 订正**（`PILOT_TASK_CARD.md` §0 与 §2.3/§2.8 表述同步，卡 v0.4 → v0.5）——**零新增/删除断言**（本文件断言口径不变：92A + 26B + 23C + 16H）；§17.6 挂起登记中 **G-13 状态转「已订正」**，其余 **G-01~G-12 仍挂**（皆为内容判断，等用户指认或实测完成）。
+
+> **v1.14 追加**：**G-12 双源真值取证**（§17.8）——**零新增/删除断言**（口径不变：92A + 26B + 23C + 16H）；§17.6 中 **G-12 状态转「证据齐备·机械可判」**（真值源 = `LGMM 8.0/lean4/`），其余 **G-01~G-11 仍挂**。
+
+### 17.8 G-12 双源真值取证与指认建议（v1.14）
+
+**缘起**：用户指令「继续处理 G-12 的双源真值指认」。G-12 原状 = 「数据齐备待裁决」、解锁条件「用户指认」。本轮对该项做**只读取证**（`D:\Article` 侧**零写入**），结论 = **该指认已由机械判据锁定，不再属"内容判断"**。
+
+**取证对象**：`LGMM\LGMM 8.0\lean4\`（记 **A**）与 `LGMM\LGMM_Lean\LGMM\`（记 **B**）。
+
+| # | 判据 | A = `lean4/` | B = `LGMM_Lean/LGMM/` | 指向 |
+|---|---|---|---|---|
+| 1 | `.lean` 文件集（排除 `.lake` 内部） | **16** | **13**（**全部**与 A 同名） | B ⊂ A，**B 零独有文件** |
+| 2 | 同名对 SHA256 | — | 13 对 = **12 一致 + 1 DIFF**（`EWNLS.lean`） | 与 pilot 2026-09-13 读数**逐项一致** |
+| 3 | `EWNLS.lean` 逐行包含率 | — | B 的 **629** 个非空行中 **628** 出现在 A（**99.84%**；唯一未命中 = `open …` 行的扩展形态）；A 另有 **147** 个非空行独有 | **A ⊃ B**（B 无独有文本） |
+| 4 | 声明集（theorem / lemma / def / structure / instance / abbrev / axiom） | **43** | **34** | **仅 A 有 9 / 仅 B 有 0** |
+| 5 | 总行数 | **902** | **725** | A 多 **177** 行 |
+| 6 | `axiom` 重数（**剥块注释与行注释后精确重数**） | `EWNLS.lean` **8**；全树 **53** | `EWNLS.lean` **6** | 单文件 **+2** = 两条 Cauchy-Schwarz 公理 |
+| 7 | mtime | **2026-08-01** | 2026-06-03 | A 晚 |
+| 8 | 其余 12 文件 mtime | 与 B **逐文件相同**（2026-06-03 / 2026-05-31） | 同左 | B 为**拷贝**（时间戳被保留） |
+| 9 | **仓内权威自证** | 根模块 `lean4/LGMM.lean` 头部「LGMM **v8.1**」+「**v9.1 Changelog（2026-08-01）**」明列实测到的 A 独有声明 **5 个**（`ewnlsHessian` / `ewnls_hessian_det_eq` / `nls_hessian_nonsingular` / 两条 Cauchy-Schwarz 公理）与公理总数 | 根模块 `LGMM_Lean/LGMM.lean` 头部「**LGMM 5.0** paper / 基于 `LGMM-5_0_final.tex`」，import **13** 模块 | **A 自证 v9.1；B 停在 v5.0 时代** |
+| 10 | lake 工程三件套（A-76） | **无**（`lean-toolchain` / `lakefile.*` / `lake-manifest.json` **全缺**） | **有**——且为**全 `LGMM/` 树唯一**的 lake 工程（mathlib4 v4.20.0 缓存于其 `.lake/`） | **B 才是工程根** |
+| 11 | git 覆盖 | 内层仓 `LGMM 8.0`：**471** 追踪文件、`lean4/` **16/16 已入库**（`a885468` 2026-07-17「pre-reorganization baseline」） | **零追踪**（属外层 `Working paper` 仓，该仓仅 **5** 个追踪文件、`LGMM/` 下 0 个） | 仅 A 受版本控制 |
+
+**结论（指认）**：**内容真值源 = `LGMM 8.0/lean4/`**（工作区态 = v9.1）。判据 **1 / 3 / 4 / 9** 四路**独立同向**（文件集 ⊂、文本行 ⊂、声明集 ⊂、仓内自证版本号）；其中判据 9 由**该仓自己书写的 changelog** 命名了我们实测到的 A 独有声明与 +2 公理，判据 8 又解释了 12 个文件为何逐字节相同（拷贝保留时间戳）⇒ **非内容判断，属机械可判**。
+
+**三条派生发现（比"选哪份"更重要）**
+
+- **F-1 = v9.1 证明集当前不可构建**：「A 有源无工程、B 有工程无新源」——B 的根模块 `import` 面仅 **13**（**不含** v9.0 新增的 `JointDistribution` 与 `BahadurBoundary`）且其 `LGMM/` 停在 06-03 ⇒ `LGMM.lean` 头部自述的「**No `sorry` placeholders remain**」与「axiom 53」**当前无法用 `lake build` 机械复现**。这正是本仓 A-76 / B20「症状↔不变式对偶」的活样本。
+- **F-2 = v9.0 / v9.1 全部改动未提交**：内层仓 HEAD `e200be9`（2026-07-23）落后于工作区；`git status` 显示 `lean4/` **4 文件已改未提交**（`BahadurBoundary.lean` / `EWNLS.lean` / `JointDistribution.lean` / `LGMM.lean`），其中 `EWNLS.lean` **+178 −1** ⇒ **一次干净克隆即丢失**。该风险**独立于、且高于**双源问题。**⚠️ 范围订正（P-066 执行期，写任务卡时跑全局 `git status` 暴露）**：本项初稿**只报 lean4 的 4 条**（当时用的是**范围限定**命令 `git status -- lean4/`），**低估了仓库整体未提交面**——实测全局 **61 条** = 24 修改 + **1 删除** + 36 未跟踪、**0 已暂存**，其中**非 lean4 共 57 条**（横跨 `paper/` 的 `.tex`/`.pdf`、`code/`、`data/`、`MANIFEST.md` / `README.md` / `RESEARCH_LOG.md`），并含一处**工作区删除**（`LGMM7_Proofs_Analysis.md`，状态 ` D`）；HEAD 之后**约 2.3 个月的产出全部未提交**（工作区最新文件 mtime = 2026-10-01）。⇒ **F-2 的性质由「4 文件级」升级为「仓库级」**；本仓处置仍以 lean4 的 4 条为**最小切口**（写进任务卡 §2.1），**其余 57 条不属该卡范围**、须另立任务卡由仓主裁决。
+- **F-3 = 朴素 `grep sorry` 假阳性 10 例**：首轮以词边界全树计得 **10**，**全部**来自根模块 changelog 散文对该词的提及；**剥注释后真实 = 0**，与声明一致 ⇒ 再次实证「**朴素匹配 ≠ 语义重数**」（同族 = 本仓 P-061 的 `dc_validator` M5 假阳性）。**附带正向证据**：同批实测 `axiom` 全树 **53** 与声明**精确吻合** ⇒ 该仓的**可数声明可信**。
+
+**处置建议（三档，按成本升序；均在 `D:\Article` 侧，属用户裁决面）**
+
+| 档 | 动作 | 收益 | 前置 |
+|---|---|---|---|
+| **P0** | 提交 A 侧 4 个未提交文件（`lean4/` 的 v9.0 / v9.1 工作） | 消除 **F-2** 的丢失风险；**零改内容** | 无（建议最先做） |
+| **P1** | 把 A 的 16 文件**单向同步**进 `LGMM_Lean/LGMM/`，并以 A 侧 `LGMM.lean` 替换 B 侧根模块（补 2 个 `import`） | 恢复可构建性 ⇒ 使「声明可复现」 | mathlib 缓存已在（无需重下） |
+| **P2** | `LGMM_Lean/` 纳入版本控制或至少 README 标注；`.lake/` 按 A-76 ignore | **工程配置与源**（`lakefile.lean` / `lean-toolchain` / `lake-manifest.json` / 16 个源文件）获版本保护；**不含 `.lake` 本身**——按 A-76 该目录**应 ignore**，7 GB 依赖缓存靠 `lake exe cache get` 重建（**订正**：本条初稿写「7 GB 依赖缓存获版本保护」**不成立**） | 可与 P1 合并 |
+
+**不推荐**：删任一份——B 是**唯一**承载构建配置者，A 侧无 lake 三件套；删 B 等于放弃可构建性（与 PILOT_TASK_CARD §2.3「DIFF = 0；唯一真值源 = `lean4/`」并不矛盾：该判据说的是**内容真值源**，不是**工程根**）。
+
+**边界**：本轮**只读取证**，`D:\Article` 侧**零写入**（未提交 / 未同步 / 未删除任何文件）；**不新增编号断言**（读数以本节实测表承载，口径保持 **92A + 26B + 23C + 16H**）；**指认已追认**（由处置档位裁决蕴含，见 §17.9）**· 动作未执行**——处置动作按 P0 → P1 → P2 顺序另立批次（属学术仓侧写动作，不并入本仓批次）。
+
+### 17.9 G-12 处置动作清单（三档 · 待执行）
+
+**同批追加（v1.14）**：用户就 §17.8【处置建议】三档作出裁决 = **全部（P0 + P1 + P2）**。下表为**学术仓侧**可逐条执行的清单——**执行本体仍属学术仓侧写动作，不并入本仓批次**（与 §17.8 边界一致）；本仓**只出清单、不代执行**，执行须再获一次显式指令。
+
+**前置 Ⅰ · 变量与备份（不可跳过）**（AGENTS.md 破坏性文件操作纪律：覆盖前必须备份）
+
+```powershell
+$A  = "D:\Article\Working paper\LGMM\LGMM 8.0"
+$B  = "D:\Article\Working paper\LGMM\LGMM_Lean"
+$BK = "D:\Article\_trash\$(Get-Date -Format 'yyyy-MM-dd-HHmm')-lgmm-lean-pre-sync"
+New-Item -ItemType Directory -Force $BK | Out-Null
+Copy-Item "$B\LGMM" "$BK\LGMM" -Recurse -Force
+Copy-Item "$B\LGMM.lean","$B\lakefile.lean","$B\lean-toolchain","$B\lake-manifest.json" $BK -Force
+```
+
+通过门 = `$BK` 下存在 `LGMM\`（13 文件）与 4 个顶层文件。
+
+**P0 · 提交 A 侧 4 个未提交文件**（消除 **F-2**）
+
+```powershell
+git -C $A add lean4/EWNLS.lean lean4/BahadurBoundary.lean lean4/JointDistribution.lean lean4/LGMM.lean
+git -C $A commit -m "lean4: v9.0/v9.1 axiom-based formalization (P1-1 EW-NLS Hessian non-singularity)"
+git -C $A status --short -- lean4/
+```
+
+通过门 = 第三条**输出为空**（`lean4/` 工作区干净）；`git -C $A log -1 --stat` 列出上述 4 文件。
+回退 = `git -C $A reset --soft HEAD~1`（提交撤回，工作区内容保留）。
+约束 = **不用 `git add -A`**（避免夹带未审内容）；**不 push**（推送属该仓自治，另裁）。
+
+**P1 · A→B 单向同步 + 换根模块**（恢复可构建性）
+
+映射口径（**结构性要点**）= A 的 `lean4/LGMM.lean` 是 **`LGMM` 模块根**（import `LGMM.*`），其余 15 个是 **`LGMM.*` 子模块** ⇒ 前者**替换** `$B\LGMM.lean`，后者**覆盖进** `$B\LGMM\`（不可把根模块放进 `LGMM\`，那样模块名会变成 `LGMM.LGMM`）。
+
+```powershell
+Get-ChildItem "$A\lean4" -File -Filter *.lean | Where-Object { $_.Name -ne 'LGMM.lean' } |
+  ForEach-Object { Copy-Item $_.FullName "$B\LGMM\" -Force }
+Copy-Item "$A\lean4\LGMM.lean" "$B\LGMM.lean" -Force
+```
+
+对账（**逐文件、不得抽样**）：
+
+```powershell
+$bad = @()
+foreach ($f in (Get-ChildItem "$A\lean4" -File -Filter *.lean)) {
+  $t = if ($f.Name -eq 'LGMM.lean') { "$B\LGMM.lean" } else { "$B\LGMM\$($f.Name)" }
+  if ((Get-FileHash $f.FullName).Hash -ne (Get-FileHash $t).Hash) { $bad += $f.Name }
+}
+"DIFF = " + $bad.Count
+(Select-String -Path "$B\LGMM.lean" -Pattern '^import LGMM\.').Count
+```
+
+构建（**F-1 的真正判据**）：
+
+```powershell
+Push-Location $B; lake build; $code = $LASTEXITCODE; Pop-Location; "lake build exit = $code"
+```
+
+通过门 = `DIFF = 0` / import 计数 **15** / `lake build` **exit 0**。
+> **不表演纪律**：若本机无 `elan` / `lake` 或工具链未就绪，**如实标注「构建未执行」**——不得以「对账通过」冒充「可构建性已恢复」，那正是本节要检验的对象本身（同 PILOT_TASK_CARD §3 的判据纪律）。
+回退 = `Copy-Item "$BK\LGMM" $B -Recurse -Force` + `Copy-Item "$BK\LGMM.lean" $B -Force`。
+
+**P2 · `LGMM_Lean/` 纳入版本控制**
+
+```powershell
+if (-not (Test-Path "$B\.gitignore")) { Set-Content "$B\.gitignore" ".lake/`n*.olean`n*.ilean" -Encoding UTF8 }
+git -C $B init
+git -C $B add LGMM LGMM.lean lakefile.lean lean-toolchain lake-manifest.json .gitignore
+git -C $B commit -m "chore: version-control LGMM Lean project (sources + lake config; .lake ignored)"
+git -C $B status --short
+```
+
+通过门 = `git status --short` **输出为空**（`.lake/` 未被纳入）；`git -C $B ls-files` 计数 = 源 + 配置（**不含 `.lake` 内任何文件**）。
+形态说明 = 与 `LGMM 8.0` 自身即**嵌套仓**的既成事实**同构**，且守 **A-76**（`.lake` 不入库）。
+**等价替代（轻量形态）** = 仅新增 `$B\README.md`，标注「本目录为**构建工作副本**，内容真值源在 `LGMM 8.0\lean4\`」——收益仅可读性，**不产生版本保护**。
+回退 = `Remove-Item "$B\.git" -Recurse -Force`（只撤版本控制，**不动任何文件**）。
+
+**执行顺序**：P0 → P1 → P2（P0 亦可在 P1 后补做，但遗漏 P0 则 **F-2** 风险持续）。
+**执行后回填**：① §17.8 结论段的「待追认」改为「**已追认**」；② 学术仓侧动作实录（做了什么 / 读数 / 未执行项如实标注）；③ 若 P1 的 `lake build` 成功 ⇒ **F-1 关闭**；若失败或未执行 ⇒ **F-1 维持开启**并附失败读数。
+
+**落档（P-066 同批）**：本清单已**实例化为学术仓内的任务卡** `D:\Article\Working paper\LGMM\LGMM 8.0\TASK_CARD.md`（**12,021 B / UTF-8 无 BOM**）。写入方式 = 单引号 here-string + `WriteAllText`（规避 PowerShell 对反引号与 `$` 的展开）；**本仓 `Write` 工具受工作目录限制无法直达 `D:\`，故以 Shell 落盘**。卡片为**自足形态**（执行者无需外部仓上下文）：§0 前置三件（基线 / **备份** / 环境探测）→ §1 已完成的取证（读数表 + 指认结论 + 三条发现）→ §2 三档命令 + 通过门 + 回退点 → §3 **机读回填块**（JSON）+ `F1_closed` / `F2_closed` 判定口径 → §4 **九条红线** → §5 范围。**未纳入任何提交**——卡片 §2.1 明令 P0 **只提交 4 个 lean4 文件**，并禁止 `git add -A`。
+
+**⚠️ 同批执行期发现（P-066）**：写卡时跑**全局** `git status` 暴露 **F-2 记载低估范围**——初稿用的是**范围限定**命令（`-- lean4/`），实际仓库整体未提交面 = **61 条**（非 lean4 **57 条**）⇒ 已就地订正 §17.8 F-2，并把该读数作为 **§0.1b 仓库级基线**写进卡片（含「不要扩大提交范围」的显式护栏）。**教训**：**范围限定命令的读数不等于全局读数**，报"未提交风险"时须**先声明作用域**或直接用全局读（同族 = P-064 的 P1-1「把眼估当机械重数」——同为**读数口径未声明**）。
 
 ## 18. 补充调研十一：外部引文二次核验（v1.12）
 
