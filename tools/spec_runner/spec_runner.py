@@ -22,7 +22,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.6.0"
+VERSION = "1.7.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -36,11 +36,18 @@ EXIT_USAGE, EXIT_GATE_MISSING, EXIT_ENDPOINT = 2, 3, 1
 # P-022 懒加载门控：会话目录注入 + git 快照 opt-in（ADR-0010 Q3 借懒加载原则）
 SESSIONS_ENV = "SR_SESSIONS_DIR"
 GIT_AUTOCOMMIT_ENV = "SR_GIT_AUTOCOMMIT"
+# P-069 返工图真值源注入（同 SESSIONS_ENV 先例：selftest 隔离，默认 <repo>/docs/rework-graph.json）
+REGISTRY_ENV = "SR_REWORK_REGISTRY"
 
 
 def sessions_dir() -> Path:
     """会话目录：env SR_SESSIONS_DIR 可注入（selftest 用），默认 <repo>/sessions。"""
     return Path(os.environ.get(SESSIONS_ENV, ROOT / "sessions"))
+
+
+def registry_path() -> Path:
+    """返工图真值源路径：env SR_REWORK_REGISTRY 可注入，默认 <repo>/docs/rework-graph.json。"""
+    return Path(os.environ.get(REGISTRY_ENV) or (ROOT.parent.parent / "docs" / "rework-graph.json"))
 
 
 def now_iso() -> str:
@@ -196,22 +203,20 @@ ANCHOR_RE = re.compile(
     r"(?:#[L]\d+|L\d+|\s*§" + SECTION_ID + r")?)$")
 
 
-def cmd_gate_step(args) -> int:
-    """校验 session 内 decision 事件链——只读不写流。
+def _decision_chain(decisions):
+    """决策链机械解析（step-gate 与 backflow-audit **共用同一实现**，守 I-10/B25）。
 
-    三类规则（DESIGN §6.2）：
-      - 硬性-1 schema：八字段必填 + metadata.step_id/step_seq + evidence 非空
-      - 硬性-2 秩序：step_id ∈ 序表、step_seq = 序表位、每步恰一条、--expect 覆盖时全链一致
-      - 软性-3 锚点：evidence[].anchor 形态可解析（正则）
-    exit 0 / 1（硬性）/ 2（软性存疑）。
+    规则（DESIGN §6.2 + P-069 回边受理）：
+      - 硬性 schema：DREQ 八字段齐 + metadata.step_id/step_seq + evidence 非空
+      - 硬性 位错：step_id ∉ 序表 或 step_seq ≠ 序表位
+      - 硬性 同位重复：sseq == 前步（非回退、非推进）——**仍判硬性**（回边受理不豁免真重复）
+      - **受控回边（P-069）**：sseq < 前步（回退到上游步位）⇒ 受理，记入 back_edges
+      - 软性 锚点：evidence[].anchor 形态可解析（正则）
+    返回 (hard, soft, seen, back)：
+      seen = {step_id: seq}（首现插入序，供 --expect 比对）
+      back = [(seq, step_id)] 受控回边
     """
-    w = EventWriter(sessions_dir())
-    decisions = [r for r in w.read(args.session) if r.get("event") == "decision"]
-    if not decisions:
-        print(f"step-gate[{args.session}]: 无 decision 事件（决策记录纪律未执行）")
-        return 1
-    expect = tuple(args.expect) if args.expect else None
-    hard, soft, seen = [], [], {}
+    hard, soft, seen, back, prev = [], [], {}, [], None
     for r in decisions:
         inp = r.get("input") if isinstance(r.get("input"), dict) else {}
         md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
@@ -226,20 +231,48 @@ def cmd_gate_step(args) -> int:
         sid_, sseq = md["step_id"], md["step_seq"]
         if sid_ not in STEP_SEQUENCE or sseq != STEP_SEQUENCE.index(sid_) + 1:
             hard.append(f"seq{r.get('seq')} step 位错 (step_id={sid_!r}, step_seq={sseq})")
-        if sid_ in seen:
-            hard.append(f"seq{r.get('seq')} step_id 重复 {sid_!r}（已见于 seq{seen[sid_]}）")
+            seen[sid_] = r.get("seq")
+            continue
+        if prev is not None and sseq < prev:
+            back.append((r.get("seq"), sid_))          # 受控回边：受理
+        elif prev is not None and sseq == prev:
+            hard.append(f"seq{r.get('seq')} step_id 重复 {sid_!r}（同位重复，非受控回边）")
+        prev = sseq
         seen[sid_] = r.get("seq")
         for ev in md["evidence"]:
             anchor = ev.get("anchor") if isinstance(ev, dict) else str(ev)
             if anchor and not ANCHOR_RE.match(anchor):
                 soft.append(f"seq{r.get('seq')} 锚点形态存疑 {str(anchor)[:50]!r}")
+    return hard, soft, seen, back
+
+
+def cmd_gate_step(args) -> int:
+    """校验 session 内 decision 事件链——只读不写流。
+
+    三类规则（DESIGN §6.2）：
+      - 硬性-1 schema：八字段必填 + metadata.step_id/step_seq + evidence 非空
+      - 硬性-2 秩序：step_id ∈ 序表、step_seq = 序表位、同位重复禁止、--expect 覆盖时全链一致
+                    （**受控回边**：step_seq 回退到上游步位 = 受理并登记，见 `_decision_chain`）
+      - 软性-3 锚点：evidence[].anchor 形态可解析（正则）
+    exit 0 / 1（硬性）/ 2（软性存疑）。
+    """
+    w = EventWriter(sessions_dir())
+    decisions = [r for r in w.read(args.session) if r.get("event") == "decision"]
+    if not decisions:
+        print(f"step-gate[{args.session}]: 无 decision 事件（决策记录纪律未执行）")
+        return 1
+    hard, soft, seen, back = _decision_chain(decisions)
     got = list(seen)
+    expect = tuple(args.expect) if args.expect else None
     if expect:
         if len(got) != len(expect) or got != list(expect):
             hard.append(f"期望链 {list(expect)} ≠ 已登记 {got}")
     else:
         print(f"step-gate[{args.session}]: 已登记 {len(got)}/{len(STEP_SEQUENCE)} 步 ({got})"
               + ("（未声明 --expect 完整性）" if len(got) < len(STEP_SEQUENCE) else ""))
+    for seq, sid_ in back:
+        print(f"  [REWORK] seq{seq} 受控回边（重入 {sid_}）——已受理；"
+              "如属真实返工须经 backflow-audit + 返工图登记")
     for m in hard:
         print(f"  [HARD] {m}")
     for m in soft:
@@ -424,6 +457,96 @@ def cmd_anchor_audit(args) -> int:
               "（建议裁决：DR-24 候选扩权）")
         return 1
     print("anchor-audit: 触发条件未满足（0 例）→ exit 0")
+    return 0
+
+
+# ---- 模块 2f：backflow-audit 回写/回边待处理检测（P-069——只读诊断；不接门禁，同 anchor-audit 先例） ----
+def _load_rework_registry():
+    """读返工图真值源（`docs/rework-graph.json`）→ (trigger_kinds, registered, err)。
+
+    registered = 已登记 session 名集（`forks[].new`/`.origin` + `non_rework[].name`）。
+    err = None（成功）/ 字符串（缺失或不可解析 ⇒ 调用方降级 exit 2，不当作通过）。
+    **触发枚举只此一处来源**（守 I-10：绝不复制一份常量）。
+    """
+    p = registry_path()
+    if not p.is_file():
+        return None, set(), f"登记表缺失: {p}"
+    try:
+        reg = json.loads(p.read_text(encoding="utf-8"))
+    except Exception as e:                                          # noqa: BLE001
+        return None, set(), f"登记表不可解析: {type(e).__name__}: {e}"
+    tk = reg.get("trigger_kinds")
+    if not isinstance(tk, list) or not tk:
+        return None, set(), "登记表 trigger_kinds 为空/非数组（无封闭集可判）"
+    registered = set()
+    for f in reg.get("forks") or []:
+        if isinstance(f, dict):
+            for k in ("new", "origin"):
+                if isinstance(f.get(k), str) and f[k]:
+                    registered.add(f[k])
+    for x in reg.get("non_rework") or []:
+        if isinstance(x, dict) and isinstance(x.get("name"), str) and x["name"]:
+            registered.add(x["name"])
+    return list(tk), registered, None
+
+
+def cmd_backflow_audit(args) -> int:
+    """回写/回边待处理检测——只读零副作用、**不接门禁**（同 anchor-audit 先例）。
+
+    三个**机械可判**信号（真值源 = `docs/rework-graph.json` 的 `trigger_kinds`）：
+      ① **待重入**：session 决策链含**受控回边**（step-gate 已受理），且该 session 未登记返工图；
+      ② **待回写**：decision 携带 `metadata.trigger` ∈ `trigger_kinds`，但 session 未登记返工图；
+      ③ **失败枚举**：`metadata.trigger` 取值 ∉ `trigger_kinds`（非法枚举值）。
+    exit 0 = 无待处理；1 = 检出待回写/待重入/非法 trigger；2 = 无 session 或无登记（降级）。
+    （坏行沿用 EventWriter 语义：解析失败即报 `<路径>:<行号>` → exit 1，不静默跳过）
+    """
+    kinds, registered, err = _load_rework_registry()
+    if err:
+        print(f"backflow-audit: {err} ⇒ exit 2（降级，不当作通过）")
+        return 2
+    w = EventWriter(sessions_dir())
+    if getattr(args, "session", None):
+        p = w.path(args.session)
+        if not p.exists():
+            print(f"backflow-audit: session 不存在: {args.session} ⇒ exit 2")
+            return 2
+        paths = [p]
+    else:
+        paths = sorted(w.base.glob("*.jsonl"))
+        if not paths:
+            print("backflow-audit: sessions 目录无会话文件 ⇒ exit 2")
+            return 2
+    pending, invalid = [], []
+    for p in paths:
+        sid = p.name[:-len(".jsonl")]
+        decisions = [r for r in w._read_rows(p) if r.get("event") == "decision"]
+        if not decisions:
+            continue
+        _, _, _, back = _decision_chain(decisions)
+        if sid not in registered:
+            for seq, step in back:
+                pending.append((sid, "待重入", f"seq{seq} 受控回边（重入 {step}）未登记返工图"))
+        for r in decisions:
+            inp = r.get("input") if isinstance(r.get("input"), dict) else {}
+            md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
+            trig = md.get("trigger")
+            if trig is None:
+                continue
+            if trig not in kinds:
+                invalid.append((sid, f"seq{r.get('seq')} trigger={trig!r} ∉ trigger_kinds"))
+            elif sid not in registered:
+                pending.append((sid, "待回写", f"seq{r.get('seq')} trigger={trig}（未登记返工图）"))
+    print(f"backflow-audit: 扫描 {len(paths)} session；"
+          f"trigger_kinds={kinds}（真值源 {registry_path()}）")
+    for sid, kind, why in pending:
+        print(f"  [PENDING] {sid} {kind} —— {why}")
+    for sid, why in invalid:
+        print(f"  [INVALID] {sid} —— {why}")
+    if pending or invalid:
+        print(f"backflow-audit: 待处理 {len(pending)} + 失败枚举 {len(invalid)}"
+              " ⇒ exit 1（人工处置：登记返工图 / 订正 trigger 取值）")
+        return 1
+    print("backflow-audit: 无待回写/待重入（0 例）⇒ exit 0")
     return 0
 
 
@@ -645,6 +768,10 @@ def build_parser() -> argparse.ArgumentParser:
                         help="锚点形态集合对账（P-042 v1.20，DR-25：J1/J2 差集 = 候选扩权触发条件；只读、不接门禁）")
     aa.add_argument("--session", help="仅审该 session（缺省 = 扫描 sessions 目录全部）")
     aa.set_defaults(func=cmd_anchor_audit)
+    ba = sub.add_parser("backflow-audit",
+                        help="回写/回边待处理检测（P-069：受控回边 + trigger 标记未登记；只读、不接门禁）")
+    ba.add_argument("--session", help="仅审该 session（缺省 = 扫描 sessions 目录全部）")
+    ba.set_defaults(func=cmd_backflow_audit)
     st = sub.add_parser("selftest", help="内置自测（stdlib mock server）")
     st.set_defaults(func=lambda a: run_selftest())
     return p
@@ -707,6 +834,18 @@ def run_selftest() -> int:
     # （审查 §1.4：L467 env=dict(os.environ,...) 整体拷贝是绕过点）
     env = {k: v for k, v in os.environ.items() if k != GIT_AUTOCOMMIT_ENV}
     env[SESSIONS_ENV] = str(tmp)
+    # P-069：返工图真值源注入（与真表隔离）——trigger_kinds 两条封闭枚举 + 一条已登记返工边
+    reg_file = tmp / "rework-graph.json"
+    reg_file.write_text(json.dumps({
+        "version": 1, "updated": "2026-10-03", "owner": "selftest",
+        "truth_source": "registry",
+        "trigger_kinds": ["user-verdict", "undecided"],
+        "provenance_prefixes": ["manual", "tool"],
+        "forks": [{"new": "bf-reg", "origin": "bf-origin", "seq_from": 1,
+                   "trigger_kind": "user-verdict", "reason": "selftest 已登记返工",
+                   "provenance": "manual:selftest", "date": "2026-10-03"}],
+        "non_rework": []}, ensure_ascii=False), encoding="utf-8")
+    env[REGISTRY_ENV] = str(reg_file)
     me = str(Path(__file__).resolve())
 
     def run_cli(*argv):
@@ -981,6 +1120,72 @@ def run_selftest() -> int:
                     input_=_va_d("adr/ADR-0006-assertion-framework-dual-copy-authority.md §B1"))
         p_a6 = run_cli("verify-anchor", "--session", "p064-exact")
         check("F52 精确匹配（§B1 不前缀命中 B/B2/B3/B4）→ exit 1", p_a6.returncode == 1)
+
+        # F53-F61: backflow-audit 回写/回边待处理检测（P-069）——锚点/回边/失败枚举三臂
+        w_bf = EventWriter(tmp)
+
+        def _bf_d(step, step_seq, trigger=None):
+            md = {"step_id": step, "step_seq": step_seq,
+                  "evidence": [{"grade": "E1", "anchor": "spec/step-gate/DESIGN.md §4"}]}
+            if trigger is not None:
+                md["trigger"] = trigger
+            return {"category": "c", "scenario": "s", "reasoning": "r",
+                    "outcome": "o", "confidence": 0.9, "metadata": md}
+
+        for st, sq in (("research", 1), ("design", 2), ("implement", 3),
+                       ("verify", 4), ("finalize", 5)):          # 锚点臂：干净链
+            w_bf.append("bf-clean", "assistant", "decision", input_=_bf_d(st, sq))
+        p_bf0 = run_cli("backflow-audit", "--session", "bf-clean")
+        check("F53 backflow-audit 干净链（无回边无 trigger）→ exit 0",
+              p_bf0.returncode == 0 and "0 例" in p_bf0.stdout, p_bf0.stdout[-120:])
+
+        for st, sq in (("research", 1), ("design", 2), ("implement", 3),
+                       ("research", 1)):                           # 回边臂
+            w_bf.append("bf-back", "assistant", "decision", input_=_bf_d(st, sq))
+        p_bf1 = run_cli("backflow-audit", "--session", "bf-back")
+        check("F54 backflow-audit 受控回边未登记 → exit 1 且 [PENDING] 待重入",
+              p_bf1.returncode == 1 and "[PENDING]" in p_bf1.stdout
+              and "待重入" in p_bf1.stdout, p_bf1.stdout[-160:])
+
+        p_sg_back = run_cli("step-gate", "--session", "bf-back")
+        check("F55 step-gate 受控回边受理 → exit 0 且打印 [REWORK]",
+              p_sg_back.returncode == 0 and "[REWORK]" in p_sg_back.stdout,
+              p_sg_back.stdout[-160:])
+
+        w_bf.append("bf-dup", "assistant", "decision", input_=_bf_d("research", 1))
+        w_bf.append("bf-dup", "assistant", "decision", input_=_bf_d("research", 1))
+        p_sg_dup = run_cli("step-gate", "--session", "bf-dup")
+        check("F56 step-gate 同位重复仍判硬性（回边受理未豁免真重复）→ exit 1",
+              p_sg_dup.returncode == 1, p_sg_dup.stdout[-120:])
+
+        w_bf.append("bf-trig", "assistant", "decision",
+                    input_=_bf_d("research", 1, trigger="user-verdict"))   # 失败枚举臂
+        p_bf2 = run_cli("backflow-audit", "--session", "bf-trig")
+        check("F57 backflow-audit trigger 合法但未登记 → exit 1 且 待回写",
+              p_bf2.returncode == 1 and "待回写" in p_bf2.stdout, p_bf2.stdout[-160:])
+
+        w_bf.append("bf-bad", "assistant", "decision",
+                    input_=_bf_d("research", 1, trigger="bogus-kind"))
+        p_bf3 = run_cli("backflow-audit", "--session", "bf-bad")
+        check("F58 backflow-audit trigger 非法枚举 → exit 1 且 [INVALID]",
+              p_bf3.returncode == 1 and "[INVALID]" in p_bf3.stdout, p_bf3.stdout[-160:])
+
+        for st, sq in (("research", 1), ("design", 2), ("research", 1)):  # 已登记返工
+            w_bf.append("bf-reg", "assistant", "decision", input_=_bf_d(st, sq))
+        p_bf4 = run_cli("backflow-audit", "--session", "bf-reg")
+        check("F59 backflow-audit 已登记 session 的回边不报（返工图 = 真值源）→ exit 0",
+              p_bf4.returncode == 0, p_bf4.stdout[-160:])
+
+        p_bf5 = run_cli("backflow-audit", "--session", "bf-none")
+        check("F60 backflow-audit session 不存在 → exit 2（降级）",
+              p_bf5.returncode == 2, p_bf5.stdout[-120:])
+
+        env_noreg = dict(env, **{REGISTRY_ENV: str(tmp / "no-such-registry.json")})
+        p_bf6 = subprocess.run([sys.executable, me, "backflow-audit",
+                                "--session", "bf-clean"],
+                               capture_output=True, text=True, env=env_noreg)
+        check("F61 backflow-audit 登记表缺失 → exit 2（降级不当作通过）",
+              p_bf6.returncode == 2, p_bf6.stdout[-120:])
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))

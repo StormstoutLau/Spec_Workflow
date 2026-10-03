@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-CHECKLIST
 type: design
-version: 1.4
+version: 1.5
 status: accepting
 date: 2026-09-27
 depends: [rework-and-decision-paths-IMPLEMENTATION, rework-and-decision-paths-DESIGN]
@@ -12,11 +12,12 @@ upstream: null
 
 > **Feature**: 回写流与多方案决策路径（P-050 后续阶段）
 > **创建日期**: 2026-09-27
-> **状态**: accepting（验收中；v1.4 版本引用收口 / v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
+> **状态**: accepting（验收中；v1.5 增记 P-069 三问续研 Layer-1 最小实施 / v1.4 版本引用收口 / v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.3**
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.6**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.9**
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.4**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.7**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.11**
+> **v1.5 变更（2026-10-03，三问续研 Layer-1 最小实施）**：用户指令「按这个方案落档并实施」⇒ 记录 **P-069**（受控回边受理 + `backflow-audit` 只读子命令 + selftest **54/54 → 63/63**）的验收——新增 **F9~F12**（功能）/ **I5**（接口）/ **E5**（错误处理）/ **C4**（兼容性）/ 不变式 **I-16~I-18** 三行；§1 交叉版本同步至 **RESEARCH v1.11 / DESIGN v1.7 / IMPL v1.4**；**§10.1 计数 33 → 44（通过 32 → 43）**。**既有 F1~F8 / I1~I4 / E1~E4 / C1~C3 判定语义零改动**（回边受理为**放宽**，不触碰分支①②）。
 > **v1.4 变更（2026-09-27，跨仓对照观察项登记 + 版本引用收口）**：用户指令「D盘 RPC框架对本框架的意见 请分析是否合理」⇒ 观察项登记落 [RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)（**H-RPC1 / H-RPC2**）；本文件**收口版本引用 + 同步交付 B 状态**——§1 交叉表与三条「基于」行此前**滞后**于 RESEARCH v1.8 / DESIGN v1.5 / IMPL v1.2（与 S8-1/S8-2 同族复发），现同步至 **v1.9 / v1.6 / v1.3**；§10.2「交付 B 未实施」与 §11 矛盾（v1.3 遗漏）→ 改为「已实施」；§11 新增 **H-FTA / H-RPC1 / H-RPC2** 观察项行。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 > **v1.3 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」⇒ 记录 **D-B2 实施**（`superseded` 入 design 一般档，4 权威位点 + 3 模板；[IMPLEMENTATION §11](./IMPLEMENTATION.md)）+ §11 交付 B 行由此前「待裁决」改为「已裁决并实施」（R2 触发驱动 / R3 倾向否决）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 > **v1.2 变更（2026-09-27，Step 8 独立审查整改）**：记入 **Step 8 独立审查**（子代理 / 同基座降级）结果 —— **7 项发现（2 P2 + 5 P3）全部整改**（记录见 [RESEARCH §5.5](./RESEARCH.md)）；同步 §1 交叉版本表、§8.4、§11 与三条「基于」行版本（S8-1/S8-2）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
@@ -29,7 +30,8 @@ upstream: null
 |--------|------|------|
 | RESEARCH → DESIGN 设计决策可追溯 | ✅ | DESIGN §2.1 逐条引 RESEARCH §3.1/§3.8 |
 | DESIGN → IMPLEMENTATION 模块可追溯 | ✅ | IMPLEMENTATION §3.1/§3.2 对应 DESIGN §4 |
-| 无文档间矛盾（RESEARCH v1.9 ↔ DESIGN v1.6 ↔ IMPL v1.3） | ✅ | 机械复核（v1.4 重数） |
+| 无文档间矛盾（RESEARCH v1.11 ↔ DESIGN v1.7 ↔ IMPL v1.4） | ✅ | 机械复核（v1.5 重数） |
+| P-069 三问可追溯（RESEARCH §3.9 ↔ DESIGN §8 I-16~I-18 / §10.4 ↔ IMPL §12） | ✅ | 逐条对应（三问判定 / 三条不变式 / 三条未决项 / 实施读数） |
 
 ## 2. 功能验收
 
@@ -43,6 +45,10 @@ upstream: null
 | F6 | 模板 §10.1 追加规范约束 | 3 条约束落文档 | ✅ | `CHECKLIST_TEMPLATE.md` §10.1 |
 | F7 | 全量实跑：Phase 0 全规范文件零违规 | `promptfoo-m7-eval` 不报 | ✅ | 123 文件 0 违规 |
 | F8 | 全量实跑：历史异形零阻断 | 6 条 §10.1 skip、P1/P2=0 | ✅ | 123 文件 0 违规 |
+| F9 | 受控回边受理 | `step-gate` 对 `research→design→implement→research` 判 **exit 0** 且打印 `[REWORK]` | ✅ | selftest F55 |
+| F10 | 同位重复仍判硬性 | 连续同 `step_seq` 重复 → **exit 1** | ✅ | selftest F56 |
+| F11 | `backflow-audit` 三信号 | 干净链 exit 0 / 回边·trigger 待处理 exit 1 / 非法枚举 exit 1 | ✅ | selftest F53/F54/F57/F58/F59 |
+| F12 | `backflow-audit` 真机读数 | 93 session（含本批 1 条）/ 待处理 0 例 → **exit 0** | ✅ | IMPLEMENTATION §12（2026-10-03） |
 
 ## 3. 接口验收
 
@@ -52,6 +58,7 @@ upstream: null
 | I2 | `_counting_checklist` 判定表六条件齐 | 通过/P1×2/skip×3/无结果 | ✅ |
 | I3 | `check_counting` 双分支可独立命中 | F4（分支①）+ F12（分支②）并存 | ✅ |
 | I4 | 无 §10.1 → 无结果 | 零结果 | ✅ |
+| I5 | `backflow-audit` CLI + 单一实现 | `[--session <sid>]` exit 0/1/2；`_decision_chain` 由 `step-gate` 与 `backflow-audit` 共用（守 I-10） | ✅ |
 
 ## 4. 不变式验收
 
@@ -62,6 +69,9 @@ upstream: null
 | I-13 渐进不追溯 | F14 / F15 + 全量实跑 P1/P2=0 | ✅ |
 | I-14 分支互不干扰 | F4 与 F12-F18 并存 PASS | ✅ |
 | I-15 交付 B 零运行时足迹 | 词表未动，F3b/F3c 仍 PASS | ✅ |
+| I-16 受控回边受理（回归面只减不增） | F9（回边 exit 0）/ F10（同位重复 exit 1）+ 全量回归 87 pass 逐例一致 | ✅ |
+| I-17 触发枚举单一真值源 | `backflow-audit` 读 `docs/rework-graph.json`；全文 grep 无复制常量 | ✅ |
+| I-18 `backflow-audit` 只读不接门禁 | `.pre-commit-config.yaml` 未改；只 stdout；F53~F61 全通过 | ✅ |
 
 ## 5. 错误处理验收
 
@@ -71,6 +81,7 @@ upstream: null
 | E2 | 单元格非纯整数 | skip | ✅ | `downstream-compliance` 实跑 |
 | E3 | 围栏内示例 | 无结果 | ✅ | selftest F17 |
 | E4 | 普通小节标题（正文含「验收统计」） | 无结果 | ✅ | selftest F18 |
+| E5 | `backflow-audit` 登记表缺失/不可解析 | 降级 **exit 2**（不当作通过） | ✅ | selftest F61 |
 
 ## 6. 性能验收
 
@@ -86,6 +97,7 @@ upstream: null
 | C1 | 分支① 逐字平移零破坏 | F4 / F9 仍 PASS | ✅ |
 | C2 | stdlib only（零新依赖） | import 面零新增第三方 | ✅ |
 | C3 | pre-commit hook 零改动 | `.pre-commit-config.yaml` 未改 | ✅ |
+| C4 | 既有 session 回归逐例一致 | 93 session：87 pass / 5 无 decision / 1 soft，与改前一致（零新硬性错误） | ✅ |
 
 ## 8. ADD 审计（Step 10）
 
@@ -144,15 +156,15 @@ upstream: null
 
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |------|------|------|------|------|
-| 文档一致性 | 3 | 3 | 0 | 0 |
-| 功能 | 8 | 8 | 0 | 0 |
-| 接口 | 4 | 4 | 0 | 0 |
-| 不变式 | 5 | 5 | 0 | 0 |
-| 错误处理 | 4 | 4 | 0 | 0 |
+| 文档一致性 | 4 | 4 | 0 | 0 |
+| 功能 | 12 | 12 | 0 | 0 |
+| 接口 | 5 | 5 | 0 | 0 |
+| 不变式 | 8 | 8 | 0 | 0 |
+| 错误处理 | 5 | 5 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
-| 兼容性 | 3 | 3 | 0 | 0 |
+| 兼容性 | 4 | 4 | 0 | 0 |
 | ADD 审计 | 4 | 3 | 0 | 1 |
-| **总计** | 33 | 32 | 0 | 1 |
+| **总计** | 44 | 43 | 0 | 1 |
 
 > **统计口径（RULE-2）**：上表来自本文件**逐项核对**（每一项均有独立标记），非事后汇总推算。
 >
@@ -161,7 +173,7 @@ upstream: null
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：交付 A 全部验收项通过（**32/33**）；**唯一待办 = 异基座独立 pass**（§8.4）；交付 B **已实施**（v1.3，[IMPLEMENTATION §11](./IMPLEMENTATION.md)），其规格已经 **v1.1 同基座自审**并修订 10 项（DESIGN §9.5）
+- [x] **有条件通过**：交付 A 全部验收项通过（**43/44**）；**唯一待办 = 异基座独立 pass**（§8.4）；交付 B **已实施**（v1.3，[IMPLEMENTATION §11](./IMPLEMENTATION.md)），其规格已经 **v1.1 同基座自审**并修订 10 项（DESIGN §9.5）；**P-069 三问续研 Layer-1 最小实施已验收**（v1.5，[IMPLEMENTATION §12](./IMPLEMENTATION.md)）
 - [ ] **验收失败**
 
 ### 10.3 签字
@@ -182,4 +194,6 @@ upstream: null
 | **M7 样本 ㊳**（增长型载体计数漂移第三度复发）入账 | — | — | ✅ |
 | H-CL2（L2 条目级真对账）/ H-CL3（skip 驱动收敛）观察 | — | — | 观察项 |
 | **H-FTA / H-RPC1 / H-RPC2** 观察项（工具化触发 / 跨仓对照可迁移性） | — | — | 观察项（[RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)） |
+| **P-069 三问续研 Layer-1 最小实施**（`backflow-audit` + 受控回边受理） | — | — | ✅ 已实施（[IMPLEMENTATION §12](./IMPLEMENTATION.md)；selftest **63/63**） |
+| **U-8 / U-9 / U-10** 未决项（上游影响字段 / CONSOLE 待回写队列 / fork 薄壳） | — | — | 未决（defer，各带触发条件；[DESIGN §10.4](./DESIGN.md)） |
 | 更新 PROGRESS.md / CODE_WIKI.md | — | — | ✅ |

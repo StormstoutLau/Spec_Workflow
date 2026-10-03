@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-IMPLEMENTATION
 type: design
-version: 1.3
+version: 1.4
 status: draft
 date: 2026-09-27
 depends: [rework-and-decision-paths-DESIGN, rework-and-decision-paths-RESEARCH, precommit-dc-validator-DESIGN]
@@ -14,12 +14,13 @@ upstream: null
 > **创建日期**: 2026-09-27
 > **状态**: draft（草稿）
 > **Spec 步骤**: Step 5-6
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.6**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.9**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.7**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.11**
 > **v1.1 变更（2026-09-27，Step 8 独立审查整改）**：Step 8 独立审查（[RESEARCH §5.5](./RESEARCH.md)）发现 **S8-2 / S8-7** 并订正——① 头部两条「基于」行**滞后**（设计 v1.1→**v1.4** / 调研 v1.4→**v1.7**）；② 交付物表「新增正则 **4**」实为 **3**（`RE_CL_STAT_HEAD` / `RE_CL_STAT_ANY` / `RE_CL_INT`）；③ 「`--selftest` **23/23→24/24**」前值失实 → **16/16→24/24**（`git show` 取前版重数 = 16）；④ 步骤 4「增 F12-F15 → **22/22**」→ **21/21**。**交付 A 实现本体零改动**。
 > **本批范围**：**交付 A 实施**（`dc_validator` M4 分支② + `CHECKLIST_TEMPLATE` §10.1 规范约束）；**交付 B**：v1.1 止于规格（守 I-15）→ **v1.2 已实施**（见 **§11**）。
 > **v1.2 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」（先独立 pass → 再实施）⇒ **D-B2 落地**——`superseded` 入 design **一般档**，改 **4 权威位点 + 3 模板**（明细见 **§11**）；**DC1 零改动**；R2 未实施 / R3 未采纳。IMPLEMENTATION 由「交付 B 零改动」改为「交付 B 亦实施」。
 > **v1.3 变更（2026-09-27，跨仓对照观察项登记 + 版本引用收口）**：用户指令「D盘 RPC框架对本框架的意见 请分析是否合理」⇒ **观察项登记落 [RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)**（H-RPC1 / H-RPC2），本文件**仅收口「基于」版本引用**（设计 **v1.4 → v1.6** / 调研 **v1.7 → v1.9**——滞后于 v1.5/v1.8 的遗留漂移，与 S8-2 同族）；**实现本体零改动**。
+> **v1.4 变更（2026-10-03，三问续研 · Layer-1 最小实施）**：用户指令「按这个方案落档并实施」（承 [RESEARCH §3.9](./RESEARCH.md) / [DESIGN §8 I-16~I-18 + §10.4](./DESIGN.md)）⇒ **新增 §12 实施记录**——`spec_runner` **v1.6.0 → v1.7.0**：新增只读子命令 `backflow-audit`（与 `step-gate` 共用 `_decision_chain`）+ **受控回边受理** + selftest **54/54 → 63/63**；「基于设计」**v1.6 → v1.7**、「基于调研」**v1.9 → v1.11**。**交付 A / 交付 B 实现本体零改动**（本批只增新命令 + 放宽步序受理）。
 
 ---
 
@@ -259,6 +260,34 @@ def parse_checklist_stats(body):
 **验证**：`dc_validator --selftest` **24/24 PASS**（新增词表成员不破坏既有 fixture）；全量 **123 文件 0 违规**（既有 design 文档 `status` ∈ 旧三值 ⇒ 零回归）。
 
 **边界**：本记录只覆盖**状态词**；回写通路的另两半（事件流 `fork` 回写 / 新流-原流关联登记）属**使用纪律**（DESIGN §7.2「使用时机」），非本次代码改动。
+
+---
+
+## 12. 实施记录（P-069，三问续研 · Layer-1 最小实施；2026-10-03）
+
+**范围**：`tools/spec_runner/spec_runner.py` **单文件**；`spec_runner` **v1.6.0 → v1.7.0**。**零新依赖 / 零新门禁 / 零 API 破坏 / 零新契约**（守 [DESIGN §8](./DESIGN.md) I-16~I-18）。
+
+**交付物**：
+
+| # | 落点 | 改动 | 状态 |
+|---|---|---|---|
+| 1 | `_decision_chain`（新增） | 决策链机械解析**单一实现**：硬性 schema / 位错 / **同位重复**；**受控回边**（`sseq < 前步`）**受理**并记入 `back_edges`；软性锚点 | ✅ |
+| 2 | `cmd_gate_step` | 改调 `_decision_chain`；新增 `[REWORK]` 回边提示行；**exit 码语义不变**（0/1/2） | ✅ |
+| 3 | `cmd_backflow_audit` + `_load_rework_registry`（新增） | 只读三信号（**待重入 / 待回写 / 失败枚举**）；触发枚举读 `docs/rework-graph.json`（守 I-17）；exit 0/1/2；**不接门禁**（守 I-18） | ✅ |
+| 4 | `REGISTRY_ENV` / `registry_path()`（新增） | 返工图真值源可注入（同 `SESSIONS_ENV` 先例，selftest 隔离） | ✅ |
+| 5 | argparse `backflow-audit` 子命令 | `[--session <sid>]`（缺省 = 扫描 sessions 目录全部） | ✅ |
+| 6 | selftest **F53-F61** | 9 项：干净链 / 回边待处理 / 回边受理 / 同位重复 / trigger 待回写 / 非法枚举 / 已登记不报 / session 缺失 / 登记表缺失 | ✅ |
+
+**实测读数**（读数时点 **2026-10-03**，口径见各行）：
+
+- `spec_runner selftest` = **54/54 → 63/63**（+9）。
+- `backflow-audit`（真机，默认扫描 `tools/spec_runner/sessions/*.jsonl`）：**93** session / `trigger_kinds` = 返工图 **5** 值 / **待处理 0 例 ⇒ exit 0**（含本批新增 1 条；随 session 增长漂移）。
+- `step-gate` **全量回归**（改后）：**87 pass / 5 无 decision（exit 1）/ 1 soft（exit 2）**；命中 `[REWORK]` = **0**、命中「同位重复」= **0** ⇒ 与改前**逐例一致**（零新硬性错误，I-16）。
+- `rework_graph_check.py` 不受影响（本批未产生 `fork`，`forks` 仍 `[]`）。
+
+**实施期结论（「不破坏既有 5 步链」的机械保证）**：本批**只做移除 / 收窄**（把「重复一律硬性」收窄为「同位重复硬性、回退受理」）⇒ 允许的链集合是原集合的**超集**，回归面**只减不增**——故「既有 87+ session 全通过」由**集合包含关系**保证，而非抽样验证。
+
+**边界**：`backflow-audit` 为**检测器非强制器**（不接门禁）；**不自动发起返工**；`metadata.trigger` 为**可选**字段（零新增契约 ⇒ 既有 session 零回归）。
 
 ---
 
