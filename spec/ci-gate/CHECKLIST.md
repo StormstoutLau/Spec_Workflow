@@ -3,7 +3,7 @@
 ---
 id: ci-gate-CHECKLIST
 type: design
-version: 1.1
+version: 1.2
 status: accepting
 date: 2026-10-03
 depends: [ci-gate-IMPLEMENTATION, ci-gate-DESIGN]
@@ -14,8 +14,8 @@ upstream: null
 > **创建日期**: 2026-10-03
 > **状态**: accepting（验收中；真异基座独立 pass 仍待触发）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.1**
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.1**
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.2**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.2**
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.1**（5A+3B+3C+2H）
 
 ---
@@ -157,6 +157,7 @@ upstream: null
 | **H1**（平台/行尾差异是否致假红） | — | — | ✅ 已回填（实为管道编码 cp1252，已修；DR-1） |
 | **H2**（远端 required check / branch protection 形态） | — | — | ✅ 已回填（保护态已开启，见 F5 / DR-2） |
 | **直推 main 绕过处置（选 B）** | — | — | ✅ 已开启（Require PR `approvals=0` + `enforce_admins=true`） |
+| **actions 版本升级（checkout@v5 / setup-python@v6）** | — | — | ✅ 已升（消除 Node 20 目标；DR-4） |
 | 更新 PROGRESS.md / CODE_WIKI.md | — | — | ✅ |
 
 ---

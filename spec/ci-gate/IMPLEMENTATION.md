@@ -3,7 +3,7 @@
 ---
 id: ci-gate-IMPLEMENTATION
 type: design
-version: 1.1
+version: 1.2
 status: draft
 date: 2026-10-03
 depends: [ci-gate-DESIGN, ci-gate-RESEARCH]
@@ -43,7 +43,7 @@ upstream: null
 
 | # | 步骤 | 命令 | 幂等/只读 |
 |---|---|---|---|
-| 0 | 检出 + Python | `actions/checkout@v4` + `setup-python@v5`（`3.11`）+ job 级 `env`（`PYTHONUTF8=1` / `PYTHONIOENCODING=utf-8`，见 DR-1） | — |
+| 0 | 检出 + Python | `actions/checkout@v5` + `setup-python@v6`（`3.11`）+ job 级 `env`（`PYTHONUTF8=1` / `PYTHONIOENCODING=utf-8`，见 DR-1；版本升级见 DR-4） | — |
 | 1 | DC 契约 + R7 计数 | `python scripts/dc_validator.py --check-all` | 只读 |
 | 2 | M7 账本 hits 块 | `python scripts/m7_stats.py` | 只读（**无** `--write`） |
 | 3 | 视图层枚举 | `python scripts/repo_stats.py` | 只读 |
@@ -91,6 +91,7 @@ upstream: null
 | DR-1 | 首跑失败定位与修复：**管道编码而非行尾** | 首次远端运行 `37106315633` 在**第 1 步 `dc_validator`** 失败：`UnicodeEncodeError: 'charmap' codec can't encode characters in position 18-19`（CI 日志管道下 stdout 默认 **cp1252** ⇒ 校验器打印中文即崩，**在打印违规之前**退出 ⇒ 非违规、纯环境面） | job 级 `env: PYTHONUTF8=1 / PYTHONIOENCODING=utf-8` + job name 改 ASCII `verify`（使 required-check context 为纯 ASCII）⇒ 复跑 `37106881947` 全绿（8 步）。**不设 `continue-on-error`**（守 I-4）；**不改任何校验器代码** |
 | DR-2 | 直推 main 绕过 required check 的处置：**选 B（Require PR）** | required status checks **只拦 PR 合并、不拦直推**；本仓日常为「commit → 直推 main」⇒ CI 在**推送后**才跑，红了代码已落 main ⇒ 「绕过本地 hook ≠ 放行」在直推路径上**未兑现** | 开启 `required_pull_request_reviews`（`required_approving_review_count = 0`）+ `enforce_admins = true` + 保留 `required_status_checks=[verify]` ⇒ **直推被拒**、合并须 PR 且 check 绿。**`approvals=0` 是必需取值**（PR 作者不可自 approve，设 ≥1 即永久自锁）。自审 PR **不构成独立复核**（RULE-1~6），故如实声明 = **机械门**，非审查层。回退体 = `.git/protection-rollback-body.json` |
 | DR-3 | `⑂ fork / 支线` 段把本地分支名写入派生产物 ⇒ CI `--check` 在 PR **必然红** | `console_gen` 的 §8 由 `list_branches`（`git branch`，**环境态**）生成；PR 检出分支集 ≠ 提交时 ⇒ **产物跨环境不可复现**（选 A 前曾评估「`--check` 忽略该段」与「CI 移除该步骤」，因「**让检查闭嘴 ≠ 让产物正确**」否决） | §8 改由**确定性真值源** `docs/rework-graph.json` 的 `forks` 派生（`read_forks()` 取代 `list_branches`）；[project-console DESIGN](../project-console/DESIGN.md) **v1.12 → v1.13**；selftest **52/52**；**属本 L2 门禁首跑抓到的真实确定性缺口（非环境假红）** |
+| DR-4 | actions 版本升级（`checkout@v4 → v5` / `setup-python@v5 → v6`） | CI 运行告警：v4/v5 目标 **Node 20**，被强制跑在 Node 24（deprecation）；**告警非失败**，但属依赖面欠账 | 升 `actions/checkout@v5` + `actions/setup-python@v6`（消除 Node 20 目标）；**不改 job 语义 / 不改 Python 3.11 / 不改 fail-closed**；DESIGN §5 + IMPLEMENTATION §3 步骤 0 同步 |
 
 ---
 

@@ -31,8 +31,10 @@ jobs:
       PYTHONUTF8: "1"
       PYTHONIOENCODING: "utf-8"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      # 2026-10-04（P-070 追加轮 ⑨）：checkout v4 → v5 / setup-python v5 → v6
+      # 消除 Node 20 deprecation 告警（v4/v5 目标 Node 20，被强制跑在 Node 24）
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"   # 与开发环境一致（P-070 实测本机 = 3.11.16）
 
