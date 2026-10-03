@@ -1,0 +1,55 @@
+# L2 CI 门禁（远程兜底强制）——P-070 · spec/ci-gate/DESIGN.md §3
+#
+# 定位：本地 pre-commit 五 hook 是 L1（诚实护栏，git 官方明示可用 `--no-verify` 绕过，
+# hook-surface §3.2 实证 12 种绕过向量全放行）。本 workflow 把同一批判据搬到远端复验：
+# **本地能拦的，CI 也拦** —— 绕过本地 hook 不再等于放行。
+#
+# 边界（诚实声明）：
+#   - 只在**本仓**触发；不对消费仓（Cpp_Hub 等）产生任何强制（跨仓 L3 属 P-039 P-c，未实现）。
+#   - 只读复验：不写任何文件、不需要网络、零第三方依赖（与三校验器同栈 stdlib）。
+#   - 强制力仍是「提交/合并门」而非运行时阻塞；远端 required check 须在 GitHub 侧
+#     开启 branch protection 后才生效（本仓侧只提供 job）。
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: 远程复验（L2 兜底）
+    runs-on: windows-latest      # 与开发环境同平台（Windows），避免平台漂移造成假红
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # 与开发环境一致（P-070 实测本机 = 3.11.16）
+
+      # ── 与本地五 hook 等价的复验（顺序 = 门禁链顺序）──────────────────────
+      - name: DC 契约 + R7 计数（dc-validator）
+        run: python scripts/dc_validator.py --check-all
+      - name: M7 账本 hits 块（m7-stats）
+        run: python scripts/m7_stats.py
+      - name: 视图层枚举（repo-stats）
+        run: python scripts/repo_stats.py
+      - name: 派生视图与源一致（console-gen --check）
+        run: python scripts/console_gen.py --check
+      - name: 决策流批次强制（step-enforce，全量四文档）
+        shell: bash
+        run: python scripts/step_enforce.py $(git ls-files 'spec/*/*.md')
+
+      # ── 内嵌自测（齐平 + 自测档：把回归面也纳入远端）────────────────────
+      - name: 内嵌自测（六件）
+        shell: bash
+        run: |
+          python scripts/dc_validator.py --selftest
+          python scripts/m7_stats.py --selftest
+          python scripts/repo_stats.py --selftest
+          python scripts/console_gen.py --selftest
+          python tools/spec_runner/spec_runner.py selftest
+          python scripts/rework_graph_check.py --selftest
