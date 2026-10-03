@@ -3,7 +3,7 @@
 ---
 id: ci-gate-DESIGN
 type: design
-version: 1.1
+version: 1.2
 status: in-review
 date: 2026-10-03
 depends: [ci-gate-RESEARCH, ADR-0010, ADR-0011]
@@ -82,7 +82,7 @@ upstream: null
 | 载体 | 内容 |
 |---|---|
 | 触发 | `push`（`main`）/ `pull_request` / `workflow_dispatch` |
-| 运行时 | `windows-latest` + `actions/setup-python@v5`（`3.11`） |
+| 运行时 | `windows-latest` + `actions/setup-python@v6`（`3.11`） |
 | 权限 | `contents: read`（只读仓） |
 | 退出语义 | 任一步非 0 ⇒ job 失败（fail-closed） |
 
