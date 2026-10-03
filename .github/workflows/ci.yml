@@ -22,8 +22,14 @@ permissions:
 
 jobs:
   verify:
-    name: 远程复验（L2 兜底）
+    # check context 名固定为 ASCII `verify`（避免 CJK 进入 required status check 的 context / API JSON）
+    name: verify
     runs-on: windows-latest      # 与开发环境同平台（Windows），避免平台漂移造成假红
+    env:
+      # P-070 首跑实证（run 37106315633）：CI 日志管道下 stdout 默认 cp1252 ⇒
+      # 校验器打印中文即 UnicodeEncodeError，在打印违规之前 exit 1（非违规，纯环境面）。
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: "utf-8"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
