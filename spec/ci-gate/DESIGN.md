@@ -3,7 +3,7 @@
 ---
 id: ci-gate-DESIGN
 type: design
-version: 1.0
+version: 1.1
 status: in-review
 date: 2026-10-03
 depends: [ci-gate-RESEARCH, ADR-0010, ADR-0011]
@@ -14,7 +14,7 @@ upstream: null
 > **创建日期**: 2026-10-03
 > **状态**: 评审中（首版；异基座独立 pass 待触发）
 > **Spec 步骤**: Step 3-4
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.0**（5A+3B+3C+2H）
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.1**（5A+3B+3C+2H）
 > **本批范围**: 用户指令「先实现 L2 CI 门禁」——新增远端 workflow，复验与本地五 hook 等价的判据 + 内嵌自测。**零新判据 / 零新脚本 / 零新依赖 / 零 API 破坏**。
 
 ---
@@ -38,6 +38,7 @@ upstream: null
 | 检查面 CLI 已齐且只读 stdlib | **D3**：检查面 = 五 hook 等价命令 + 内嵌自测（**超集**，非新判据） | A-4/B3 |
 | 本机 Windows + Python 3.11 | **D4**：runner = `windows-latest`、Python `3.11`（对齐开发环境以降假红） | A-5 |
 | 只读诊断器「检出即 exit 1」与其「不接门禁」定位冲突 | **D5**：**不接入** `anchor-audit` / `backflow-audit` / `downstream_compliance`（它们读跨仓/信息面） | RESEARCH §4.2 |
+| 远端 required check 只拦 PR 合并、**不拦直推**（H2 回填） | **D6**：在 GitHub 侧开启 `required_status_checks=[verify]` + Require PR（`required_approving_review_count=0`）+ `enforce_admins=true` ⇒ 直推被拒、PR 门生效（治理面；`approvals=0` 为单人仓防自锁必需值） | H2/B2 |
 
 ## 3. 架构设计
 
@@ -98,8 +99,8 @@ upstream: null
 ## 7. 边界声明
 
 1. **只在本仓触发**——对消费仓（Cpp_Hub 等）**不产生任何强制**；跨仓 L3 属 P-039 **P-c**、未实现。
-2. **强制力取决于外部开关**——job 只提供「可复验」；真正「挡住合并」需 GitHub 侧 branch protection / required check（H2，本仓不可自证）。
-3. **不覆盖「绕过 CI 本身」**——若远端策略允许直推绕过 required check，则 L2 亦失效；这是**平台治理**面，非本仓可解（与 L1 的 `--no-verify` 同源限制）。
+2. **强制力已开启（2026-10-03）**——GitHub 侧 branch protection 已启用：`required_status_checks.contexts=["verify"]`（`strict=false`）+ `required_pull_request_reviews.required_approving_review_count=0` + `enforce_admins=true` ⇒ **直推 main 被拒**、改动须经 **PR 且 `verify` 绿**方可合并。`approvals=0` 为**单人仓防自锁的必需取值**（PR 作者不可自 approve）。**回退体**存于 `.git/protection-rollback-body.json`（本地、不入库）。
+3. **不覆盖「绕过 CI 本身」**——若远端策略允许直推绕过 required check，则 L2 亦失效；这是**平台治理**面，非本仓可解（与 L1 的 `--no-verify` 同源限制）。**已收窄（2026-10-03）**：`enforce_admins=true` 关闭了管理员豁免 ⇒ **直推路径已堵**；残余面 = 管理员在 Settings 主动改写 branch protection 本身（**平台治理面，非本仓可解**）。
 4. **不追溯历史**——CI 自本批起生效，不回改历史提交。
 
 ## 8. 不变式（Invariants）
@@ -121,7 +122,7 @@ upstream: null
 
 1. **唯一新增文件** = `.github/workflows/ci.yml`（§3.1 结构 + §4 映射）；
 2. **禁止项**：不新增脚本 / 不接只读诊断器 / 不使用 `--stage` / 不设 `continue-on-error`；
-3. **登记项**：H1（平台/行尾差异）/ H2（远端 required check 形态）为观察项，本批不实施。
+3. **登记项（已回填）**：H1（平台/行尾差异 ⇒ 实为管道编码，已修）/ H2（远端 required check 形态 ⇒ 保护态已开启，见 §7 第 2 条）均于 2026-10-03 实测回填；**强制力开关（D6）已实施**，回退体见 §7。
 
 ---
 

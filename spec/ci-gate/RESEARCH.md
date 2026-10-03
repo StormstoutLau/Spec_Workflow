@@ -3,7 +3,7 @@
 ---
 id: ci-gate-RESEARCH
 type: design
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-10-03
 depends: [SPEC-PROCESS, ADR-0010, hook-surface-RESEARCH, rework-and-decision-paths-RESEARCH]
@@ -23,7 +23,7 @@ upstream: null
 | A 事实类 | 5 | 本仓机械取证（E1）+ 本机复跑（E2） |
 | B 推断类 | 3 | 由 A 类推出的判定（见附录 B） |
 | C 类（决策） | 3 | 不参与 R7 机械对账 |
-| 假设区 | 2 | 未实测项（见附录 C） |
+| 假设区 | 2 | 未实测项；均已于 2026-10-03 实测回填（见附录 C） |
 
 ## 1. 调研目标
 
@@ -65,8 +65,8 @@ A-5 本机 = **Windows + Python 3.11.16**；`spec_runner` / `repo_stats` 等使�
 ### 4.1 关键发现
 
 1. **L2 的缺口是「位点」而非「判据」**：五 hook 的判据与 CLI 已全部可用且只读（A-4），缺的是远端触发。【置信度 ★★★★★】
-2. **L2 强制力仍受外部开关约束**：CI job 只提供「可复验」；真正「挡住合并」需 GitHub 侧 branch protection / required check（本仓侧不可自证）。【置信度 ★★★★☆】
-3. **平台选择影响假红风险**：本仓重 Windows 特性（前例多处记录 Windows 特有陷阱），远端 runner 选同平台可降漂移；但行尾/平台差异是否影响 `--check` 未实测（H1）。【置信度 ★★★☆☆】
+2. **L2 强制力已由外部开关开启（2026-10-03 回填）**：GitHub 侧 branch protection 已启用——`required_status_checks.contexts = ["verify"]`（`strict=false`）+ `required_pull_request_reviews.required_approving_review_count = 0` + `enforce_admins = true` ⇒ **直推 main 被拒**、改动须经 PR 且 `verify` 绿方可合并。`approvals=0` 为**单人仓防自锁的必需取值**（GitHub 不允许 PR 作者自 approve，设 ≥1 则永远无法合并）。【置信度 ★★★★★，E2 实测】
+3. **平台选择影响假红风险**：本仓重 Windows 特性（前例多处记录 Windows 特有陷阱），远端 runner 选同平台可降漂移；**回填**：首次远端运行（2026-10-03）暴露的**并非行尾差异**，而是 CI 日志管道下 stdout 默认 **cp1252** ⇒ 校验器打印中文即 `UnicodeEncodeError`，**在打印违规之前** exit 1（非违规、纯环境面）；修复 = job 级 `env: PYTHONUTF8=1 + PYTHONIOENCODING=utf-8` ⇒ 复跑全绿。【置信度 ★★★★★，E2】
 
 ### 4.2 结论与建议
 
@@ -77,13 +77,13 @@ A-5 本机 = **Windows + Python 3.11.16**；`spec_runner` / `repo_stats` 等使�
 ## 5. 幻觉抑制审查（Step 2 Review）
 
 - 全部 A 类为**本仓机械取证 + 本机复跑**；无外部检索断言（复用本仓既有 hook-surface 登记，不重复检索）。
-- 已知局限：H1（平台/行尾差异）与 H2（远端 required check 形态）**未实测**，已在 §4.1 与附录 C 显式登记。
+- 已知局限（**已回填**）：H1（平台/行尾差异）与 H2（远端 required check 形态）于 2026-10-03 首次远端运行与保护态回读后**均实测**（见附录 C 回填注）；仍存局限 = **仅一次远端运行证据**，同类环境问题不排除再现。
 
 ## 6. 对设计的输入
 
 - 设计落点 = **单个 workflow 文件**（[DESIGN](./DESIGN.md) §3）；
 - 检查面 = **本地五 hook 的超集**（加内嵌自测），理由见 B-3；
-- 平台 = `windows-latest` + Python `3.11`（对齐 A-5），行尾风险登记 H1；
+- 平台 = `windows-latest` + Python `3.11`（对齐 A-5）；**实际首跑风险非行尾而是管道编码（cp1252），已修**（H1 回填，DR-1）；
 - 边界 = 只在本仓触发，**不对消费仓产生强制**。
 
 ## 附录 A 断言登记（A 类，5 条）
@@ -99,15 +99,15 @@ A-5 本机 = **Windows + Python 3.11.16**；`spec_runner` / `repo_stats` 等使�
 ```json
 [
   {"id": "B1", "claim": "本地 hook 是 L1（可违反）、CI 是 L2（本地绕过不生效）；复验同一批命令即把「绕过硬护栏」变为「远端挡住」", "basis": "A-2/A-3"},
-  {"id": "B2", "claim": "CI 只提供可复验位点，真正「挡住合并」取决于 GitHub 侧 branch protection / required check；本批提升的是可核性而非自动强制", "basis": "A-1"},
+  {"id": "B2", "claim": "CI job 只提供可复验位点；真正「挡住合并」取决于 GitHub 侧 branch protection。本仓已于 2026-10-03 开启（required check=[verify] + Require PR(approvals=0) + enforce_admins=true）⇒ 直推 main 被拒、合并须 PR 且 check 绿；approvals=0 是单人仓防自锁的必需取值", "basis": "A-1"},
   {"id": "B3", "claim": "检查面应取本地五 hook 的超集（加内嵌自测），否则 CI 可能弱于本地", "basis": "A-4"}
 ]
 ```
 
 ## 附录 C 假设区（2 项）
 
-- [H1] CI 平台/行尾差异（Windows runner 的 CRLF vs LF）是否影响 `console_gen --check` 与计数类读数——**未实测**。
-- [H2] 远端 required check（branch protection）的实际开启形态未在本仓侧登记——本批只提供 job。
+- [H1] CI 平台/行尾差异（Windows runner 的 CRLF vs LF）是否影响 `console_gen --check` 与计数类读数——**已实测·回填（2026-10-03，E2）**：首次远端运行（run 37106315633）失败**非行尾所致**，而是 CI 日志管道 stdout 默认 **cp1252** ⇒ 校验器打印中文即崩（在打印违规前 exit 1，纯环境面）；修复 = job 级 `env: PYTHONUTF8=1 / PYTHONIOENCODING=utf-8`（run 37106881947 全绿）。行尾差异在本次运行中**未观察到影响**。
+- [H2] 远端 required check（branch protection）的实际开启形态未在本仓侧登记——**已回填（2026-10-03，E2，gh api 回读）**：`required_status_checks = {strict:false, contexts:["verify"]}` + `required_pull_request_reviews = {required_approving_review_count:0, dismiss_stale_reviews:false, require_code_owner_reviews:false}` + `enforce_admins = true` + `allow_force_pushes = false` + `allow_deletions = false`。`approvals=0` 为**单人仓防自锁的必需取值**（PR 作者不可自 approve，设 ≥1 即永久无法合并）。
 
 ---
 

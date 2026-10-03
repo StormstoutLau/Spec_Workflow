@@ -3,7 +3,7 @@
 ---
 id: ci-gate-CHECKLIST
 type: design
-version: 1.0
+version: 1.1
 status: accepting
 date: 2026-10-03
 depends: [ci-gate-IMPLEMENTATION, ci-gate-DESIGN]
@@ -14,9 +14,9 @@ upstream: null
 > **创建日期**: 2026-10-03
 > **状态**: accepting（验收中；真异基座独立 pass 仍待触发）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.0**
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.0**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.0**（5A+3B+3C+2H）
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.1**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.1**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.1**（5A+3B+3C+2H）
 
 ---
 
@@ -36,6 +36,7 @@ upstream: null
 | F2 | 检查面 = 五 hook 等价 | 五个等价命令齐备且顺序 = 门禁链 | ✅ | IMPLEMENTATION §3 |
 | F3 | 内嵌自测纳入 | 六件 `--selftest`/`selftest` 全跑 | ✅ | IMPLEMENTATION §3 步骤 6 |
 | F4 | 命令本机可过 | 逐条复跑全绿（**161**/0、0、0、与源一致、**94** exit 0、自测全过） | ✅ | IMPLEMENTATION §4 |
+| F5 | 远端保护态已开启（真机械阻断） | branch protection = required check `verify`（`strict=false`）+ Require PR（`approvals=0`）+ `enforce_admins=true`；直推 main 被拒 | ✅ | gh api 回读（2026-10-03）+ DR-2 |
 
 ## 3. 接口验收
 
@@ -90,11 +91,13 @@ upstream: null
 
 | 严重性 | 发现 | 证据 | 处置 |
 |--------|------|------|------|
-| — | 本批为基础设施件，实施期**零发现**（判据/命令全沿用既有） | IMPLEMENTATION §4 逐条复跑 | 无需修 |
+| P3 | 首跑暴露**环境面编码假设**：CI 日志管道 stdout 默认 cp1252 ⇒ 校验器打印中文即 `UnicodeEncodeError`（**在打印违规之前** exit 1，非违规） | run 37106315633 日志（DR-1） | **已修**（job 级 `PYTHONUTF8` / `PYTHONIOENCODING`）；属环境面，非规格缺陷 |
+| P2 | L2 首跑 PR（run 37112565627）：`console_gen --check` 报「CONSOLE.md 已过期」——**根因 = ⑂ 支线段取本地分支名（环境态）入产物** ⇒ 跨环境不可复现 | DR-3 | **已修**（§8 改由 `docs/rework-graph.json` 派生 + project-console DESIGN v1.13）；**属真实确定性缺口，非环境假红** |
+| — | 判据 / 命令全沿用既有，无**规格级**修正 | IMPLEMENTATION §4 | 无需修 |
 
 ### 8.3 ADD Iron Law 检查
 
-- [x] 断言恒真式：F1-F4 均指向可独立复核的机械读数，非恒真断言；
+- [x] 断言恒真式：F1-F5 均指向可独立复核的机械读数，非恒真断言；
 - [x] 单文件检查盲区：F4 为**逐条命令**复跑（非仅 YAML 存在性）；
 - [x] 设计文档独有约束无测试：六条不变式各有文件级核查；
 - [x] 修正阻断性项无测试：本批零修正项。
@@ -120,14 +123,14 @@ upstream: null
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |------|------|------|------|------|
 | 文档一致性 | 3 | 3 | 0 | 0 |
-| 功能 | 4 | 4 | 0 | 0 |
+| 功能 | 5 | 5 | 0 | 0 |
 | 接口 | 1 | 1 | 0 | 0 |
 | 不变式 | 6 | 6 | 0 | 0 |
 | 错误处理 | 1 | 1 | 0 | 0 |
 | 性能 | 1 | 1 | 0 | 0 |
 | 兼容性 | 2 | 2 | 0 | 0 |
 | ADD 审计 | 4 | 3 | 0 | 1 |
-| **总计** | 22 | 21 | 0 | 1 |
+| **总计** | 23 | 22 | 0 | 1 |
 
 > **统计口径（RULE-2）**：上表来自本文件**逐项核对**（每一项均有独立标记），非事后汇总推算。
 >
@@ -136,7 +139,7 @@ upstream: null
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：**21/22** 通过；唯一待办 = 真异基座独立 pass（§8.4）；四件套与 workflow 已落地
+- [x] **有条件通过**：**22/23** 通过；唯一待办 = 真异基座独立 pass（§8.4）；四件套 + workflow + 远端保护态已落地
 - [ ] **验收失败**
 
 ### 10.3 签字
@@ -151,8 +154,9 @@ upstream: null
 | 行动 | 责任人 | 期限 | 状态 |
 |------|--------|------|------|
 | **真异基座独立 pass**（RULE-1/RULE-5） | — | — | 待触发 |
-| **H1**（平台/行尾差异是否致假红）观察项 | — | — | 观察项（首次远端运行后回填） |
-| **H2**（远端 required check / branch protection 形态） | — | — | 观察项（本仓侧不可自证） |
+| **H1**（平台/行尾差异是否致假红） | — | — | ✅ 已回填（实为管道编码 cp1252，已修；DR-1） |
+| **H2**（远端 required check / branch protection 形态） | — | — | ✅ 已回填（保护态已开启，见 F5 / DR-2） |
+| **直推 main 绕过处置（选 B）** | — | — | ✅ 已开启（Require PR `approvals=0` + `enforce_admins=true`） |
 | 更新 PROGRESS.md / CODE_WIKI.md | — | — | ✅ |
 
 ---

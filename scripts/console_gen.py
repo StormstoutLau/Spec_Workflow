@@ -441,13 +441,16 @@ def hook_chain(path: Path) -> list:
     return out
 
 
-def list_branches(root: Path) -> list:
-    """fork 支线（git 分支）；git 不可用 → 空列表（降级）。"""
+def read_forks(root: Path) -> list:
+    """登记返工支线（真值源 `docs/rework-graph.json` 的 `forks`）——**确定性**输入。
+
+    取代原 `git branch` 本地枚举（环境态，跨环境不可复现；P-070 追加轮方案 A）。
+    不可读 → 空列表（降级，I-8 显式缺口）。
+    """
     try:
-        p = subprocess.run(["git", "-C", str(root), "branch", "--format=%(refname:short)"],
-                           capture_output=True, text=True, timeout=15)
-        return [b.strip() for b in p.stdout.splitlines() if b.strip()] if p.returncode == 0 else []
-    except Exception:  # noqa: BLE001 —— 降级
+        data = json.loads((root / "docs" / "rework-graph.json").read_text(encoding="utf-8"))
+        return [str(f.get("name", "—")) for f in data.get("forks", [])]
+    except (OSError, ValueError):  # noqa: BLE001 —— 降级
         return []
 
 
@@ -780,7 +783,7 @@ def _basis(tasks, sessions, features) -> str:
             f"P 行 = {len(tasks)}；session = {len(sessions)}；feature = {len(features)}")
 
 
-def render(tasks, sessions, features, mapping, edges, dyn, hooks, branches, spec_dir,
+def render(tasks, sessions, features, mapping, edges, dyn, hooks, forks, spec_dir,
            tasks_by_pid, script_names, derived=False) -> str:
     # I-7（P2b 件③，只加不删）：开关关闭时本行与现行为**逐字节一致**；开启时**追加**执行态派生条款
     i7_line = "> 状态词表 = PROGRESS 原词（I-7）；本视图不重贴标签，只补派生依据与行动档"
@@ -810,7 +813,9 @@ def render(tasks, sessions, features, mapping, edges, dyn, hooks, branches, spec
     out += ["", f"## ✅ 已完成（最近 {DONE_TAIL} 条）"]
     out += _done_table(tasks, sessions, derived)
     out += ["", "## ⑂ fork / 支线"]
-    out += [f"- {b}" for b in branches] if branches else ["（git 不可用或无分支）"]
+    out += ["- 本地分支属**环境态**，不纳入派生视图（保证跨环境可复现；P-070 追加轮方案 A）",
+            "- 回写支线真值源见 `docs/rework-graph.json`"]
+    out += [f"- 登记返工支线：{name}" for name in forks] if forks else ["- 登记返工支线：（无）"]
     out += [""]
     return "\n".join(out)
 
@@ -871,8 +876,8 @@ def build(root: Path = ROOT, derived: bool = False) -> str:
     script_names = sorted(p.stem for p in scripts) + (["spec_runner"] if runner.exists() else [])
     edges, dyn = dep_graph(paths, _known_modules(root))
     hooks = hook_chain(root / ".pre-commit-config.yaml")
-    branches = list_branches(root)
-    return render(tasks, sessions, features, mapping, edges, dyn, hooks, branches, spec_dir,
+    forks = read_forks(root)
+    return render(tasks, sessions, features, mapping, edges, dyn, hooks, forks, spec_dir,
                   tasks_by_pid, script_names, derived)
 
 
