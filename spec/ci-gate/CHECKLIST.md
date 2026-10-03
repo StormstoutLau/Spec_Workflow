@@ -92,6 +92,7 @@ upstream: null
 | 严重性 | 发现 | 证据 | 处置 |
 |--------|------|------|------|
 | P3 | 首跑暴露**环境面编码假设**：CI 日志管道 stdout 默认 cp1252 ⇒ 校验器打印中文即 `UnicodeEncodeError`（**在打印违规之前** exit 1，非违规） | run 37106315633 日志（DR-1） | **已修**（job 级 `PYTHONUTF8` / `PYTHONIOENCODING`）；属环境面，非规格缺陷 |
+| P2 | L2 首跑 PR（run 37112565627）：`console_gen --check` 报「CONSOLE.md 已过期」——**根因 = ⑂ 支线段取本地分支名（环境态）入产物** ⇒ 跨环境不可复现 | DR-3 | **已修**（§8 改由 `docs/rework-graph.json` 派生 + project-console DESIGN v1.13）；**属真实确定性缺口，非环境假红** |
 | — | 判据 / 命令全沿用既有，无**规格级**修正 | IMPLEMENTATION §4 | 无需修 |
 
 ### 8.3 ADD Iron Law 检查
