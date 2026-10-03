@@ -920,6 +920,8 @@ git -C $B status --short
 
 **执行追记（2026-10-04，同批，学术仓侧）**：按本批建议顺序执行两项——① **G-12 P1 已执行**：A → B 单向同步（`DIFF = 0` / `import = 15`；备份 `_trash\2026-10-04-lgmm-lean-pre-sync`）；**`lake build` 失败（exit 1）**——根因 = **Mathlib olean 缓存缺失**（`LGMM_Lean\.lake\build\lib\lean\Mathlib` 不存在，mathlib 源在未编译）⇒ **F-1 维持开启**（未以「对账通过」冒充「可构建性已恢复」）。② **H13 记录订正**：学术仓 `LGMM 8.0\data_policy.md` 新增 **§4.1 订正**（`LGMM_Lean\LGMM\` 实测存在；原「目录不存在」为当时读数），原行保留不改。⇒ **F-5 处理完毕**（不符处已在本仓 §17.10 与学术仓侧 §4.1 **双向登记**）。
 
+**F-1 真因订正与 O1 执行结果（2026-10-04，追加）**：上一追记所记「根因 = Mathlib olean 缓存缺失」**读数不准**（**查错目录**——mathlib 产物在 **package 目录**而非常规 root 位置）。实测订正：mathlib **源码完整**（**6437** 个 `.lean`）、HEAD = 清单钉的 `c211948…`（v4.20.0）、预编译产物 **6443 个 `.olean` 就位**（`…\.lake\packages\mathlib\.lake\build\lib\lean\`）⇒ **非缓存问题**。**真因 = 系统性版本不匹配**：A 侧 v9.1 源码按**旧版 Lean/mathlib（旧命名法）**写，而 B 的 lake 工程钉 **v4.20.0**（新命名法 + 更严编译器）。**O1（改 3 处 import）已执行**：`Data.Set.Finite.Basic` / `LinearAlgebra.Matrix.Determinant.Basic` / `Normed.{Group,Module}.Basic`（A 改并同步 B，`DIFF = 0`）；`lake build` 仍 **exit 1 / 149+ error**（下界；**KernelTheory 133 / DataStructures 13**；unknown identifier 34 / type mismatch 13 / noncomputable 8 / …）⇒ **超 O1 阈值，判为系统性漂移**。**版本靶点不存在**（内层仓 git 历史从无 `lean-toolchain`/`lakefile`；源码无版本注释）⇒ O2 属试错。**处置裁定（用户）**：**O1 逐文件移植**，且**移植工作委派给 LGMM 仓库 agent**——已实例化为学术仓内自足任务卡 `LGMM 8.0\LEAN_PORT_TASK_CARD.md`（**5,039 B / UTF-8 无 BOM**；含前置/备份 + 已完成读数 + 逐文件移植循环与错误处置表 + 通过门 + 机读回填块 + 七条红线 + O2/O3 备选）；**产出方不执行**。O2（回钉，无靶点）/ O3（接受缺口）保留为备选。
+
 ## 18. 补充调研十一：外部引文二次核验（v1.12）
 
 **缘起**：v1.1–v1.11 的 A-17 依赖一篇"微软 / UC Berkeley / 清华"论文（§7.3 原引）。本轮对该条做**独立二次核验**（时序独立于原取证轮，RULE-1 精神），目标是把"**看起来像文献**"与"**确有文献**"分开。**结论 = 原引疑似虚构，据实换源**。
