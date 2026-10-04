@@ -1,7 +1,7 @@
 ---
 id: academic-writing-workflow-RESEARCH
 type: design
-version: 1.16
+version: 1.17
 status: in-review
 date: 2026-10-01
 depends: [community-ecosystem-RESEARCH, loop-engineering-RESEARCH, DISTRIBUTED_AGENT_RESEARCH, ADR-0010]
@@ -32,6 +32,7 @@ upstream: null
 > **v1.14 G-12 双源真值取证批（用户指令「继续处理 G-12 的双源真值指认」；Layer-0 文档批、零代码）**: 对 §17.6 **G-12** 做**只读取证**（`D:\Article` 侧**零写入**），新增 **§17.8 G-12 双源真值取证与指认建议**（十一项判据表 + 结论 + 三条派生发现 + 处置三档建议）。**结论 = 内容真值源为 `LGMM 8.0/lean4/`**——四路判据同向（文件集 ⊂ / 文本行 99.84% ⊂ / 声明集 34 ⊂ 43 且 B 零独有 / mtime 晚），且**由该仓自身 changelog 自证**（A 侧根模块头部「v8.1」+「v9.1 Changelog（2026-08-01）」明列实测到的 A 独有声明 5 个与 +2 公理）⇒ **该指认属机械可判，非内容判断**；G-12 状态由「数据齐备待裁决」改为「**证据齐备·机械可判，待用户追认 + 处置裁决**」。**三条派生发现** = **F-1** v9.1 证明集**当前不可构建**（A 有源无工程、B 有工程但根模块 import 面仅 13 且内容停 v5.0 时代 ⇒ 「No sorry placeholders remain」类声明无法用 `lake build` 复现）/ **F-2** v9.0/v9.1 全部改动**未提交**（内层仓 HEAD `e200be9` 落后工作区，`lean4/` 4 文件已改未提交，`EWNLS.lean` **+178 −1** ⇒ 一次干净克隆即丢失）/ **F-3** 朴素 `grep sorry` **假阳性 10 例**（全为 changelog 散文提及，剥注释后真实 0 —— 同族 = 本仓 P-061 M5 假阳性）。**边界** = `D:\Article` 侧零写入（未提交 / 未同步 / 未删除任何文件）；**不新增编号断言**（读数以 §17.8 实测表承载，口径保持 **92A + 26B + 23C + 16H**）。**零工具改动**。
 > **v1.15 完成度评估与阻塞项分类批（P-071，用户指令「分析学术推理框架完成度」→「学术框架阻塞项分类调研先落档 然后按照建议顺序执行」；Layer-0 登记批、零代码）**: 新增 **§17.10 完成度评估与阻塞项分类**——分层完成度矩阵（S1 契约层 / S2 清理层 / S3 推理工作流）× 本轮实测发现（**F-1** 各仓 S1/S2 已就地落档（2026-10-02/03，4 仓各 **9 件**齐）/ **F-2** H13-H16 已于 2026-10-03 裁决 / **F-3** G-12 P0 已由提交 `79cbdc7` 满足（仓库级未提交面降为 0，**未造空提交**）/ **F-4** 本批写动作 = 工作区根三件套落盘（`data_policy.md` **4,241 B** + `WORKSPACE.md` **2,282 B** + `INDEX.md` **5,322 B**〔17 项目登记〕；UTF-8 无 BOM；**未 commit / 未 push**）/ **F-5** 两处与既有记录不符（`LGMM_Lean/LGMM` 实测存在 vs H13 记录「不存在」；**G-12 P1 未执行**，hash 对账 **DIFF/missing = 4**））+ 阻塞项三分类（可立即做 / 等裁决 / 等触发）+ 建议执行顺序（G-12 P1 → H13 记录复核）；**不新增或删除编号断言**（口径保持 **92A+26B+23C+16H**）；**本仓零工具改动**；学术仓侧仅根三件套写、**未 commit / 未 push**。
 > **v1.16 O1 收口批（P-072，用户指令「LGMM 仓库已经处理 请继续分析后续任务」→ AskUserQuestion 裁「先独立复跑 lake build」「执行完整 P-072」「内层仓我自己/仓库 agent 处理」；Layer-0 登记批、零代码）**: 新增 **§17.10 追加段「O1 收口与 F-1 关闭」**——**O1 由 LGMM 仓库 agent 执行完成**（`LEAN_PORT_TASK_CARD` v0.6 回填块：`build_exit: 0` / `error_count: 0` / `synced_to_B: true` / 16 文件改动；**零 `sorry`、零新增 `axiom`**，框架缺口以 `def` 占位 + docstring 登记）。**产出方独立复验**（非自报——守任务卡 R5 精神）：在 `LGMM_Lean` 目录**独立复跑** `lake build` ⇒ **`LAKE_EXIT=0` / `error` 行 0 / "Build completed successfully."**（2497/2499 replayed，仅 unused-variable 警告）⇒ **F-1 关闭**（可构建性已恢复，非「对账通过」冒充）。**§17.9 P2 形态分叉（待追认）**：卡定 `git -C $B init`（B 独立仓），**实际采取外层 monorepo 追踪**（外层仓提交 `8e78ed5`，21 files / +6884；`.lake/` 经 `.gitignore` 规则不入库，A-76）——属**形态分叉**，须追认。**三分类刷新**：G-12 三档收口（P0 已满足 / **P1 已执行且 `lake build exit 0`** / P2 以 monorepo 形态执行待追认）；**余项** = 等裁决（G-01~G-07 内容判断）/ 等触发（S3 推理工作流本体 = 最大结构空白）。**沉淀**：Lean4 mathlib 迁移 playbook（错误处置 **4 类 → 15 类**，含 API 变更三亚型 / 词法级非法 token / 依赖 `if` 分支 / `let` 作用域 / 隐式参数命名传参 / 同 namespace 重名 / `open` 污染 / 定义顺序 / **框架缺口占位范式**；已落学术仓 `docs/spec/lean4_mathlib_migration_notes.md`）。**不新增或删除编号断言**（口径保持 **92A+26B+23C+16H**）；**本仓零工具改动**；**零新增 M7 样本**。
+> **v1.17 G-01~G-07 内容指认只读取证批（P-073，用户指令「G01-G07内容指认是否可以执行」→ AskUserQuestion 裁「全量开取证批」；Layer-0 登记批、零代码）**: 对 §17.6 的 **G-01~G-07 做只读取证**（`D:\Article` 侧**零写入**），把「内容判断」尽量降为「机械可判 + 用户追认」（同 G-12 路径），新增 **§17.11**。**取证判据** = 体积 / 行数 / 同名 PDF / mtime / **分支系**（`\documentclass` + 宏包）/ **正文结构**（`\section` 序列 + `\label`）/ pairwise diff。**A 档（已机械可判，待追认）** = **G-01** `Joint Online Learning\v2.0`（6 `.tex` 分两系：xeCJK 系 4 件 `JOLF-2.0`/`-fixed`/`-final` 逐行 diff **0**、`-academic` 差 10；ctex 系 2 件 `-academic-ctex` ↔ `-fixed` 差 **2**；ctex-fixed 最晚 13:28 + 有 PDF + 最全 ⇒ 真值建议 `JOLF-2.0-academic-ctex-fixed.tex`，原「分支取舍」**机械可判**）/ **G-03** `DL-KS-IGMM_v1.0`（29,899→30,114→34,525 B 三项单调 + 各带 PDF ⇒ `document_improved.tex`）/ **G-04** `Agent_Multi_2.0`（`document_2.0.tex` 66,299 B + PDF + `references.bib` vs `Multi_Agent.tex` 24,652 B 早 7 天 ⇒ `document_2.0.tex`）/ **G-05** `MIDAS-Granger\temp`（3 件全无 PDF + 目录名 `temp` + 正式产出在 `MIDAS v3.0` ⇒ **整目录归档**）/ **G-06** `AL model_old`（`document-3.0.tex` 86,233 B 最新最大 ⇒ 真值；9 PDF / 5 `.tex` ⇒ **6 个无精确同名源**，其中 2 个为 `Mode-` 截断名〔疑 `-working paper` 变体〕⇒ 净孤儿 **4**，与 §17.6 记载一致；按 **G1 只归档不删**）。**B 档（G-02 正文取证后转可判）** = `Volsurface_SABR\SABR_v5.0` 三件**同题同系**（「Operator Conduction Theory for the SABR Model」）：`SABR-v2`（288 行，无 `\label`、`\Large\textbf` 标题、占位邮箱、含 Proof Sketch）为最粗草案 / `SABR-v1`（559 行，有 Numerical Realisation）为中间稿 / `sabr_wavelet_revised`（624 行，全节带 `\label` 且**新增 Coercivity / Conduction intensity / β=1/2 phase transition / Discussion**）**最完备**；**矛盾消解** = mtime 最新为 `SABR-v1`（23:16:47）vs revised（23:08:24）**仅差 8 分**（疑 PDF 编译/重存时间戳扰动）⇒ **结构完备性指向 `sabr_wavelet_revised.tex`**（**置信中高**，mtime 属弱信号，须追认）。**C 档（G-07 设计件）** = 命名规则（禁状态词 + 空格）**已写入** 学术仓 `WORKSPACE.md §1`（P-071 落盘）⇒ 原阻塞「规则未写入」**部分消解**；**`main.tex` 单入口约定仍未写入**；引用同步面 = `MIDAS v3.0\reconcile_numbers.py:24` **硬编码** `MIDAS_HM_GC_v3.tex`（+ L135/165-166 表名）；§17.11 出**设计件**（main.tex 约定文本 + 引用同步方案 + 边界），**Layer-0 不执行**，待追认后另立实施批次。**边界** = 只读取证（`D:\Article` **零写入**）；**不新增或删除编号断言**（口径保持 **92A+26B+23C+16H**）；**本仓零工具改动**；**执行主体在学术仓侧**（归档 / 改名 / 删除），守 ACADEMIC_REPO_TASK_CARD §5 红线 3 与 data_policy **G1/G2**。
 > **核心目的**: 确认"学术推理写作工作流"与本仓 Spec 驱动框架的**同构性**——把 LGMM 场景的痛点映射到本仓既有机制，识别社区可借鉴构件，判定是否需吸收/承接。
 
 ## 0. 断言统计表（必填，审计入口）
@@ -750,6 +751,8 @@ v1.7 之后用户追问「真实仓库里面存在问题，解决方案是否已
 
 > **状态更新（P-071，2026-10-04）**：G-09 / G-10 / G-11 / G-12 的承项已由学术仓侧于 2026-10-03 裁决 / 满足（H14 / H15 / H16 / H13）；G-12 **P0 已满足、P1 未执行**——详见 §17.10。
 
+> **状态更新（P-073，2026-10-04）**：**G-01~G-06 转「证据齐备 · 机械可判，待用户追认」**（只读取证见 **§17.11**；**G-02** 经正文取证由「信号矛盾」降为可判）——原「内容判断」经只读判据（分支系 / 正文结构）**降为机械可判 + 追认**（同 G-12 路径）。**G-07 部分消解**：命名规则（禁状态词 + 空格）**已入** 学术仓 `WORKSPACE.md §1`（P-071 落盘）；**`main.tex` 单入口约定**与**引用同步方案**见 §17.11 **C 档（设计件）**，Layer-0 待追认。**余 G-08 / G-09 / G-10 / G-11 不变**（等用户按时间成本取舍 / 逐个人工判定 / 363 PDF 版本构成 / pilot 完成度）。
+
 **执行纪律（本轮固化）**：派生物清理**只隔离不删除**（move 至 `_trash` + 保相对路径 + 可原路回滚 + 计数守卫 + 内容签名 fail-closed），观察期无异常后再释放；此后**已由 §17.3 实测**：5 仓 tracked-artifacts = 0，故"隔离"不与版本控制冲突。
 
 ### 17.7 计数声明
@@ -763,6 +766,8 @@ v1.7 之后用户追问「真实仓库里面存在问题，解决方案是否已
 > **v1.14 追加**：**G-12 双源真值取证**（§17.8）——**零新增/删除断言**（口径不变：92A + 26B + 23C + 16H）；§17.6 中 **G-12 状态转「证据齐备·机械可判」**（真值源 = `LGMM 8.0/lean4/`），其余 **G-01~G-11 仍挂**。
 
 > **v1.15 追加**：**完成度评估与阻塞项分类**（§17.10，P-071）——**零新增/删除断言**（口径不变：92A+26B+23C+16H）；§17.6 挂起项状态更新（G-09 / G-10 / G-11 / G-12）见 §17.10。
+
+> **v1.17 追加**：**G-01~G-07 内容指认只读取证**（§17.11，P-073）——**零新增/删除断言**（口径不变：92A+26B+23C+16H）；§17.6 挂起项 **G-01~G-06 状态转「证据齐备 · 机械可判，待用户追认」**、**G-07 部分消解**，详见 §17.11 与 §17.6 上方状态更新行。
 
 ### 17.8 G-12 双源真值取证与指认建议（v1.14）
 
@@ -924,6 +929,52 @@ git -C $B status --short
 **F-1 真因订正与 O1 执行结果（2026-10-04，追加）**：上一追记所记「根因 = Mathlib olean 缓存缺失」**读数不准**（**查错目录**——mathlib 产物在 **package 目录**而非常规 root 位置）。实测订正：mathlib **源码完整**（**6437** 个 `.lean`）、HEAD = 清单钉的 `c211948…`（v4.20.0）、预编译产物 **6443 个 `.olean` 就位**（`…\.lake\packages\mathlib\.lake\build\lib\lean\`）⇒ **非缓存问题**。**真因 = 系统性版本不匹配**：A 侧 v9.1 源码按**旧版 Lean/mathlib（旧命名法）**写，而 B 的 lake 工程钉 **v4.20.0**（新命名法 + 更严编译器）。**O1（改 3 处 import）已执行**：`Data.Set.Finite.Basic` / `LinearAlgebra.Matrix.Determinant.Basic` / `Normed.{Group,Module}.Basic`（A 改并同步 B，`DIFF = 0`）；`lake build` 仍 **exit 1 / 149+ error**（下界；**KernelTheory 133 / DataStructures 13**；unknown identifier 34 / type mismatch 13 / noncomputable 8 / …）⇒ **超 O1 阈值，判为系统性漂移**。**版本靶点不存在**（内层仓 git 历史从无 `lean-toolchain`/`lakefile`；源码无版本注释）⇒ O2 属试错。**处置裁定（用户）**：**O1 逐文件移植**，且**移植工作委派给 LGMM 仓库 agent**——已实例化为学术仓内自足任务卡 `LGMM 8.0\LEAN_PORT_TASK_CARD.md`（**5,039 B / UTF-8 无 BOM**；含前置/备份 + 已完成读数 + 逐文件移植循环与错误处置表 + 通过门 + 机读回填块 + 七条红线 + O2/O3 备选）；**产出方不执行**。O2（回钉，无靶点）/ O3（接受缺口）保留为备选。
 
 **O1 收口与 F-1 关闭（2026-10-04，追加 · P-072）**：**O1 已由 LGMM 仓库 agent 执行完成**（16/16 文件、`lake build exit 0`、根模块 15 条 import 全解析、`synced_to_B: true`；**零 `sorry`、零新增 `axiom`**——框架缺口改 `def` 占位 + docstring 登记，如 `weakConvergence := ⊤` / `falseDiscoveryRate := 0`）。**产出方独立复验（非自报）**：按其任务卡 **R5**「不得以对账通过冒充可构建性已恢复」的判据纪律，**产出方在 `LGMM_Lean` 目录独立复跑** `lake build` ⇒ **`LAKE_EXIT=0` / `error` 行 0 / "Build completed successfully."**（2497/2499 replayed；仅 unused-variable 警告）——**此为机械可复现读数，非执行方回填块自报** ⇒ **F-1 关闭**（可构建性真正恢复）。**§17.9 P2 形态分叉（待追认）**：卡定 P2 = `git -C $B init`（B 作**独立仓**），**实际采取外层 monorepo 追踪**（外层仓提交 `8e78ed5`，21 files / +6884；`.lake/` 经 `.gitignore` 规则不入库，守 **A-76**）——形态分叉属**合规等价替代**（同样产生版本保护、同样不追踪 `.lake`），但**与卡文不一致，须追认**。**三分类刷新**：**G-12 三档收口**（P0 = 已由 `79cbdc7` 满足，未造空提交 / **P1 = 已执行，通过门 `DIFF=0`+`import=15`+`lake build exit 0` 全绿** / P2 = 以 monorepo 形态执行，待追认）；**余项不变** = 等裁决（G-01~G-07 内容判断）/ 等触发（**S3 推理工作流本体 = 最大结构空白**）。**沉淀**：Lean4 mathlib 迁移 playbook——错误处置表由 **4 类扩至 15 类**（API 变更三亚型〔改名/消失/签名变化〕/ 词法级非法 token〔`λ`·`²`·`₂`〕/ 依赖 `if` 分支禁 `rw [if_pos h]` 改 `by_cases` / `let` 绑定不在 tactic 作用域 / 隐式参数须命名传参 / 同 namespace 重名 / `open` 污染 / 定义顺序 / **框架缺口占位范式**〔不 `sorry`，改 `def` + docstring〕）；已落学术仓 `LGMM 8.0\docs\spec\lean4_mathlib_migration_notes.md` + 任务卡 `LEAN_PORT_TASK_CARD.md` v0.6。
+
+### 17.11 G-01~G-07 内容指认只读取证与建议（v1.17，P-073）
+
+**缘起**：用户问「G01-G07内容指认是否可以执行」→ 裁「全量开取证批」。本轮对 §17.6 的 G-01~G-07 做**只读取证**（`D:\Article` 侧**零写入**），把「内容判断」尽量降为「机械可判 + 用户追认」（同 §17.8 的 G-12 路径）。**判据** = 体积 / 行数 / 同名 PDF / mtime / **分支系**（`\documentclass` + 宏包）/ **正文结构**（`\section` 序列 + `\label`）/ pairwise diff。
+
+#### 17.11.1 A 档——已机械可判（待追认）
+
+| 项 | 目录 | 本轮实测读数（E1） | 真值建议 | 置信 |
+|---|---|---|---|---|
+| G-01 | `Joint Online Learning\v2.0` | 6 `.tex` 两系：**xeCJK 系 4 件**（`JOLF-2.0` / `-fixed` / `-final` 逐行 diff **0**；`-academic` 差 10）+ **ctex 系 2 件**（`\usepackage{ctex}`；`-academic-ctex` ↔ `-fixed` 差 **2**）；`ctex-fixed` 最晚（13:28）+ 有 PDF + 630 行最全 | `JOLF-2.0-academic-ctex-fixed.tex` | 高 |
+| G-03 | `DL-KS-IGMM\DL-KS-IGMM_v1.0` | 29,899 → 30,114 → 34,525 B **三项单调** + 各带 PDF | `document_improved.tex` | 高 |
+| G-04 | `Agent_Multi\Agent_Multi_2.0` | `document_2.0.tex` 66,299 B + PDF + `references.bib`；vs `Multi_Agent.tex` 24,652 B（早 7 天） | `document_2.0.tex` | 高 |
+| G-05 | `MIDAS-Granger\temp` | 3 件**全无 PDF** + 目录名 `temp` + 正式产出在 `MIDAS v3.0` | **整目录归档**（无真值） | 高 |
+| G-06 | `…Avellaneda–Lipkin Model\AL model_old` | `document-3.0.tex` 86,233 B 最新最大；9 PDF / 5 `.tex` ⇒ 6 无精确同名源（2 为 `Mode-` 截断名 ⇒ 净孤儿 **4**） | `document-3.0.tex`；孤儿按 **G1 只归档不删** | 高 |
+
+**G-01 关键**：原「英文本 vs ctex 分支取舍」经 `\documentclass` / 宏包取证 + pairwise diff **降为机械可判**——ctex 系为 xeCJK 系的**继任支**（更晚、有 PDF、更全）。
+
+#### 17.11.2 B 档——G-02 正文取证后转可判
+
+`Volsurface_SABR\SABR_v5.0` 三件**同题同系**（标题均为「Operator Conduction Theory for the SABR Model」）：
+
+| 文件 | 行数 | `\label` | 结构特征 |
+|---|---:|---|---|
+| `SABR-v2.tex` | 288 | 无 | 最粗草案：`\Large\textbf` 标题 + 占位邮箱 `quantresearch.net` + `Proof of Coercivity (Sketch)` |
+| `SABR-v1.tex` | 559 | 部分 | 中间稿：有 `Numerical Realisation` / `Conduction Intensity` |
+| `sabr_wavelet_revised.tex` | 624 | **全节带** | **最完备**：新增 `Coercivity` / `Conduction intensity and multi-scale decomposition` / **`β=1/2 phase transition in wavelet domain`** / `Discussion` |
+
+**矛盾消解**：§17.4 记「mtime 最新为 `SABR-v1`（23:16）vs 体积最大为 `sabr_wavelet_revised`」——本轮实测二者 mtime **仅差 8 分**（23:16:47 vs 23:08:24），疑为 **PDF 编译 / 重存时间戳扰动**；以**结构完备性**（`\label` + 新增节）为判据 ⇒ 建议真值 = `sabr_wavelet_revised.tex`，**置信中高**（mtime 属弱信号，须追认）。
+
+#### 17.11.3 C 档——G-07 命名规则与引用同步方案（设计件）
+
+**现状取证**（学术仓侧，只读）：
+
+- **命名规则已落**：`WORKSPACE.md §1` 已含「源文件名禁状态词入名（`final` / `corrected` / `reviewed` / `rigorous` / `complete` / `new` / `old` / `_vN`）与空格」⇒ 原阻塞「规则未写入 WORKSPACE.md」**部分消解**（P-071 已落盘）。
+- **`main.tex` 单入口约定未落**：`WORKSPACE.md` 无 `main.tex` 约定文本。
+- **引用同步面**：`MIDAS-Granger\MIDAS v3.0\reconcile_numbers.py:24` **硬编码** `MIDAS_HM_GC_v3.tex`（`PAPER = os.path.join(BASE, 'MIDAS_HM_GC_v3.tex')`）；同文件 L135 / L165-166 另硬编码 `real_data_tables.tex` / `s5_vvix_robust.tex` / `s6_tyvix_robust.tex` / `s7_gvz_robust.tex`（表名，非 PAPER 入口）。另 §17.4 记 `CDO_v9_Rigorous.tex` 被 4 `.py` 注释 + 多 `.md` 引用、`Fisher–Conduction Duality` 引 `paper_a_heston.tex`。
+
+**设计件（Layer-0，不执行）**：
+
+1. **`main.tex` 单入口约定文本**（拟入 `WORKSPACE.md §1`）：「每论文单元以 `main.tex` 为唯一编译入口（`\input` 组装分章）；正文文件禁状态词与版本号入名（版本由目录 / 标签承载，不变量 II）」。
+2. **引用同步方案**（改名前置检查）：① **硬编码引用清单** —— `reconcile_numbers.py:24`（PAPER 入口）+ L135 / L165-166（表名）+ §17.4 所列 `CDO_v9_Rigorous.tex` / `paper_a_heston.tex` 引用点；② **同步步骤** —— 改名 → 逐点同步引用 → 以 `reconcile_numbers.py` 跑通为通过门；③ **边界** —— 复用 **A-92 strangler-fig 增量原则**，逐仓同步而非全局批量替换。
+3. **边界**：本设计件**只给方案**；写动作（改 `WORKSPACE.md` / 改名 / 同步引用）属学术仓侧，须**追认后另立实施批次**（守 ACADEMIC_REPO_TASK_CARD §5 红线 3 与 data_policy **G1/G2**：不改名 / 不删除既有文件）。
+
+#### 17.11.4 计数与边界
+
+本节为**只读取证 + 建议**，**不新增编号断言**——读数以本节表格承载，口径保持 **92A + 26B + 23C + 16H**。**边界** = `D:\Article` 侧**零写入**（只读盘列 + 读文件内容）；**本仓零工具改动**；G-01~G-06 的追认与 G-07 的规则定稿均属**用户裁决面**，执行主体在学术仓侧。
 
 ## 18. 补充调研十一：外部引文二次核验（v1.12）
 
