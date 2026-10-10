@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""console_gen 项目控制台生成器（P-043 建立，P-044 增补描述列与 per-feature 流程，P-047 增补锚点与映射收敛）。
+"""console_gen 项目控制台生成器（P-043 建立，P-044 增补描述列与 per-feature 流程，P-047 增补锚点与映射收敛，
+P-084 列头即状态行——C-40 Layer-0 首项 / A-19 落地）。
 
 把 per-feature / per-P / 决策链 / 架构流程四类真值源压缩为**多视图只读控制台**——
 输出为**纯派生产物** docs/CONSOLE.md（100% 机器生成，无人工内容；重跑即刷新）。
@@ -78,6 +79,25 @@ STEP_ARTIFACT = {
 STEP_CAP = 48      # 步骤表「主题 / 简要描述」列字符上限（C-14；H6 渲染宽度校准待实测）
 # 行动队列三级（RESEARCH A-8 的 Needs Attention → Ready to Verify → Recommended）
 TIER_ORDER = ("Needs Attention", "Ready to Verify", "Recommended")
+# 三档队列列头契约（C-40 Layer-0 首项 / A-19「列头即状态行」落地，P-084 → DESIGN D19 / RESEARCH §7.32）：
+# 本仓 console 为 8 区块非 kanban（A-73）⇒「列」的最小对应物 = 三档行动队列（状态类别分组，A-21 同源）。
+# 列头即状态行 = 词 + 机械计数 + DoR/DoD；DoR/DoD 为 DESIGN §5 状态表与 §5.2 判据表的**档级重投影**
+# （与下方 derive_state 分支逐一对应；静态契约、不随数据漂移 ⇒ 不构成第二判定实现，守 I-10 精神）。
+# limit / sum **不适用**（三档队列不设容量上限；本仓卡片无数值量纲，sum ≡ count）——显式不声称，防「照抄句式造假读数」。
+TIER_CONTRACT = {
+    "Needs Attention": (
+        "`blocked`；或执行态但无 session（决策链缺失）",
+        "阻塞解除（状态列改判）或决策链补齐（首个决策事件落盘）",
+    ),
+    "Ready to Verify": (
+        "最新轮含 gate exit 2（软性存疑）；或五步完整待收（最远 step = `finalize`）",
+        "新轮消解存疑（重跑 gate exit 0 或用户裁决）或收束（进已完成段）",
+    ),
+    "Recommended": (
+        "未开工（`pending` 且无决策流）；或推进中（最远 step 未到链尾）",
+        "推进至链尾（最远 step = `finalize`）或状态列改判（`blocked` / `done`）",
+    ),
+}
 
 DONE_TAIL = 8      # 已完成段保留最近 N 条
 ACTIVE_CAP = 7     # 活动区卡片上限（RESEARCH A-22：5~7 项）
@@ -456,6 +476,15 @@ def read_forks(root: Path) -> list:
 
 # ---------------------------------------------------------------- 渲染（纯函数）
 
+def _tier_dor(tier: str, derived: bool) -> str:
+    """DoR 文案（C-40 Layer-0 首项 / D19）：派生态下 Ready to Verify 的第二进入支
+    （最远 step = `finalize`）已由 `_eff_status` 短路归 `done` ⇒ 文案随开关态分流
+    （同 I-7 承载位点名族：声明须与开关态实现相符）。"""
+    if tier == "Ready to Verify" and derived:
+        return "最新轮含 gate exit 2（软性存疑）"
+    return TIER_CONTRACT[tier][0]
+
+
 def _tier_lines(tasks, sessions, derived) -> list:
     buckets = {t: [] for t in TIER_ORDER}
     for t in tasks:
@@ -468,7 +497,9 @@ def _tier_lines(tasks, sessions, derived) -> list:
     lines = []
     for tier in TIER_ORDER:
         rows = buckets[tier]
-        lines.append(f"**{tier}**")
+        # 列头即状态行（A-19 / D19）：词 + 机械计数（count = len(rows)，声明 = 重数）+ DoR/DoD
+        lines.append(f"**{tier}**（{len(rows)} 项）")
+        lines.append(f"> DoR：{_tier_dor(tier, derived)} · DoD：{TIER_CONTRACT[tier][1]}")
         lines += rows if rows else ["（无）"]
         lines.append("")
     return lines
@@ -1194,6 +1225,20 @@ def run_selftest() -> int:
           and "- **决策链缺失（Needs Attention）**：P-004" in text_d)
     check("S50c 默认态（R-1）：输出既不含豁免面显式行、也不含豁免依据文案",
           "结构性豁免面" not in text)
+
+    # --- P-084（C-40 Layer-0 首项 / A-19 落地）：三档队列列头即状态行（计数 + DoR/DoD）---
+    check("S51 列头即状态行：三档列头承载机械计数（声明 = 重数；fixture 档位 1/2/7）",
+          "**Needs Attention**（1 项）" in text
+          and "**Ready to Verify**（2 项）" in text
+          and "**Recommended**（7 项）" in text)
+    check("S52 每列 DoR/DoD 齐备且为 derive_state 判据的档级重投影（静态契约）",
+          "> DoR：" in text and "· DoD：" in text
+          and "`blocked`；或执行态但无 session（决策链缺失）" in text
+          and "最新轮含 gate exit 2（软性存疑）；或五步完整待收（最远 step = `finalize`）" in text
+          and "未开工（`pending` 且无决策流）" in text)
+    check("S53 派生态：Ready to Verify 第二进入支随开关态分流（finalize 已归 done ⇒ 不出现）",
+          "或五步完整待收（最远 step = `finalize`）" in text
+          and "或五步完整待收（最远 step = `finalize`）" not in text_d)
 
     shutil.rmtree(root, ignore_errors=True)
     print(f"selftest: {passed}/{total} PASS")
