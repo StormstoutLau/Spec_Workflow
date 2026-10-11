@@ -8,6 +8,8 @@
 adapter 开放结构（D4：NativeHTTPAdapter 默认，DshSDKAdapter 为实测后候选）。
 
 命令面（D7）：run / gate / status / replay / fork（search = grep，零代码）。
+P-089：fork 另支持可选「注册三件」（--reason / --trigger-kind / --provenance，
+all-or-none）——fork 成功后追加一条返工图登记（docs/rework-graph.json）。
 用法示例见 README.md；selftest：python spec_runner.py selftest。
 """
 
@@ -22,7 +24,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.7.0"
+VERSION = "1.8.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -461,20 +463,27 @@ def cmd_anchor_audit(args) -> int:
 
 
 # ---- 模块 2f：backflow-audit 回写/回边待处理检测（P-069——只读诊断；不接门禁，同 anchor-audit 先例） ----
-def _load_rework_registry():
-    """读返工图真值源（`docs/rework-graph.json`）→ (trigger_kinds, registered, err)。
+def _load_registry_raw():
+    """返工图真值源**原文**加载 → (reg|None, err|None)。
 
-    registered = 已登记 session 名集（`forks[].new`/`.origin` + `non_rework[].name`）。
+    P-089：注册写入（cmd_fork）与只读派生（backflow-audit）**共用同一解析**。
     err = None（成功）/ 字符串（缺失或不可解析 ⇒ 调用方降级 exit 2，不当作通过）。
-    **触发枚举只此一处来源**（守 I-10：绝不复制一份常量）。
     """
     p = registry_path()
     if not p.is_file():
-        return None, set(), f"登记表缺失: {p}"
+        return None, f"登记表缺失: {p}"
     try:
-        reg = json.loads(p.read_text(encoding="utf-8"))
+        return json.loads(p.read_text(encoding="utf-8")), None
     except Exception as e:                                          # noqa: BLE001
-        return None, set(), f"登记表不可解析: {type(e).__name__}: {e}"
+        return None, f"登记表不可解析: {type(e).__name__}: {e}"
+
+
+def _registry_derive(reg):
+    """从返工图原文派生 (trigger_kinds, registered, err)。
+
+    registered = 已登记 session 名集（`forks[].new`/`.origin` + `non_rework[].name`）。
+    **触发枚举只此一处来源**（守 I-10：绝不复制一份常量；P-089 注册前置校验同源复用）。
+    """
     tk = reg.get("trigger_kinds")
     if not isinstance(tk, list) or not tk:
         return None, set(), "登记表 trigger_kinds 为空/非数组（无封闭集可判）"
@@ -488,6 +497,18 @@ def _load_rework_registry():
         if isinstance(x, dict) and isinstance(x.get("name"), str) and x["name"]:
             registered.add(x["name"])
     return list(tk), registered, None
+
+
+def _load_rework_registry():
+    """读返工图真值源（`docs/rework-graph.json`）→ (trigger_kinds, registered, err)。
+
+    err = None（成功）/ 字符串（缺失或不可解析 ⇒ 调用方降级 exit 2，不当作通过）。
+    **触发枚举只此一处来源**（守 I-10：绝不复制一份常量）。
+    """
+    reg, err = _load_registry_raw()
+    if err:
+        return None, set(), err
+    return _registry_derive(reg)
 
 
 def cmd_backflow_audit(args) -> int:
@@ -693,8 +714,52 @@ def cmd_replay(args) -> int:
     return 0
 
 
+def _fork_reg_validate(reg, kinds, registered, args) -> str | None:
+    """P-089 写入端**最小前置校验**（fail-fast 子集）→ 错误串 / None。
+
+    与对账器（`scripts/rework_graph_check.py`）的关系：**完整判定单点在对账器**；
+    本函数只拦「确定会把无效值写进真值源」的输入（值域一律读真值源，守 I-17）——
+      ① reason 非空白、禁禁用词 `unknown`；② trigger_kind ∈ 封闭集（读真值源）；
+      ③ provenance 形态（含 `<前缀>:<载荷>` / 前缀 ∈ 封闭集 / 载荷非空）；
+      ④ new 不在已登记名集（防与既有边 / 豁免歧义）。
+    跨文件对账（对账器 C/D 段）**零复刻**；两处若漂移以对账器为准（它更严）。
+    """
+    def _blank(v) -> bool:
+        t = v.strip() if isinstance(v, str) else ""
+        return (not t) or t.lower() == "unknown"
+
+    if _blank(args.reason):
+        return "reason 空 / 仅空白 / 禁用词 unknown"
+    if args.trigger_kind not in kinds:
+        return f"trigger_kind 不在封闭集（真值源）: {args.trigger_kind!r}"
+    prov = args.provenance
+    if _blank(prov):
+        return "provenance 空 / 仅空白 / 禁用词 unknown"
+    if ":" not in prov:
+        return "provenance 缺 <前缀>:<载荷> 形式"
+    pref, _, payload = prov.partition(":")
+    prefixes = reg.get("provenance_prefixes")
+    if not isinstance(prefixes, list) or pref not in prefixes:
+        return f"provenance 前缀 不在封闭集（真值源）: {pref!r}"
+    if not payload.strip():
+        return "provenance 载荷为空（有前缀没有内容）"
+    if args.new in registered:
+        return f"new 已在已登记名集（防歧义）: {args.new!r}"
+    if not isinstance(reg.get("forks"), list):
+        return "登记表 forks 字段缺失/非数组（先修表再注册）"
+    return None
+
+
 def cmd_fork(args) -> int:
     w = EventWriter(sessions_dir())
+    # P-089：注册三件（可选；all-or-none。三件全缺 ⇒ 与 P-009 原行为逐字一致）
+    given = [x for x in (args.reason, args.trigger_kind, args.provenance)
+             if x is not None]
+    if given and len(given) != 3:
+        print("fork: 注册三件须齐给（all-or-none）：--reason / --trigger-kind / "
+              "--provenance", file=sys.stderr)
+        return EXIT_USAGE
+    register = len(given) == 3
     src = w.read(args.session)
     if not src:
         print(f"fork: source session empty/missing: {args.session}", file=sys.stderr)
@@ -706,11 +771,36 @@ def cmd_fork(args) -> int:
     if not kept:
         print(f"fork: no rows with seq <= {args.seq_from}", file=sys.stderr)
         return EXIT_USAGE
+    reg = entry = None
+    if register:  # 校验先于任何写入（fork 未执行即失败 ⇒ 无半成品）
+        reg, err = _load_registry_raw()
+        if err is None:
+            kinds, registered, err = _registry_derive(reg)
+        if err is None:
+            err = _fork_reg_validate(reg, kinds, registered, args)
+        if err:
+            print(f"fork: 注册不可用：{err}（未执行 fork）", file=sys.stderr)
+            return EXIT_USAGE
+        today = datetime.now().strftime("%Y-%m-%d")
+        # seq_from 登记 = **实际复制行数**（机械真值；请求 N 超出源末端时以实况为准）
+        entry = {"new": args.new, "origin": args.session, "seq_from": len(kept),
+                 "trigger_kind": args.trigger_kind, "reason": args.reason,
+                 "provenance": args.provenance, "date": today}
     p = w.path(args.new)
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("a", encoding="utf-8") as f:  # L4：fork = 从事件 i 复制出新流
         for r in kept:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    if register:  # fork 已落盘 → 追加登记（格式保真 dump；写入端单点）
+        reg["forks"].append(entry)
+        reg["updated"] = entry["date"]
+        rp = registry_path()
+        tmp = rp.with_suffix(rp.suffix + ".tmp")
+        tmp.write_text(json.dumps(reg, indent=2, ensure_ascii=False) + "\n",
+                       encoding="utf-8")
+        os.replace(tmp, rp)
+        print(f"register: forks += {args.new} <- {args.session} "
+              f"(seq_from={entry['seq_from']}, {args.trigger_kind})")
     print(f"fork: {args.new} <- {args.session} (seq 1..{kept[-1]['seq']}, "
           f"{len(kept)} rows)")
     return 0
@@ -746,10 +836,13 @@ def build_parser() -> argparse.ArgumentParser:
     v = sub.add_parser("replay", help="重放校验（seq 单调 + 行可解析）")
     v.add_argument("--session", required=True)
     v.set_defaults(func=cmd_replay)
-    f = sub.add_parser("fork", help="复制前 N seq 行至新流（L4）")
+    f = sub.add_parser("fork", help="复制前 N seq 行至新流（L4；+P-089 可选注册三件）")
     f.add_argument("--session", required=True)
     f.add_argument("--seq", type=int, required=True, dest="seq_from")
     f.add_argument("--new", required=True)
+    f.add_argument("--reason", help="注册用：返工原因（非空，禁 unknown）")
+    f.add_argument("--trigger-kind", help="注册用：触发种类（∈ 返工图 trigger_kinds）")
+    f.add_argument("--provenance", help="注册用：<前缀>:<载荷>（前缀 ∈ provenance_prefixes）")
     f.set_defaults(func=cmd_fork)
     sg = sub.add_parser("step-gate", help="决策产物管线校验（P-020：schema/evidence/step 序，只读）")
     sg.add_argument("--session", required=True)
@@ -1186,6 +1279,86 @@ def run_selftest() -> int:
                                capture_output=True, text=True, env=env_noreg)
         check("F61 backflow-audit 登记表缺失 → exit 2（降级不当作通过）",
               p_bf6.returncode == 2, p_bf6.stdout[-120:])
+
+        # F62-F69: fork 注册扩展（P-089）——成功臂 / 零回归 / fail-fast 原子性
+        p_r1 = run_cli("fork", "--session", "st-001", "--seq", "2",
+                       "--new", "st-001r", "--reason", "selftest 返工样例",
+                       "--trigger-kind", "user-verdict",
+                       "--provenance", "manual:selftest-p089")
+        reg1 = json.loads(reg_file.read_text(encoding="utf-8"))
+        frk = [f for f in reg1["forks"] if f.get("new") == "st-001r"]
+        check("F62 fork 注册成功（登记边字段齐 + 会话复制 + updated 盖戳）",
+              p_r1.returncode == 0 and "register: forks +=" in p_r1.stdout
+              and len(frk) == 1 and frk[0]["origin"] == "st-001"
+              and frk[0]["seq_from"] == 2
+              and frk[0]["trigger_kind"] == "user-verdict"
+              and frk[0]["reason"] == "selftest 返工样例"
+              and frk[0]["provenance"] == "manual:selftest-p089"
+              and re.fullmatch(r"\d{4}-\d{2}-\d{2}", frk[0]["date"]) is not None
+              and reg1["updated"] == frk[0]["date"]
+              and len(w.read("st-001r")) == 2)
+
+        reg_after_r1 = reg_file.read_bytes()
+        p_r2 = run_cli("fork", "--session", "st-001", "--seq", "1",
+                       "--new", "st-001p")
+        check("F63 无注册参数零回归（registry 字节不变 + 无 register 行）",
+              p_r2.returncode == 0 and reg_file.read_bytes() == reg_after_r1
+              and "register:" not in p_r2.stdout)
+
+        p_r3 = run_cli("fork", "--session", "st-001", "--seq", "1",
+                       "--new", "st-001x", "--reason", "只给一件")
+        check("F64 注册三件缺件（all-or-none）→ exit 2 且零写入",
+              p_r3.returncode == 2 and not w.path("st-001x").exists()
+              and reg_file.read_bytes() == reg_after_r1)
+
+        p_r4 = run_cli("fork", "--session", "st-001", "--seq", "1",
+                       "--new", "st-001y", "--reason", "r",
+                       "--trigger-kind", "no-such-kind",
+                       "--provenance", "manual:x")
+        check("F65 非法触发枚举 → exit 2 且零写入（校验先于 fork）",
+              p_r4.returncode == 2 and not w.path("st-001y").exists()
+              and reg_file.read_bytes() == reg_after_r1)
+
+        ok66 = True
+        for i, bad_prov in enumerate(("selftest-no-colon", "counted:xx", "manual:")):
+            nm = f"st-001z{i}"
+            p_r5 = run_cli("fork", "--session", "st-001", "--seq", "1",
+                           "--new", nm, "--reason", "r",
+                           "--trigger-kind", "undecided",
+                           "--provenance", bad_prov)
+            ok66 = ok66 and p_r5.returncode == 2 and not w.path(nm).exists()
+        check("F66 provenance 形态非法三臂（缺冒号/前缀越界/载荷空）→ exit 2 且零写入",
+              ok66 and reg_file.read_bytes() == reg_after_r1)
+
+        p_r6 = run_cli("fork", "--session", "st-001", "--seq", "1",
+                       "--new", "bf-origin", "--reason", "r",
+                       "--trigger-kind", "user-verdict",
+                       "--provenance", "manual:x")
+        check("F67 new 已在已登记名集 → exit 2 且零写入",
+              p_r6.returncode == 2 and not w.path("bf-origin").exists()
+              and reg_file.read_bytes() == reg_after_r1)
+
+        env_noreg2 = dict(env, **{REGISTRY_ENV: str(tmp / "no-such-registry2.json")})
+        p_r7 = subprocess.run([sys.executable, me, "fork", "--session", "st-001",
+                               "--seq", "1", "--new", "st-001m", "--reason", "r",
+                               "--trigger-kind", "user-verdict",
+                               "--provenance", "manual:x"],
+                              capture_output=True, text=True, env=env_noreg2)
+        check("F68 登记表缺失 ⇒ 前置失败 exit 2（fork 不发生）",
+              p_r7.returncode == 2 and not w.path("st-001m").exists()
+              and reg_file.read_bytes() == reg_after_r1)
+
+        n_rows = len(w.read("st-001"))
+        p_r8 = run_cli("fork", "--session", "st-001", "--seq", str(n_rows + 10),
+                       "--new", "st-001q", "--reason", "r",
+                       "--trigger-kind", "undecided",
+                       "--provenance", "tool:selftest")
+        reg2 = json.loads(reg_file.read_text(encoding="utf-8"))
+        frk2 = [f for f in reg2["forks"] if f.get("new") == "st-001q"]
+        check("F69 请求 seq 超出源末端 → seq_from 按实际复制行数登记（机械真值）",
+              p_r8.returncode == 0 and len(frk2) == 1
+              and frk2[0]["seq_from"] == n_rows
+              and len(w.read("st-001q")) == n_rows)
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))
