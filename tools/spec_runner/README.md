@@ -41,6 +41,13 @@ python spec_runner.py replay --session <sid>
 # fork：复制前 N seq 行至新流
 python spec_runner.py fork --session <sid> --seq 42 --new <sid2>
 
+# fork + 返工图登记（P-089 可选三件，all-or-none；成功后追加一条边至 docs/rework-graph.json）
+python spec_runner.py fork --session <sid> --seq 42 --new <sid2> \
+    --reason "<一句返工原因，非空>" --trigger-kind upstream-overturned \
+    --provenance manual:<载荷>
+#   值域读真值源（trigger_kinds / provenance_prefixes）；校验先于 fork、失败即 exit 2 零写入；
+#   完整判定单点在对账器 scripts/rework_graph_check.py（薄壳只做写入端 fail-fast 子集）
+
 # 决策产物管线校验（P-020）：decision 事件链 schema/evidence/step 序（只读）
 #   --expect 期望完整链（缺省 = 仅校验已登记链内部一致性）
 python spec_runner.py step-gate --session <sid> --expect research design implement verify finalize
@@ -48,7 +55,7 @@ python spec_runner.py step-gate --session <sid> --expect research design impleme
 # 检索 = grep（零代码）：
 #   grep '"source": "gate"' sessions/<sid>.jsonl   # 门禁轨迹
 #   grep '"event": "decision"' sessions/<sid>.jsonl # 决策记录轨迹
-python spec_runner.py selftest   # 26 项内置自测（stdlib mock server）
+python spec_runner.py selftest   # 71 项内置自测（stdlib mock server）
 ```
 
 端点/模型/提供商运行时注入：`--endpoint/--model/--provider` 或 `SR_ENDPOINT/SR_MODEL/SR_PROVIDER` 环境变量——不硬编码。

@@ -3,7 +3,7 @@
 ---
 id: rework-and-decision-paths-IMPLEMENTATION
 type: design
-version: 1.4
+version: 1.5
 status: draft
 date: 2026-09-27
 depends: [rework-and-decision-paths-DESIGN, rework-and-decision-paths-RESEARCH, precommit-dc-validator-DESIGN]
@@ -14,13 +14,14 @@ upstream: null
 > **创建日期**: 2026-09-27
 > **状态**: draft（草稿）
 > **Spec 步骤**: Step 5-6
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.7**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.11**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.8**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.12**
 > **v1.1 变更（2026-09-27，Step 8 独立审查整改）**：Step 8 独立审查（[RESEARCH §5.5](./RESEARCH.md)）发现 **S8-2 / S8-7** 并订正——① 头部两条「基于」行**滞后**（设计 v1.1→**v1.4** / 调研 v1.4→**v1.7**）；② 交付物表「新增正则 **4**」实为 **3**（`RE_CL_STAT_HEAD` / `RE_CL_STAT_ANY` / `RE_CL_INT`）；③ 「`--selftest` **23/23→24/24**」前值失实 → **16/16→24/24**（`git show` 取前版重数 = 16）；④ 步骤 4「增 F12-F15 → **22/22**」→ **21/21**。**交付 A 实现本体零改动**。
 > **本批范围**：**交付 A 实施**（`dc_validator` M4 分支② + `CHECKLIST_TEMPLATE` §10.1 规范约束）；**交付 B**：v1.1 止于规格（守 I-15）→ **v1.2 已实施**（见 **§11**）。
 > **v1.2 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」（先独立 pass → 再实施）⇒ **D-B2 落地**——`superseded` 入 design **一般档**，改 **4 权威位点 + 3 模板**（明细见 **§11**）；**DC1 零改动**；R2 未实施 / R3 未采纳。IMPLEMENTATION 由「交付 B 零改动」改为「交付 B 亦实施」。
 > **v1.3 变更（2026-09-27，跨仓对照观察项登记 + 版本引用收口）**：用户指令「D盘 RPC框架对本框架的意见 请分析是否合理」⇒ **观察项登记落 [RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)**（H-RPC1 / H-RPC2），本文件**仅收口「基于」版本引用**（设计 **v1.4 → v1.6** / 调研 **v1.7 → v1.9**——滞后于 v1.5/v1.8 的遗留漂移，与 S8-2 同族）；**实现本体零改动**。
 > **v1.4 变更（2026-10-03，三问续研 · Layer-1 最小实施）**：用户指令「按这个方案落档并实施」（承 [RESEARCH §3.9](./RESEARCH.md) / [DESIGN §8 I-16~I-18 + §10.4](./DESIGN.md)）⇒ **新增 §12 实施记录**——`spec_runner` **v1.6.0 → v1.7.0**：新增只读子命令 `backflow-audit`（与 `step-gate` 共用 `_decision_chain`）+ **受控回边受理** + selftest **54/54 → 63/63**；「基于设计」**v1.6 → v1.7**、「基于调研」**v1.9 → v1.11**。**交付 A / 交付 B 实现本体零改动**（本批只增新命令 + 放宽步序受理）。
+> **v1.5 变更（2026-10-12，U-10′ 薄壳实施 · P-089）**：用户指令「按照顺序 用吃狗粮模式执行下一个」（承 [DESIGN §10.5](./DESIGN.md) 裁定 B）⇒ **新增 §13 实施记录**——`spec_runner` **v1.7.0 → v1.8.0**：`fork` 可选注册三件（all-or-none）+ `_fork_reg_validate`（fail-fast 子集）+ registry 加载拆分（`_load_registry_raw` / `_registry_derive`，与 `backflow-audit` 共用同一解析）+ selftest **63/63 → 71/71**（F62~F69）；「基于设计」**v1.7 → v1.8**、「基于调研」**v1.11 → v1.12**。**交付 A / 交付 B 实现本体零改动**（本批只扩 `fork` 命令面）。
 
 ---
 
@@ -288,6 +289,39 @@ def parse_checklist_stats(body):
 **实施期结论（「不破坏既有 5 步链」的机械保证）**：本批**只做移除 / 收窄**（把「重复一律硬性」收窄为「同位重复硬性、回退受理」）⇒ 允许的链集合是原集合的**超集**，回归面**只减不增**——故「既有 87+ session 全通过」由**集合包含关系**保证，而非抽样验证。
 
 **边界**：`backflow-audit` 为**检测器非强制器**（不接门禁）；**不自动发起返工**；`metadata.trigger` 为**可选**字段（零新增契约 ⇒ 既有 session 零回归）。
+
+---
+
+## 13. 实施记录（P-089，U-10′ 薄壳 · Layer-1 工具微批；2026-10-12）
+
+**范围**：`tools/spec_runner/spec_runner.py` **单文件**（+ `README.md` 命令面示例）；`spec_runner` **v1.7.0 → v1.8.0**。**返工图 schema 零改动 / 零新依赖 / 零新门禁 / 零新契约**（守 [DESIGN §8 I-19~I-21](./DESIGN.md) 与 §10.5 裁定 B）。
+
+**交付物**：
+
+| # | 落点 | 改动 | 状态 |
+|---|---|---|---|
+| 1 | `cmd_fork`（扩展） | 注册三件（`--reason` / `--trigger-kind` / `--provenance`，**all-or-none**）；校验先于一切写入；fork 落盘后追加登记 + 盖 `date` / `updated`；`seq_from` = **实际复制行数**；dump 字节保真 | ✅ |
+| 2 | `_fork_reg_validate`（新增） | 写入端 **fail-fast 子集**（reason / 触发枚举 / provenance 形态 / `new` 去重；值域读真值源，守 I-17） | ✅ |
+| 3 | `_load_registry_raw` / `_registry_derive`（拆分） | registry 加载**单一解析**：注册写入与 `backflow-audit` 共用（P-069 行为逐字保持） | ✅ |
+| 4 | argparse `fork` | 新增三参（缺省 `None`；全缺 = 原行为） | ✅ |
+| 5 | selftest **F62-F69** | 8 项：成功臂 / 零回归字节不变 / all-or-none / 非法枚举 / provenance 三臂 / 重叠名集 / 登记表缺失 / `seq_from` 机械真值 | ✅ |
+| 6 | 附带订正 1 处 | `README.md` selftest 计数 **26 → 71**（自 P-069 起的存量漂移，同批收口） | ✅ |
+
+**实测读数**（读数时点 **2026-10-12**，口径见各行）：
+
+- `spec_runner selftest` = **63/63 → 71/71**（+8）。
+- **单判定 E2E**（合成数据；合成 sessions + 真表副本）：薄壳写入边经**真对账器纯函数**（`rework_graph_check.scan` + `check`）对账——**B 段（边自洽）/ C 段（声明 → 事实）零判红**（唯一报出 = 合成环境缺 P-009 豁免会话，属夹具构造面，与写入边无关）。
+- 真机复跑：`rework_graph_check` **exit 0**（`forks` 仍零条——本批不产生真实返工边，表零扰动）；`backflow-audit` **112 session / 0 例 / exit 0**；`anchor-audit` exit 0（`J2\J1` = 0）。
+- 零回归：无注册参数时 `fork` stdout 与 exit 语义不变（F9 / F10 / F63）；`step-gate` / `verify-anchor` / `step-enforce` 全量回归不变（本批未触 `_decision_chain`，见校验链）。
+
+**实施期发现（DR 登记）**：
+
+| # | 发现 | 处置 |
+|---|---|---|
+| **DR-P089-1** | F67 首跑失败——夹具名 `bf-reg` 的文件已在 F59 存在 ⇒ 被**既有** target-exists 检查拦截，未触达新去重检查 | 夹具改用「已登记但无文件」的 `bf-origin`（专测注册层去重）；**顺带确认** target-exists 与注册去重为**两道独立闸** |
+| **DR-P089-2** | `_load_rework_registry` 原实现不返回原文 ⇒ 写入路径无法复用解析 | 拆为 `_load_registry_raw` + `_registry_derive`（P-069 语义逐字保持，`backflow-audit` 零行为变化） |
+
+**边界**：同 [DESIGN §10.5](./DESIGN.md) 五条（人工语义保留 / 校验子集 / 两次写入非事务 / 不接门禁 / 本批不产生真实返工边）；**回退点 R-7** 单点可逆。
 
 ---
 

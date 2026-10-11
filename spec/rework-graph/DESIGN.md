@@ -4,7 +4,7 @@
 
 id: rework-graph-DESIGN
 type: design
-version: 1.1
+version: 1.2
 status: in-review
 date: 2026-09-27
 depends: [rework-graph-RESEARCH, ADR-0010]
@@ -18,6 +18,7 @@ upstream: null
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.1**（16A+5B+4C+3H）
 > **本批范围**: 用户裁决「走路径 A 实施」——**路径 A = 外部登记表 + 只读对账器**（`fork` 零改动）。
 > **v1.1 变更（2026-09-27，Step 8 独立审查整改）**：Step 8 独立审查（**同基座降级**）**6 项发现（3 P2 + 3 P3）全部整改**——本文件内 3 项：**P2-2** §4.4-B8 原写「六种缺」而口径与 RPC 不一致 ⇒ 改**枚举化**并标明本仓 **7 类** / RPC **8 类**；**P3-3** §4.4-A2 只写「为空」而「含重复项」分散在 §5.2 ⇒ A2 补**「或含重复项」**（判据单点化）；**P2-1** 相关：判定表**总条数**本文件未声明（声明落在 CHECKLIST/CODE_WIKI/PROGRESS），此处不改。**判定表实现零改动**（`check()` 已逐条覆盖 19 条）。**设计本体零变动**（仅订正计数口径与判据单点化）。
+> **v1.2 变更（2026-10-12，P-089 写入端注记）**：U-10′（`fork` 注册薄壳）实施后**登记表出现机制化写入端** ⇒ 于 §4.1 补**写入端注记**（格式保真 / fail-fast 子集 / 完整判定仍单点在对账器）；语义与边界完整规格 = [rework-and-decision-paths DESIGN §10.5](../rework-and-decision-paths/DESIGN.md)。**§8 I-4 / §10-3 的「不碰 `tools/spec_runner/`」为 P-051 批次作用域**（历史、不改写）；P-089 以新批扩 `fork` 注册能力——**`fork` 行复制语义与表 schema 均零改动**。
 
 ---
 
@@ -83,6 +84,7 @@ upstream: null
 
 > `forks` **空也必须显式写 `[]`**（守 I-7）；`truth_source` 恒 `registry`（守 I-5）；`updated` 仅记录、**不参与判定**（守 I-2）。
 > `non_rework` = **「是 fork 输出、但不构成返工」的显式豁免**（如能力演示）——承 RPC「**不适用也要写下来**」纪律（否则 §4.4-D17 的孤儿扫描会把它们误报为漏登）。
+> **写入端（P-089）**：登记表可由 **`fork` 注册扩展**（`spec_runner` v1.8.0，可选三件 all-or-none）追加写入——**格式保真 dump**（对原格式即本 dump 格式的真表字节保真）+ 写入端 **fail-fast 子集**（值域读本表封闭枚举）；**完整判定仍单点在对账器**（两处漂移以对账器为准）。写入语义与边界完整规格见 [rework-and-decision-paths DESIGN §10.5](../rework-and-decision-paths/DESIGN.md)。
 
 **封闭枚举取值（v1，形状承 RPC，**值**为本仓自定且可扩张）**：
 
