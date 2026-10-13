@@ -3,9 +3,9 @@
 ---
 id: precommit-dc-validator-IMPLEMENTATION
 type: design
-version: 1.3
+version: 1.4
 status: verified
-date: 2026-09-29
+date: 2026-10-13
 depends: [precommit-dc-validator-DESIGN, precommit-dc-validator-RESEARCH]
 upstream: null
 ---
@@ -19,6 +19,7 @@ upstream: null
 > **审查状态**: v1.1 经独立 pass（2026-08-20，DeepSeek V4 Pro **真异基座**——生成端 GLM-5.3，RULE-1 时序独立 + RULE-5 模型异质性双满足）：E1 四通道复核全过（selftest 13/13 重跑 / 全仓 dry-run 39 文件 0 违规 / 双跑逐字节一致 I-2 / pre-commit 通道 Passed）；词表常量与 DESIGN §6.3 逐字符核对一致（I-4）；DR-5/DR-6 修复重验通过。发现 3 P3（§4.3/§4.5 签名声明未覆盖 `root=ROOT` 实施参数 / CHECKLIST §8.1 跨模块映射断言不实 / DESIGN §10.1-4 LOC 核对缺位）→ v1.2 修正注 + DR-7；M7 样本⑬（映射闭合 1 处）
 > **v1.2 变更（2026-08-20）**: 独立 pass 修正——§4.3/§4.5 补 `root=ROOT` 实施参数声明（P3-1）；§10 增 DR-7（LOC 对账登记）；status draft → verified
 > **v1.3 变更（2026-09-29，P-052 DC2 判别规则扩宽）**: M2 副轴判别由「id **后缀** `-CHECKLIST`」扩宽为「id **含 `CHECKLIST` 段**」——修复 `step-gate/defect-fixes` 两份 `-CHECKLIST-FUNC` 被误判一般档致 `accepting` **机械不可表达**；selftest **24/24 → 27/27**（新增 F19-F21）；§8.1 fixture 表补 F19-F21 行（**注**：本表 F11-F18 为 v1.1/v1.2 历史增量，未逐一回填，**以代码为准**——属「声明未随实物更新」同族，登记见 [drift-gate RESEARCH 观察项](../drift-gate/RESEARCH.md)）。契约文本见 [doc-contract PLAN §1 DC2 v1.7](../doc-contract/PLAN.md)。
+> **v1.4 变更（2026-10-13，P-090 M5 第四排除上下文「行内代码跨度」）**: §3.5 增第四排除上下文；§4.5 补 `strip_inline_code` 实施注（CommonMark 反引号游程配对标 + `_ASCII_PUNCT` 转义消费 + 收尾按原文扫描）；selftest **27/27 → 32/32**（新增 F22-F26）；§8.1 fixture 表补 F22-F26 行；§8.2 基线读数更新为 **162 文件 0 违规**；§10 增 DR-8（第四排除上下文的语义真值源 = CommonMark 参考实现）。设计见 [DESIGN §4.5](./DESIGN.md) v1.3
 
 ---
 
@@ -192,6 +193,7 @@ def check_links(file: str, text: str) -> list[CheckResult]:
 - **排除上下文一**：fenced code block（``` 围栏之间）——附录 B `assertions` 登记块内的链接属引文快照
 - **排除上下文二**：引文行（行含 `引文:` 或 `"quote":`）——被引原文的链接描述源仓库路径空间，非本仓导航（ADR0006_POINTER L49/L113 实测场景；改引文 = 篡改证据）
 - **排除上下文三**：`spec/templates/` 目录——模板占位链接（`./DESIGN.md` 等）实例化前天然不指向真实文件（derived-requirement DR-3）
+- **排除上下文四**（v1.4，P-090）：**行内代码跨度**——以 `strip_inline_code(line)` 预剥离后再交 `RE_MD_LINK`（CommonMark 反引号游程等长配对标；未配对游程视为普通字符；反斜杠转义的标点先消费为字面量、收尾扫描按原文；配对跨度整体替换为单个空格）。动机 = 行内代码渲染即字面量，原文出现「右方括号紧邻左圆括号」的字面量时会误判为不可解析相对链接并 P2 阻断
 - 档 2-4 标注识别：链接文本以 `源项目·` / `外部·` / `本地工具·` 开头 → 跳过解析（DC3 四档，PLAN §1）
 - 其余相对路径：剥 `#锚点`，以文件所在目录 resolve，`os.path.exists` 判存在；不存在 → P2
 - 实测基线：修复 ADR-0004/0005 两处真断链后 dry-run 应零违规
@@ -247,11 +249,12 @@ def check_counting(file: str, text: str) -> list[CheckResult]:
 
 ```python
 def check_links(file: str, text: str) -> list[CheckResult]:
-    """实现: 链接提取 → 三排除上下文 → 档 2-4 标注识别 → 相对路径存在性"""
+    """实现: 链接提取 → 四排除上下文 → 档 2-4 标注识别 → 相对路径存在性"""
 ```
 
 **签名一致性**: 与 DESIGN §4.5 一致（+`text` 参数，同 4.2）✅
 **v1.2 修正注（独立 pass P3-1）**: 实际签名 `check_links(file, text, root=ROOT)` 另含 `root=ROOT` 默认参数（selftest F8b 的 fixture 根解析所需），同类实施参数，v1.1 未声明，补记
+**v1.4 实施注（P-090）**: 增模块级 `strip_inline_code(line)` 与常量 `_ASCII_PUNCT`（`check_links` 逐行调用，行内无反引号时短路返回原行）。**语义真值源 = CommonMark 参考实现（markdown-it-py CommonMark 预设）实测核定**（DR-8）：① 反斜杠转义的标点先被消费为字面量 ⇒ 转义位反引号**不能开**跨度；② 收尾扫描**按原文**找等长游程（代码跨度内反斜杠不转义 ⇒ 收尾反引号前的反斜杠**不阻止**收尾，本仓 Windows 路径形态 `D:\...\` 即此类）；③ 未配对游程视为普通字符。**探针实测（2026-10-13，全仓 156 文件）**：naive 奇偶剥离漏检 12 位点 / 本实现漏检 3 位点（真值判定均落在代码跨度内 ⇒ 非真实链接）/ 新造位点 0 ⇒ **真实位点 9/9 保留**
 
 ### 4.6 CheckResult / Summary（数据结构）
 
@@ -323,12 +326,17 @@ Windows（主控站，entry 走 `python` 前缀规避 `/bin/sh`，RESEARCH §2.1
 | F19 段判别 `accepting` 合法（id `x-CHECKLIST-FUNC`） | P-052 DC2 扩宽：CHECKLIST **段**（含 `-CHECKLIST-<变体>`） | 零 status 违规 |
 | F20 段判别 `draft` 非法（id `x-CHECKLIST-FUNC`） | P-052 DC2 扩宽反向 | 报 `非法 status` |
 | F21 段判别**非子串**（id `x-FOOCHECKLIST`） | P-052 防扩宽过界 | 走一般档，零 status 违规 |
+| F22 行内代码跨度内的链接字面量（单/双反引号） | P-090 第四排除上下文：排除生效 | 零违规 |
+| F23 行内字面量未配对三反引号 + 成对单反引号跨度 + 真实断链 | P-090 未配对游程视为普通字符（naive 奇偶剥离会吞掉其后真实链接） | 仅真实断链报 P2 |
+| F24 `\` 转义反引号 + 其后真实断链 | P-090 转义标点先消费为字面量（escape-blind 配对会吞掉其后真实链接） | 仅真实断链报 P2 |
+| F25 `]` 紧邻反引号跨度再紧邻 `(` | P-090 跨度替换为空格 ⇒ 不跨边界新造位点 | 零违规 |
+| F26 Windows 路径形态（收尾反引号前有反斜杠）+ 其后真实断链 | P-090 收尾扫描按原文（跨度正常收尾，不吞其后链接） | 仅真实断链报 P2 |
 
 selftest 输出 `N/N PASS` 或首条失败详情，退出码 0/1。
 
 ### 8.2 集成测试（dry-run）
 
-`pre-commit run dc-validator --all-files`（staged 语义全量模拟）+ `python scripts/dc_validator.py`（独立全仓调用）双通道，全仓 `.md` 零违规为通过线（真违规修复后；文件数随 feature 文档落地递增，v1.1 实测 34 = 33 存量 + IMPLEMENTATION.md 自身，CHECKLIST.md 落地后 35）。
+`pre-commit run dc-validator --all-files`（staged 语义全量模拟）+ `python scripts/dc_validator.py`（独立全仓调用）双通道，全仓 `.md` 零违规为通过线（真违规修复后；文件数随 feature 文档落地递增，v1.1 实测 34 = 33 存量 + IMPLEMENTATION.md 自身，CHECKLIST.md 落地后 35）。**v1.4 读数（2026-10-13）**：全仓 **162 文件 / 47 结果 / 0 违规**（P-090 前后同值 ⇒ I-2 行为等价面零回归）；selftest **32/32 PASS**。
 
 ### 8.3 属性测试
 
@@ -369,6 +377,7 @@ selftest 输出 `N/N PASS` 或首条失败详情，退出码 0/1。
 | DR-5 | 修复 2 处存量真断链（ADR-0004/0005 `../../` → `../`）+ 1 处存量计数漏计（ADR0006 A 7→8） | M4/M5 预跑捕获（§1 取证 2/3） | 随本 feature 同 commit 修复；M7 登记见 CHECKLIST |
 | DR-6 | selftest 汇总计数由硬编码 `12/12` 改为 expect 自增机械计数（v1.0 打印 13 行 PASS 却声称 12/12——**计数校验工具自身犯计数错**，形态 II 在审查臂的实例） | Step 6 复验发现（2026-08-19） | 已修复（`total[0] += 1` 自增，R7 同构原则应用于工具自身）；实测 13/13 PASS；M7 登记见 CHECKLIST |
 | DR-7 | 代码量与 DESIGN §10.1-4 "~100 行"估算的核对缺位——独立 pass 实测 **422 行**（selftest 块 ~104 行） | P-008 独立 pass 发现（2026-08-20；DESIGN 约束 4 明示"实施时核对"，v1.1 无 LOC 对账） | 本行即核对登记：膨胀源 = 内嵌 selftest（DR-4）+ CLI 参数矩阵 + 错误处理路径（均有对应验收项承载），功能契约与 I-3 零新规则不受影响；RESEARCH H2 估算按 ~3× 偏差入账，作后续规模估算校准参考 |
+| DR-8 | M5 第四排除上下文的**语义真值源** = CommonMark 参考实现（markdown-it-py CommonMark 预设）实测核定，而非自拟规则 | P-090 实施期发现自拟「转义反引号不参与配对」为**过度泛化**——实为「转义只作用于起始、收尾按原文」，自拟版实测在 Windows 路径形态上误吞 15 个真实位点（疑似真值源缺失） | 本文档 §4.5 实施注登记；fixture F22-F26 各覆盖一种边界语义；探针通过门 = 真实位点零损失（9/9） |
 
 ## 11. 实施步骤
 

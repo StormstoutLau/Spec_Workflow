@@ -298,10 +298,61 @@ def check_counting(file, text):
 RE_MD_LINK = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 
 
+_ASCII_PUNCT = set("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
+
+
+def strip_inline_code(line):
+    """剔除行内代码跨度（P-090：M5 第四排除上下文）。
+
+    CommonMark 反引号配对标（markdown-it-py 实测核定语义）：
+    - 起始反引号：**反斜杠转义的标点被先行消费为字面量** ⇒ 该位反引号不能开跨度；
+    - 收尾扫描：**按原文找等长游程**（代码跨度内反斜杠不转义，故收尾反引号前的反斜杠不阻止收尾）；
+    - **未配对游程视为普通字符**（例：行内字面量 ``` 后接成对单反引号）。
+    配对成功的跨度整体替换为**单个空格**——既排除跨度内的相邻形态字面量，又防止两端文本
+    拼合新造该形态（naive 奇偶剥离两端都做不到）。
+    """
+    if "`" not in line:
+        return line
+    out, i, n = [], 0, len(line)
+    while i < n:
+        if line[i] == "\\" and i + 1 < n and line[i + 1] in _ASCII_PUNCT:
+            out.append(line[i:i + 2])
+            i += 2
+            continue
+        if line[i] == "`":
+            j = i
+            while j < n and line[j] == "`":
+                j += 1
+            run = j - i
+            k, close = j, -1
+            while k < n:
+                if line[k] == "`":
+                    m = k
+                    while m < n and line[m] == "`":
+                        m += 1
+                    if (m - k) == run:
+                        close = m
+                        break
+                    k = m
+                else:
+                    k += 1
+            if close < 0:
+                out.append(line[i:j])
+                i = j
+            else:
+                out.append(" ")
+                i = close
+            continue
+        out.append(line[i])
+        i += 1
+    return "".join(out)
+
+
 def check_links(file, text, root=ROOT):
     """M5：DC3 档 1——仓库内相对链接可解析。
 
     排除上下文（DR-3）：fenced code block / 引文行（引文: 或 "quote":）/ spec/templates/。
+    P-090 增第四排除上下文：行内代码跨度（strip_inline_code，CommonMark 反引号配对标）。
     档 2-4 标注（链接文本前缀 源项目·/外部·/本地工具·）不跨仓解析。
     """
     if file.replace("\\", "/").startswith(TEMPLATE_DIR.replace("\\", "/")):
@@ -316,7 +367,7 @@ def check_links(file, text, root=ROOT):
             continue
         if any(mk in ln for mk in QUOTE_MARKERS):
             continue
-        for m in RE_MD_LINK.finditer(ln):
+        for m in RE_MD_LINK.finditer(strip_inline_code(ln)):
             label, tgt = m.group(1).strip(), m.group(2).strip()
             if tgt.startswith(("http://", "https://", "#", "mailto:")):
                 continue
@@ -599,6 +650,32 @@ def run_selftest():
         f21 = w("f21.md", FM_OK.replace("id: selftest-ok-RESEARCH", "id: x-FOOCHECKLIST"))
         r = check_frontmatter(f21, _read(os.path.join(tmp, f21)))
         expect(not any("status" in x.message for x in r), "F21 段判别非子串（x-FOOCHECKLIST 走一般档）")
+
+        # --- P-090 方向 B：M5 第四排除上下文「行内代码跨度」（CommonMark 反引号配对标） ---
+        # F22 行内代码跨度内的链接字面量 → 零违规（本批新增的行为能力）
+        f22 = w("f22.md", FM_OK + "\n示例：`[text](./nope.md)` 与 ``[a](./nope2.md)``\n")
+        r = check_links(f22, _read(os.path.join(tmp, f22)), root=tmp)
+        expect(len(r) == 0, "F22 行内代码跨度内链接零违规")
+
+        # F23 未配对反引号游程视为普通字符（naive 奇偶剥离会吞掉其后的真实断链）
+        f23 = w("f23.md", FM_OK + "\n统计升 ```hits 块 + `scripts/m7_stats.py` 见 [bad](./nope.md)\n")
+        r = check_links(f23, _read(os.path.join(tmp, f23)), root=tmp)
+        expect(len(r) == 1 and "nope.md" in r[0].message, "F23 未配对游程不吞真实链接")
+
+        # F24 反斜杠转义的反引号不参与配对（escape-blind 配对会吞掉其后的真实断链）
+        f24 = w("f24.md", FM_OK + "\n来源 x \\` [bad](./nope.md) `y`\n")
+        r = check_links(f24, _read(os.path.join(tmp, f24)), root=tmp)
+        expect(len(r) == 1 and "nope.md" in r[0].message, "F24 转义反引号不参与配对")
+
+        # F25 代码跨度整体替换为空格 ⇒ 不跨边界新造 `](` 相邻位点
+        f25 = w("f25.md", FM_OK + "\n正文 x]`code`(y) 结束\n")
+        r = check_links(f25, _read(os.path.join(tmp, f25)), root=tmp)
+        expect(len(r) == 0, "F25 跨度边界不新造链接位点")
+
+        # F26 收尾反引号前有反斜杠（Windows 路径形态）：跨度正常收尾，其后真实链接仍检出
+        f26 = w("f26.md", FM_OK + "\n路径 `D:\\Art\\wp\\` 见 [bad](./nope.md)\n")
+        r = check_links(f26, _read(os.path.join(tmp, f26)), root=tmp)
+        expect(len(r) == 1 and "nope.md" in r[0].message, "F26 跨度正常收尾不吞其后链接")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
