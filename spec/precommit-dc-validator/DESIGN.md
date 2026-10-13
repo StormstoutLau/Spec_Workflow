@@ -1,9 +1,9 @@
 ---
 id: precommit-dc-validator-DESIGN
 type: design
-version: 1.2
+version: 1.3
 status: draft
-date: 2026-08-18
+date: 2026-10-13
 depends: [precommit-dc-validator-RESEARCH, ADR-0007, SPEC-PROCESS, FWK-ASSERTION, doc-contract-refactor]
 upstream: null
 ---
@@ -17,6 +17,7 @@ upstream: null
 > **基于调研**: [RESEARCH.md](./PRECOMMIT_DC_VALIDATOR_RESEARCH.md) v1.1（经同基座复验）
 > **审查状态**: v1.1 经复验（2026-08-18，DeepSeek V4 Pro，**同基座新上下文**——RULE-1 时序独立满足、RULE-5 模型异质性未满足，真异基座需另开 GLM 会话）：§2.1 六行映射全部可追溯；引用文件/章节/行号（PLAN L55-60）全核实；发现 P2-1（§6.3 词表双轴歧义未裁决，已升格为实施前置条件）+ P3-2（§3.4 退出码 2 路径，已补注）并修正
 > **v1.2 变更（2026-08-18）**: P2-1 前置条件闭合——[PLAN v1.6 §1 DC2](../doc-contract/PLAN.md) 消歧落地（design 增两行，判别规则 = id 后缀 `-CHECKLIST`；E1 全仓 14 份 design 文档零违规）+ [ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md) 澄清追记。**v1.1 引证勘误**：v1.1 P2-1 注称"PLAN L59 design 状态"——实际 L59 为"template 实例"行，design 词表 v1.6 前载于 PLAN 头部注 + ADR-0007 D4（DC2 表原缺 design 行）；该引证错误入 M7 样本⑧（行号桶，实施期自查发现，规律④ 第二实例）
+> **v1.3 变更（2026-10-13，P-090 M5 第四排除上下文）**: §4.5 增**行内代码跨度排除**设计（CommonMark 反引号游程配对标；原 `check_links` 排除面仅三处 = 围栏 / 引文行 / `spec/templates/`，属**未考虑**而非 by-design）。**来源** = [M7 §4 候选③](../../docs/M7_EVIDENCE_LOG.md) 方向 B 落地（触发 = 用户裁决；方向 A 表述弱纪律已实施于 P-062，本批为工具兜底）；通过门 = **真实位点零损失**（真机机械枚举，见 §4.5 与 [IMPLEMENTATION §3.5](./IMPLEMENTATION.md)）
 
 ---
 
@@ -201,6 +202,14 @@ def check_links(file: str) -> list[CheckResult]:
     """
 ```
 
+**v1.3 增：第四排除上下文「行内代码跨度」**（P-090）
+
+- **动机**：`RE_MD_LINK` 为朴素匹配（非 markdown 语义解析），原排除面仅三处（围栏 / 引文行 / `spec/templates/`），**行内反引号代码跨度不在其列**（属未考虑）。后果 = 正文写「右方括号紧邻左圆括号」的字面量即被拆为 label/target、resolve 不成立 ⇒ **P2 阻断提交**（同族 2 例，P-014 起草期 + P-060 首跑，均以改写措辞临时规避）。
+- **设计判据**：行内代码跨度**渲染即字面量**，本不该当链接 ⇒ 按 CommonMark 剔除。
+- **算法（反引号游程等长配对标，非 naive 奇偶剥离）**：起始游程与**等长**的下一游程配对；**未配对游程视为普通字符**；**反斜杠转义的标点先被消费为字面量**（故转义位反引号不能开跨度），而**收尾扫描按原文**（代码跨度内反斜杠不转义 ⇒ 收尾反引号前的反斜杠不阻止收尾）；配对成功的跨度整体替换为**单个空格**（防两端文本拼合新造该形态）。语义经 CommonMark 参考实现实测核定（[IMPLEMENTATION §3.5](./IMPLEMENTATION.md)）。
+- **通过门（预登记 + 真机实测，2026-10-13）**：① **真实位点零损失**——全仓 156 文件机械枚举：naive 奇偶剥离漏检 12 位点，正解实现漏检 3 位点且经真值判定**均落在代码跨度内**（非真实链接），真实位点 9/9 保留；② **新造位点 0**；③ 存量全仓 **0 违规**。
+- **回退点 R-8**：改动 = 单文件 `scripts/dc_validator.py` 内新增 `strip_inline_code` 一处 + `check_links` 一行调用 ⇒ **单点可逆**（回退 = 删函数 + 撤调用，无其它文档/契约依赖）。
+
 ## 5. 替代方案
 
 ### 5.1 方案 A：pre-commit 本地 hook + 纯 Python 脚本（选择）
@@ -329,6 +338,7 @@ CHECKLIST_STATUS_VOCAB = {"pending", "accepting", "accepted"}
 4. 代码量 ~100 行（RESEARCH H2 规模，实施时核对）
 5. YAML 解析依赖选型（stdlib vs PyYAML）在 IMPLEMENTATION §2.1 验证真实存在与版本
 6. ~~词表双轴歧义先行裁决（P2-1）~~ ✅ 已闭合（v1.2，2026-08-18）：PLAN v1.6 §1 DC2 消歧落地——M2 判定规则 = id 后缀 `-CHECKLIST` 二档选词表（见 §6.3）
+7. M5 第四排除上下文「行内代码跨度」实现为 **CommonMark 反引号游程配对标**（v1.3，P-090）——禁止 naive 奇偶剥离（实测漏检真实位点 12 处）；语义以 CommonMark 参考实现核定为真值源（见 §4.5）
 
 ### 10.2 风险与缓解
 
@@ -339,6 +349,7 @@ CHECKLIST_STATUS_VOCAB = {"pending", "accepting", "accepted"}
 | 非契约范围 .md 误报（如 README / CODE_WIKI 轻契约） | scope 过滤 + allowlist，作为 derived-requirement 在 Step 8 登记 |
 | R7 计数自引用边界（grep 命令自身的标记字符） | 排除规则，首版登记 derived-requirement（§2.3 能力边界） |
 | Step 8 双向引用检查（ADR-0008 D6）一度被认为属本 feature | 已声明 v1 范围外，触发条件后扩展，防范围蔓延 |
+| **M5 行内代码跨度排除过宽 ⇒ 漏检真实断链**（v1.3，P-090） | ① 实现取 CommonMark 配对标（禁 naive）；② fixture F22-F26 覆盖五种边界（跨度内排除 / 未配对游程 / 转义反引号 / 边界不新造 / 收尾按原文）；③ 真机探针机械枚举真假位点差集，通过门 = 真实位点零损失（§4.5） |
 
 ---
 

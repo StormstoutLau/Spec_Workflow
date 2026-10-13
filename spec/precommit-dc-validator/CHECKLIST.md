@@ -3,9 +3,9 @@
 ---
 id: precommit-dc-validator-CHECKLIST
 type: design
-version: 1.1
+version: 1.2
 status: accepted
-date: 2026-08-19
+date: 2026-10-13
 depends: [precommit-dc-validator-IMPLEMENTATION, precommit-dc-validator-DESIGN]
 upstream: null
 ---
@@ -14,9 +14,10 @@ upstream: null
 > **创建日期**: 2026-08-19
 > **状态**: 已验收（2026-08-20 独立 pass 通过——真异基座 DeepSeek V4 Pro，RULE-1 时序独立 + RULE-5 模型异质性双满足；v1.0"有条件通过"的条件已满足，升 accepted）
 > **v1.1 变更（2026-08-20）**: 独立 pass 修正——§8.1 跨模块契约行映射断言修正（M4 不共享解析器，M7 样本⑬）；§8.2 补录独立轮 3 P3 发现；§10.2/§10.3/§11 落地验收决定与签字
+> **v1.2 变更（2026-10-13，P-090 M5 第四排除上下文）**: §2.5 增「行内代码跨度排除」验收项（对应 [IMPLEMENTATION v1.4](./IMPLEMENTATION.md) §3.5/§4.5 + §8.1 F22-F26）；§10.1 计数同步（功能 17→18、总计 50+4→51+4，口径 = §2.1-2.5 表格行数）。**本批为增量验收，不重写 P-008 批次的历史结论与签字**（§10.2/§10.3 沿用）；增量证据 = selftest **32/32 PASS** + 全仓 **162 文件 0 违规** + 探针真实位点零损失（9/9）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) v1.2（独立 pass 审查对象为 v1.1；v1.2 为修正版）
-> **基于设计**: [DESIGN.md](./DESIGN.md) v1.2
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) v1.4（独立 pass 审查对象为 v1.1；v1.2 为修正版，v1.3/v1.4 为 P-052/P-090 增量）
+> **基于设计**: [DESIGN.md](./DESIGN.md) v1.3（v1.3 为 P-090 增量）
 > **验收配置**: 同基座自查（GLM-5.3，既写又审——如实标注；机械证据全部 E1 可重放，非记忆断言）
 
 ---
@@ -98,6 +99,7 @@ upstream: null
 | 档 1 断链检测 | selftest F8 + dry-run | 真断链报 P2；档 2 标注/引文行跳过 | ☑ | selftest F8；**ADR-0004/0005 两处真断链被捕获**（DR-5，修复后通过） |
 | templates 占位排除 | selftest F8b | `spec/templates/` 内链接不解析 | ☑ | selftest 13/13 PASS |
 | fenced block 排除 | dry-run（附录 B assertions 块内链接） | 引文快照链接零误报 | ☑ | dry-run 零该类误报 |
+| 行内代码跨度排除（v1.2，P-090） | selftest F22-F26 + 真机探针（CommonMark 参考实现核真值） | 跨度内位点不报 P2；真实位点零损失；新造位点 0 | ☑ | selftest **32/32 PASS**；全仓 162 文件 0 违规；探针：naive 剥离漏检 12（本实现 3，真值判定均为跨度内）/ 新造 0 ⇒ 真实位点 9/9 保留 |
 
 ### 2.6 存量违规修复（DR-5/DR-6）
 
@@ -211,14 +213,14 @@ upstream: null
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |------|------|------|------|------|
 | 文档一致性 | 10 | 10 | 0 | 0 |
-| 功能 | 17 | 17 | 0 | 0 |
+| 功能 | 18 | 18 | 0 | 0 |
 | 接口 | 6 | 6 | 0 | 0 |
 | 不变式 | 5 | 5 | 0 | 0 |
 | 错误处理 | 6 | 6 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
 | 兼容性 | 4 | 4 | 0 | 0（Linux 实机为可选项） |
 | ADD 审计 | 5 + 4 盲区 | 5 + 4 | 0 | 独立轮（Step 10） |
-| **总计** | **50 + 4** | **50 + 4** | **0** | **1（独立 pass）** |
+| **总计** | **51 + 4** | **51 + 4** | **0** | **1（独立 pass）** |
 
 ### 10.2 验收决定
 
