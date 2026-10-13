@@ -3,22 +3,23 @@
 ---
 id: rework-and-decision-paths-CHECKLIST
 type: design
-version: 1.6
+version: 1.7
 status: accepting
-date: 2026-09-27
+date: 2026-10-13
 depends: [rework-and-decision-paths-IMPLEMENTATION, rework-and-decision-paths-DESIGN]
 upstream: null
 ---
 
 > **Feature**: 回写流与多方案决策路径（P-050 后续阶段）
 > **创建日期**: 2026-09-27
-> **状态**: accepting（验收中；v1.6 增记 P-089 U-10′ 薄壳实施 / v1.5 增记 P-069 三问续研 Layer-1 最小实施 / v1.4 版本引用收口 / v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
+> **状态**: accepting（验收中；**v1.7 增记 P-092 U-8 门禁链实施** / v1.6 增记 P-089 U-10′ 薄壳实施 / v1.5 增记 P-069 三问续研 Layer-1 最小实施 / v1.4 版本引用收口 / v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.5**
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.8**
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.12**
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.6**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.9**
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.13**
 > **v1.5 变更（2026-10-03，三问续研 Layer-1 最小实施）**：用户指令「按这个方案落档并实施」⇒ 记录 **P-069**（受控回边受理 + `backflow-audit` 只读子命令 + selftest **54/54 → 63/63**）的验收——新增 **F9~F12**（功能）/ **I5**（接口）/ **E5**（错误处理）/ **C4**（兼容性）/ 不变式 **I-16~I-18** 三行；§1 交叉版本同步至 **RESEARCH v1.11 / DESIGN v1.7 / IMPL v1.4**；**§10.1 计数 33 → 44（通过 32 → 43）**。**既有 F1~F8 / I1~I4 / E1~E4 / C1~C3 判定语义零改动**（回边受理为**放宽**，不触碰分支①②）。
 > **v1.6 变更（2026-10-12，U-10′ 薄壳实施 · P-089）**：用户指令「按照顺序 用吃狗粮模式执行下一个」（承 [DESIGN §10.5](./DESIGN.md) 裁定 B）⇒ 记录 **P-089**（`fork` 注册三件 all-or-none + 写入端 fail-fast 子集直写返工图 + selftest **63/63 → 71/71**）的验收——新增 **F13~F16**（功能）/ **I6**（接口）/ **E6~E7**（错误处理）/ **C5**（兼容性）/ 不变式 **I-19~I-21** 三行；§1 新增 P-089 可追溯行并同步交叉版本至 **RESEARCH v1.12 / DESIGN v1.8 / IMPL v1.5**；**§10.1 计数 44 → 56（通过 43 → 55）**。**既有 F1~F12 / I1~I5 / E1~E5 / C1~C4 判定语义零改动**（本批只扩 `fork` 命令面）。
+> **v1.7 变更（2026-10-13，U-8 门禁链实施 · P-092）**：用户指令「继续执行下一个任务」（承 [DESIGN §10.6](./DESIGN.md) 三轴裁定）⇒ 记录 **P-092**（`finalize` 决策强制 `metadata.upstream_impact` 三态 + 过渡期机械边界 `P ≥ 92` + selftest **71/71 → 81/81**）的验收——新增 **F17~F19**（功能）/ **I7**（接口）/ **E8**（错误处理）/ **C6**（兼容性）/ 不变式 **I-22**；§1 新增 P-092 可追溯行并同步交叉版本至 **RESEARCH v1.13 / DESIGN v1.9 / IMPL v1.6**；**§10.1 计数 56 → 64（通过 55 → 63）**。**既有 F1~F16 / I1~I6 / E1~E7 / C1~C5 判定语义零改动**（本批只增一处门禁硬性组）。
 > **v1.4 变更（2026-09-27，跨仓对照观察项登记 + 版本引用收口）**：用户指令「D盘 RPC框架对本框架的意见 请分析是否合理」⇒ 观察项登记落 [RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)（**H-RPC1 / H-RPC2**）；本文件**收口版本引用 + 同步交付 B 状态**——§1 交叉表与三条「基于」行此前**滞后**于 RESEARCH v1.8 / DESIGN v1.5 / IMPL v1.2（与 S8-1/S8-2 同族复发），现同步至 **v1.9 / v1.6 / v1.3**；§10.2「交付 B 未实施」与 §11 矛盾（v1.3 遗漏）→ 改为「已实施」；§11 新增 **H-FTA / H-RPC1 / H-RPC2** 观察项行。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 > **v1.3 变更（2026-09-27，交付 B 实施）**：用户裁决「两项都做」⇒ 记录 **D-B2 实施**（`superseded` 入 design 一般档，4 权威位点 + 3 模板；[IMPLEMENTATION §11](./IMPLEMENTATION.md)）+ §11 交付 B 行由此前「待裁决」改为「已裁决并实施」（R2 触发驱动 / R3 倾向否决）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
 > **v1.2 变更（2026-09-27，Step 8 独立审查整改）**：记入 **Step 8 独立审查**（子代理 / 同基座降级）结果 —— **7 项发现（2 P2 + 5 P3）全部整改**（记录见 [RESEARCH §5.5](./RESEARCH.md)）；同步 §1 交叉版本表、§8.4、§11 与三条「基于」行版本（S8-1/S8-2）。**§10.1 计数不变**（真异基座 pass 仍为唯一待办）。
@@ -31,9 +32,10 @@ upstream: null
 |--------|------|------|
 | RESEARCH → DESIGN 设计决策可追溯 | ✅ | DESIGN §2.1 逐条引 RESEARCH §3.1/§3.8 |
 | DESIGN → IMPLEMENTATION 模块可追溯 | ✅ | IMPLEMENTATION §3.1/§3.2 对应 DESIGN §4 |
-| 无文档间矛盾（RESEARCH v1.12 ↔ DESIGN v1.8 ↔ IMPL v1.5） | ✅ | 机械复核（v1.6 重数） |
+| 无文档间矛盾（RESEARCH v1.13 ↔ DESIGN v1.9 ↔ IMPL v1.6） | ✅ | 机械复核（v1.7 重数） |
 | P-069 三问可追溯（RESEARCH §3.9 ↔ DESIGN §8 I-16~I-18 / §10.4 ↔ IMPL §12） | ✅ | 逐条对应（三问判定 / 三条不变式 / 三条未决项 / 实施读数） |
 | P-089 U-10′ 薄壳可追溯（RESEARCH §3.9.5 ↔ DESIGN §8 I-19~I-21 / §10.5 ↔ IMPL §13） | ✅ | 逐条对应（A/B 裁定 B / 三条不变式 / 回退点 R-7 / 通过门 / 实施读数） |
+| P-092 U-8 门禁链可追溯（RESEARCH §3.9.5 ↔ DESIGN §8 I-22 / §10.6 ↔ IMPL §14） | ✅ | 逐条对应（三轴裁定 A/B/C / 不变式 I-22 / 回退点 R-10 / 通过门 / 实施读数） |
 
 ## 2. 功能验收
 
@@ -55,6 +57,9 @@ upstream: null
 | F14 | 无注册参数零回归 | registry 字节不变 + 无 `register:` 行（F9/F10 原断言并存） | ✅ | selftest F63 |
 | F15 | 注册输入 fail-fast 族 → exit 2 且零写入 | all-or-none 缺件 / 非法触发枚举 / provenance 三臂（缺冒号 · 前缀越界 · 载荷空）/ 登记表缺失，四种输入全拒且无半成品 | ✅ | selftest F64/F65/F66/F68 |
 | F16 | `new` 在已登记名集 → 拒绝 | exit 2 且零写入（注册层去重；与 target-exists 为两道独立闸） | ✅ | selftest F67 |
+| F17 | `finalize` 缺 / 非法 `upstream_impact` → 硬性 | exit 1（`upstream_impact` ∉ `IMPACT_STATES` 三态封闭集） | ✅ | selftest F72/F73 |
+| F18 | `finalize` `upstream_impact` 三态判定 | `none` → 通过；非 `none` 未登记返工图 → exit 1；非 `none` 已登记 → exit 0 | ✅ | selftest F74/F75/F76 |
+| F19 | 过渡期机械边界（P 编号 ≥ 92 才适用） | 历史批次 / sid 形态不匹配 → **不适用**（判定为空）；返工图不可用 → 降级**软性** | ✅ | selftest F77/F78/F79 |
 
 ## 3. 接口验收
 
@@ -66,6 +71,7 @@ upstream: null
 | I4 | 无 §10.1 → 无结果 | 零结果 | ✅ |
 | I5 | `backflow-audit` CLI + 单一实现 | `[--session <sid>]` exit 0/1/2；`_decision_chain` 由 `step-gate` 与 `backflow-audit` 共用（守 I-10） | ✅ |
 | I6 | `fork` 注册三件 all-or-none + 值域读真值源 | 全缺 = 原行为；缺一 = exit 2；触发枚举 / 前缀不复制常量（守 I-17）；registry 解析由注册写入与 `backflow-audit` 共用（`_load_registry_raw` / `_registry_derive`） | ✅ |
+| I7 | `_finalize_impact_check` 单点实现 + 四类规则 | `cmd_gate_step` 规则由三类 → **四类**（`step-enforce` 经复用自动继承）；**不写入** `_decision_chain`（保其纯性并被 `backflow-audit` 共用，守 I-10） | ✅ |
 
 ## 4. 不变式验收
 
@@ -82,6 +88,7 @@ upstream: null
 | I-19 写入端只做 fail-fast 子集 | F65/F66/F67/F68（子集拒绝）+ 单判定 E2E（真对账器对写入边零判红）；C/D 段零复刻（全文可见） | ✅ |
 | I-20 `fork` 复制语义零改动 | F63（registry 字节不变）+ F9/F10 原断言并存；校验先于写入（F64~F68 零写入断言） | ✅ |
 | I-21 登记值 = 机械真值 | F62（`seq_from` = 请求值 = 实际行数）/ F69（请求超末端按实况）；dump 往返字节保真（E1 实测） | ✅ |
+| I-22 `finalize` 三态强制面与过渡期机械边界（P-092） | F17/F18（强制面 + 耦合）/ F19（过渡期边界 + 降级臂）/ C6（存量逐例零回归） | ✅ |
 
 ## 5. 错误处理验收
 
@@ -94,6 +101,7 @@ upstream: null
 | E5 | `backflow-audit` 登记表缺失/不可解析 | 降级 **exit 2**（不当作通过） | ✅ | selftest F61 |
 | E6 | 登记表缺失/不可解析（注册路径，P-089） | 前置失败 **exit 2**（fork 不发生——校验先于一切写入） | ✅ | selftest F68 |
 | E7 | provenance 形态非法（缺冒号 / 前缀越界 / 载荷空，P-089） | **exit 2** 且零写入 | ✅ | selftest F66 |
+| E8 | `finalize` 三态强制面错误族（DESIGN §10.6 边界⑤，P-092） | 缺 / 非法 `upstream_impact` → **硬性 exit 1**；非 `none` 耦合未登记 → 硬性；返工图不可用 → 非 `none` 耦合**降级软性**（人工复核，**不静默当作通过**） | ✅ | selftest F72/F73/F75/F79 |
 
 ## 6. 性能验收
 
@@ -111,6 +119,7 @@ upstream: null
 | C3 | pre-commit hook 零改动 | `.pre-commit-config.yaml` 未改 | ✅ |
 | C4 | 既有 session 回归逐例一致 | 93 session：87 pass / 5 无 decision / 1 soft，与改前一致（零新硬性错误） | ✅ |
 | C5 | 既有 `fork` / `backflow-audit` 行为零变化（P-089） | F9/F10/F63（fork 零回归）；`backflow-audit` 真机 exit 0（registry 解析拆分后语义逐字保持） | ✅ |
+| C6 | 存量 session 逐例零回归（P-092） | 115 session（含 finalize 103）：U-8 新增组新增判定项 **0**（硬 0 / 软 0），旧判定分布逐例不变 | ✅ |
 
 ## 8. ADD 审计（Step 10）
 
@@ -169,15 +178,15 @@ upstream: null
 
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |------|------|------|------|------|
-| 文档一致性 | 5 | 5 | 0 | 0 |
-| 功能 | 16 | 16 | 0 | 0 |
-| 接口 | 6 | 6 | 0 | 0 |
-| 不变式 | 11 | 11 | 0 | 0 |
-| 错误处理 | 7 | 7 | 0 | 0 |
+| 文档一致性 | 6 | 6 | 0 | 0 |
+| 功能 | 19 | 19 | 0 | 0 |
+| 接口 | 7 | 7 | 0 | 0 |
+| 不变式 | 12 | 12 | 0 | 0 |
+| 错误处理 | 8 | 8 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
-| 兼容性 | 5 | 5 | 0 | 0 |
+| 兼容性 | 6 | 6 | 0 | 0 |
 | ADD 审计 | 4 | 3 | 0 | 1 |
-| **总计** | 56 | 55 | 0 | 1 |
+| **总计** | 64 | 63 | 0 | 1 |
 
 > **统计口径（RULE-2）**：上表来自本文件**逐项核对**（每一项均有独立标记），非事后汇总推算。
 >
@@ -186,7 +195,7 @@ upstream: null
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：交付 A 全部验收项通过（**55/56**）；**唯一待办 = 异基座独立 pass**（§8.4）；交付 B **已实施**（v1.3，[IMPLEMENTATION §11](./IMPLEMENTATION.md)），其规格已经 **v1.1 同基座自审**并修订 10 项（DESIGN §9.5）；**P-069 三问续研 Layer-1 最小实施已验收**（v1.5，[IMPLEMENTATION §12](./IMPLEMENTATION.md)）；**P-089 U-10′ 薄壳已验收**（v1.6，[IMPLEMENTATION §13](./IMPLEMENTATION.md)；selftest **71/71**）
+- [x] **有条件通过**：交付 A 全部验收项通过（**63/64**）；**唯一待办 = 异基座独立 pass**（§8.4）；交付 B **已实施**（v1.3，[IMPLEMENTATION §11](./IMPLEMENTATION.md)），其规格已经 **v1.1 同基座自审**并修订 10 项（DESIGN §9.5）；**P-069 三问续研 Layer-1 最小实施已验收**（v1.5，[IMPLEMENTATION §12](./IMPLEMENTATION.md)）；**P-089 U-10′ 薄壳已验收**（v1.6，[IMPLEMENTATION §13](./IMPLEMENTATION.md)；selftest **71/71**）；**P-092 U-8 门禁链已验收**（v1.7，[IMPLEMENTATION §14](./IMPLEMENTATION.md)；selftest **81/81**；存量零回归 115 session 逐例）
 - [ ] **验收失败**
 
 ### 10.3 签字
@@ -209,5 +218,6 @@ upstream: null
 | **H-FTA / H-RPC1 / H-RPC2** 观察项（工具化触发 / 跨仓对照可迁移性） | — | — | 观察项（[RESEARCH §6](./RESEARCH.md) / [DESIGN §10.2](./DESIGN.md)） |
 | **P-069 三问续研 Layer-1 最小实施**（`backflow-audit` + 受控回边受理） | — | — | ✅ 已实施（[IMPLEMENTATION §12](./IMPLEMENTATION.md)；selftest **63/63**） |
 | **U-10′ `fork` 注册薄壳**（P-089，乙类执行序 2） | — | — | ✅ 已实施（[IMPLEMENTATION §13](./IMPLEMENTATION.md)；规格 [DESIGN §10.5](./DESIGN.md)；selftest **71/71**；回退点 **R-7**） |
-| **U-8 / U-9** 未决项（上游影响字段 / CONSOLE 待回写队列） | — | — | 未决（defer，各带触发条件；[DESIGN §10.4](./DESIGN.md)） |
+| **U-8 `finalize` 三态强制**（P-092，乙类执行序 5） | — | — | ✅ 已实施（[IMPLEMENTATION §14](./IMPLEMENTATION.md)；规格 [DESIGN §10.6](./DESIGN.md)；selftest **81/81**；回退点 **R-10**） |
+| **U-9** 未决项（CONSOLE 待回写队列） | — | — | 未决（defer，带触发条件；[DESIGN §10.4](./DESIGN.md)） |
 | 更新 PROGRESS.md / CODE_WIKI.md | — | — | ✅ |
