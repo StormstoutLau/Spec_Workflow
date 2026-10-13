@@ -24,7 +24,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.8.0"
+VERSION = "1.9.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -196,12 +196,16 @@ DREQ = ("category", "scenario", "reasoning", "outcome", "confidence")
 # 数字，或「字母 + 可选数字」，点分隔分段（`3.5` / `B` / `B4` / `D1` / `B4.2`）；
 # **大小写敏感**（与标题 token 逐字符一致）；**多字母词形不受理**（`§selftest` 仍属形态不可解析）。
 # 两处**共用本常量** ⇒ 「两实现漂移」在构造上不可发生（B25 / I-10 / A-33 教训）。
-# 注：前缀白名单与「是否要求定位符」属**差集口径**，仍由两处各自显式表达（B19 正确分工）。
+# 注：**「是否要求定位符」**属**唯一的差集口径**，仍由两处各自显式表达（B19 正确分工）。
+# P-091「候选扩权」：J1 **去前缀白名单**（原 `(?:spec|adr|docs|tools|scripts)/` 只存在于 J1，
+# 致根级权威源载体 `CODE_WIKI.md` / `SPEC_PROCESS.md` / `AGENTS.md` 上的定位符锚点被判 soft→阻断
+# 而 J2 判真实 = 不变量 `J2 ⊆ J1` 的唯一方向性偏离 d 类）；J1 与 J2 的路径字符类**逐字对齐**
+# （`[A-Za-z0-9_./\-]+\.(?:md|py|jsonl)`）⇒ 不变量自此**在构造上成立**，`anchor-audit` 的差集读数
+# 语义随之由「候选扩权触发条件」改为「**不变量违反 = 缺陷**」。
 SECTION_ID = r"(?:[0-9]+|[A-Za-z][0-9]*)(?:\.(?:[0-9]+|[A-Za-z][0-9]*))*"
 ANCHOR_RE = re.compile(
     r"^(https?://\S+|"
-    r"(?:spec|adr|docs|tools|scripts)/"
-    r"[A-Za-z0-9_./\-]*(?:\.(?:md|py|jsonl))?"
+    r"[A-Za-z0-9_./\-]+(?:\.(?:md|py|jsonl))?"
     r"(?:#[L]\d+|L\d+|\s*§" + SECTION_ID + r")?)$")
 
 
@@ -412,9 +416,10 @@ def cmd_anchor_audit(args) -> int:
 
     J1 = ANCHOR_RE（step-gate 软性面；经 step_enforce.py 的「非 0 即 fail」升级为阻断级）
     J2 = _resolve_anchor 可解析的位置形态（section / line）
-    不变量 J2 ⊆ J1（independent-verify DESIGN §4.1.2）：差集非空即「候选扩权」触发条件已满足
-    ——把 DR-24 的「≥1 例真实返工」由不可核声称改为可机械判定（同 B15 判据边界教训）。
-    exit 0 = 触发未满足（差集空）；1 = 触发已满足（列出实例）；2 = 目录无 session 文件
+    不变量 J2 ⊆ J1（independent-verify DESIGN §4.1.2）：**P-091 起该不变量在构造上成立**
+    （两处路径字符类逐字对齐、J1 无前缀白名单）⇒ 差集非空 = **不变量被违反 = 缺陷**，
+    不再是「候选扩权触发条件」（扩权已于 P-091 实施；本命令转为该不变量的**机械守门**）。
+    exit 0 = 不变量成立（差集空）；1 = 不变量被违反（列出实例）；2 = 目录无 session 文件
     （坏行沿用 EventWriter 语义：解析失败即中断并报 `<路径>:<行号>` → exit 1，不静默跳过）
     """
     w = EventWriter(sessions_dir())
@@ -450,15 +455,15 @@ def cmd_anchor_audit(args) -> int:
                     other += 1
     print(f"anchor-audit: 扫描 {len(paths)} session / {total} 锚点")
     print(f"  J1 匹配（ANCHOR_RE）: {j1_ok}；J2 可解析（section/line）: {j2_pos}")
-    print(f"  J2\\J1（取证放行但门禁不匹配 = 候选扩权触发条件）: {len(diff)}")
+    print(f"  J2\\J1（取证放行但门禁不匹配 = **不变量被违反 · 缺陷**）: {len(diff)}")
     print(f"  J1\\J2（门禁放行但取证判硬性 = 正确分工面）: {j1_not_j2}；两处皆不支持: {other}")
     for sid, seq, a in diff:
-        print(f"  [TRIGGER] {sid} seq{seq} {a!r}")
+        print(f"  [DEFECT] {sid} seq{seq} {a!r}")
     if diff:
-        print(f"anchor-audit: 触发条件已满足（{len(diff)} 例）→ exit 1"
-              "（建议裁决：DR-24 候选扩权）")
+        print(f"anchor-audit: **不变量 J2 ⊆ J1 被违反（{len(diff)} 例 = 缺陷）** → exit 1"
+              "（须修判定面，使 J1 重新覆盖 J2）")
         return 1
-    print("anchor-audit: 触发条件未满足（0 例）→ exit 0")
+    print("anchor-audit: 不变量 J2 ⊆ J1 成立（差集 0 例）→ exit 0")
     return 0
 
 
@@ -1154,17 +1159,18 @@ def run_selftest() -> int:
         p_r1 = run_cli("verify-anchor", "--session", "va-range")
         check("F41 行号区间形态 → 硬性 exit 1（隔离实测结论固化为回归）", p_r1.returncode == 1)
 
-        # F42-F45: anchor-audit 锚点形态集合对账（P-042 v1.20，DR-25——触发条件可核化）
+        # F42-F45: anchor-audit 锚点形态集合对账（P-042 v1.20，DR-25；P-091 候选扩权后
+        # 语义改为「不变量守门」——原 d 类实例（根级载体 + 定位符）经扩权已不再偏离）
         w_va.append("aa-trigger", "assistant", "decision",
                     input_=_va_d("spec/step-gate/DESIGN.md §4"))
         w_va.append("aa-trigger", "assistant", "decision",
                     input_=_va_d("CODE_WIKI.md#L3"))
         p_aa1 = run_cli("anchor-audit", "--session", "aa-trigger")
-        check("F42 J2\\J1 差集非空 → 触发已满足 exit 1 且列实例（d 类识别）",
-              p_aa1.returncode == 1 and "[TRIGGER]" in p_aa1.stdout
-              and "CODE_WIKI.md#L3" in p_aa1.stdout, p_aa1.stdout[-140:])
+        check("F42 原 d 类实例（根级载体 + 定位符）扩权后偏离清零 → 不变量成立 exit 0",
+              p_aa1.returncode == 0 and "不变量 J2 ⊆ J1 成立" in p_aa1.stdout
+              and bool(ANCHOR_RE.match("CODE_WIKI.md#L3")), p_aa1.stdout[-140:])
         p_aa2 = run_cli("anchor-audit", "--session", "va-real")
-        check("F43 仅白名单 .md + §章节 → 差集空，触发未满足 exit 0",
+        check("F43 仅白名单 .md + §章节 → 差集空，不变量成立 exit 0",
               p_aa2.returncode == 0, p_aa2.stdout[-100:])
         w_va.append("aa-pure", "assistant", "decision",
                     input_=_va_d("scripts/spec_map.py"))
@@ -1177,9 +1183,9 @@ def run_selftest() -> int:
         bad.unlink()
         p_aa4 = run_cli("anchor-audit")
         p_aa5 = run_cli("anchor-audit")
-        check("F45 全量扫描（无 --session）：确定性双跑一致 + 命中已登记实例 exit 1",
-              p_aa4.returncode == 1 and p_aa4.stdout == p_aa5.stdout
-              and "aa-trigger" in p_aa4.stdout, p_aa4.stdout[-140:])
+        check("F45 全量扫描（无 --session）：确定性双跑一致 + 差集 0 → exit 0",
+              p_aa4.returncode == 0 and p_aa4.stdout == p_aa5.stdout,
+              p_aa4.stdout[-140:])
 
         # F46-F52: `§` 编号空间收口（P-064——字母编号受理 / 词形不受理 / 大小写敏感 / 精确性 / 守门）
         w_va.append("p064-alpha", "assistant", "decision",
@@ -1359,6 +1365,27 @@ def run_selftest() -> int:
               p_r8.returncode == 0 and len(frk2) == 1
               and frk2[0]["seq_from"] == n_rows
               and len(w.read("st-001q")) == n_rows)
+
+        # F70-F71: §4.1.1 十例矩阵机械守门（P-091 候选扩权——把矩阵变断言，
+        # 防两处正则再漂移；同 I-10「两实现同错、对账抓不住」教训）
+        # 行 = (锚点, J1 匹配期望, J2 可解析期望)，逐例对齐 independent-verify DESIGN §4.1.1
+        _mx = [("spec/project-console/RESEARCH.md §7.16", True, True),
+               ("docs/PROGRESS.md#L3", True, True),
+               ("scripts/spec_map.py#L76", True, True),
+               ("docs/PROGRESS.md#L3-L5", False, False),
+               ("scripts/spec_map.py#L76-L83", False, False),
+               ("CODE_WIKI.md", True, False),
+               ("CODE_WIKI.md#L3", True, True),
+               ("scripts/spec_map.py", True, False),
+               ("spec/project-console/RESEARCH.md", True, False),
+               ("adr/ADR-0006-assertion-framework-dual-copy-authority.md §B4", True, True)]
+        check("F70 §4.1.1 十例矩阵逐例一致（J1/J2 两处判定与 DESIGN §4.1.1 声明同步）",
+              all(bool(ANCHOR_RE.match(a)) == m1
+                  and (_resolve_anchor(a)[0] in ("section", "line")) == m2
+                  for a, m1, m2 in _mx))
+        check("F71 J2 ⊆ J1 不变量（十例全例成立；原 d 类根级载体偏离已清零）",
+              all(not (m2 and not m1) for _, m1, m2 in _mx)
+              and all(ANCHOR_RE.match(a) for a, _, m2 in _mx if m2))
 
         # F25-F26: git_snapshot 懒加载门控 + 精确范围（P-022 A+B，临时 git 仓实证）
         git_tmp = Path(tempfile.mkdtemp(prefix="sr_gittest_"))
