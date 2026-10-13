@@ -24,7 +24,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.9.0"
+VERSION = "1.10.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -192,6 +192,18 @@ def gate_passed(w: EventWriter, sid: str, name: str) -> bool:
 # ---- 模块 2b：step-gate 决策产物管线校验（P-020，CER §3.5——只读校验，三类规则分级 exit） ----
 STEP_SEQUENCE = ("research", "design", "implement", "verify", "finalize")
 DREQ = ("category", "scenario", "reasoning", "outcome", "confidence")
+# U-8（P-092）：finalize 步「上游影响」三态**封闭集**。
+# 裁定（DESIGN §10.6）= **代码常量**（与 `DREQ` / `STEP_SEQUENCE` 同类——decision schema 的
+# 封闭枚举）；**不入返工图**——返工图是「返工边」真值源、非 decision schema 真值源，
+# 故与 I-17「触发枚举单一真值源」**无冲突**（该条只约束 `trigger_kinds`）。
+IMPACT_STATES = ("none", "partial", "overturned")
+# U-8 **过渡期判据（机械边界）**：仅 P 编号 ≥ 本值的批次 session 受新硬性组约束。
+# 依据（E1，2026-10-13 实测）= 115 session 中 **103 含 finalize 决策**、其中带
+# `metadata.upstream_impact` 者 **0 例**、P 编号 ≥ P-092 者 **0 例** ⇒ 无过渡期时
+# 103 个历史 session 会被判硬性（**门禁链断裂**）；设 92 后存量零回归，且**本批自证**
+# （P-092 自身须带该字段——吃狗粮）。同 V1a′ 先例「机械边界 = P 编号 ≥ 某号」。
+FINALIZE_IMPACT_MIN_P = 92
+BATCH_SID_RE = re.compile(r"^specwf-p(\d{3})-")
 # P-064「§ 编号空间收口」：J1（ANCHOR_RE）与 J2（_resolve_anchor）的**交集口径单点定义**——
 # 数字，或「字母 + 可选数字」，点分隔分段（`3.5` / `B` / `B4` / `D1` / `B4.2`）；
 # **大小写敏感**（与标题 token 逐字符一致）；**多字母词形不受理**（`§selftest` 仍属形态不可解析）。
@@ -252,14 +264,51 @@ def _decision_chain(decisions):
     return hard, soft, seen, back
 
 
+def _finalize_impact_check(decisions, sid, registered, registry_ok):
+    """U-8 硬性组（P-092）：`finalize` 决策强制 `metadata.upstream_impact` 三态。
+
+    规则（DESIGN §10.6 裁定）：
+      - **过渡期判据（机械边界）**：仅 sid 形态 `specwf-p<NNN>-` 且 NNN ≥ `FINALIZE_IMPACT_MIN_P`
+        时**适用**；形态不匹配 / 历史批次 ⇒ **不适用**（返回空——存量零回归）
+      - **硬性-①**：finalize 决策须带 `metadata.upstream_impact` ∈ `IMPACT_STATES`
+      - **硬性-②**：取值 ≠ `none` ⇒ 该 session 须**已登记返工图**（`registered` 来自
+        `_registry_derive`，与 `backflow-audit` 的「待回写」判据**逐字同口径**，守 I-10/I-17）
+      - **降级臂**：返工图不可用（`registry_ok` 为假）⇒ ② 转**软性**（人工复核），**不静默当作通过**
+    返回 (hard, soft)。
+    """
+    m = BATCH_SID_RE.match(sid or "")
+    if not m or int(m.group(1)) < FINALIZE_IMPACT_MIN_P:
+        return [], []
+    hard, soft = [], []
+    for r in decisions:
+        inp = r.get("input") if isinstance(r.get("input"), dict) else {}
+        md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
+        if md.get("step_id") != "finalize":
+            continue
+        v = md.get("upstream_impact")
+        if v not in IMPACT_STATES:
+            hard.append(f"seq{r.get('seq')} finalize 缺/非法 upstream_impact: {v!r}"
+                        f"（须 ∈ {list(IMPACT_STATES)}）")
+        elif v != "none":
+            if not registry_ok:
+                soft.append(f"seq{r.get('seq')} upstream_impact={v} 且返工图不可用"
+                            "（非 none 耦合未判——人工复核）")
+            elif sid not in registered:
+                hard.append(f"seq{r.get('seq')} upstream_impact={v} 但该 session 未登记返工图"
+                            "（非 none ⇒ 须有对应返工登记）")
+    return hard, soft
+
+
 def cmd_gate_step(args) -> int:
     """校验 session 内 decision 事件链——只读不写流。
 
-    三类规则（DESIGN §6.2）：
+    四类规则（DESIGN §6.2 + §10.6）：
       - 硬性-1 schema：八字段必填 + metadata.step_id/step_seq + evidence 非空
       - 硬性-2 秩序：step_id ∈ 序表、step_seq = 序表位、同位重复禁止、--expect 覆盖时全链一致
                     （**受控回边**：step_seq 回退到上游步位 = 受理并登记，见 `_decision_chain`）
-      - 软性-3 锚点：evidence[].anchor 形态可解析（正则）
+      - 硬性-3（**U-8 / P-092**）：`finalize` 决策强制 `upstream_impact` 三态；非 `none` ⇒
+                    该 session 须已登记返工图（**过渡期 = P 编号 ≥ 92**；见 `_finalize_impact_check`）
+      - 软性-4 锚点：evidence[].anchor 形态可解析（正则）
     exit 0 / 1（硬性）/ 2（软性存疑）。
     """
     w = EventWriter(sessions_dir())
@@ -268,6 +317,11 @@ def cmd_gate_step(args) -> int:
         print(f"step-gate[{args.session}]: 无 decision 事件（决策记录纪律未执行）")
         return 1
     hard, soft, seen, back = _decision_chain(decisions)
+    _, registered, regerr = _load_rework_registry()          # U-8（P-092）
+    ui_hard, ui_soft = _finalize_impact_check(decisions, args.session, registered,
+                                              regerr is None)
+    hard += ui_hard
+    soft += ui_soft
     got = list(seen)
     expect = tuple(args.expect) if args.expect else None
     if expect:
@@ -1285,6 +1339,79 @@ def run_selftest() -> int:
                                capture_output=True, text=True, env=env_noreg)
         check("F61 backflow-audit 登记表缺失 → exit 2（降级不当作通过）",
               p_bf6.returncode == 2, p_bf6.stdout[-120:])
+
+        # F72-F79: U-8 finalize upstream_impact 三态强制（P-092）——三态臂 / 耦合臂 / 过渡期臂 / 降级臂
+        _UI_MISS = "__missing__"
+
+        def _ui_d(step, step_seq, impact=None):
+            md = {"step_id": step, "step_seq": step_seq,
+                  "evidence": [{"grade": "E1", "anchor": "spec/step-gate/DESIGN.md §4"}]}
+            if impact is not None:
+                md["upstream_impact"] = impact
+            return {"category": "c", "scenario": "s", "reasoning": "r",
+                    "outcome": "o", "confidence": 0.9, "metadata": md}
+
+        def _ui_chain(sid, impact=_UI_MISS):
+            """干净五步链（唯一变量 = finalize 的 upstream_impact）。"""
+            for st, sq in (("research", 1), ("design", 2), ("implement", 3), ("verify", 4)):
+                w.append(sid, "assistant", "decision", input_=_ui_d(st, sq))
+            w.append(sid, "assistant", "decision",
+                     input_=_ui_d("finalize", 5,
+                                  None if impact == _UI_MISS else impact))
+
+        _ui_chain("specwf-p092-s1")
+        p_u1 = run_cli("step-gate", "--session", "specwf-p092-s1")
+        check("F72 finalize 缺 upstream_impact（P ≥ 92）→ 硬性 exit 1",
+              p_u1.returncode == 1 and "upstream_impact" in p_u1.stdout, p_u1.stdout[-170:])
+
+        _ui_chain("specwf-p092-s2", "bogus")
+        p_u2 = run_cli("step-gate", "--session", "specwf-p092-s2")
+        check("F73 非法 upstream_impact 取值 → 硬性 exit 1",
+              p_u2.returncode == 1 and "bogus" in p_u2.stdout, p_u2.stdout[-170:])
+
+        _ui_chain("specwf-p092-s3", "none")
+        p_u3 = run_cli("step-gate", "--session", "specwf-p092-s3")
+        check("F74 upstream_impact=none + 全链齐 → exit 0（吃狗粮形态）",
+              p_u3.returncode == 0, p_u3.stdout[-170:])
+
+        _ui_chain("specwf-p092-s4", "overturned")
+        p_u4 = run_cli("step-gate", "--session", "specwf-p092-s4")
+        check("F75 非 none 且该 session 未登记返工图 → 硬性 exit 1（耦合臂）",
+              p_u4.returncode == 1 and "未登记返工图" in p_u4.stdout, p_u4.stdout[-170:])
+
+        reg2 = tmp / "rework-graph-p092.json"
+        reg2.write_text(json.dumps({
+            "version": 1, "updated": "2026-10-13", "owner": "selftest",
+            "truth_source": "registry",
+            "trigger_kinds": ["user-verdict", "undecided"],
+            "provenance_prefixes": ["manual", "tool"],
+            "forks": [{"new": "specwf-p092-s5", "origin": "specwf-p092-s0",
+                       "seq_from": 1, "trigger_kind": "user-verdict",
+                       "reason": "selftest 已登记返工", "provenance": "manual:selftest-p092",
+                       "date": "2026-10-13"}],
+            "non_rework": []}, ensure_ascii=False), encoding="utf-8")
+        _ui_chain("specwf-p092-s5", "partial")
+        p_u5 = subprocess.run([sys.executable, me, "step-gate", "--session",
+                               "specwf-p092-s5"], capture_output=True, text=True,
+                              env=dict(env, **{REGISTRY_ENV: str(reg2)}))
+        check("F76 非 none 且该 session 已登记返工图 → exit 0（耦合满足）",
+              p_u5.returncode == 0, p_u5.stdout[-170:])
+
+        _ui_chain("specwf-p091-hist")
+        p_u6 = run_cli("step-gate", "--session", "specwf-p091-hist")
+        check("F77 过渡期判据：历史批次（P=91）不适用 ⇒ 缺字段仍 exit 0（零回归边界）",
+              p_u6.returncode == 0, p_u6.stdout[-170:])
+
+        _ui_chain("notbatch-001")
+        p_u7 = run_cli("step-gate", "--session", "notbatch-001")
+        check("F78 sid 形态不匹配（非 specwf-pNNN-）⇒ 不适用 ⇒ exit 0",
+              p_u7.returncode == 0, p_u7.stdout[-170:])
+
+        p_u8 = subprocess.run([sys.executable, me, "step-gate", "--session",
+                               "specwf-p092-s5"], capture_output=True, text=True,
+                              env=dict(env, **{REGISTRY_ENV: str(tmp / "no-reg-ui.json")}))
+        check("F79 非 none 且返工图不可用 → 耦合降级为软性（exit 2，不静默通过）",
+              p_u8.returncode == 2, p_u8.stdout[-170:])
 
         # F62-F69: fork 注册扩展（P-089）——成功臂 / 零回归 / fail-fast 原子性
         p_r1 = run_cli("fork", "--session", "st-001", "--seq", "2",

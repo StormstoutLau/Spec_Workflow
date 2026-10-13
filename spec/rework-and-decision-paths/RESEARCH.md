@@ -3,9 +3,9 @@
 ---
 id: rework-and-decision-paths-RESEARCH
 type: design
-version: 1.12
+version: 1.13
 status: draft
-date: 2026-09-27
+date: 2026-10-13
 depends: [ADR-0006, ADR-0007, ADR-0010, SPEC-PROCESS, loop-engineering-RESEARCH, project-console-DESIGN, FWK-DECISION-RECORD]
 upstream: null
 ---
@@ -27,6 +27,7 @@ upstream: null
 > **v1.10 变更（2026-09-29，状态真值源位置候选登记批）**：用户要求「分析当前框架是否存在『状态独立于执行流维护 ⇒ 必须手动同步』这类问题」并**落档 §3.8** → 新增 **§3.8.7 候选 ④ + 观察项**：将 4 条用户判断逐条对照本仓（**① 手动更新 = 架构信号 / ② 回写须是「给系统用的」结构化事件 / ③ 三层上下文不能混 / ④ 「缺任务图 + 事件流状态层」需校正**），核心判定 = **任务粒度状态（本可派生）被放进决策粒度的散文载体**（[`console_gen.derive_state` L298-310](../../scripts/console_gen.py) 首参**照抄 `task.status`**，I-7 冻结状态词）⇒ 这是「**两边都写 ⇒ 两边都不一致**」的**载体根因**（同族 4 实例）；**实质增量 = P-054 的否决前提（status 声称面「无定形」）是载体相关的** ⇒ 若状态真值源改为结构化，该裁定应**随载体形态变更重审**。**零代码变更、零断言计数变更**（24A+12B+5C+6H 不变——登记为候选 / 观察项，非新增事实断言；不新增脚本 / 不改 `console_gen` / 不动 I-7）；DESIGN / 流水线侧同步留待激活时。
 > **v1.11 变更（2026-10-03，三问续研：工作流运行期自我维持批 · Layer-1 最小实施）**：用户连续三问收敛为一主题——① 跨仓广播如何保证其他仓 agent 遵守 spec 流程；② 实施文档 review 判「不可行」后 agent 是否**自动**回溯重入上游（回边），而非等用户手动提示；③ 运行期如何保证 agent **及时反向更新历史文档**（回写文书）。新增 **[§3.9](#39-三问续研工作流运行期自我维持p-069)**（四层强度阶梯 / 回边不会自动的三处缺环 / 回写分三类 / 机械通路已齐缺「桥」+ 实施设计 / 边界与三条未决项四元登记块）；新增 **A-25~A-27 / B-13~B-14 / C-6~C-7**；**Layer-1 最小实施** = [`spec_runner`](../../tools/spec_runner/spec_runner.py) 新增**只读子命令 `backflow-audit`**（不接门禁，同 `anchor-audit` 先例；触发枚举读 [`docs/rework-graph.json`](../../docs/rework-graph.json) 的 `trigger_kinds` 真值源，守 I-10）+ **受控回边受理**（`step-gate` 仅放宽：回退到上游步位受理、同位重复仍判硬性）+ selftest **54/54 → 63/63**；VERSION **1.6.0 → 1.7.0**。断言计数 **24A+12B+5C+6H → 27A+14B+7C+6H**。
 > **v1.12 变更（2026-10-12，U-10′ 薄壳实施批 · P-089）**：用户指令「按照顺序 用吃狗粮模式执行下一个」（承 P-087 乙类执行序 **2**）⇒ **U-10（`fork` 一键薄壳，乙类视图记 U-10′）经用户裁决支路开闸并已实施**（真实返工 ≥3 例支路未满足——现 0 例）：[`spec_runner`](../../tools/spec_runner/spec_runner.py) **v1.7.0 → v1.8.0**——`fork` 可选注册三件（`--reason` / `--trigger-kind` / `--provenance`，**all-or-none**）成功后直写返工图（人工语义保留：三件必填、无默认值；写入端只做 fail-fast 子集，完整判定单点在对账器）；**§3.9.5 U-10 行就地更新为「已实施」**；规格 = [DESIGN §10.5](./DESIGN.md)，实施 = [IMPLEMENTATION §13](./IMPLEMENTATION.md)。**返工图 schema 零改动 / 零新依赖 / 零新门禁**；selftest **63/63 → 71/71**。断言计数**不变**（27A+14B+7C+6H——实施批，无新增断言行）。
+> **v1.13 变更（2026-10-13，U-8 门禁链实施批 · P-092）**：用户指令「继续执行下一个任务」（承 P-087 乙类执行序 **5**）⇒ **U-8（`finalize` 决策强制 `upstream_impact` 三态）经用户裁决支路开闸并已实施**（机械支路「一次真实的『上游被推翻但未登记』事例」未满足——现 **0 例**）：[`spec_runner`](../../tools/spec_runner/spec_runner.py) **v1.9.0 → v1.10.0**——`cmd_gate_step` 新增**硬性组** `_finalize_impact_check`（三态 = `{none, partial, overturned}` 代码常量；非 `none` ⇒ 该 session 须**已登记返工图**，与 `backflow-audit`「待回写」同口径；**过渡期判据 = session 的 P 编号 ≥ 92**，形态不匹配 / 历史批次**不适用**）；`step-enforce` 经复用自动继承；**§3.9.5 U-8 行就地更新为「已实施」**；规格 = [DESIGN §10.6](./DESIGN.md)（+ §8 I-22），实施 = [IMPLEMENTATION §14](./IMPLEMENTATION.md)。**零新依赖 / 零新脚本 / 零新 hook**（改动面 = 单文件）；selftest **71/71 → 81/81**；**存量零回归（E1，逐例对照）**：115 session 中 103 含 finalize、新增判定项 **0**。断言计数**不变**（27A+14B+7C+6H——实施批，无新增断言行）。
 
 ---
 
@@ -305,9 +306,9 @@ P-054 曾**显式否决**「在 `repo_stats` 内做 status 一致性 Layer-1 看
 - 它**只保证「已发生的信号被看见」**，**不保证「该返工的一定被返工」**（与 rework-graph §7-1「**清单是线索不是事实**」同源）；
 - **不自动发起回写**：本批**不实现** agent 自动重入上游（属 L3 分布式执行器 / P-039 P-c 范畴，未实现）。
 
-**三条未决项（四元登记块：判据 / 触发条件 / 当前倾向 / 证据等级；U-8 / U-9 仍为 defer 且**各带触发条件**——符合 P-058 净收敛纪律的「**新开必带触发条件**」分支；**U-10 经用户裁决支路已实施（P-089，2026-10-12）**）**：
+**三条未决项（四元登记块：判据 / 触发条件 / 当前倾向 / 证据等级；U-9 仍为 defer 且**带触发条件**——符合 P-058 净收敛纪律的「**新开必带触发条件**」分支；**U-8 经用户裁决支路已实施（P-092，2026-10-13）**；**U-10 经用户裁决支路已实施（P-089，2026-10-12）**）**：
 
-1. **U-8 `finalize` 决策强制 `upstream_impact` 三态**——判据 = `finalize` 步 decision 的 `metadata.upstream_impact ∈ {none, partial, overturned}`，且非 `none` 时须有对应返工登记；触发条件 = 一次真实的「上游被推翻但未登记」事例 **或** 用户裁决；当前倾向 = **defer**（**会打断所有既有 session**——其 `finalize` 决策无该字段 ⇒ 须先定过渡期判据，学 **V1a′** 的「机械边界 = P 编号 ≥ 某号」）；证据等级 = **设计推断**（回归面未实测）。
+1. **U-8 `finalize` 决策强制 `upstream_impact` 三态**——判据 = `finalize` 步 decision 的 `metadata.upstream_impact ∈ {none, partial, overturned}`，且非 `none` 时须有对应返工登记；触发条件 = 一次真实的「上游被推翻但未登记」事例 **或** 用户裁决；**✅ 已实施（P-092，2026-10-13；用户裁决支路——机械支路 0 例未满足）**——`cmd_gate_step` 新增硬性组 `_finalize_impact_check`（三态**代码常量**；非 `none` ⇒ `sid ∈ registered`〔与 `backflow-audit`「待回写」同口径〕；**过渡期判据 = session 的 P 编号 ≥ 92**，形态不匹配 / 历史批次**不适用**；返工图不可用 ⇒ 耦合降级为**软性**）；规格 = [DESIGN §10.6](./DESIGN.md)（+ §8 **I-22**），实施 = [IMPLEMENTATION §14](./IMPLEMENTATION.md)；证据等级 = **E1**（selftest **81/81** + **存量零回归**逐例对照〔115 session / 含 finalize 103 / 新增判定项 **0**〕+ 门禁链全 exit 0 / 本批 session **自证**）。
 2. **U-9 CONSOLE「待重写 / 待重入」队列**——判据 = `console_gen.next_step()` 对「有回边 / 有 trigger」的 feature 输出行动档；触发条件 = `backflow-audit` 首次真实报出 **≥1 例**；当前倾向 = **defer**（当前**空转**——`next_step()` 对全 `done` 集合不可达，见 §3.8.6；属**视图层另批**）；证据等级 = **设计推断**。
 3. **U-10 `fork` 一键薄壳**（乙类视图记 **U-10′**）——判据 = 一条命令完成 `fork` + 返工图登记（原语已存在）；触发条件 = 真实返工 **≥3 例** 或 用户裁决；**✅ 已实施（P-089，2026-10-12；用户裁决支路）**——`fork` 可选注册三件（`--reason` / `--trigger-kind` / `--provenance`，**all-or-none**）成功后直写返工图，**人工语义保留**（三件必填、无默认值，不自动生成 `reason` / `provenance`）；规格 = [DESIGN §10.5](./DESIGN.md)，实施 = [IMPLEMENTATION §13](./IMPLEMENTATION.md)；证据等级 = **E1**（selftest 71/71 + 真机对账 `rework_graph_check` exit 0 + 合成 E2E 单判定对账零判红）。
 
