@@ -3,9 +3,9 @@
 ---
 id: rework-and-decision-paths-RESEARCH
 type: design
-version: 1.13
+version: 1.14
 status: draft
-date: 2026-10-13
+date: 2026-10-14
 depends: [ADR-0006, ADR-0007, ADR-0010, SPEC-PROCESS, loop-engineering-RESEARCH, project-console-DESIGN, FWK-DECISION-RECORD]
 upstream: null
 ---
@@ -28,6 +28,7 @@ upstream: null
 > **v1.11 变更（2026-10-03，三问续研：工作流运行期自我维持批 · Layer-1 最小实施）**：用户连续三问收敛为一主题——① 跨仓广播如何保证其他仓 agent 遵守 spec 流程；② 实施文档 review 判「不可行」后 agent 是否**自动**回溯重入上游（回边），而非等用户手动提示；③ 运行期如何保证 agent **及时反向更新历史文档**（回写文书）。新增 **[§3.9](#39-三问续研工作流运行期自我维持p-069)**（四层强度阶梯 / 回边不会自动的三处缺环 / 回写分三类 / 机械通路已齐缺「桥」+ 实施设计 / 边界与三条未决项四元登记块）；新增 **A-25~A-27 / B-13~B-14 / C-6~C-7**；**Layer-1 最小实施** = [`spec_runner`](../../tools/spec_runner/spec_runner.py) 新增**只读子命令 `backflow-audit`**（不接门禁，同 `anchor-audit` 先例；触发枚举读 [`docs/rework-graph.json`](../../docs/rework-graph.json) 的 `trigger_kinds` 真值源，守 I-10）+ **受控回边受理**（`step-gate` 仅放宽：回退到上游步位受理、同位重复仍判硬性）+ selftest **54/54 → 63/63**；VERSION **1.6.0 → 1.7.0**。断言计数 **24A+12B+5C+6H → 27A+14B+7C+6H**。
 > **v1.12 变更（2026-10-12，U-10′ 薄壳实施批 · P-089）**：用户指令「按照顺序 用吃狗粮模式执行下一个」（承 P-087 乙类执行序 **2**）⇒ **U-10（`fork` 一键薄壳，乙类视图记 U-10′）经用户裁决支路开闸并已实施**（真实返工 ≥3 例支路未满足——现 0 例）：[`spec_runner`](../../tools/spec_runner/spec_runner.py) **v1.7.0 → v1.8.0**——`fork` 可选注册三件（`--reason` / `--trigger-kind` / `--provenance`，**all-or-none**）成功后直写返工图（人工语义保留：三件必填、无默认值；写入端只做 fail-fast 子集，完整判定单点在对账器）；**§3.9.5 U-10 行就地更新为「已实施」**；规格 = [DESIGN §10.5](./DESIGN.md)，实施 = [IMPLEMENTATION §13](./IMPLEMENTATION.md)。**返工图 schema 零改动 / 零新依赖 / 零新门禁**；selftest **63/63 → 71/71**。断言计数**不变**（27A+14B+7C+6H——实施批，无新增断言行）。
 > **v1.13 变更（2026-10-13，U-8 门禁链实施批 · P-092）**：用户指令「继续执行下一个任务」（承 P-087 乙类执行序 **5**）⇒ **U-8（`finalize` 决策强制 `upstream_impact` 三态）经用户裁决支路开闸并已实施**（机械支路「一次真实的『上游被推翻但未登记』事例」未满足——现 **0 例**）：[`spec_runner`](../../tools/spec_runner/spec_runner.py) **v1.9.0 → v1.10.0**——`cmd_gate_step` 新增**硬性组** `_finalize_impact_check`（三态 = `{none, partial, overturned}` 代码常量；非 `none` ⇒ 该 session 须**已登记返工图**，与 `backflow-audit`「待回写」同口径；**过渡期判据 = session 的 P 编号 ≥ 92**，形态不匹配 / 历史批次**不适用**）；`step-enforce` 经复用自动继承；**§3.9.5 U-8 行就地更新为「已实施」**；规格 = [DESIGN §10.6](./DESIGN.md)（+ §8 I-22），实施 = [IMPLEMENTATION §14](./IMPLEMENTATION.md)。**零新依赖 / 零新脚本 / 零新 hook**（改动面 = 单文件）；selftest **71/71 → 81/81**；**存量零回归（E1，逐例对照）**：115 session 中 103 含 finalize、新增判定项 **0**。断言计数**不变**（27A+14B+7C+6H——实施批，无新增断言行）。
+> **v1.14 变更（2026-10-14，回写自动化闭环条件裁定 + 全链 E2E 证成批 · P-097）**：用户指令「先闭环回写机制自动化」→「执行 A + C 合成一批」。**裁定（核心）** = **回写链五段中四段已闭环**（产生 `fork` / 登记 **U-10′**〔P-089〕/ 检测·强制 **U-8**〔P-092〕/ 受理·对账〔P-069 受控回边受理 + 真值源 + 两对账器〕）⇒ **唯一未闭环环 = U-9（视图侧「待重写 / 待重入」队列）**，其触发 = `backflow-audit` **首次真实报出 ≥1 例**（现值 **0 / 120 session · `forks` 0 条**）⇒ **维持 defer、明文不提前开**（理由 = 判据 `next_step()` 对全 `done` 集合**结构性空转** ⇒ 触发未满即实施则产物**必然空集** = 表演；与 U-10′ 属**乙类可开闸**的「潜在能力」不同）。**E2E 证成（C 部分；E1；仓外夹具全链、**真值源零污染**）** = **八腿全通**：① `backflow-audit` 报 `[PENDING] … 待回写 —— seq1 trigger=user-verdict（未登记返工图）` **exit 1**（**信号检出**）→ ② `fork` 三件登记（`register: forks += …-fork <- … (seq_from=1, user-verdict)`）**exit 0** → ③ 再跑 `backflow-audit` **0 例 exit 0**（**登记即消解 = 闭环**）→ ④ `step-gate` 五步链 **exit 0** → ⑤ `step-enforce --pid P-097` **exit 0**（含 **U-8 三态自证**：P=97 ≥ 92 门限下 `upstream_impact=none` 通过）→ ⑥ 真 `docs/rework-graph.json` **sha256 前后一致（零写入）** → ⑦ 真 `rework_graph_check` **exit 0**（`forks=0 · non_rework=1`，**未被污染**）→ ⑧ 真仓 `backflow-audit` **0 待处理 exit 0**。**注入口径** = `SR_SESSIONS_DIR` + `SR_REWORK_REGISTRY`（同 selftest 先例；**夹具不落仓内**）。**本批零代码 / 零仓内足迹 / 零新断言**（口径保持 **27A+14B+7C+6H**）。**§3.9.5 U-9 行就地更新为「defer 维持 + 闭环条件已钉」**。
 
 ---
 
@@ -306,10 +307,10 @@ P-054 曾**显式否决**「在 `repo_stats` 内做 status 一致性 Layer-1 看
 - 它**只保证「已发生的信号被看见」**，**不保证「该返工的一定被返工」**（与 rework-graph §7-1「**清单是线索不是事实**」同源）；
 - **不自动发起回写**：本批**不实现** agent 自动重入上游（属 L3 分布式执行器 / P-039 P-c 范畴，未实现）。
 
-**三条未决项（四元登记块：判据 / 触发条件 / 当前倾向 / 证据等级；U-9 仍为 defer 且**带触发条件**——符合 P-058 净收敛纪律的「**新开必带触发条件**」分支；**U-8 经用户裁决支路已实施（P-092，2026-10-13）**；**U-10 经用户裁决支路已实施（P-089，2026-10-12）**）**：
+**三条未决项（四元登记块：判据 / 触发条件 / 当前倾向 / 证据等级；U-9 **经 P-097 裁定维持 defer**（闭环条件已钉、明文不提前开）且**带触发条件**——符合 P-058 净收敛纪律的「**新开必带触发条件**」分支；**U-8 经用户裁决支路已实施（P-092，2026-10-13）**；**U-10 经用户裁决支路已实施（P-089，2026-10-12）**）**：
 
 1. **U-8 `finalize` 决策强制 `upstream_impact` 三态**——判据 = `finalize` 步 decision 的 `metadata.upstream_impact ∈ {none, partial, overturned}`，且非 `none` 时须有对应返工登记；触发条件 = 一次真实的「上游被推翻但未登记」事例 **或** 用户裁决；**✅ 已实施（P-092，2026-10-13；用户裁决支路——机械支路 0 例未满足）**——`cmd_gate_step` 新增硬性组 `_finalize_impact_check`（三态**代码常量**；非 `none` ⇒ `sid ∈ registered`〔与 `backflow-audit`「待回写」同口径〕；**过渡期判据 = session 的 P 编号 ≥ 92**，形态不匹配 / 历史批次**不适用**；返工图不可用 ⇒ 耦合降级为**软性**）；规格 = [DESIGN §10.6](./DESIGN.md)（+ §8 **I-22**），实施 = [IMPLEMENTATION §14](./IMPLEMENTATION.md)；证据等级 = **E1**（selftest **81/81** + **存量零回归**逐例对照〔115 session / 含 finalize 103 / 新增判定项 **0**〕+ 门禁链全 exit 0 / 本批 session **自证**）。
-2. **U-9 CONSOLE「待重写 / 待重入」队列**——判据 = `console_gen.next_step()` 对「有回边 / 有 trigger」的 feature 输出行动档；触发条件 = `backflow-audit` 首次真实报出 **≥1 例**；当前倾向 = **defer**（当前**空转**——`next_step()` 对全 `done` 集合不可达，见 §3.8.6；属**视图层另批**）；证据等级 = **设计推断**。
+2. **U-9 CONSOLE「待重写 / 待重入」队列**——判据 = `console_gen.next_step()` 对「有回边 / 有 trigger」的 feature 输出行动档；触发条件 = `backflow-audit` 首次真实报出 **≥1 例**；当前倾向 = **defer（P-097 裁定维持，2026-10-14）**（当前**空转**——`next_step()` 对全 `done` 集合不可达，见 §3.8.6；属**视图层另批**）；证据等级 = **设计推断**。**P-097 裁定（2026-10-14）** = **闭环条件已钉死、明文维持 defer、不提前开**：**上游四段全部就位**（产生 `fork` / 登记 **U-10′**〔P-089〕/ 检测·强制 **U-8**〔P-092〕/ 受理·对账〔P-069 受控回边受理 + 真值源 + 两对账器〕）⇒ **本环为末环**；**触发判据机械化** = `backflow-audit` 报出 **≥1 例**即开（现值 **0 / 120 · `forks` 0**）；**不提前开之理由** = 触发未满即实施 ⇒ `next_step()` 对全 `done` 集合**结构性空转**、产物**必然空集** = 表演（与 U-10′ 属**乙类可开闸**的「潜在能力」不同）；**全链 E2E 已证「信号一到即一步闭合」**（仓外夹具八腿全通、真值源零污染；读数见 [PROGRESS P-097](../../docs/PROGRESS.md)）。
 3. **U-10 `fork` 一键薄壳**（乙类视图记 **U-10′**）——判据 = 一条命令完成 `fork` + 返工图登记（原语已存在）；触发条件 = 真实返工 **≥3 例** 或 用户裁决；**✅ 已实施（P-089，2026-10-12；用户裁决支路）**——`fork` 可选注册三件（`--reason` / `--trigger-kind` / `--provenance`，**all-or-none**）成功后直写返工图，**人工语义保留**（三件必填、无默认值，不自动生成 `reason` / `provenance`）；规格 = [DESIGN §10.5](./DESIGN.md)，实施 = [IMPLEMENTATION §13](./IMPLEMENTATION.md)；证据等级 = **E1**（selftest 71/71 + 真机对账 `rework_graph_check` exit 0 + 合成 E2E 单判定对账零判红）。
 
 ## 4. 综合分析
