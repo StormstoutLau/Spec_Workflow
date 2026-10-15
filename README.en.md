@@ -6,7 +6,7 @@
 
 ---
 
-Spec_Workflow is a **documentation-only methodology**: no source code, no build system, no runtime. It defines a 10-step spec process with a matching review apparatus for the "solo developer + LLM agent" workflow. Its core objective is to **suppress hallucinations and performative review in LLM-generated content as far as possible** — no agent framework can eliminate hallucinations outright, only suppress them to some degree; this framework makes suppression detectable, interceptable, and accountable through evidence grading, mechanical reconciliation, and process gates — including reviews written by the LLM itself.
+Spec_Workflow is a **documentation-only methodology (Layer-0)**: the methodology itself ships no source code, no build system, no runtime — a pure-document consumer (reader / auditor / external reviewer) can use it completely with zero tool dependencies; the repository additionally carries a set of **on-demand Layer-1 gate tools** (validators / a derived-view generator / a gate engine) that fire only at commit time and do not exist until activated (see [ADR-0010](adr/ADR-0010-lazy-loading-architecture-gate.md)). It defines a 10-step spec process with a matching review apparatus for the "solo developer + LLM agent" workflow. Its core objective is to **suppress hallucinations and performative review in LLM-generated content as far as possible** — no agent framework can eliminate hallucinations outright, only suppress them to some degree; this framework makes suppression detectable, interceptable, and accountable through evidence grading, mechanical reconciliation, and process gates — including reviews written by the LLM itself.
 
 > This system was not designed on a whiteboard. It grew out of real failure cases from the math-finance-reasoning project: the M2 statistics fabrication, the M6 concurrent self-review, and Phase 7C's hallucination checklist that contained hallucinations of its own. Every rule registers its originating incident and its failure conditions — and the methodology itself is under continuous measurement (see [Self-verification](#self-verification)).
 
@@ -36,6 +36,26 @@ A system of distrust. Five layers, each answered by a mechanism:
 
 **DC1–DC4 document contract** ([ADR-0007](adr/ADR-0007-unified-document-contract.md)): seven-field front-matter / status vocabulary / four-tier reference annotation / namespace registry. Every document carries machine-readable metadata; the authoritative namespace registry lives in ADR-0007 Appendix A.
 
+## Key Mechanisms
+
+Beyond the 10-step process and the six review rules, four **mechanically verifiable** mechanisms are central:
+
+### Backflow
+
+When an upstream input is overturned at the implementation or acceptance stage, the framework offers a **mechanical re-entry path**, not a verbal discipline. The backflow chain has five segments: (1) **produce** — `fork` branches a new event stream from an existing one, leaving the original intact; (2) **register** — an optional all-or-none triple (`--reason` / `--trigger-kind` / `--provenance`) writes the rework graph on success; (3) **detect & enforce** — the `finalize` step requires `metadata.upstream_impact ∈ {none, partial, overturned}`, and any non-`none` value demands that the session is registered in the rework graph; (4) **accept & reconcile** — `step-gate` accepts a controlled re-entry rewinding to an upstream step (same-position repeats remain hard failures), while `backflow-audit` reports "to be written back / to be re-entered" and `rework_graph_check` verifies the registry is self-consistent. The source of truth is `docs/rework-graph.json` (its trigger enumeration is the single source, preserving semantic single-sourcing). The first four segments are closed; the last (the view-side "to-rewrite / to-re-enter" queue) stays deferred, triggered by the first real backflow event.
+
+### Console Status Tracking
+
+[docs/CONSOLE.md](docs/CONSOLE.md) is a **purely derived view**, 100% script-generated (single write path); `scripts/console_gen.py` refreshes it on every commit, and `--check` verifies it matches the sources. The status truth source is "event-stream step sequence ∪ feature four-document front-matter" (derived) ∪ "human adjudication" (non-derived), split by value domain: execution states (`done` / `in-progress`) are machine-derived, decision states (`pending` / `blocked`) are human-written — **one source per position, no double writes**. The view presents three action queues whose headers are status rows (status word + mechanical count + DoR/DoD).
+
+### Lazy-loading Gate
+
+[ADR-0010](adr/ADR-0010-lazy-loading-architecture-gate.md): before absorbing any candidate (community framework / skill / MCP / external service / new in-repo tool), three questions are mandatory — (1) **which layer** (Layer-0 docs / Layer-1 tools), (2) **activation condition** (what turns it from "registered" to "implemented"; no trigger, no implementation), (3) **zero side effects while inactive** (no import / no launch / no scan / invisible to the doc layer). It complements the zero-dependency rule: zero-dependency blocks external dependency creep, lazy-loading blocks internal structural growth; **no movement until the trigger is met = no performance**.
+
+### Dogfooding
+
+This repository develops itself with its own process. Every change batch lands a `specwf-p<NNN>-<date>` decision stream (`tools/spec_runner/sessions/*.jsonl`, five steps `research → design → implement → verify → finalize`), enforced at commit time by the `step-gate` / `step-enforce` gates — a batch with no decision stream, or an inconsistent decision chain, blocks the commit (`.pre-commit-config.yaml` defines 5 pre-commit gates). The first instance is P-020 step-gate (also the first full use of ADR-0010's three questions).
+
 ## Self-verification
 
 <img src="docs/assets/readme/evidence.svg" alt="M7 self-verification data" width="840">
@@ -46,17 +66,23 @@ The workflow measures itself. Every review or audit round appends a sample to [M
 
 ```
 Spec_Workflow/
-├── SPEC_PROCESS.md            # Process constitution v1.4 (10 steps + 6 rules + ADD + forensics)
+├── SPEC_PROCESS.md            # Process constitution: 10 steps + 6 rules + ADD + forensics
+├── AGENTS.md                  # Behavior-alignment bridge for agents entering the repo
 ├── CODE_WIKI.md               # Full-repository wiki
 ├── adr/                       # Architecture decision records ×8 (ADR-0004–0011, all accepted)
 ├── docs/
-│   ├── ASSERTION_EVIDENCE_FRAMEWORK.md  # Assertion evidence framework v1.4
+│   ├── PROGRESS.md            # Task registry (source of truth for P-level tasks)
+│   ├── CONSOLE.md             # Project console (purely derived view, refreshed on commit)
+│   ├── rework-graph.json      # Rework-graph source of truth (backflow registry)
+│   ├── ASSERTION_EVIDENCE_FRAMEWORK.md  # Assertion evidence framework
 │   ├── M7_EVIDENCE_LOG.md     # Review comparison-arm ledger (single living carrier)
 │   ├── discoveries/           # Three-state discovery index (learning loop)
 │   └── dev-log/               # Development logs
+├── scripts/                   # Layer-1: validators + derived-view generator
+├── tools/spec_runner/         # Layer-1: gate engine (decision streams / step-gate / step-enforce)
 └── spec/
     ├── templates/             # 6 templates (four-document set + ADR + decision matrix)
-    ├── doc-contract/          # Document contract refactor plan v1.5 (verified)
+    ├── doc-contract/          # Document contract refactor plan (verified)
     └── <feature>/             # Per-feature four-document instances
 ```
 
@@ -79,6 +105,8 @@ Optional: `docs/ASSERTION_EVIDENCE_FRAMEWORK.md` for assertion grading during St
 | [adr/](adr/) | Eight ADRs: heterogeneity / evidence binding / authority / contract / gates / discoveries |
 | [docs/ASSERTION_EVIDENCE_FRAMEWORK.md](docs/ASSERTION_EVIDENCE_FRAMEWORK.md) | A/B/C grading + asymmetric configuration + double-blind rederivation |
 | [docs/M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md) | Self-verification evidence ledger |
+| [docs/PROGRESS.md](docs/PROGRESS.md) | Task registry: source of truth for P-level tasks |
+| [docs/CONSOLE.md](docs/CONSOLE.md) | Project console: purely derived status view |
 | [spec/templates/](spec/templates/) | Six copy-ready document templates |
 
 ## License
