@@ -3,18 +3,18 @@
 ---
 id: rework-and-decision-paths-DESIGN
 type: design
-version: 1.10
+version: 1.11
 status: in-review
-date: 2026-10-14
+date: 2026-10-16
 depends: [rework-and-decision-paths-RESEARCH, precommit-dc-validator-DESIGN, ADR-0007, ADR-0010]
 upstream: null
 ---
 
 > **Feature**: 回写流与多方案决策路径（P-050 后续阶段）
 > **创建日期**: 2026-09-27
-> **状态**: 评审中（v1.1 同基座自审 10 项已修订；v1.2 补 R2/R3 的 FTA 判据；v1.3 登记 FTA 工具化观察项；v1.4 Step 8 独立审查 7 项整改；**v1.5 交付 B 已实施**；**v1.6 登记跨仓对照观察项 H-RPC1/H-RPC2 + 四件套版本引用收口**；**v1.7 三问续研 Layer-1 最小实施（backflow-audit + 受控回边受理）**；**v1.8 U-10′ 薄壳规格（P-089：`fork` 注册三件 + 不变式 I-19~I-21）**；**v1.9 U-8 门禁链规格（P-092：`finalize` 强制 `upstream_impact` 三态 + 不变式 I-22 + 过渡期机械边界）**；**v1.10 回写自动化闭环条件裁定（P-097：U-9 维持 defer + 明文不提前开 + 全链 E2E 证成）**；**异基座独立 pass 仍待触发**）
+> **状态**: 评审中（v1.1 同基座自审 10 项已修订；v1.2 补 R2/R3 的 FTA 判据；v1.3 登记 FTA 工具化观察项；v1.4 Step 8 独立审查 7 项整改；**v1.5 交付 B 已实施**；**v1.6 登记跨仓对照观察项 H-RPC1/H-RPC2 + 四件套版本引用收口**；**v1.7 三问续研 Layer-1 最小实施（backflow-audit + 受控回边受理）**；**v1.8 U-10′ 薄壳规格（P-089：`fork` 注册三件 + 不变式 I-19~I-21）**；**v1.9 U-8 门禁链规格（P-092：`finalize` 强制 `upstream_impact` 三态 + 不变式 I-22 + 过渡期机械边界）**；**v1.10 回写自动化闭环条件裁定（P-097：U-9 维持 defer + 明文不提前开 + 全链 E2E 证成）**；**v1.11 U-9 实施（P-101：返工边 → CONSOLE 行动档「待重写 / 待重入」；用户裁决推翻 P-097 defer；selftest 55/55 → 57/57）**；**异基座独立 pass 仍待触发**）
 > **Spec 步骤**: Step 3-4
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.14**（27A+14B+7C+6H）
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.15**（27A+14B+7C+6H）
 > **v1.1 变更（2026-09-27，交付 B 规格自审批）**：对 §7 执行专项自审，**10 项发现（3 P1 / 3 P2 / 4 P3）全部修订**（明细见 §9.5）；核心订正 = **原语命令面**（`fork --seq-from` → `fork --session --seq --new`）与 **D-B2 收敛为「只增一词、不增字段」**（DC1 零改动）。同缺陷源 RESEARCH L103 同步修订；登记 **M7 样本 ㊲**（转述失真族）。
 > **v1.2 变更（2026-09-27，R2/R3 故障链判据批）**：用户提问「R2 R3 是否可以进行故障链方案分析」→ 以 **FTA**（RESEARCH §3.1 Q2 三项空白之一）对 R2/R3 建树，新增 **§7.6**：**R3 得倾向结论（否决显式反向链）**，且与 **I-10 的论证结构独立收敛**（两法互证）；**R2 判为不可裁**（两选项割集 3 vs 2 且方向相反 = 对称）⇒ 回归 ADR-0010 Q2 触发驱动。§7.4 两条裁决点同步改写；方法边界（给结构不给概率 / 粒度敏感 / 顶事件依赖）显式声明；**前置机械事实** = 文档 `status` 全仓**零语义消费方**（E1）。该应用登记为「故障链方法本仓首个真实用例」（RESEARCH §6），RESEARCH 升 **v1.4 → v1.5**。
 > **v1.3 变更（2026-09-27，FTA 工具化观察项登记）**：用户指令「补登为正式观察项」→ 将 **FTA 工具化**由「不立即工具化」升级为**正式观察项**：新增 **§10.2 H-FTA 行**（工具化触发条件），交叉引用 **RESEARCH §6** 的完整登记（3 条触发条件 / 载体预判 = Layer-0 判据 + Layer-1 纯图运算·零新依赖·须过 ADR-0010 三问 / 未触发处置 = 人建树 + 机器只做割集算术）。**本轮零实施、零代码改动**；同步订正「基于调研」版本引用（RESEARCH **v1.4 → v1.6**，原值系 v1.2 批未回写的**遗留漂移**）。
@@ -474,10 +474,10 @@ python tools/spec_runner/spec_runner.py fork \
 | # | 项 | 判据 | 触发条件 | 当前倾向 | 证据等级 |
 |---|---|---|---|---|---|
 | **U-8** | `finalize` 决策强制 `upstream_impact` 三态 | `finalize` 步 decision 的 `metadata.upstream_impact ∈ {none, partial, overturned}`，非 `none` 时须有对应返工登记 | 一次真实的「上游被推翻但未登记」事例 **或** 用户裁决 | **✅ 已实施（P-092，2026-10-13；经用户裁决支路——机械支路 0 例未满足）**——`cmd_gate_step` 新增硬性组 `_finalize_impact_check`（**过渡期判据 = P 编号 ≥ 92**）；规格 §10.6 / 实施 [IMPLEMENTATION §14](./IMPLEMENTATION.md) | **E1**（selftest 81/81 + 存量 115 session 逐例零回归 + 门禁链全 exit 0） |
-| **U-9** | CONSOLE「待重写 / 待重入」队列 | `console_gen.next_step()` 对「有回边 / 有 trigger」的 feature 输出行动档 | `backflow-audit` 首次真实报出 **≥1 例** | **defer（P-097 裁定维持，2026-10-14）**（上游四段全就位 ⇒ 本环为**末环**；当前**空转**——`next_step()` 对全 `done` 集合不可达，见 RESEARCH §3.8.6；属**视图层另批**）；**明文不提前开**（触发未满即实施 ⇒ 产物**必然空集** = 表演）；**全链 E2E 已证「信号一到即一步闭合」（P-097）** | 设计推断 |
+| **U-9** | CONSOLE「待重写 / 待重入」队列 | **`console_gen._tier_lines` 对「有回边」的 feature 输出行动档**（返工边 `origin` 会话名 `specwf-p<NNN>-` → 该 P 任务） | `backflow-audit` 首次真实报出 **≥1 例** **或** 用户裁决 | **✅ 已实施（P-101，2026-10-16；经用户裁决支路——机械支路 0 例未满足）**——`console_gen` 新增 `read_forks`（返回边对象）+ `fork_rewrite_pids`（边 `origin` → P 任务 ⇒ `Needs Attention`「待重写 / 待重入」，**先于 `done` 短路**）；**零边 ⇒ U-9 分支真机不触发**（真实仓 `forks=[]` ⇒ 三档队列无「待重写 / 待重入」条目）。规格 = [project-console DESIGN §5.5](../project-console/DESIGN.md)，实施 = [project-console IMPLEMENTATION §8](../project-console/IMPLEMENTATION.md)；**P-097 的 defer 裁定经用户裁决推翻**（覆盖留痕见 [PROGRESS P-101](../../docs/PROGRESS.md)）。**开闸支路 = 用户裁决**（同 U-8〔P-092〕/ U-10〔P-089〕先例） | **E1**（selftest **55/55 → 57/57**〔+S54/S55〕+ 真机 `console_gen --check` **零变化**〔真实仓 `forks=[]`〕+ 三校验器 0 违规） |
 | **U-10** | `fork` 一键薄壳（乙类视图记 U-10′） | 一条命令完成 `fork` + 返工图登记（原语已存在） | 真实返工 **≥3 例** 或 用户裁决 | **✅ 已实施（P-089，2026-10-12；经用户裁决支路）**——`fork` 可选注册三件直写返工图（规格 §10.5 / 实施 [IMPLEMENTATION §13](./IMPLEMENTATION.md)） | **E1**（selftest 71/71 + 真机对账 exit 0 + 合成 E2E 零判红） |
 
-> **U-9 为 defer 且带触发条件**（符合 P-058 净收敛纪律的「新开必带触发条件」分支）；**U-8 已实施（P-092）**、**U-10 已实施（P-089）**；**U-9 由 P-097 裁定（2026-10-14）：闭环条件已钉、维持 defer、明文不提前开**。完整论证见 [RESEARCH §3.9.5](./RESEARCH.md) 与 [PROGRESS P-097](../../docs/PROGRESS.md)。
+> **三条未决项均已实施**：**U-8（P-092，2026-10-13）**、**U-10（P-089，2026-10-12）**、**U-9（P-101，2026-10-16）**——U-9 的开闸支路 = **用户裁决**（用户指令「先闭环 U-9（视图侧『待重写 / 待重入』队列）按照吃狗粮执行」**推翻 P-097（2026-10-14）「明文不提前开」裁定**；同 U-8 / U-10 先例）。完整论证见 [RESEARCH §3.9.5](./RESEARCH.md) 与 [PROGRESS P-101](../../docs/PROGRESS.md)。
 
 ### 10.5 U-10′ 实施规格（P-089，A/B 裁定）
 

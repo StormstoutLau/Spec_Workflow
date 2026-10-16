@@ -462,16 +462,39 @@ def hook_chain(path: Path) -> list:
 
 
 def read_forks(root: Path) -> list:
-    """登记返工支线（真值源 `docs/rework-graph.json` 的 `forks`）——**确定性**输入。
+    """登记返工边（真值源 `docs/rework-graph.json` 的 `forks`）——**确定性**输入。
 
     取代原 `git branch` 本地枚举（环境态，跨环境不可复现；P-070 追加轮方案 A）。
+    **返回原始边对象列表**（U-9 / P-101：既供「⑂ fork / 支线」区渲染名称〔字段 = `new`〕，
+    也供行动档映射 P 号——`name` 系 `non_rework` 字段，`forks` 用 `new`）。
     不可读 → 空列表（降级，I-8 显式缺口）。
     """
     try:
         data = json.loads((root / "docs" / "rework-graph.json").read_text(encoding="utf-8"))
-        return [str(f.get("name", "—")) for f in data.get("forks", [])]
+        return [f for f in data.get("forks", []) if isinstance(f, dict)]
     except (OSError, ValueError):  # noqa: BLE001 —— 降级
         return []
+
+
+FORK_ORIGIN_PID_RE = re.compile(r"^specwf-(p\d{3})")
+
+
+def fork_rewrite_pids(forks: list) -> dict:
+    """返工边 → `{P 号: 行动说明}`（U-9，P-101）。
+
+    映射 = 边的 `origin` 会话名（`specwf-p<NNN>-<date>`）→ 该 **P 任务**（= 被推翻的上游）。
+    正名 = **「待重写 / 待重入」**（上游文档待重写 + 该回边待重入）。
+    只消费返工图**已登记**边（不重实现 `backflow-audit` 的待回写检测，守 I-10）；
+    **零边 ⇒ 空 dict ⇒ 行动档逐字节不变**（回归安全）。
+    """
+    out: dict = {}
+    for f in forks:
+        m = FORK_ORIGIN_PID_RE.match(str(f.get("origin", "")))
+        if not m:
+            continue
+        pid = "P-" + m.group(1)[1:]
+        out.setdefault(pid, f"待重写 / 待重入（返工边 `{f.get('new', '—')}` ← `{f.get('origin', '—')}`）")
+    return out
 
 
 # ---------------------------------------------------------------- 渲染（纯函数）
@@ -485,9 +508,15 @@ def _tier_dor(tier: str, derived: bool) -> str:
     return TIER_CONTRACT[tier][0]
 
 
-def _tier_lines(tasks, sessions, derived) -> list:
+def _tier_lines(tasks, sessions, derived, fork_pids=None) -> list:
     buckets = {t: [] for t in TIER_ORDER}
+    fork_pids = fork_pids or {}
     for t in tasks:
+        # U-9（P-101）：已登记返工边的**上游**任务 ⇒ 行动档「待重写 / 待重入」，
+        # **先于** `done` 短路（回边存在即不得被 done 遮蔽；零边 ⇒ 本支不触发）
+        if t.pid in fork_pids:
+            buckets["Needs Attention"].append(f"- **{t.pid}** {t.title} —— {fork_pids[t.pid]}")
+            continue
         d = derive_state(t, sessions.get(t.pid), derived)
         if d.tier:
             note = d.basis
@@ -828,7 +857,7 @@ def render(tasks, sessions, features, mapping, edges, dyn, hooks, forks, spec_di
         "",
         "## ⚑ 需要你 / NEXT",
     ]
-    out += _tier_lines(tasks, sessions, derived)
+    out += _tier_lines(tasks, sessions, derived, fork_rewrite_pids(forks))
     out += ["## feature 视图（分组键）"]
     out += _feature_table(features, mapping, sessions, spec_dir, tasks_by_pid)
     out += ["", f"## 事项视图（卡片键 · 活动区上限 {ACTIVE_CAP}）"]
@@ -846,7 +875,7 @@ def render(tasks, sessions, features, mapping, edges, dyn, hooks, forks, spec_di
     out += ["", "## ⑂ fork / 支线"]
     out += ["- 本地分支属**环境态**，不纳入派生视图（保证跨环境可复现；P-070 追加轮方案 A）",
             "- 回写支线真值源见 `docs/rework-graph.json`"]
-    out += [f"- 登记返工支线：{name}" for name in forks] if forks else ["- 登记返工支线：（无）"]
+    out += [f"- 登记返工支线：{f.get('new', '—')}" for f in forks] if forks else ["- 登记返工支线：（无）"]
     out += [""]
     return "\n".join(out)
 
@@ -1239,6 +1268,23 @@ def run_selftest() -> int:
     check("S53 派生态：Ready to Verify 第二进入支随开关态分流（finalize 已归 done ⇒ 不出现）",
           "或五步完整待收（最远 step = `finalize`）" in text
           and "或五步完整待收（最远 step = `finalize`）" not in text_d)
+
+    # --- U-9（P-101）夹具：返工边 → 行动档「待重写 / 待重入」（真实仓 forks 为空 ⇒ 零变化）---
+    root2 = _build_mini()
+    (root2 / "docs" / "rework-graph.json").write_text(
+        json.dumps({"forks": [{"new": "specwf-p003-rw-20260911",
+                               "origin": "specwf-p003-20260911", "seq_from": 1,
+                               "trigger_kind": "user-verdict", "reason": "夹具",
+                               "provenance": "manual:fixture", "date": "2026-09-11"}]},
+                   ensure_ascii=False), encoding="utf-8")
+    text_rw = build(root2)
+    check("S54 返工边 → 上游 P 任务进 Needs Attention「待重写 / 待重入」（先于 done 短路）",
+          "- **P-003** gamma 进行中 —— 待重写 / 待重入（返工边 "
+          "`specwf-p003-rw-20260911` ← `specwf-p003-20260911`）" in text_rw
+          and "**Needs Attention**（2 项）" in text_rw)
+    check("S55 零返工边 ⇒ 无 U-9 附加行（回归安全）",
+          "待重写 / 待重入" not in text)
+    shutil.rmtree(root2, ignore_errors=True)
 
     shutil.rmtree(root, ignore_errors=True)
     print(f"selftest: {passed}/{total} PASS")

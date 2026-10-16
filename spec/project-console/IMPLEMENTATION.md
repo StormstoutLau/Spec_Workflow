@@ -1,9 +1,9 @@
 ---
 id: project-console-IMPLEMENTATION
 type: design
-version: 1.22
+version: 1.23
 status: verified
-date: 2026-09-11
+date: 2026-10-16
 depends: [project-console-DESIGN, board-generator-IMPLEMENTATION]
 upstream: null
 ---
@@ -255,9 +255,15 @@ upstream: null
 
 【A】A-26: **P-084 C-40 Layer-0 首项落地批读数（E1，读数日期 2026-10-10）** = ① **实现面 = `scripts/console_gen.py` 单文件**——新增 `TIER_CONTRACT`（三档 DoR/DoD 契约常量，= §5 状态表与 §5.2 判据表的档级重投影）+ `_tier_dor()`（开关态分流：派生态下 RTV 第二进入支由 `_eff_status` 短路归 `done`）+ `_tier_lines` 列头两行形态（`**{tier}**（{n} 项）` + `> DoR：… · DoD：…`——**列头即状态行**：词 + 机械计数 + DoR/DoD；**limit / sum 不适用不声称**）；② `console_gen --selftest` **52/52 → 55/55**（+**S51** 三档计数（fixture 档位 1/2/7，声明 = 重数）/ **S52** DoR/DoD 齐备且为判据重投影 / **S53** 派生态分流）；③ **真机读数** = `docs/CONSOLE.md` 重生成（三档列头改状态行形态；存量三档 0/0/0——与 A-73 ④ 同读数）且 `--check` 报「与源一致」；④ **同批订正 1 处** = DESIGN §4 §1 行与实现不符（软性存疑实归 `Ready to Verify`，自 C-5 起）⇒ 就地订正 + 补 D19 引用；⑤ 三校验器全绿 + 门禁链 exit 0（`step-gate` 5/5 · `verify-anchor` 全真实 · `step-enforce --pid P-084` exit 0）；⑥ **边界** = 不改 `PROGRESS` 状态列 / 不改任何校验器 / 不新增门禁 / 零新依赖 / 新回退点 **R-5**。
 
+## 8. 本批实施记录（P-101 · U-9 视图侧返工行动档 · Layer-1 单文件）
+
+> P-101（2026-10-16）：rework 未决项 **U-9** 经**用户裁决支路**开闸（**推翻 P-097「明文不提前开」裁定**）；规格 = [DESIGN §5.5](./DESIGN.md)（**D21** + 不变式 **I-12** + 回退点 **R-8**）。
+
+**【A】A-27: P-101 U-9 实施批读数（E1，读数日期 2026-10-16）** = ① **实现面 = `scripts/console_gen.py` 单文件**——`read_forks` 改返**边对象列表**（`forks` 字段 = `new`；旧读 `name` 系隐患，本批就地订正）+ 新增 `fork_rewrite_pids`（`FORK_ORIGIN_PID_RE = ^specwf-(p\d{3})` → 边 `origin` 映射该 P 任务）+ `_tier_lines(tasks, sessions, derived, fork_pids=None)` 增**前置**分支（`t.pid in fork_pids` ⇒ `Needs Attention`「待重写 / 待重入」，**先于** `derive_state` 的 `done` 短路）+ `render` 调用点传 `fork_rewrite_pids(forks)` + 「⑂ fork / 支线」区改渲染 `f.get('new')`；② `console_gen --selftest` **55/55 → 57/57**（+**S54** 返工边 → `P-003` 进 `Needs Attention`〔计数 1→2〕/ **S55** 零返工边 ⇒ 无 U-9 附加行）；③ **零边等价（I-12 ①）** = U-9 分支**真机不触发**（真实仓 `forks=[]` ⇒ `fork_pids` 为空 ⇒ 三档队列**无**「待重写 / 待重入」条目；`--check` 报「与源一致」）；本批 `docs/CONSOLE.md` 变化**仅限本批自身登记**（P-101 卡片与计数）；④ **单点消费（I-12 ②）** = 只读返工图**已登记**边，不重实现 `backflow-audit` 检测；⑤ `rework_graph_check` **exit 0**（`forks=0 · non_rework=1`，**真值源零写入**）；⑥ 三校验器全绿 + 门禁链 exit 0（`step-gate` 5/5 · `verify-anchor` 全真实 · `step-enforce --pid P-101` exit 0）；⑦ **边界** = Layer-1 单文件 / 零新依赖 / 零新门禁 / **不写返工真值源** / 不改 `PROGRESS` 状态列 / 不改任何校验器。
+
 ## 附录 A：A 类断言明细
 
-- A-1 至 A-26：见 §2.2 / §3 / §5 各 `【A】` 行（本机实测；A-5/A-6 为 P-044 新增，A-7/A-8 为 P-046 新增，A-9/A-10/A-11 为 P-047 及收口批新增，**A-12 为 P-042 v1.8 新增**，**A-13 为 P-042 v1.11 新增**，**A-14 为 P-042 v1.15 新增**，**A-15 为 P-042 v1.17 新增**，**A-16 为 P-042 v1.18 新增**，**A-17 为 P-042 v1.19 新增**，**A-18 为 P-042 v1.20 新增**，**A-19 为 P-042 v1.21 新增**，**A-20 为 P-042 v1.22 新增**，**A-21 为 P-042 v1.23 新增**，**A-22 为 P-042 v1.24 新增**，**A-23 为 P-042 v1.25 新增**，**A-24 为 P-064 新增**，**A-25 为 P-068 新增**，**A-26 为 P-084 新增**）。
+- A-1 至 A-26：见 §2.2 / §3 / §5 各 `【A】` 行（本机实测；A-5/A-6 为 P-044 新增，A-7/A-8 为 P-046 新增，A-9/A-10/A-11 为 P-047 及收口批新增，**A-12 为 P-042 v1.8 新增**，**A-13 为 P-042 v1.11 新增**，**A-14 为 P-042 v1.15 新增**，**A-15 为 P-042 v1.17 新增**，**A-16 为 P-042 v1.18 新增**，**A-17 为 P-042 v1.19 新增**，**A-18 为 P-042 v1.20 新增**，**A-19 为 P-042 v1.21 新增**，**A-20 为 P-042 v1.22 新增**，**A-21 为 P-042 v1.23 新增**，**A-22 为 P-042 v1.24 新增**，**A-23 为 P-042 v1.25 新增**，**A-24 为 P-064 新增**，**A-25 为 P-068 新增**，**A-26 为 P-084 新增**，**A-27 为 P-101 新增**）。
 
 ## 附录 B：B 类推断机读块
 
