@@ -3,16 +3,16 @@
 ---
 id: rework-and-decision-paths-CHECKLIST
 type: design
-version: 1.7
+version: 1.8
 status: accepting
-date: 2026-10-13
+date: 2026-10-19
 depends: [rework-and-decision-paths-IMPLEMENTATION, rework-and-decision-paths-DESIGN]
 upstream: null
 ---
 
 > **Feature**: 回写流与多方案决策路径（P-050 后续阶段）
 > **创建日期**: 2026-09-27
-> **状态**: accepting（验收中；**v1.7 增记 P-092 U-8 门禁链实施** / v1.6 增记 P-089 U-10′ 薄壳实施 / v1.5 增记 P-069 三问续研 Layer-1 最小实施 / v1.4 版本引用收口 / v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
+> **状态**: accepting（验收中；**v1.8 增记 P-101 U-9 实施（视图侧返工行动档；经用户裁决支路开闸、推翻 P-097 defer；P-103 回写订正）** / **v1.7 增记 P-092 U-8 门禁链实施** / v1.6 增记 P-089 U-10′ 薄壳实施 / v1.5 增记 P-069 三问续研 Layer-1 最小实施 / v1.4 版本引用收口 / v1.3 增记交付 B 实施 / v1.2 增记 Step 8 独立审查 7 项整改）
 > **Spec 步骤**: Step 7-8, 10
 > **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) **v1.6**
 > **基于设计**: [DESIGN.md](./DESIGN.md) **v1.9**
@@ -219,5 +219,5 @@ upstream: null
 | **P-069 三问续研 Layer-1 最小实施**（`backflow-audit` + 受控回边受理） | — | — | ✅ 已实施（[IMPLEMENTATION §12](./IMPLEMENTATION.md)；selftest **63/63**） |
 | **U-10′ `fork` 注册薄壳**（P-089，乙类执行序 2） | — | — | ✅ 已实施（[IMPLEMENTATION §13](./IMPLEMENTATION.md)；规格 [DESIGN §10.5](./DESIGN.md)；selftest **71/71**；回退点 **R-7**） |
 | **U-8 `finalize` 三态强制**（P-092，乙类执行序 5） | — | — | ✅ 已实施（[IMPLEMENTATION §14](./IMPLEMENTATION.md)；规格 [DESIGN §10.6](./DESIGN.md)；selftest **81/81**；回退点 **R-10**） |
-| **U-9** 未决项（CONSOLE 待回写队列） | — | — | 未决（defer，带触发条件；[DESIGN §10.4](./DESIGN.md)） |
+| **U-9 CONSOLE 视图侧返工行动档**（「待重写 / 待重入」队列；P-101） | — | — | ✅ 已实施（[project-console DESIGN §5.5](../project-console/DESIGN.md) **D21** + **I-12** + 回退点 **R-8**；实施 [project-console IMPLEMENTATION §8](../project-console/IMPLEMENTATION.md)；selftest **55/55 → 57/57**）——**开闸支路 = 用户裁决**（推翻 P-097「明文不提前开」裁定，同 U-8 / U-10 先例） |
 | 更新 PROGRESS.md / CODE_WIKI.md | — | — | ✅ |
