@@ -11,7 +11,7 @@ upstream: null
 # 验收清单：项目控制台实施批（P-043）/ 视图增补批（P-044）/ 承载与步骤表批（P-046）/ 锚点与映射收敛批（P-047，含收口修正批）
 
 > **Feature**: 项目控制台（`spec/project-console/`）
-> **被验收物**: [DESIGN v1.14](./DESIGN.md) + [IMPLEMENTATION v1.22](./IMPLEMENTATION.md)（**P-064 批的契约载体 = [`independent-verify DESIGN v1.4`](../independent-verify/DESIGN.md)**——锚点形态契约归属该 feature，同 C-29 / C-30 先例；**P-084 批落地面 = `scripts/console_gen.py` 单文件**——D19 / A-26 / DR-29）
+> **被验收物**: [DESIGN v1.17](./DESIGN.md) + [IMPLEMENTATION v1.23](./IMPLEMENTATION.md)（**P-064 批的契约载体 = [`independent-verify DESIGN v1.4`](../independent-verify/DESIGN.md)**——锚点形态契约归属该 feature，同 C-29 / C-30 先例；**P-084 批落地面 = `scripts/console_gen.py` 单文件**——D19 / A-26 / DR-29）
 > **Spec 步骤**: Step 7-8
 > **v1.1 变更（P-044）**: 新增功能验收 **F11-F15**（描述列 / 描述回退链 / per-feature 折叠与锚点 / 三口径架构图 / I-8 缺口清单）+ 不变式 **I-8** 行；§8 补 P-044 复跑记录；§9 回填 H6/H7 实测部分。
 > **v1.2 变更（P-046，用户指令「先执行 C-13 和 C-14，C-16 共享模块单独处理」）**: 新增功能验收 **F16**（hook 链列表块 + `name` + 安全化通则）/ **F17**（步骤级动态描述六列 + 多轮 + 无 session 显式缺失）+ 不变式 **I-9** 行；§8 补 P-046 复跑记录（含 **I-9 全表机械核对**）；§9 再回填 H6/H7；**C-15 / C-16 显式登记为「不在本批」**。

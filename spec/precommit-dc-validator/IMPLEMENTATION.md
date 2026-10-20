@@ -14,7 +14,7 @@ upstream: null
 > **创建日期**: 2026-08-19
 > **状态**: verified（独立 pass 通过，2026-08-20）
 > **Spec 步骤**: Step 5-6
-> **基于设计**: [DESIGN.md](./DESIGN.md) v1.2
+> **基于设计**: [DESIGN.md](./DESIGN.md) v1.3
 > **基于调研**: [RESEARCH.md](./PRECOMMIT_DC_VALIDATOR_RESEARCH.md) v1.1
 > **审查状态**: v1.1 经独立 pass（2026-08-20，DeepSeek V4 Pro **真异基座**——生成端 GLM-5.3，RULE-1 时序独立 + RULE-5 模型异质性双满足）：E1 四通道复核全过（selftest 13/13 重跑 / 全仓 dry-run 39 文件 0 违规 / 双跑逐字节一致 I-2 / pre-commit 通道 Passed）；词表常量与 DESIGN §6.3 逐字符核对一致（I-4）；DR-5/DR-6 修复重验通过。发现 3 P3（§4.3/§4.5 签名声明未覆盖 `root=ROOT` 实施参数 / CHECKLIST §8.1 跨模块映射断言不实 / DESIGN §10.1-4 LOC 核对缺位）→ v1.2 修正注 + DR-7；M7 样本⑬（映射闭合 1 处）
 > **v1.2 变更（2026-08-20）**: 独立 pass 修正——§4.3/§4.5 补 `root=ROOT` 实施参数声明（P3-1）；§10 增 DR-7（LOC 对账登记）；status draft → verified
