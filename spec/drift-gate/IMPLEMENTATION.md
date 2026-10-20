@@ -15,7 +15,7 @@ upstream: null
 > **状态**: verified（selftest 27/27 + 三通道全绿）
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md) v1.1（§7 对实施的输入 / §9 实施追记）
-> **基于调研**: [RESEARCH.md](./RESEARCH.md) v1.0
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) v1.3
 > **任务来源**: 用户指令「按照吃狗粮模式 继续执行」（drift-gate 实施裁决）+ 懒加载 gate 重审通过（Q1 Layer-1 / Q2 用户裁决激活 / Q3 行为兼容）
 
 ---

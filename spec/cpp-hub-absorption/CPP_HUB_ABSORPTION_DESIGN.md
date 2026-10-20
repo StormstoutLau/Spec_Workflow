@@ -1,9 +1,9 @@
 ---
 id: cpp-hub-absorption-DESIGN
 type: design
-version: 1.0
-status: draft
-date: 2026-08-16
+version: 1.1
+status: verified
+date: 2026-08-17
 depends: [CPP_HUB_GAP_ANALYSIS_RESEARCH, CPP_HUB_GAP_ANALYSIS_AUDIT, FWK-ASSERTION, SPEC_PROCESS, ADR-0006, doc-contract-refactor]
 upstream: null
 ---

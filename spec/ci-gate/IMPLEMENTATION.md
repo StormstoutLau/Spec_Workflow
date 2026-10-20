@@ -14,7 +14,7 @@ upstream: null
 > **创建日期**: 2026-10-03
 > **状态**: draft（草稿）
 > **Spec 步骤**: Step 5-6
-> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.1**
+> **基于设计**: [DESIGN.md](./DESIGN.md) **v1.2**
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) **v1.1**（5A+3B+3C+2H）
 
 ---

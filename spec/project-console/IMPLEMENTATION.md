@@ -11,7 +11,7 @@ upstream: null
 # 实施文档：项目控制台多视图生成器与归属迁移（P-043）/ 视图增补（P-044）/ 承载与步骤表（P-046）/ 锚点与映射收敛（P-047，含收口修正批）
 
 > **Feature**: 项目控制台（`spec/project-console/`）
-> **设计依据**: [DESIGN v1.8](./DESIGN.md)（D1-D18 + I-1~I-10）
+> **设计依据**: [DESIGN v1.17](./DESIGN.md)（D1-D21 + I-1~I-11）
 > **Spec 步骤**: Step 5-6
 > **本批范围**: P-043 = 归属迁移（前身退役）+ 多视图扩展；**P-044 = 视图增补（描述列 / per-feature 流程 / 架构图口径）**；**P-046 = 承载修复与步骤级动态描述（hook 链表形态 / 步骤四字段）**；**P-047 = 锚点双属性（C-15）+ 映射来源语义反转与共享模块（C-16）+ 收口修正批（§6 缺映射清单 / 兜底面归零）**；**Layer-1 生成端派生视图 + hook 入口只读映射**
 > **v1.1 变更（P-044，用户指令「好的，按 C-9/C-10/C-12 落代码」）**: `scripts/console_gen.py` 增补 **D8 描述列**（`first_h1` / `shorten_title` / `feature_desc`）+ **D9 per-feature 流程**（`_feature_process_section`）+ **D10 架构图显式关系口径**（`_arch_section` + `DECLARED_SOURCES` / `TRUTH_NODES`）+ 新增不变式 **I-8**；selftest **16/16 → 27/27**；**C-11 不在本批**。
