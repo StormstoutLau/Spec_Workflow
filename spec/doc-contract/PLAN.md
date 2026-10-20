@@ -1,9 +1,9 @@
 ---
 id: doc-contract-refactor
 type: design
-version: 1.8
+version: 1.9
 status: verified
-date: 2026-09-29
+date: 2026-10-20
 depends: [SPEC-PROCESS, ADR-0004, ADR-0005, ADR-0006, ADR-0007, DIS-007, FWK-ASSERTION]
 upstream: null
 ---
@@ -29,10 +29,11 @@ upstream: null
 | v1.6 | 2026-08-18 | §1 DC2 状态词表消歧（P-007 复验 P2-1 触发）：① 增 `design` 两行（一般设计文档 `draft/in-review/verified`；CHECKLIST 实例 `pending/accepting/accepted`，判别规则 = id 后缀 `-CHECKLIST`）；② 原"template 实例"行改判 `template` type 行（当前全仓零使用，词表保留）；③ DC2 表 v1.5 前一直缺 design 行（词表仅载于头部注 + ADR-0007 D4）一并修复；E1 全仓实证 14 份 design 文档零违规，纯澄清无迁移 | [DESIGN §6.3](../precommit-dc-validator/DESIGN.md) P2-1 + [ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md) 澄清追记 |
 | v1.7 | 2026-09-29 | §1 DC2 判别规则扩宽：id **后缀** `-CHECKLIST` → id **含 `CHECKLIST` 段**（覆盖 `-CHECKLIST-<变体>`，如 `step-gate-CHECKLIST-FUNC`）；修复两份 `-CHECKLIST-FUNC` 被误判「一般设计文档」致其 `accepting` 状态**机械不可表达**；机械承载 `dc_validator` M2 + selftest F19-F21；E1 全仓仅 2 份受影响，零迁移 | P-052（用户裁决「扩宽 DC2 判别规则」）+ drift-gate 观察项 |
 | v1.8 | 2026-09-29 | §1 新增 **DC2.1 任务状态词表（+「来源」列）**——把**任务粒度状态**词表从 `PROGRESS` L3 载体声明上提到契约面（与 DC2 **type 主轴轴正交**的独立子块）；重申词表四取值**零改动**（`pending / in-progress / blocked / done`），仅**新增「来源」列**（执行态可派生 → 「机器派生」；决策态不可派生 → 「人工」）；§1 增设轴正交消歧注；`docs/PROGRESS.md` L3 声明**改指向 DC2.1**（单一权威）。**零代码、零词表取值变更**（DC1 零改动） | [P-042 v1.8 状态归属契约 Layer-0](../project-console/DESIGN.md) D16（C-20）+ [RESEARCH §7.13](../project-console/RESEARCH.md) |
+| v1.9 | 2026-10-20 | §1 新增 **DC5 版本引用一致性**（六条判据：收窄判据面 / 两种版本写法 / front-matter 为真值源 / 不判定面 / 全仓扫描面 / P2 等级）；§1 标题改口径 `DC1-DC4` → `DC1-DC5`；**边界显式声明** = `CODE_WIKI` §2.1 树 / §9 索引 / `PROGRESS` 汇总行仍属 Layer-0。机械承载 = `dc_validator` **M6** + selftest **F27-F33**；存量全仓 **0 违规** | P-105 全量回写审计（18 处中 9 处属本类）+ 用户指令「按方案 B 执行，开启最小门禁」 |
 
 ---
 
-## 1. 全局统一动作（DC1-DC4，原 G1-G4，含 P2-3/P2-4 修正）
+## 1. 全局统一动作（DC1-DC5，原 G1-G4，含 P2-3/P2-4 修正；DC5 = v1.9 新增）
 
 > **改名说明（v1.5）**: G1-G4 → DC1-DC4（[ADR-0007](../../adr/ADR-0007-unified-document-contract.md) D2）——G1-G4 与 Cpp_Hub DEVELOPMENT_WORKFLOW §4.1 基准对齐门禁跨仓撞车；DC = Document Contract（本仓库作用域），Cpp_Hub 侧 G 系列不动。映射：G1→DC1（front-matter）/ G2→DC2（状态词表）/ G3→DC3（引用四档）/ G4→DC4（命名空间登记）。
 
@@ -112,6 +113,21 @@ upstream: null
 | M1-M7 | 外部·元审计里程碑 | 首次出现处加脚注 |
 | Phase-7B/7C | 外部·Cpp_Hub | |
 | E1-E5 / A/B/C / H#·B#ID | 实例级 | 不入登记表 |
+
+### DC5. 版本引用一致性（v1.9 新增，P-106）
+
+> **动机**：版本号在四文档头部「基于…」行中被**复制**（非派生）；批内只改 front-matter 时，下游引用留旧值 ⇒ **静默漂移**（P-105 全量审计实证 18 处，其中 9 处属本类）。本契约把该面从「Layer-0 手工纪律」升为「提交瞬间机械拦截」。
+
+| # | 规则 | 判据 |
+|---|------|------|
+| DC5-1 | **判据面（收窄）** | 仅行首（允许 `>`）为 `**基于实施\|基于设计\|基于调研\|设计来源\|设计依据\|被验收物**` + `:` 的**头部声明行** |
+| DC5-2 | **版本写法（两种）** | ① 链接文本尾部 `vX.Y`；② 链接右括号后紧邻 `vX.Y`（允许 `**` 包裹） |
+| DC5-3 | **真值源** | 目标 `.md` 的 front-matter `version`（唯一权威，禁反向） |
+| DC5-4 | **不判定面** | 无版本写法 / 目标无 front-matter 或无 `version` / 目标不存在（断链归 DC3）/ 代码围栏内 / 行内代码跨度内 |
+| DC5-5 | **扫描面** | **全仓**（非 staged 子集）——否则「改 A 的 version、未改引用 A 的 B」检不出 |
+| DC5-6 | **违规等级** | **P2**（阻断提交），消息须含「写 vX.Y / 目标 front-matter 为 vA.B」 |
+
+**边界（诚实声明）**：`CODE_WIKI` §2.1 树 / §9 索引 / `PROGRESS` 汇总行为**自然语言行**，形态不稳定 ⇒ **不在 DC5 判据面**，仍属 Layer-0 手工纪律。
 
 ---
 

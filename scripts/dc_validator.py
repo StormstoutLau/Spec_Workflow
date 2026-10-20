@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""DC 契约校验器（DC1-DC4 + R7）——契约的机器可读定义。
+"""DC 契约校验器（DC1-DC5 + R7）——契约的机器可读定义。
 
-权威源：spec/doc-contract/PLAN.md §1 DC1-DC4 (v1.6) + adr/ADR-0007 D4/D5
-       + docs/ASSERTION_EVIDENCE_FRAMEWORK.md v1.4 R7。
+权威源：spec/doc-contract/PLAN.md §1 DC1-DC5（DC5 = v1.9 P-106）
+       + adr/ADR-0007 D4/D5 + docs/ASSERTION_EVIDENCE_FRAMEWORK.md v1.4 R7。
 词表常量逐字符复制自 spec/precommit-dc-validator/DESIGN.md §6.3（I-4 单一真值源）。
 
-不变式（DESIGN §8）：I-1 只读 / I-2 确定性 / I-3 零新规则 / I-4 单一真值源 / I-5 异构于生成端。
+不变式（DESIGN §8）：I-1 只读 / I-2 确定性 / I-3 零新规则 / I-4 单一真值源 / I-5 异构于生成端
+       / I-6 版本引用对账面（DC5）不受 staged 子集限制（全仓扫描）。
 退出码：0 全部通过 / 1 发现契约违规 / 2 工具自身错误。
 
 用法：
@@ -382,6 +383,71 @@ def check_links(file, text, root=ROOT):
     return results
 
 
+# ---------------------------------------------------------------- M6 version-refs
+
+# DC5（P-106）：只认「头部声明行」六类标签；版本写法两种（label 内 / 链接后）
+RE_REF_HEADER = re.compile(
+    r"^\s*>?\s*\*\*(?:基于实施|基于设计|基于调研|设计来源|设计依据|被验收物)\*\*\s*:")
+RE_VER_IN_LABEL = re.compile(r"v(\d+\.\d+)\s*$")
+RE_VER_AFTER_LINK = re.compile(r"^\s*\**\s*v(\d+\.\d+)")
+
+
+def check_version_refs(files, root=ROOT):
+    """M6：DC5 版本引用一致性——头部声明行内的版本 = 目标文档 front-matter `version`。
+
+    判据面（刻意收窄，防假阳性）：
+    - 行首（允许 `>`）为 `**基于实施|基于设计|基于调研|设计来源|设计依据|被验收物**` + `:`；
+    - 版本写法 = 链接文本尾部 `vX.Y` 或链接右括号后紧邻 `vX.Y`（可带 `**`）；
+    - 目标须为仓内 `.md` 且带 front-matter `version`（缺则**不判定**，非违规）；
+    - 代码围栏与行内代码跨度不参与（同 M5）。
+
+    调用面 = 全仓（I-6）：pre-commit 的 staged 子集不足以检出「改 A 的 version、未改引用 A 的 B」。
+    """
+    results = []
+    for f in files:
+        full = os.path.normpath(os.path.join(root, f))
+        try:
+            text = _read(full)
+        except OSError:
+            continue
+        base = os.path.dirname(full)
+        in_fence = False
+        for i, ln in enumerate(text.splitlines(), 1):
+            if ln.strip().startswith("```"):
+                in_fence = not in_fence
+                continue
+            if in_fence or not RE_REF_HEADER.match(ln):
+                continue
+            scanned = strip_inline_code(ln)
+            for m in RE_MD_LINK.finditer(scanned):
+                label, tgt = m.group(1).strip(), m.group(2).strip()
+                if tgt.startswith(("http://", "https://", "#", "mailto:")):
+                    continue
+                p = tgt.split("#")[0].strip()
+                if not p.endswith(".md"):
+                    continue
+                target = os.path.normpath(os.path.join(base, p))
+                if not os.path.exists(target):
+                    continue                      # 断链归 M5
+                vm = RE_VER_IN_LABEL.search(label)
+                ver = vm.group(1) if vm else None
+                if ver is None:
+                    am = RE_VER_AFTER_LINK.match(scanned[m.end():])
+                    ver = am.group(1) if am else None
+                if ver is None:
+                    continue                      # 无版本写法 ⇒ 不在 DC5 判据面
+                tfm, _ = parse_frontmatter(_read(target))
+                if not isinstance(tfm, dict) or "version" not in tfm:
+                    continue                      # 目标无 version ⇒ 不可判
+                actual = tfm["version"].strip()
+                if actual != ver:
+                    results.append(CheckResult(
+                        "dc5", f, "P2",
+                        "版本引用过期: 「%s」写 v%s，目标 %s 的 front-matter 为 v%s"
+                        % (label, ver, p, actual), i))
+    return results
+
+
 # ---------------------------------------------------------------- M1 CLI
 
 # 目录排除（M1）。`.arc` = ARC 图存储（P-035，同 `.git` 先例）。
@@ -430,10 +496,12 @@ def run_checks(files, checks, root=ROOT):
             results += check_links(f, text, root)
     if "namespace" in checks:
         results += check_namespace(gather_md_files(root), root)
+    if "version_ref" in checks:
+        results += check_version_refs(gather_md_files(root), root)   # I-6：全仓，不受 staged 子集限制
     return results
 
 
-ALL_CHECKS = ("frontmatter", "namespace", "counting", "links")
+ALL_CHECKS = ("frontmatter", "namespace", "counting", "links", "version_ref")
 
 
 def main(argv=None):
@@ -444,6 +512,7 @@ def main(argv=None):
     ap.add_argument("--check-namespace", action="store_true", help="DC4 id 全仓唯一")
     ap.add_argument("--check-counting", action="store_true", help="R7 计数 = 机械重数")
     ap.add_argument("--check-links", action="store_true", help="DC3 档 1 相对链接")
+    ap.add_argument("--check-version-ref", action="store_true", help="DC5 版本引用一致性（全仓）")
     ap.add_argument("--selftest", action="store_true", help="内嵌自测（IMPLEMENTATION §8.1）")
     ap.add_argument("files", nargs="*", help="目标 .md（缺省 = 全仓；pre-commit 传入 staged 列表）")
     args = ap.parse_args(argv)
@@ -676,6 +745,48 @@ def run_selftest():
         f26 = w("f26.md", FM_OK + "\n路径 `D:\\Art\\wp\\` 见 [bad](./nope.md)\n")
         r = check_links(f26, _read(os.path.join(tmp, f26)), root=tmp)
         expect(len(r) == 1 and "nope.md" in r[0].message, "F26 跨度正常收尾不吞其后链接")
+
+        # --- P-106 DC5：M6 版本引用对账（头部声明行 × 目标 front-matter version） ---
+        # F27 链接后版本写法且一致 → 零违规
+        w("tgt27.md", FM_OK)
+        f27 = w("f27.md", FM_OK + "\n> **基于设计**: [DESIGN.md](./tgt27.md) v1.0\n")
+        r = check_version_refs([f27], root=tmp)
+        expect(len(r) == 0, "F27 版本一致（链接后写法）零违规")
+
+        # F28 链接后版本陈旧且带 ** → P2
+        f28 = w("f28.md", FM_OK + "\n> **基于设计**: [DESIGN.md](./tgt27.md) **v1.1**\n")
+        r = check_version_refs([f28], root=tmp)
+        expect(len(r) == 1 and r[0].severity == "P2" and "版本引用过期" in r[0].message,
+               "F28 版本过期（链接后写法）报 P2")
+
+        # F29 label 内版本写法陈旧 → P2
+        w("tgt29.md", FM_OK)
+        f29 = w("f29.md", FM_OK + "\n> **设计来源**: [RESEARCH v9.9](./tgt29.md)\n")
+        r = check_version_refs([f29], root=tmp)
+        expect(len(r) == 1 and r[0].severity == "P2" and "v9.9" in r[0].message,
+               "F29 版本过期（label 内写法）报 P2")
+
+        # F30 无版本写法 → 不判定（不在判据面）
+        f30 = w("f30.md", FM_OK + "\n> **基于设计**: [DESIGN.md](./tgt27.md)（说明文字）\n")
+        r = check_version_refs([f30], root=tmp)
+        expect(len(r) == 0, "F30 无版本写法不判定")
+
+        # F31 一行双链接：仅第二个陈旧 → 恰 1 条且指向第二个
+        w("tgt31.md", FM_OK)
+        w("tgt31b.md", FM_OK)
+        f31 = w("f31.md", FM_OK + "\n> **被验收物**: [DESIGN v1.0](./tgt31.md) + [IMPLEMENTATION v9.9](./tgt31b.md)\n")
+        r = check_version_refs([f31], root=tmp)
+        expect(len(r) == 1 and "tgt31b.md" in r[0].message, "F31 双链接仅陈旧项报 P2")
+
+        # F32 非头部声明行（普通正文）→ 不在判据面
+        f32 = w("f32.md", FM_OK + "\n正文引用 [DESIGN.md](./tgt27.md) v9.9\n")
+        r = check_version_refs([f32], root=tmp)
+        expect(len(r) == 0, "F32 普通正文不计入 DC5")
+
+        # F33 围栏内示例头部行 → 不触发
+        f33 = w("f33.md", FM_OK + "\n```\n> **基于设计**: [DESIGN.md](./tgt27.md) v9.9\n```\n")
+        r = check_version_refs([f33], root=tmp)
+        expect(len(r) == 0, "F33 围栏内示例不触发")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

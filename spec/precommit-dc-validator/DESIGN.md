@@ -1,9 +1,9 @@
 ---
 id: precommit-dc-validator-DESIGN
 type: design
-version: 1.3
+version: 1.4
 status: draft
-date: 2026-10-13
+date: 2026-10-20
 depends: [precommit-dc-validator-RESEARCH, ADR-0007, SPEC-PROCESS, FWK-ASSERTION, doc-contract-refactor]
 upstream: null
 ---
@@ -18,6 +18,7 @@ upstream: null
 > **审查状态**: v1.1 经复验（2026-08-18，DeepSeek V4 Pro，**同基座新上下文**——RULE-1 时序独立满足、RULE-5 模型异质性未满足，真异基座需另开 GLM 会话）：§2.1 六行映射全部可追溯；引用文件/章节/行号（PLAN L55-60）全核实；发现 P2-1（§6.3 词表双轴歧义未裁决，已升格为实施前置条件）+ P3-2（§3.4 退出码 2 路径，已补注）并修正
 > **v1.2 变更（2026-08-18）**: P2-1 前置条件闭合——[PLAN v1.6 §1 DC2](../doc-contract/PLAN.md) 消歧落地（design 增两行，判别规则 = id 后缀 `-CHECKLIST`；E1 全仓 14 份 design 文档零违规）+ [ADR-0007 D4](../../adr/ADR-0007-unified-document-contract.md) 澄清追记。**v1.1 引证勘误**：v1.1 P2-1 注称"PLAN L59 design 状态"——实际 L59 为"template 实例"行，design 词表 v1.6 前载于 PLAN 头部注 + ADR-0007 D4（DC2 表原缺 design 行）；该引证错误入 M7 样本⑧（行号桶，实施期自查发现，规律④ 第二实例）
 > **v1.3 变更（2026-10-13，P-090 M5 第四排除上下文）**: §4.5 增**行内代码跨度排除**设计（CommonMark 反引号游程配对标；原 `check_links` 排除面仅三处 = 围栏 / 引文行 / `spec/templates/`，属**未考虑**而非 by-design）。**来源** = [M7 §4 候选③](../../docs/M7_EVIDENCE_LOG.md) 方向 B 落地（触发 = 用户裁决；方向 A 表述弱纪律已实施于 P-062，本批为工具兜底）；通过门 = **真实位点零损失**（真机机械枚举，见 §4.5 与 [IMPLEMENTATION §3.5](./IMPLEMENTATION.md)）
+> **v1.4 变更（2026-10-20，P-106 DC5 版本引用一致性）**: 新增 **§4.6 `check_version_refs`（M6）** + **§8 I-6（DC5 扫描面 = 全仓）**；契约本体先行落 [PLAN §1 DC5](../doc-contract/PLAN.md)（v1.8 → v1.9，守 I-3/I-4：**不新增发明规则**，只机器化已定义契约）。**来源** = P-105 全量回写审计（18 处欠账中 9 处属「头部声明行版本引用陈旧」）+ 用户指令「按方案 B 执行，开启最小门禁」。**判据面刻意收窄**（仅六类头部标签 × 两种版本写法），并通过门 = 存量全仓 **0 违规** + selftest **F27-F33**（含 4 条负例：围栏内 / 普通正文 / 无版本写法 / 双链接仅陈旧项）
 
 ---
 
@@ -210,6 +211,25 @@ def check_links(file: str) -> list[CheckResult]:
 - **通过门（预登记 + 真机实测，2026-10-13）**：① **真实位点零损失**——全仓 156 文件机械枚举：naive 奇偶剥离漏检 12 位点，正解实现漏检 3 位点且经真值判定**均落在代码跨度内**（非真实链接），真实位点 9/9 保留；② **新造位点 0**；③ 存量全仓 **0 违规**。
 - **回退点 R-8**：改动 = 单文件 `scripts/dc_validator.py` 内新增 `strip_inline_code` 一处 + `check_links` 一行调用 ⇒ **单点可逆**（回退 = 删函数 + 撤调用，无其它文档/契约依赖）。
 
+### 4.6 `check_version_refs`（M6，v1.4 增 · P-106）
+
+```python
+def check_version_refs(files: list[str], root: str = ROOT) -> list[CheckResult]:
+    """
+    校验 DC5 —— 四文档头部声明行的版本引用与目标 front-matter `version` 一致。
+
+    Returns:
+        每个「写 vX.Y、目标为 vA.B」的头部声明行一条 P2；不在判据面者不产出结果。
+    """
+```
+
+- **契约真值源**：[PLAN §1 DC5](../doc-contract/PLAN.md)（v1.9，六条判据 DC5-1~DC5-6）——本函数是**纯机器承载**，不新增规则（守 **I-3**）。
+- **判据面（收窄，DC5-1/DC5-2）**：仅 `行首（允许 `>`）+ **基于实施|基于设计|基于调研|设计来源|设计依据|被验收物** + `:`」的头部声明行；版本写法两种 = **链接文本尾部 `vX.Y`** 或 **右括号后紧邻 `vX.Y`（允许 `**`）**。
+- **不判定面（DC5-4）**：无版本写法 / 目标无 front-matter 或无 `version` / 目标不存在（断链归 M5）/ 代码围栏内 / **行内代码跨度内**（复用 M5 的 `strip_inline_code`，同源不重实现）。
+- **扫描面（I-6）**：**全仓** `gather_md_files(root)`，**不随 staged 子集收缩**——否则「改 A 的 version、未改引用 A 的 B」在只提交 A 时检不出（这正是 P-105 的漂移形态）。
+- **边界（诚实声明）**：`CODE_WIKI` §2.1 树 / §9 索引 / `PROGRESS` 汇总行为自然语言行，**不入判据面**（同 DC5 边界条），仍由 Layer-0 纪律 + 批后审计承接。
+- **回退点 R-11**：单文件 `scripts/dc_validator.py` 内删 `RE_REF_HEADER` / `RE_VER_IN_LABEL` / `RE_VER_AFTER_LINK` / `check_version_refs` + `run_checks` 一处分支 + CLI 一项 + F27-F33 七 fixture ⇒ 回 v1.4 行为；无数据迁移。
+
 ## 5. 替代方案
 
 ### 5.1 方案 A：pre-commit 本地 hook + 纯 Python 脚本（选择）
@@ -307,6 +327,7 @@ CHECKLIST_STATUS_VOCAB = {"pending", "accepting", "accepted"}
 3. **I-3 零新规则**：校验器不新增任何契约规则，只机器化执行 ADR-0007 / PLAN / FWK-ASSERTION R7 已定义的规则
 4. **I-4 单一真值源**：词表/字段常量变更必须先在权威文档（ADR-0007 / PLAN）生效，同 commit 改 `dc_validator.py` 常量，禁止反向
 5. **I-5 异构于生成端**：计数（R7）与唯一性（DC4）用独立 grep / 文件枚举，绝不依赖 LLM 判断（M7 规律③）
+6. **I-6 版本引用对账面 = 全仓**（v1.4 增，P-106）：DC5 扫描面固定为 `gather_md_files(root)`，**不随 pre-commit 的 staged 子集收缩**——漂移的检出前提是「被引用方」也在扫描面内；收缩即漏检「改 A 的 version、未改引用 A 的 B」形态
 
 ## 9. 幻觉排除审查（Step 4 Review）
 
