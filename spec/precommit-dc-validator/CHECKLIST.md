@@ -3,9 +3,9 @@
 ---
 id: precommit-dc-validator-CHECKLIST
 type: design
-version: 1.2
+version: 1.3
 status: accepted
-date: 2026-10-13
+date: 2026-10-20
 depends: [precommit-dc-validator-IMPLEMENTATION, precommit-dc-validator-DESIGN]
 upstream: null
 ---
@@ -15,9 +15,10 @@ upstream: null
 > **状态**: 已验收（2026-08-20 独立 pass 通过——真异基座 DeepSeek V4 Pro，RULE-1 时序独立 + RULE-5 模型异质性双满足；v1.0"有条件通过"的条件已满足，升 accepted）
 > **v1.1 变更（2026-08-20）**: 独立 pass 修正——§8.1 跨模块契约行映射断言修正（M4 不共享解析器，M7 样本⑬）；§8.2 补录独立轮 3 P3 发现；§10.2/§10.3/§11 落地验收决定与签字
 > **v1.2 变更（2026-10-13，P-090 M5 第四排除上下文）**: §2.5 增「行内代码跨度排除」验收项（对应 [IMPLEMENTATION v1.4](./IMPLEMENTATION.md) §3.5/§4.5 + §8.1 F22-F26）；§10.1 计数同步（功能 17→18、总计 50+4→51+4，口径 = §2.1-2.5 表格行数）。**本批为增量验收，不重写 P-008 批次的历史结论与签字**（§10.2/§10.3 沿用）；增量证据 = selftest **32/32 PASS** + 全仓 **162 文件 0 违规** + 探针真实位点零损失（9/9）
+> **v1.3 变更（2026-10-20，P-106 DC5 版本引用一致性）**: §2.7 新增 M6 验收五项（正例零误报 / 两种写法的检出能力 / 判据面边界 / 逐链接判定 / 扫描面 = 全仓）；§3.1 补 M6 签名行；§10.1 计数同步（功能 18→23、接口 6→7、不变式 5→6、总计 51+4→58+4）。增量证据 = selftest **39/39 PASS**（+F27-F33）+ 全仓 `--check-version-ref` **164 文件 / 0 结果 / 0 违规**（**上线零迁移**）；本批不重写 P-008 历史结论与签字
 > **Spec 步骤**: Step 7-8, 10
-> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) v1.4（独立 pass 审查对象为 v1.1；v1.2 为修正版，v1.3/v1.4 为 P-052/P-090 增量）
-> **基于设计**: [DESIGN.md](./DESIGN.md) v1.3（v1.3 为 P-090 增量）
+> **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md) v1.5（独立 pass 审查对象为 v1.1；v1.2 为修正版，v1.3/v1.4/v1.5 为 P-052/P-090/P-106 增量）
+> **基于设计**: [DESIGN.md](./DESIGN.md) v1.4（v1.3 为 P-090 增量；v1.4 为 P-106 DC5 增量）
 > **验收配置**: 同基座自查（GLM-5.3，既写又审——如实标注；机械证据全部 E1 可重放，非记忆断言）
 
 ---
@@ -36,16 +37,16 @@ upstream: null
 
 | 检查项 | 状态 | 说明 |
 |--------|------|------|
-| DESIGN.md 的模块在 IMPLEMENTATION.md 中有对应实施 | ☑ | M1-M5 ↔ IMPLEMENTATION §3.1-3.5 一一对应；数据结构 §4.6 ↔ DESIGN §6.1/6.2 |
-| IMPLEMENTATION.md 的接口签名与 DESIGN.md 一致 | ☑ | 五接口一致；`+text` 参数差异（读盘复用优化）已在 IMPLEMENTATION §4.2/4.4/4.5 显式声明——语义不变，属实施优化非契约偏离 |
-| DESIGN.md 的不变式在 IMPLEMENTATION.md 中有实施 | ☑ | I-1~I-5 ↔ IMPLEMENTATION §7（验证方式含 E1 重放路径） |
+| DESIGN.md 的模块在 IMPLEMENTATION.md 中有对应实施 | ☑ | M1-M6 ↔ IMPLEMENTATION §3.1-3.6 一一对应；数据结构 §4.6 ↔ DESIGN §6.1/6.2 |
+| IMPLEMENTATION.md 的接口签名与 DESIGN.md 一致 | ☑ | 六接口一致；`+text` 参数差异（读盘复用优化）已在 IMPLEMENTATION §4.2/4.4/4.5 显式声明——语义不变，属实施优化非契约偏离 |
+| DESIGN.md 的不变式在 IMPLEMENTATION.md 中有实施 | ☑ | I-1~I-6 ↔ IMPLEMENTATION §7（验证方式含 E1 重放路径） |
 | 无设计未覆盖的实施 | ☑ | 实施期决策全部显式登记为 DR-1~DR-6（IMPLEMENTATION §10），无隐式偏离 |
 
 ### 1.3 IMPLEMENTATION.md ↔ CHECKLIST.md 对齐
 
 | 检查项 | 状态 | 说明 |
 |--------|------|------|
-| IMPLEMENTATION.md 的功能点在本 checklist 有验收项 | ☑ | §2.1-2.5 对应 M1-M5；§3 对应五接口；DR-5/DR-6 修复对应 §2.6 |
+| IMPLEMENTATION.md 的功能点在本 checklist 有验收项 | ☑ | §2.1-2.7 对应 M1-M6；§3 对应六接口；DR-5/DR-6 修复对应 §2.6 |
 | 本 checklist 的验收项可追溯到 IMPLEMENTATION.md | ☑ | 各验收项注明来源节号 |
 
 ### 1.4 术语一致性
@@ -109,13 +110,24 @@ upstream: null
 | ADR-0004/0005 断链 | findstr 定位 + Edit 修复 + dry-run | `../../` → `../` 后链接可解析 | ☑ | `.tmp_link_scan.txt` 两处 L21；修复后 dry-run 零违规 |
 | selftest 计数 12/12→机械计数（DR-6） | 重跑 selftest | 13 个 expect 实调 = 汇总计数 13/13 | ☑ | `.tmp_selftest2.txt`：`selftest: 13/13 PASS`（v1.0 曾打印 13 行 PASS 却称 12/12——DESIGN §10.2 风险 1 预注册场景的实际命中，M7 样本⑨登记） |
 
+### 2.7 M6 版本引用对账（DC5，v1.3 增 · P-106）
+
+| 验收项 | 测试方法 | 通过条件 | 状态 | 证据 |
+|--------|---------|---------|------|------|
+| DC5 正例零误报 | `--selftest` F27 / 全仓 `--check-version-ref` | 版本一致 ⇒ 0 结果 | ☑ | selftest F27 PASS；全仓 **164 文件 / 0 结果 / 0 违规** |
+| DC5 检出能力（两种写法） | `--selftest` F28（链接后 `**vX.Y**`）/ F29（label 内 `vX.Y`） | 各报 1 条 P2 且 message 含「版本引用过期」 | ☑ | selftest F28/F29 PASS |
+| 判据面边界（不误判） | `--selftest` F30（无版本）/ F32（普通正文）/ F33（围栏内） | 均 0 结果 | ☑ | selftest F30/F32/F33 PASS |
+| 逐链接判定（非整行判） | `--selftest` F31（一行双链接、仅第二个陈旧） | 恰 1 条且指向第二链接 | ☑ | selftest F31 PASS |
+| 扫描面 = 全仓（I-6） | 代码级核对：`run_checks` 用 `gather_md_files(root)` | 不随 staged 子集收缩 | ☑ | [IMPLEMENTATION §3.6](./IMPLEMENTATION.md) + `dc_validator.py` `version_ref` 分支 |
+
 ## 3. 接口验收
 
-### 3.1 五接口（M1-M5）
+### 3.1 六接口（M1-M6）
 
 | 验收项 | 通过条件 | 状态 |
 |--------|---------|------|
 | 签名与 DESIGN §4.1-4.5 一致 | 函数名/参数/返回类型一致（`+text` 差异已显式登记） | ☑ |
+| M6 签名与 DESIGN §4.6 一致（v1.3 增） | `check_version_refs(files, root=ROOT)` + CLI `--check-version-ref` 在位 | ☑ |
 | 正常输入返回正确结果 | 合规文件 → 零违规结果（selftest F9） | ☑ |
 | 边界输入处理正确 | 无 front-matter / 装饰线 / 非 .md → [skip]（F5/F10） | ☑ |
 | 异常输入不崩溃 | 不可读文件 → P2 不抛异常（F7）；YAML 坏结构 → P1 结果（F2） | ☑ |
@@ -133,9 +145,10 @@ upstream: null
 |---------------------------|---------|------|
 | I-1 只读 | 代码审查（无 `open(..., 'w')` 于检查路径；selftest tempfile 属系统临时目录）+ dry-run 后工作树无越界改动 | ☑ |
 | I-2 确定性 | 无时间/网络/随机调用；`os.walk` 稳序；dry-run 多轮输出一致 | ☑ |
-| I-3 零新规则 | 检查项 ↔ DC1-DC4/R7 逐一对应（§1.2 对齐验收）；实施决策全部 DR 登记 | ☑ |
-| I-4 单一真值源 | TYPE_VOCAB/CHECKLIST_STATUS_VOCAB 常量 ↔ DESIGN §6.3 逐字符一致 | ☑ |
-| I-5 异构于生成端 | 计数/唯一性/链接 = 纯 `re`/`os` 机械枚举，无 LLM 调用 | ☑ |
+| I-3 零新规则 | 检查项 ↔ DC1-DC5/R7 逐一对应（§1.2 对齐验收；M6 ↔ DC5）；实施决策全部 DR 登记 | ☑ |
+| I-4 单一真值源 | TYPE_VOCAB/CHECKLIST_STATUS_VOCAB 常量 ↔ DESIGN §6.3 逐字符一致；DC5 版本真值源 = 目标 front-matter `version`（不另设版本表） | ☑ |
+| I-5 异构于生成端 | 计数/唯一性/链接/版本相等 = 纯 `re`/`os` 机械枚举，无 LLM 调用 | ☑ |
+| I-6 版本引用对账面 = 全仓（v1.3 增 · P-106） | 代码审查：`run_checks` 以 `gather_md_files(root)` 调用 M6（**不随 pre-commit staged 子集收缩**）+ selftest F27-F33；`--check-version-ref` 全仓 164 文件 0 违规 | ☑ |
 
 ## 5. 错误处理验收
 
@@ -213,14 +226,14 @@ upstream: null
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |------|------|------|------|------|
 | 文档一致性 | 10 | 10 | 0 | 0 |
-| 功能 | 18 | 18 | 0 | 0 |
-| 接口 | 6 | 6 | 0 | 0 |
-| 不变式 | 5 | 5 | 0 | 0 |
+| 功能 | 23 | 23 | 0 | 0 |
+| 接口 | 7 | 7 | 0 | 0 |
+| 不变式 | 6 | 6 | 0 | 0 |
 | 错误处理 | 6 | 6 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
 | 兼容性 | 4 | 4 | 0 | 0（Linux 实机为可选项） |
 | ADD 审计 | 5 + 4 盲区 | 5 + 4 | 0 | 独立轮（Step 10） |
-| **总计** | **51 + 4** | **51 + 4** | **0** | **1（独立 pass）** |
+| **总计** | **58 + 4** | **58 + 4** | **0** | **1（独立 pass）** |
 
 ### 10.2 验收决定
 

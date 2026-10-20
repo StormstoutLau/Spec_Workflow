@@ -3,9 +3,9 @@
 ---
 id: precommit-dc-validator-IMPLEMENTATION
 type: design
-version: 1.4
+version: 1.5
 status: verified
-date: 2026-10-13
+date: 2026-10-20
 depends: [precommit-dc-validator-DESIGN, precommit-dc-validator-RESEARCH]
 upstream: null
 ---
@@ -14,12 +14,13 @@ upstream: null
 > **创建日期**: 2026-08-19
 > **状态**: verified（独立 pass 通过，2026-08-20）
 > **Spec 步骤**: Step 5-6
-> **基于设计**: [DESIGN.md](./DESIGN.md) v1.3
+> **基于设计**: [DESIGN.md](./DESIGN.md) v1.4
 > **基于调研**: [RESEARCH.md](./PRECOMMIT_DC_VALIDATOR_RESEARCH.md) v1.1
 > **审查状态**: v1.1 经独立 pass（2026-08-20，DeepSeek V4 Pro **真异基座**——生成端 GLM-5.3，RULE-1 时序独立 + RULE-5 模型异质性双满足）：E1 四通道复核全过（selftest 13/13 重跑 / 全仓 dry-run 39 文件 0 违规 / 双跑逐字节一致 I-2 / pre-commit 通道 Passed）；词表常量与 DESIGN §6.3 逐字符核对一致（I-4）；DR-5/DR-6 修复重验通过。发现 3 P3（§4.3/§4.5 签名声明未覆盖 `root=ROOT` 实施参数 / CHECKLIST §8.1 跨模块映射断言不实 / DESIGN §10.1-4 LOC 核对缺位）→ v1.2 修正注 + DR-7；M7 样本⑬（映射闭合 1 处）
 > **v1.2 变更（2026-08-20）**: 独立 pass 修正——§4.3/§4.5 补 `root=ROOT` 实施参数声明（P3-1）；§10 增 DR-7（LOC 对账登记）；status draft → verified
 > **v1.3 变更（2026-09-29，P-052 DC2 判别规则扩宽）**: M2 副轴判别由「id **后缀** `-CHECKLIST`」扩宽为「id **含 `CHECKLIST` 段**」——修复 `step-gate/defect-fixes` 两份 `-CHECKLIST-FUNC` 被误判一般档致 `accepting` **机械不可表达**；selftest **24/24 → 27/27**（新增 F19-F21）；§8.1 fixture 表补 F19-F21 行（**注**：本表 F11-F18 为 v1.1/v1.2 历史增量，未逐一回填，**以代码为准**——属「声明未随实物更新」同族，登记见 [drift-gate RESEARCH 观察项](../drift-gate/RESEARCH.md)）。契约文本见 [doc-contract PLAN §1 DC2 v1.7](../doc-contract/PLAN.md)。
 > **v1.4 变更（2026-10-13，P-090 M5 第四排除上下文「行内代码跨度」）**: §3.5 增第四排除上下文；§4.5 补 `strip_inline_code` 实施注（CommonMark 反引号游程配对标 + `_ASCII_PUNCT` 转义消费 + 收尾按原文扫描）；selftest **27/27 → 32/32**（新增 F22-F26）；§8.1 fixture 表补 F22-F26 行；§8.2 基线读数更新为 **162 文件 0 违规**；§10 增 DR-8（第四排除上下文的语义真值源 = CommonMark 参考实现）。设计见 [DESIGN §4.5](./DESIGN.md) v1.3
+> **v1.5 变更（2026-10-20，P-106 DC5 版本引用一致性）**: §3.6 新增 M6 实施（三常量 + `check_version_refs` + 全仓调用 I-6 + CLI `--check-version-ref`）；selftest **32/32 → 39/39**（新增 F27-F33）；§8.1 补七行；§8.2 补 v1.5 读数（**164 文件 / 0 结果 / 0 违规**，上线零迁移）。契约文本见 [doc-contract PLAN §1 DC5](../doc-contract/PLAN.md) v1.9；设计见 [DESIGN §4.6](./DESIGN.md) v1.4；回退点 **R-11**
 
 ---
 
@@ -198,11 +199,22 @@ def check_links(file: str, text: str) -> list[CheckResult]:
 - 其余相对路径：剥 `#锚点`，以文件所在目录 resolve，`os.path.exists` 判存在；不存在 → P2
 - 实测基线：修复 ADR-0004/0005 两处真断链后 dry-run 应零违规
 
+### 3.6 M6 version-refs（v1.5 增 · P-106）
+
+**承载**：`RE_REF_HEADER` / `RE_VER_IN_LABEL` / `RE_VER_AFTER_LINK` 三常量 + `check_version_refs(files, root)`；`run_checks` 以 `gather_md_files(root)` 全仓调用（I-6），CLI 增 `--check-version-ref`。
+
+- 逐行：围栏翻转（同 M5）→ `RE_REF_HEADER.match` 过滤非头部行 → `strip_inline_code`（复用 M5 同一实现，守 I-10 不重实现）→ 逐链接取版本
+- 版本取值优先序：链接文本尾部 `vX.Y` → 右括号后紧邻 `vX.Y`（允许 `**`）→ 皆无 ⇒ **不判定**
+- 目标解析：相对文件目录 resolve；不存在 ⇒ 跳过（断链归 M5）；无 front-matter / 无 `version` ⇒ **不判定**
+- 比较：**字符串相等**（front-matter `version` 为 `1.17` 形态 vs 引用 `v1.17` ⇒ 剥 `v` 后逐字比对）；不等 ⇒ **P2**，message = `版本引用过期: 「<label>」写 vX.Y，目标 <path> 的 front-matter 为 vA.B`
+- 低效排除：单次全仓扫描；每次命中目标才读一次目标文件（~40 引用量级，无缓存、无索引）
+
 #### 低效操作排除
 
 | 潜在低效 | 排除措施 |
 |---------|---------|
 | 每链接一次 `stat` 系统调用 | 33 文件 × ~10 链接量级下无感知开销，不做缓存（避免过度工程） |
+| M6 重复读同一目标文件 | 引用基数 ~40（全仓头部行），目标文件多为 1-3 KB；实测全仓 `--check-version-ref` 无感知，不做缓存（避免跨文件状态破坏 I-2） |
 
 ## 4. 接口实施
 
@@ -331,12 +343,19 @@ Windows（主控站，entry 走 `python` 前缀规避 `/bin/sh`，RESEARCH §2.1
 | F24 `\` 转义反引号 + 其后真实断链 | P-090 转义标点先消费为字面量（escape-blind 配对会吞掉其后真实链接） | 仅真实断链报 P2 |
 | F25 `]` 紧邻反引号跨度再紧邻 `(` | P-090 跨度替换为空格 ⇒ 不跨边界新造位点 | 零违规 |
 | F26 Windows 路径形态（收尾反引号前有反斜杠）+ 其后真实断链 | P-090 收尾扫描按原文（跨度正常收尾，不吞其后链接） | 仅真实断链报 P2 |
+| F27 链接后版本写法且一致 | P-106 DC5 正例（`v1.0` = 目标 front-matter） | 零结果 |
+| F28 链接后版本陈旧（`**v1.1**` vs 目标 1.0） | P-106 DC5 检出（右括号后写法） | P2 且 message 含「版本引用过期」 |
+| F29 链接文本内版本陈旧（`[RESEARCH v9.9]`） | P-106 DC5 检出（label 内写法） | P2 且 message 含 `v9.9` |
+| F30 头部行但无版本写法 | P-106 判据面边界（不可判 ⇒ 不报） | 零结果 |
+| F31 一行双链接、仅第二个陈旧 | P-106 逐链接判定（不整行判） | 恰 1 条且指向第二链接 |
+| F32 普通正文含陈旧版本 | P-106 判据面边界（非头部行） | 零结果 |
+| F33 围栏内示例头部行 | P-106 排除上下文（同 M5 围栏） | 零结果 |
 
 selftest 输出 `N/N PASS` 或首条失败详情，退出码 0/1。
 
 ### 8.2 集成测试（dry-run）
 
-`pre-commit run dc-validator --all-files`（staged 语义全量模拟）+ `python scripts/dc_validator.py`（独立全仓调用）双通道，全仓 `.md` 零违规为通过线（真违规修复后；文件数随 feature 文档落地递增，v1.1 实测 34 = 33 存量 + IMPLEMENTATION.md 自身，CHECKLIST.md 落地后 35）。**v1.4 读数（2026-10-13）**：全仓 **162 文件 / 47 结果 / 0 违规**（P-090 前后同值 ⇒ I-2 行为等价面零回归）；selftest **32/32 PASS**。
+`pre-commit run dc-validator --all-files`（staged 语义全量模拟）+ `python scripts/dc_validator.py`（独立全仓调用）双通道，全仓 `.md` 零违规为通过线（真违规修复后；文件数随 feature 文档落地递增，v1.1 实测 34 = 33 存量 + IMPLEMENTATION.md 自身，CHECKLIST.md 落地后 35）。**v1.4 读数（2026-10-13）**：全仓 **162 文件 / 47 结果 / 0 违规**（P-090 前后同值 ⇒ I-2 行为等价面零回归）；selftest **32/32 PASS**。**v1.5 读数（2026-10-20，P-106 DC5）**：全仓 **164 文件 / 0 结果 / 0 违规**（`--check-version-ref` 单跑；存量 **0 处**陈旧引用 ⇒ 门禁上线零迁移）；selftest **39/39 PASS**（+F27-F33）。
 
 ### 8.3 属性测试
 
