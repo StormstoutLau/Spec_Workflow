@@ -61,3 +61,8 @@ jobs:
           python scripts/console_gen.py --selftest
           python tools/spec_runner/spec_runner.py selftest
           python scripts/rework_graph_check.py --selftest
+
+      # ── P-111 外置黑盒回归（step_enforce 包装层 + spec_map 契约；stdlib unittest）──
+      # 定位：只补内嵌 selftest 未覆盖的 CLI 包装层；**不接 pre-commit hook**（B1 档）。
+      - name: 外置黑盒回归（tests/，P-111）
+        run: python -m unittest discover -s tests -v
