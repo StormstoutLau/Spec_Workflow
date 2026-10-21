@@ -45,3 +45,12 @@ repos:
         language: system
         pass_filenames: false
         files: ^(docs/PROGRESS\.md|tools/spec_runner/sessions/.*\.jsonl|spec/.*(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST)\.md)$
+      # 外置黑盒回归（P-111，用户裁决 C：第 6 道门禁；覆盖原 B1「不加 hook」）
+      # 设计：tests/test_hook_blackbox.py（stdlib unittest；temp 镜像仓；15 用例）
+      # pass_filenames=false：unittest discover 不接收文件名；files 收窄到被测脚本与测试自身
+      - id: blackbox-tests
+        name: External blackbox regression (tests/, P-111)
+        entry: python -m unittest discover -s tests -v
+        language: system
+        pass_filenames: false
+        files: ^(tests/.*\.py|scripts/(step_enforce|spec_map)\.py)$

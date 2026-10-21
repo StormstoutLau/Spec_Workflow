@@ -54,7 +54,7 @@ Spec_Workflow 是一套**纯文档型方法论（Layer-0）**：方法论本体�
 
 ### 吃狗粮开发（Dogfooding）
 
-本仓用自己定义的流程开发自己。每个改动批次落一条 `specwf-p<NNN>-<date>` 决策流（`tools/spec_runner/sessions/*.jsonl`，五步 `research → design → implement → verify → finalize`），由 `step-gate` / `step-enforce` 门禁在提交瞬间强制校验——批次无决策流、或决策链不一致即阻断提交（`.pre-commit-config.yaml` 共 5 道 pre-commit 门禁）。首例 = P-020 step-gate（同时是 ADR-0010 三问的首个完整用例）。
+本仓用自己定义的流程开发自己。每个改动批次落一条 `specwf-p<NNN>-<date>` 决策流（`tools/spec_runner/sessions/*.jsonl`，五步 `research → design → implement → verify → finalize`），由 `step-gate` / `step-enforce` 门禁在提交瞬间强制校验——批次无决策流、或决策链不一致即阻断提交（`.pre-commit-config.yaml` 共 6 道 pre-commit 门禁）。首例 = P-020 step-gate（同时是 ADR-0010 三问的首个完整用例）。
 
 ## 方法论自测（无外部对照）
 

@@ -54,7 +54,7 @@ When an upstream input is overturned at the implementation or acceptance stage, 
 
 ### Dogfooding
 
-This repository develops itself with its own process. Every change batch lands a `specwf-p<NNN>-<date>` decision stream (`tools/spec_runner/sessions/*.jsonl`, five steps `research → design → implement → verify → finalize`), enforced at commit time by the `step-gate` / `step-enforce` gates — a batch with no decision stream, or an inconsistent decision chain, blocks the commit (`.pre-commit-config.yaml` defines 5 pre-commit gates). The first instance is P-020 step-gate (also the first full use of ADR-0010's three questions).
+This repository develops itself with its own process. Every change batch lands a `specwf-p<NNN>-<date>` decision stream (`tools/spec_runner/sessions/*.jsonl`, five steps `research → design → implement → verify → finalize`), enforced at commit time by the `step-gate` / `step-enforce` gates — a batch with no decision stream, or an inconsistent decision chain, blocks the commit (`.pre-commit-config.yaml` defines 6 pre-commit gates). The first instance is P-020 step-gate (also the first full use of ADR-0010's three questions).
 
 ## Self-verification (no external control)
 
