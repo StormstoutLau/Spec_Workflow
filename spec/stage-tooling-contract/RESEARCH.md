@@ -1,17 +1,20 @@
 # 调研文档：分阶段工具与提示词契约
 
 ---
+
 id: stage-tooling-contract-RESEARCH
 type: design
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-10-21
 depends: [SPEC-PROCESS, ADR-0010, FWK-ASSERTION]
 upstream: null
+
 ---
 
 > **Feature**: stage-tooling-contract（分阶段工具 / Skill / 提示词绑定——可行性、边界与代价）
 > **创建日期**: 2026-10-21
+> **修订**: v1.1（2026-10-21，P-115 · 裁决 5 = C 档：**U-2 全量核验**——19 条参考文献 + 3 条补充页逐条回原文；外部读数从「摘要级 E2/E3」升级为「T1 定位」；订正 **9 处**转述 / 归属 / 未取证缺陷〔含 1 处**方向倒置**〕；§4.2 按 T1 原文重写；U-2 **关闭**）
 > **状态**: draft（草稿；本轮只出调研与建议，不改 SPEC_PROCESS 正文）
 > **Spec 步骤**: Step 1-2
 > **任务来源**: 用户指令「落档 然后分析当前工作流的每个阶段是否可以精细化 指定特定 MCP skill 工具 或者提示词——例如调研阶段要求寻找学术源、开源社区等高质量信息；执行阶段要求 TDD 实现；设计阶段可能需要约束 taste；同时针对学术推理任务可能需要额外的提示词约束」
@@ -22,12 +25,12 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 14 | 本仓 / 本机 / 外部摘要的机械取证（E1-E2，见附录 A） |
+| A 事实类 | 15 | 本仓 / 本机 / 外部 **T1 原文**的机械取证（E1，见附录 A） |
 | B 推断类 | 6 | 由 A 类推出的判定（见附录 B） |
 | C 类（决策） | 5 | 不参与 R7 机械对账（DR-2） |
 | 假设区 | 4 | 未实测项（见附录 C） |
 
-> **取证口径**：本仓事实 = E1（逐字读文件 / 机械枚举）；外部结论 = **摘要级取证（E2）**，未逐篇读全文——凡转述外部论文的读数，均标注「摘要级」并不作为本仓结论的唯一支撑。**未回原文的数字不入 A 类**。
+> **取证口径（v1.1 起）**：本仓事实 = E1（逐字读文件 / 机械枚举）；外部结论 = **T1 原文定位**（arXiv 摘要 / HTML 章节 / 官方文档段落），逐条登记于 §7.1。T2 官方页（Anthropic 工程博客 / Spec Kit 站 / Contra / Glif）只作背景佐证，不与 T1 混级。**未定位到原文的数字不入 A 类**；v1.0 的 E3 二手数字已删除，不再作为论据。
 
 ---
 
@@ -59,7 +62,8 @@ upstream: null
 | `mcp_scholar-mirror_list_sources` | 学术镜像源清单 | 无参 | **成功**（返回 9 个 Google Scholar 镜像 + Semantic Scholar API） |
 | `mcp_paper-search_search_papers` | 学术论文联合检索 | `test driven development large language model code generation`，源 = arxiv/semantic/openalex | **部分成功**（arxiv 4 条，semantic/openalex 0 条） |
 | `mcp_english-search_search_web` / `search_academic` | 英文高质量检索 | 4 组查询 | **两次均 404**（服务端不可用，见 §6.3 风险 R2） |
-| WebSearch（内置） | 外部证据取证 | 4 组共 14 条查询（SDD / TDD / 引用幻觉 / 工具过载 / skill 基准 / taste 评测） | 成功（E2，摘要级） |
+| WebSearch（内置） | 外部证据线索发现 | 4 组共 14 条查询（SDD / TDD / 引用幻觉 / 工具过载 / skill 基准 / taste 评测） | 成功（线索级） |
+| `WebFetch`（v1.1 新增） | **逐条回原文核验** | 19 条参考文献 + 3 条补充页 | 成功（T1/T2 定位，见 §7.1；**19/19 已核**） |
 
 > **工具面实证的元观察**：同一「学术检索」意图，本机有 **5 个外部 MCP server** 可承接，但本次 **english-search 全部 404**、paper-search 仅 arxiv 源有结果 ⇒ **「有工具」不等于「工具可用」**。任何把工具写进流程的做法都必须配**降级链**（§5.2），否则提示词会指向一个不存在的通道。
 
@@ -128,44 +132,48 @@ upstream: null
 
 ---
 
-## 4. 外部证据（五条关键发现）
+## 4. 外部证据（五条关键发现，T1 定位）
+
+> 本节所有数值均按 §7.1 的定位回原文核验；**不可定位的转述已删除**。v1.1 的核验本身即 §5.3 四步流水线的一次实例。
 
 ### 4.1 Skill 有正向增益，但「聚焦」优于「堆叠」
 
-- **SkillsBench**（arXiv 2602.12670，摘要级）：策展 skill 把平均通过率从 **33.9% → 50.5%（+16.6pp，25.5% 归一化增益）**，配置级增益 +4.1~+25.7pp；**≤3 个模块的聚焦 skill 优于更大或穷举式 bundles**；小模型 + skill 可追平大模型无 skill。
-- **Anthropic Agent Skills 设计原则**（官方文档 / 工程博客，E2）：三级渐进披露——元数据常驻、正文按触发加载、资源按需读取；最佳实践要求「description 同时写清 what + when」「正文 < 500 行」「不含时效性信息」。
+- **SkillsBench**（arXiv:2602.12670，T1 摘要 + HTML）：策展 skill 把平均通过率从 **33.9% → 50.5%（+16.6pp，25.5% 归一化增益）**，配置级增益 **+4.1~+25.7pp**；**≤3 个模块的聚焦 skill 优于更大或穷举式 bundles**；小模型 + skill 可追平大模型无 skill。
+- **Anthropic Agent Skills 官方文档**（T1，`platform.claude.com` overview「How Skills work」+ best-practices「Progressive disclosure patterns」）：三级渐进披露——**Level 1 元数据常驻（约 100 tokens/个）**、**Level 2 正文按触发加载（< 5k tokens）**、**Level 3 资源按需读取**；`description` 必须同时写清 **what + when**；**SKILL.md 正文 < 500 行**。工程博客（T2，2025-10-16）只作发布事实与「按需加载」的二手佐证。
+- **v1.1 订正**：v1.0 另称「不含时效性信息」为官方最佳实践——在 overview 与 best-practices 两页**均未定位**，本版删除。
 
 ⇒ **可绑，但必须「每步 ≤ 1-2 个、按触发条件加载」，而不是「全量挂载」。**
 
 ### 4.2 工具过载会反向降质（不是「多一点更好」）
 
-- **RAG-MCP 相关读数**（二手博客转述，E3，**未回原文**）：工具选择准确率从 **43% 基线降到 < 14%**；约 **50 个工具**开始出现质量下滑，**约 120 个**准确率崩塌；典型 MCP 部署中工具定义占用 **72%** 上下文窗口。
+- **RAG-MCP**（arXiv:2505.03275，T1 摘要 + HTML §1/§3）：工具选择准确率 **基线 13.62% → RAG-MCP 43.13%**（原文 "more than triples"）；prompt tokens 降低 **> 50%**；stress test 显示**随 MCP schema 数量增加，选择准确率与任务成功率下降**。
+- **v1.0 的二手读数已证伪并删除**：原写「工具选择准确率从 **43% 基线降到 < 14%**」——原文方向**相反**：43.13% 是**检索增强后**的结果，13.62% 才是基线。该二手博客另称「约 50 个工具开始下滑 / 约 120 个崩塌 / 72% 上下文被工具定义占用」，在 T1 摘要与可见正文中**均未定位**，本版**不作为论据**。
 
-⇒ **这条直接否掉「把 200 个 skill 全列进流程」的做法**。也解释了为什么本仓采用**懒加载架构门禁**（ADR-0010 三问）是正确方向。
+⇒ **这条直接否掉「把 200 个 skill 全列进流程」的做法**（工具数量增长导致选择质量下降，T1 stress test 方向）。也解释了为什么本仓采用**懒加载架构门禁**（ADR-0010 三问）是正确方向。**同时它是 T4 转述风险的活样本：一次方向倒置可以完整反转结论。**
 
 ### 4.3 TDD 提示词单独不够，关键是「定向测试上下文」
 
-- **TDAD**（arXiv 2603.17973，摘要级）：SWE-bench Verified 上回归率 **6.08% → 1.82%（-70%）**；**原文同时指出「仅加入 TDD 程序性指令而无所针对的测试上下文」未见同等改善**。
-- **TDD-Agent**（arXiv 2608.16742，摘要级）：test-first reasoning prompt 在 LiveCodeBench 上对 reasoning baseline 一致改进；RepoEval 上优于检索式 / agent 式基线。
-- **TDD-Bench Verified**（arXiv 2412.02883）：LLM「先于修复写出能失败的测试」本身是独立能力，需要专门流程而非一句「请用 TDD」。
+- **TDAD**（arXiv:2603.17973，T1 arXiv HTML）：SWE-bench Verified 上回归率 **6.08% → 1.82%（-70%）**；**prompt-only 组（仅加 TDD 程序性指令、无定向测试上下文）回归率升至 9.94%，高于无干预基线 6.08%**。
+- **TDD-Agent**（arXiv:2608.16742，T1）：test-first reasoning prompt 在 LiveCodeBench 上对 reasoning baseline 一致改进；RepoEval 上优于检索式 / agent 式基线。
+- **TDD-Bench Verified**（arXiv:2412.02883，T1）：**449** 个 issue；LLM「先于修复写出能失败的测试」本身是独立能力，需要专门流程而非一句「请用 TDD」。
+- **v1.1 订正**：v1.0 写 prompt-only「**未见同等改善**」——原文实际是「**更差**」（9.94% > 6.08%）。该转述**低估了原文**，本版按原文改写。
 
-⇒ **「执行阶段要求 TDD」若只写成一句提示词，按现有证据大概率是表演**；真正起作用的是**先把可执行的失败测试造出来**（本仓 = fixture + 可重放的 selftest 编号）。
+⇒ **「执行阶段要求 TDD」若只写成一句提示词，按现有证据不仅大概率是表演，还可能使回归率上升**；真正起作用的是**先把可执行的失败测试造出来**（本仓 = fixture + 可重放的 selftest 编号）。
 
 ### 4.4 引用幻觉是基线问题，且 LLM 不能自任验证器
 
-- **GhostCite**（arXiv 2602.06718，摘要级）：13 个 SOTA LLM **全部**出现引用幻觉，区间 **14.23%–94.93%**，且有领域敏感性；**LLM 作为引用验证器仅 38% 准确率——低于随机猜测**。
-- **Biomedical 26 模型审计**（arXiv 2609.14988，摘要级）：**55.4%** 的参考文献为编造，**仅 14.9%** 全部字段正确。
-- **跨模型审计**（arXiv 2603.03299，摘要级）：幻觉率 **11.4%–56.8%**，**由 prompt 框架诱发**（不加提示时模型不主动编引用）；**≥3 模型共识**被列为可用过滤手段。
-- **部署约束研究**（arXiv 2603.07287，摘要级）：17,443 条生成引用中**无模型**的「引用存在率」超过 **0.475**；输出仍然格式合规 ⇒ **格式合规 ≠ 引用真实**。
-- **验证侧可行**：VeriCite（2510.11394）、CiteGuard（2510.17853，68.1% vs 人类 69.2%）、CiteFix（2504.15629，相对 +15.46%）——**事后机械核验有效**。
+- **GhostCite**（arXiv:2602.06718，T1 arXiv HTML v1「Key Findings」）：13 个 SOTA LLM **全部**出现引用幻觉，区间 **14.23%–94.93%**，且有领域敏感性；**LLM 作为引用验证器仅 38% 准确率——原文措辞 "even lower than random guessing"**。标题原文为 "…in the Age of **Large Language Models**"（v1.0 缩写为 "LLMs"，本版订正）。
+- **Biomedical 26 模型审计**（arXiv:2609.14988，T1 摘要）：**55.4%** 的参考文献为编造，**仅 14.9%** 全部字段正确。
+- **跨模型审计**（arXiv:2603.03299，T1）：幻觉率 **11.4%–56.8%**，**由 prompt 框架诱发**（不加提示时模型不主动编引用）；**">3 个 LLM 一致" 的共识准确率 95.6%**，被列为可用过滤手段。（v1.0 写「≥3」，边界错，本版订正为 **>3**。）
+- **部署约束研究**（arXiv:2603.07287，T1）：17,443 条生成引用中**无模型**的「引用存在率」超过 **0.475**；输出仍然格式合规 ⇒ **格式合规 ≠ 引用真实**。
+- **验证侧可行**：VeriCite（2510.11394，T1）、CiteGuard（2510.17853，T1：68.1% vs 人类 69.2%）、CiteFix（2504.15629，T1：行业引用准确率约 74%，相对提升 15.46%）——**事后机械核验有效**。
 
 ⇒ **Step 2 的「验证文献引用」必须指定为「DOI / arXiv ID 可解析」的机械动作**，而不是「再问模型一遍」。
 
 ### 4.5 taste 不能外包给现成 judge
 
-- **设计评测读数**（二手转述论文，E3）：现成 judge 最高 **0.543**，人类设计师与评审团多数一致率 **0.741**；专门训练的判别头才接近人类。
-- **Design Crit**（E2）：模型在最难的 3-2 分歧上与人类持平（0.602 vs 0.600），但在**人类认为简单的题上差距仍大**。
-- **Human Creativity Benchmark**（arXiv 2606.30561，摘要级）：创意质量须分离 **convergence（专业共识）** 与 **divergence（个体品味）** 两种信号。
+- **TASTE**（arXiv:2605.20731；读数经 **T2** 页面 Glif / Contra 转述）：现成 judge 最高 **0.543**，人类设计师 **0.741**；专门训练的判别头 **0.611**。Contra（T2，2026-06-17）另报：无现成 judge 超 **55%**（最好 54.3%），人类 74.1%，训练后 61.1%；**在最难的 3-2 分歧上 0.602 vs 人类上限 0.600**。
+- **Human Creativity Benchmark**（arXiv:2606.30561，T1）：创意质量须分离 **convergence（专业共识）** 与 **divergence（个体品味）** 两种信号；**它不承载 0.543 / 0.741 两个数字**（v1.0 的归属混淆，本版订正）。
 
 ⇒ **「设计阶段约束 taste」不能落成「✅ 好看 / ✅ 有品味」这种勾选**——那是本仓最反感的表演形态。只能落成：**可列举的判据维度 + 被拒绝的替代方案 + 代价**。
 
@@ -203,11 +211,11 @@ upstream: null
 
 **降级链（必写）**：`目标通道 → 备用通道 → 已读到的本仓/本机事实 → 「未取证」声明`。
 
-> 本次调研本身就是实例：`mcp_english-search` 两次 404 ⇒ 降到 `WebSearch`；`paper-search` 的 semantic/openalex 返回 0 ⇒ 只采用 arxiv 4 条并标明「源覆盖不全」。
+> 本次调研本身就是实例：`mcp_english-search` 两次 404 ⇒ 降到 `WebSearch`；`paper-search` 的 semantic/openalex 返回 0 ⇒ 只采用 arxiv 4 条并标明「源覆盖不全」；v1.1 核验再证 **T4 不可直接采信**——§4.2 的二手读数方向倒置，回 T1 后才纠正。
 
 **反模式（须显式避免）**：
 
-- 「搜到了 = 事实」——T4 转述当 T1 用（本仓 `hook-surface` P2-1 已发生过一次）；
+- 「搜到了 = 事实」——T4 转述当 T1 用（本仓 `hook-surface` P2-1 已发生过一次；本批 §4.2 是第二例）；
 - 「只有一个来源但写成共识」——必须写「单源」；
 - 「工具失败静默跳过」——必须写降级走了哪一跳。
 
@@ -218,7 +226,7 @@ upstream: null
 3. **字段比对**：标题 / 作者 / 年份至少两项一致；不一致 ⇒ 标「元数据错配」（比「不存在」更常见）；
 4. **落状态**：`已验证（T1 命中）` / `元数据错配（列出差异）` / `未验证（解析失败）`——**禁止出现「已验证」但无解析记录的行**。
 
-**为什么不能让模型自查**：§4.4 的 38% 验证器准确率（低于随机）是直接反证；本仓的等价做法是 **E1 逐字读原件**，而不是「我确认过了」。
+**为什么不能让模型自查**：§4.4 的 38% 验证器准确率（GhostCite HTML v1「Key Findings」，低于随机）是直接反证；本仓的等价做法是 **E1 逐字读原件**，而不是「我确认过了」。
 
 ### 5.4 Step 3 设计：把 taste 变成「可审查」而非「可判定」
 
@@ -232,7 +240,7 @@ upstream: null
 
 ### 5.5 Step 4/6/8：角色化审查 + 机械面分工
 
-- **角色化**：Step 4 用「反方」角色（`scientific-critical-thinking` 的 stance），要求**先给最强反驳再给结论**；多智能体辩论对事实性有正向证据（arXiv 2305.14325，摘要级），但**成本高**，本仓只在「设计决策不可逆」时启用；
+- **角色化**：Step 4 用「反方」角色（`scientific-critical-thinking` 的 stance），要求**先给最强反驳再给结论**；多智能体辩论对事实性有正向证据（arXiv 2305.14325，T1），但**成本高**，本仓只在「设计决策不可逆」时启用；
 - **机械面优先**：能用 `dc_validator` / `repo_stats` 判的，不进人工 Review（否则人工会退化成「复述机器结果」）；
 - **独立性**：守 RULE-1（时序独立）+ RULE-5（模型异质），这条**已经**比「绑 skill」更重要。
 
@@ -249,7 +257,7 @@ upstream: null
 
 ### 5.8 Step 9：TDD 双要素（提示词 + 测试上下文）
 
-按 §4.3，**只写提示词不够**。本仓的可执行形态：
+按 §4.3，**只写提示词不够，甚至可能更差**。本仓的可执行形态：
 
 | 要素 | 本仓等价物 | 反例 |
 |---|---|---|
@@ -273,7 +281,7 @@ upstream: null
 3. **禁止「研究表明」**：无引用不得使用该措辞；有引用则按 §5.3 核验；
 4. **统计口径前置**：估计量、样本、缺失处理、显著性阈值必须写在结论之前，而不是附录；
 5. **反例义务**：每个模型 / 方法结论必须给**至少一个失效条件**（否则视为未完成）；
-6. **多模型共识只作过滤**：≥3 模型一致可降低引用幻觉（§4.4），但**不作为证据强度**；
+6. **多模型共识只作过滤**：**>3** 模型一致可降低引用幻觉（§4.4），但**不作为证据强度**；
 7. **形式化优先**：能写成定义 / 命题 / 反例的，不写成散文（本仓 `math-finance-reasoning` 与 `lean4-theorem-proving` 两 skill 的适用位）；
 8. **执行面隔离**：跨仓（如 `D:\Article`）只读、只登记快照指针，**不复制真值**（承 P-104 纪律）。
 
@@ -283,9 +291,9 @@ upstream: null
 
 ### 6.1 三条结论
 
-**C-1（结论）**：**可以精细化，但不是「给每步挂一堆工具」，而是「给每步定一条最小通道 + 一条硬约束 + 一个证据出口」。** 依据：§4.1（聚焦优于堆叠）+ §4.2（工具过载反向降质）+ §3.1（现状只有 Step 1 有契约，其余全是隐性惯例）。
+**C-1（结论）**：**可以精细化，但不是「给每步挂一堆工具」，而是「给每步定一条最小通道 + 一条硬约束 + 一个证据出口」。** 依据：§4.1（聚焦优于堆叠）+ §4.2（工具数量增长反向降质）+ §3.1（现状只有 Step 1 有契约，其余全是隐性惯例）。
 
-**C-2（结论）**：**提示词只能约束「形态」，不能约束「质量」。** 依据：§4.3（TDD 提示词单独无改善）+ §4.4（LLM 自任验证器 38%）+ §4.5（taste 的 judge 与人类差距）。⇒ 写进流程的提示词必须**落到可机械核验的形态**（可解析 ID / 有失败 fixture / 有拒绝方案），否则就是**形式化审查表演**。
+**C-2（结论）**：**提示词只能约束「形态」，不能约束「质量」。** 依据：§4.3（TDD 提示词单独甚至更差：9.94% vs 6.08%）+ §4.4（LLM 自任验证器 38%）+ §4.5（taste 的 judge 与人类差距）。⇒ 写进流程的提示词必须**落到可机械核验的形态**（可解析 ID / 有失败 fixture / 有拒绝方案），否则就是**形式化审查表演**。
 
 **C-3（结论）**：**「taste」在本仓应落为「被拒绝的替代方案 + 判据维度」，不落为勾选项。** 依据：§4.5。这是本仓能否避免「用品味之名行表演之实」的分水岭。
 
@@ -307,21 +315,22 @@ upstream: null
 | R2 | **工具可用性不均**：本次 `mcp_english-search` 两次 404、`paper-search` 仅 arxiv 有结果 | §2.1 实测 | 每条工具条款必须配**降级链**（§5.2）；不允许「单点通道」 |
 | R3 | **「绑了 = 做了」的表演风险**：把 skill 名写进 CHECKLIST 并打 ✅ | 本仓 M7 形态 II 的历史教训 | 硬约束只写**可核验形态**；skill 调用**不得**作为验收证据（只有产出形态才是证据） |
 | R4 | **B 档仍不能消除手工回写**（同 P-105 教训） | P-103 / P-105 同族 4 例 | 预期管理：B 档是「可复核」，不是「自动化」；不承诺减工作量 |
-| R5 | **外部读数均为摘要级**（E2/E3），存在转述失真 | §4.1-4.5 全部标注 | 本批**不作为任何门禁的判据依据**；如需引用具体数值到设计文档，须回原文（未决项 U-2） |
+| R5 | **二手转述可反转结论**；v1.0 的 E2/E3 读数存在方向与归属失真 | §4.2 的 43%→<14% 方向倒置；§4.5 的 TASTE 归属混淆；§4.3 的 TDAD 低估 | v1.1 已全量回原文（§7.1）；**外部数字只作背景，不作任何门禁判据**；新增数字未定位则只能标「未验证」 |
 
 ### 6.4 未决项登记（四元块）
 
 - **U-1 B 档落点：改 `SPEC_PROCESS` 正文 vs 新增独立附录文档**
   - **判据**：落点确定且不产生第二真值源（同一规则不出现在两处）
   - **触发条件**：用户裁决「按 B 档实施」
-  - **当前倾向**：**新增 §「Step 工具与提示词契约」表**（正文内单节，约 60 行），不另建文档——避免「同一规则两处维护」
-  - **证据等级**：B5（推断）
+  - **当前倾向**：**已裁决并落地**——P-108 在 `SPEC_PROCESS` 正文新增 §「Step 工具与提示词契约」（单节，约 60 行），未另建文档
+  - **证据等级**：B5（推断）→ **已闭合（2026-10-21，P-108）**
 
-- **U-2 外部读数是否回原文核验**
+- **U-2 外部读数是否回原文核验** —— **已闭合（2026-10-21，P-115）**
   - **判据**：§4 中被引用的每个数值都有对应的 T1 原文页码 / 段落
-  - **触发条件**：B 档实施时若要把任一数值写进 `DESIGN` / `CHECKLIST` 判据
-  - **当前倾向**：**只在本 RESEARCH 内以「摘要级」保留**，不进判据；进判据前必须回原文
-  - **证据等级**：E2（摘要级，未回原文）
+  - **达成情况**：**19/19 条已核**（17 条 T1 命中 + 2 条 T2 官方页），外加 3 条补充页（Anthropic best-practices / RAG-MCP / TASTE 读数页）；§4 现存的每个数值均标 T1 定位（摘要 / 章节 / Key Findings）；**不可定位的二手数字已删除**（§4.2 的 50/120/72%）；订正 9 处（§7.1 末列）
+  - **残余边界**：T2 读数的 page 可能随厂商改版漂移；复算时以 §7.1 的 URL + 定位重取
+  - **当前倾向**：**关闭**；后续新增外部数字须按 §5.3 四步登记 ID + 位置，否则只能标「未验证」
+  - **证据等级**：**E1**
 
 - **U-3 学术推理附加约束是否独立成文**
   - **判据**：八条约束有唯一载体，且被 `academic-writing-workflow` 引用而非复制
@@ -333,15 +342,15 @@ upstream: null
 
 ## 7. 参考文献
 
-> 外部条目均为**摘要级 / 二手转述**（E2/E3），未逐篇读全文；DOI/arXiv ID 按检索返回原样登记，**未逐条解析**（见 U-2）。
+> **v1.1 状态**：19 条全部核验（17 条 T1 命中 + 2 条 T2 官方页）；另增补 3 条（RAG-MCP / TASTE / Anthropic best-practices）。逐条状态、定位与差异见 §7.1。T2 条目不替代 T1 方法学结论。
 
 1. SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks. arXiv:2602.12670. https://arxiv.org/pdf/2602.12670v4
 2. Anthropic. Equipping agents for the real world with Agent Skills. https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
-3. Anthropic. Agent Skills 概览 / 最佳实践. https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
+3. Anthropic. Agent Skills 概览. https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
 4. TDAD: Test-Driven Agentic Development — Reducing Code Regressions in AI Coding Agents via Graph-Based Impact Analysis. arXiv:2603.17973. https://arxiv.org/html/2603.17973
 5. TDD-Agent: Test-Driven Reasoning for Code Generation. arXiv:2608.16742. https://arxiv.org/pdf/2608.16742
 6. TDD-Bench Verified: Can LLMs Generate Tests for Issues Before They Get Resolved? arXiv:2412.02883. https://arxiv.org/pdf/2412.02883v1
-7. GhostCite: A Large-Scale Analysis of Citation Validity in the Age of LLMs. arXiv:2602.06718. https://arxiv.org/html/2602.06718v1
+7. GhostCite: A Large-Scale Analysis of Citation Validity in the Age of Large Language Models. arXiv:2602.06718. https://arxiv.org/html/2602.06718v1
 8. Biomedical Reference Generation Remains Unreliable across 26 LLMs. arXiv:2609.14988. https://arxiv.org/abs/2609.14988
 9. How LLMs Cite and Why It Matters: A Cross-Model Audit of Reference Fabrication. arXiv:2603.03299. https://arxiv.org/pdf/2603.03299v1
 10. Do Deployment Constraints Make LLMs Hallucinate Citations? arXiv:2603.07287. https://arxiv.org/html/2603.07287
@@ -350,14 +359,46 @@ upstream: null
 13. CiteFix: Enhancing RAG Accuracy Through Post-Processing Citation Correction. arXiv:2504.15629. https://arxiv.org/html/2504.15629v2/
 14. Improving Factuality and Reasoning in Language Models through Multiagent Debate. arXiv:2305.14325. https://arxiv.org/pdf/2305.14325
 15. The Human Creativity Benchmark. arXiv:2606.30561. https://arxiv.org/html/2606.30561
-16. GitHub Spec Kit 文档（Spec → Plan → Tasks → Implement → Converge）. https://github.github.io/spec-kit/
-17. Unblocked. How Many MCP Servers Is Too Many? The Tool Overload Problem. https://getunblocked.com/blog/mcp-tool-overload/
+16. GitHub Spec Kit 文档（Specify → Plan → Tasks → Implement → Converge）. https://github.github.io/spec-kit/ ——**背景对照：正文未引用**（v1.0 孤儿引用，v1.1 显式标注）
+17. Unblocked. How Many MCP Servers Is Too Many? The Tool Overload Problem. https://getunblocked.com/blog/mcp-tool-overload/ ——**T3 转述：其方向性读数已被 T1 证伪，仅作线索保留**
 18. Glif. Teaching Our Agent to Judge Design. https://glif.app/use-cases/taste
 19. Contra Labs. Design Crit: teaching AI to judge design like a designer. https://contralabs.com/research/design-crit
+20. RAG-MCP: Mitigating Prompt Bloat in LLM Tool Selection via Retrieval-Augmented Generation. arXiv:2505.03275. https://arxiv.org/html/2505.03275v1
+21. TASTE: 设计品味评测原始论文. arXiv:2605.20731.（本条为 §4.5 数值的**真实归属**；v1.0 误置于 HCB）
+22. Anthropic. Skill authoring best practices. https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+
+### 7.1 文献核验表（U-2 全量核验，2026-10-21）
+
+| # | 引用（短名） | ID / URL | 验证方式 | 状态 | 命中或差异 |
+|---|---|---|---|---|---|
+| 1 | SkillsBench | arXiv:2602.12670 | 摘要 + HTML | **T1 命中** | 33.9%→50.5%（+16.6pp，25.5% 归一化）；≤3 模块聚焦优于 bundles |
+| 2 | Anthropic 工程博客 | anthropic.com/engineering/... | 页面逐字 | T2 页面命中 | 2025-10-16 发布；2025-12-18 开放标准；三级披露细节在 docs 而非本篇 |
+| 3 | Anthropic Agent Skills docs | platform.claude.com/.../overview | 页面逐字 | **T1 命中** | Level 1 约 100 tokens / Level 2 <5k tokens；description 须含 what + when |
+| 4 | TDAD | arXiv:2603.17973 | arXiv HTML | **T1 命中** | 6.08%→1.82%；**prompt-only 9.94%（更差）**——v1.0 转述低估，已订正 |
+| 5 | TDD-Agent | arXiv:2608.16742 | arXiv PDF | **T1 命中** | LiveCodeBench 一致改进；RepoEval 优于检索 / agent 基线 |
+| 6 | TDD-Bench Verified | arXiv:2412.02883 | arXiv PDF | **T1 命中** | 449 issues；fail-to-pass 测试生成是独立能力 |
+| 7 | GhostCite | arXiv:2602.06718 | arXiv HTML v1 | **T1 命中** | 14.23%–94.93%；38% 在 **Key Findings**；标题为 "Large Language Models"（v1.0 缩写已订正） |
+| 8 | Biomedical 26 LLM | arXiv:2609.14988 | arXiv abs | **T1 命中** | 55.4% 编造；14.9% 全字段正确 |
+| 9 | Cross-model audit | arXiv:2603.03299 | arXiv PDF | **T1 命中** | 11.4%–56.8%；**">3" 共识 95.6%**——v1.0 写「≥3」，已订正 |
+| 10 | Deployment constraints | arXiv:2603.07287 | arXiv HTML | **T1 命中** | 17,443 条；无模型存在率 >0.475；格式仍合规 |
+| 11 | VeriCite | arXiv:2510.11394 | arXiv PDF | **T1 命中** | SIGIR-AP 2025；事后核验可行 |
+| 12 | CiteGuard | arXiv:2510.17853 | arXiv HTML | **T1 命中** | 68.1% vs 人类 69.2% |
+| 13 | CiteFix | arXiv:2504.15629 | arXiv HTML | **T1 命中** | 行业准确率约 74%；相对提升 15.46% |
+| 14 | Multiagent Debate | arXiv:2305.14325 | arXiv PDF | **T1 命中** | 事实性与推理均有提升 |
+| 15 | Human Creativity Benchmark | arXiv:2606.30561 | arXiv HTML | **T1 命中** | convergence / divergence 两信号；**不含 0.543 / 0.741**（归属已订正） |
+| 16 | GitHub Spec Kit | github.github.io/spec-kit/ | 页面逐字 | T2 页面命中 | Specify→Plan→Tasks→Implement→Converge；**正文未引用（孤儿引用）**，v1.1 标为背景 |
+| 17 | Unblocked 工具过载博客 | getunblocked.com/blog/... | 页面逐字 | **T3 转述（方向倒置）** | 称「43% 基线→<14%」；T1 原文为 13.62%→43.13% ⇒ **误读**；50/120/72% 未定位 ⇒ 删除 |
+| 18 | Glif TASTE | glif.app/use-cases/taste | 页面逐字 | T2 页面命中 | 0.543 / 0.741 / 0.611；指向 TASTE（arXiv:2605.20731） |
+| 19 | Contra Design Crit | contralabs.com/research/design-crit | 页面逐字 | T2 页面命中 | 54.3% / 74.1% / 61.1%；最难 3-2 分歧 **0.602 vs 0.600** |
+| 20 | RAG-MCP | arXiv:2505.03275 | 摘要 + HTML | **T1 命中** | 13.62%→43.13%；prompt tokens 降 >50%；工具数量增长致选择质量下降 |
+| 21 | TASTE | arXiv:2605.20731 | 经 T2 页面指认 | T2 指认（未逐页读） | §4.5 数值的真实归属；**本仓不将 T2 读数升级为 T1** |
+| 22 | Anthropic best practices | platform.claude.com/.../best-practices | 页面逐字 | **T1 命中** | SKILL.md 正文 < 500 行；description what + when；**「不含时效性信息」未定位** ⇒ 删除 |
+
+> **核验结论**：19 条原参考文献 **19/19 已核**（17 条 T1 + 2 条 T2）；补 3 条。**订正 9 处** = §4.2 方向倒置 / §4.3 TDAD 低估 / §4.4 Cross-model 边界 / §4.4 GhostCite 标题 / §4.4 GhostCite 取证位置（摘要→Key Findings）/ §4.5 TASTE 归属 / §4.1 Anthropic 未取证项 / §4.2 三个未取证阈值 / 文献 16 孤儿引用。形态 II 入账见 [M7 样本 #40](../../docs/M7_EVIDENCE_LOG.md)。
 
 ---
 
-## 附录 A. A 事实类断言清单（14 条）
+## 附录 A. A 事实类断言清单（15 条）
 
 | 编号 | 事实 | 取证方式 |
 |---|---|---|
@@ -373,8 +414,9 @@ upstream: null
 | A-10 | 【A】`dc_validator` 现有 selftest 39 个 fixture（F1-F33，含 F3b/F3c/F8b/F11b/F11c 等扩展编号），M6 的 F27-F33 为「先 fixture 后实现」 | E1 实跑 `--selftest` + 读 `scripts/dc_validator.py` |
 | A-11 | 【A】本仓已有断言分级 A/B/C + E1-E5，E1 = 逐字读原件 | E1 读 `docs/ASSERTION_EVIDENCE_FRAMEWORK.md` |
 | A-12 | 【A】`hook-surface` RESEARCH v1.1 的 P2-1 记录：引证含来源中没有的杂词「MySQL」 | E1 读 `spec/hook-surface/RESEARCH.md` L19 |
-| A-13 | 【A】SkillsBench 摘要：策展 skill 使通过率 33.9%→50.5%（+16.6pp）；≤3 模块的聚焦 skill 优于更大 bundles | E2 检索摘要 |
-| A-14 | 【A】TDAD 摘要：SWE-bench Verified 回归率 6.08%→1.82%（-70%）；且指出「仅加 TDD 程序性指令而无定向测试上下文」未见同等改善 | E2 检索摘要 |
+| A-13 | 【A】SkillsBench（arXiv:2602.12670）：策展 skill 使通过率 33.9%→50.5%（+16.6pp，25.5% 归一化）；≤3 模块的聚焦 skill 优于更大 bundles | **E1 T1 原文**：arXiv 摘要 + HTML |
+| A-14 | 【A】TDAD（arXiv:2603.17973）：SWE-bench Verified 回归率 6.08%→1.82%（-70%）；**prompt-only（无定向测试上下文）回归率 9.94%，高于无干预基线** | **E1 T1 原文**：arXiv HTML |
+| A-15 | 【A】RAG-MCP（arXiv:2505.03275）：工具选择准确率 **13.62% 基线 → 43.13%**（more than triples）；prompt tokens 降低 >50%；工具数量增长致选择质量下降 | **E1 T1 原文**：arXiv 摘要 + HTML §1/§3 |
 
 ## 附录 B. B 推断类断言清单（6 条）
 
@@ -382,9 +424,9 @@ upstream: null
 [
   {"id": "B1", "claim": "十步中七步的工具/提示词契约缺位，同一步不同批次可做法完全不同且无记录", "basis": "A-01~A-04"},
   {"id": "B2", "claim": "本仓不缺原则（证据分级/TDD/独立审查），缺的是「哪一步用哪个通道、拿到什么形态证据」的连接件", "basis": "A-10, A-11, A-12"},
-  {"id": "B3", "claim": "「执行阶段要求 TDD」若只写成一句提示词，按现有证据大概率退化为表演；起作用的是可执行的失败测试（fixture）", "basis": "A-14, A-10"},
-  {"id": "B4", "claim": "「设计阶段约束 taste」不能落成勾选项，只能落成「被拒绝的替代方案 + 判据维度 + 代价」", "basis": "外部 §4.5"},
-  {"id": "B5", "claim": "B 档（单节文档 + 最小绑定）是唯一性价比合理档；C 档（全编排）与 ADR-0010 Q3 冲突", "basis": "A-05, A-06, A-13"},
+  {"id": "B3", "claim": "「执行阶段要求 TDD」若只写成一句提示词，不仅退化为表演，还可能提高回归率；起作用的是可执行的失败测试（fixture）", "basis": "A-14, A-10"},
+  {"id": "B4", "claim": "「设计阶段约束 taste」不能落成勾选项，只能落成「被拒绝的替代方案 + 判据维度 + 代价」", "basis": "§4.5（T2 读数）"},
+  {"id": "B5", "claim": "B 档（单节文档 + 最小绑定）是唯一性价比合理档；C 档（全编排）与 ADR-0010 Q3 冲突", "basis": "A-05, A-06, A-13, A-15"},
   {"id": "B6", "claim": "学术推理八条约束应先单点承载（本文 §5.10），待学术批启动再决定是否上提", "basis": "B2"}
 ]
 ```
@@ -394,7 +436,7 @@ upstream: null
 | 编号 | 假设 | 未验证点 |
 |---|---|---|
 | H1 | [H1] 把「来源分层 + 降级链」写进流程后，实际调研会减少「单源当共识」类缺陷 | 无前后对照样本；需下一批真实调研做 A/B |
-| H2 | [H2] 每步 ≤2 个工具的绑定不会造成工具选择退化 | §4.2 的阈值（50/120）来自二手转述，未在本机实测 |
+| H2 | [H2] 每步 ≤2 个工具的绑定不会造成工具选择退化 | RAG-MCP 的 stress test 只证明「工具数量增长会降质」，未测「≤2」在本机的最优性；本机无对照样本 |
 | H3 | [H3] skill 名放附录 / 执行卡即可避免「环境漂移进正文」 | 尚未出现「附录里的 skill 失效」实例 |
 | H4 | [H4] 学术域八条约束与本仓 A/B/C 分级、E1-E5 口径不冲突 | 需在学术批首轮实际套用一次 |
 
