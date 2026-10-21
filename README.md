@@ -8,7 +8,7 @@
 
 Spec_Workflow 是一套**纯文档型方法论（Layer-0）**：方法论本体无源代码、无构建系统、无运行时——纯文档消费者（阅读者 / 审计 / 外部 reviewer）零工具依赖即可完整使用；仓内另附一组**按需激活的 Layer-1 门禁工具**（校验器 / 派生视图生成器 / 门禁引擎），仅在提交时被动触发，未激活即「不存在」（见 [ADR-0010](adr/ADR-0010-lazy-loading-architecture-gate.md)）。它定义一个 10 步 Spec 流程及其配套审查机制，服务于「单人开发者 + LLM Agent」的工作流，核心目标是**最大限度抑制 LLM 生成内容中的幻觉与形式化审查表演**——任何 agent 框架都无法消除幻觉，只能某种程度地抑制；本框架通过证据分级、机械对账与流程门禁，把抑制落实为可检测、可拦截、可问责的机制——包括 LLM 自己做的审查。
 
-> 这套体系不是理论设计。它从 math-finance-reasoning 项目的真实失效案例中长出来：M2 统计虚报、M6 并发自查、Phase 7C 幻觉清单自身含幻觉。每条规则都登记了来源事故与失效条件，且整套方法论自身也在被持续测量（见[方法论自实证](#方法论自实证)）。
+> 这套体系不是理论设计。它从 math-finance-reasoning 项目的真实失效案例中长出来：M2 统计虚报、M6 并发自查、Phase 7C 幻觉清单自身含幻觉。每条规则都登记了来源事故与失效条件，且整套方法论自身也在被持续测量（见[方法论自测（无外部对照）](#方法论自测无外部对照)）。
 
 ## 设计哲学
 
@@ -56,9 +56,9 @@ Spec_Workflow 是一套**纯文档型方法论（Layer-0）**：方法论本体�
 
 本仓用自己定义的流程开发自己。每个改动批次落一条 `specwf-p<NNN>-<date>` 决策流（`tools/spec_runner/sessions/*.jsonl`，五步 `research → design → implement → verify → finalize`），由 `step-gate` / `step-enforce` 门禁在提交瞬间强制校验——批次无决策流、或决策链不一致即阻断提交（`.pre-commit-config.yaml` 共 5 道 pre-commit 门禁）。首例 = P-020 step-gate（同时是 ADR-0010 三问的首个完整用例）。
 
-## 方法论自实证
+## 方法论自测（无外部对照）
 
-<img src="docs/assets/readme/evidence.svg" alt="M7 方法论自实证数据" width="840">
+<img src="docs/assets/readme/evidence.svg" alt="M7 方法论自测数据（无外部对照）" width="840">
 
 这套工作流自身也被当作实验对象测量——每轮审查/审计追加样本至 [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md)。截至 2026-09-29：样本 1-38，横跨 LLM 审查臂（同基座自查 / 异构双盲 / 真异基座独立 pass）与机械拦截臂（pre-commit 提交瞬间 / dry-run 重数），登记形态 II 复发 97 处、归纳 4 条复发规律——其中第 4 条「审计修正自身含计数错误」由异基座复验独立重跑发现，直接印证了 RULE-5 的实证基础。本段数字为时点快照，累积真值以 M7 账本为准。
 
