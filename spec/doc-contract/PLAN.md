@@ -1,9 +1,9 @@
 ---
 id: doc-contract-refactor
 type: design
-version: 1.9
+version: 1.9.1
 status: verified
-date: 2026-10-20
+date: 2026-10-21
 depends: [SPEC-PROCESS, ADR-0004, ADR-0005, ADR-0006, ADR-0007, DIS-007, FWK-ASSERTION]
 upstream: null
 ---
@@ -30,6 +30,7 @@ upstream: null
 | v1.7 | 2026-09-29 | §1 DC2 判别规则扩宽：id **后缀** `-CHECKLIST` → id **含 `CHECKLIST` 段**（覆盖 `-CHECKLIST-<变体>`，如 `step-gate-CHECKLIST-FUNC`）；修复两份 `-CHECKLIST-FUNC` 被误判「一般设计文档」致其 `accepting` 状态**机械不可表达**；机械承载 `dc_validator` M2 + selftest F19-F21；E1 全仓仅 2 份受影响，零迁移 | P-052（用户裁决「扩宽 DC2 判别规则」）+ drift-gate 观察项 |
 | v1.8 | 2026-09-29 | §1 新增 **DC2.1 任务状态词表（+「来源」列）**——把**任务粒度状态**词表从 `PROGRESS` L3 载体声明上提到契约面（与 DC2 **type 主轴轴正交**的独立子块）；重申词表四取值**零改动**（`pending / in-progress / blocked / done`），仅**新增「来源」列**（执行态可派生 → 「机器派生」；决策态不可派生 → 「人工」）；§1 增设轴正交消歧注；`docs/PROGRESS.md` L3 声明**改指向 DC2.1**（单一权威）。**零代码、零词表取值变更**（DC1 零改动） | [P-042 v1.8 状态归属契约 Layer-0](../project-console/DESIGN.md) D16（C-20）+ [RESEARCH §7.13](../project-console/RESEARCH.md) |
 | v1.9 | 2026-10-20 | §1 新增 **DC5 版本引用一致性**（六条判据：收窄判据面 / 两种版本写法 / front-matter 为真值源 / 不判定面 / 全仓扫描面 / P2 等级）；§1 标题改口径 `DC1-DC4` → `DC1-DC5`；**边界显式声明** = `CODE_WIKI` §2.1 树 / §9 索引 / `PROGRESS` 汇总行仍属 Layer-0。机械承载 = `dc_validator` **M6** + selftest **F27-F33**；存量全仓 **0 违规** | P-105 全量回写审计（18 处中 9 处属本类）+ 用户指令「按方案 B 执行，开启最小门禁」 |
+| v1.9.1 | 2026-10-21 | §1 DC1 补「**位置约定**」注：front-matter 围栏**允许位于前 10 行**（存量多为 H1 标题后置形态），`dc_validator` M2 以 `FM_WINDOW = 10` 识别；**显式声明其非标准性与代价**（Jekyll / Hugo / Obsidian 等通用工具要求围栏位于第 1 行；本仓元数据仅由 `dc_validator` 消费）。**DC1 七字段零改动、零代码** | P-109（外部评审 LOW-2 处置）+ P-105 实证「本仓 front-matter 多在 H1 之后」 |
 
 ---
 
@@ -52,6 +53,8 @@ upstream: null
 | `date` | 最近修订日期 | |
 | `depends` | 依赖文档 id 列表 | 替代散落的"相关文档"链接 |
 | `upstream`（P2-4 新增） | **上游权威源声明** | 解决 Cpp_Hub 双份框架并存：本仓库份为权威源时置 `null`；为迁移副本时置源路径。DIS-007 与 FWK-ASSERTION 因源项目有同名文件，**必须**显式声明 |
+
+> **位置约定（P-109 补注，v1.9.1）**: front-matter 围栏**允许位于文件前 10 行内**（本仓存量多为 `# H1` 标题后置形态，围栏自第 3 行起），`dc_validator` M2 以 `FM_WINDOW = 10` 扫描前 10 行识别。**这是非标准 YAML front-matter 形态**——Jekyll / Hugo / Obsidian 等通用工具要求围栏位于文件第 1 行；本仓保留标题后置的原因 = 存量文档均以 H1 开头，批量前移会改动全仓文档且无功能收益。**代价** = 通用工具不识别本仓 front-matter，元数据仅由 `dc_validator` 消费；新建文档沿用标题后置形态以保持全仓一致。
 
 ### DC2. 状态词表（type 主轴；`design` 内按文档类别二档——v1.6 消歧）
 
