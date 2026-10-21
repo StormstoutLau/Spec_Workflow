@@ -54,13 +54,13 @@ When an upstream input is overturned at the implementation or acceptance stage, 
 
 ### Dogfooding
 
-This repository develops itself with its own process. Every change batch lands a `specwf-p<NNN>-<date>` decision stream (`tools/spec_runner/sessions/*.jsonl`, five steps `research → design → implement → verify → finalize`), enforced at commit time by the `step-gate` / `step-enforce` gates — a batch with no decision stream, or an inconsistent decision chain, blocks the commit (`.pre-commit-config.yaml` defines 5 pre-commit gates). The first instance is P-020 step-gate (also the first full use of ADR-0010's three questions).
+This repository develops itself with its own process. Every change batch lands a `specwf-p<NNN>-<date>` decision stream (`tools/spec_runner/sessions/*.jsonl`, five steps `research → design → implement → verify → finalize`), enforced at commit time by the `step-gate` / `step-enforce` gates — a batch with no decision stream, or an inconsistent decision chain, blocks the commit (`.pre-commit-config.yaml` defines 6 pre-commit gates). The first instance is P-020 step-gate (also the first full use of ADR-0010's three questions).
 
 ## Self-verification (no external control)
 
 <img src="docs/assets/readme/evidence.svg" alt="M7 self-verification data (no external control)" width="840">
 
-The workflow measures itself. Every review or audit round appends a sample to [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md). As of 2026-09-29: samples 1–38 span both LLM review arms (same-base self-review / heterogeneous double-blind / true heterogeneous independent pass) and mechanical interception arms (pre-commit / dry-run recounts), with 97 logged recurrences of Pattern II and four induced recurrence laws — the fourth, *"a correction to an audit can itself contain a counting error,"* was caught by an independent heterogeneous re-run of the grep probes, directly confirming the empirical basis of RULE-5. The figures here are point-in-time snapshots; the M7 ledger is the source of truth.
+The workflow measures itself. Every review or audit round appends a sample to [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md). As of 2026-10-21: samples 1–39 span both LLM review arms (same-base self-review / heterogeneous double-blind / true heterogeneous independent pass) and mechanical interception arms (pre-commit / dry-run recounts), with 97 logged recurrences of Pattern II and four induced recurrence laws — the fourth, *"a correction to an audit can itself contain a counting error,"* was caught by an independent heterogeneous re-run of the grep probes, directly confirming the empirical basis of RULE-5. The figures here are point-in-time snapshots; the M7 ledger is the source of truth.
 
 ## Repository Layout
 

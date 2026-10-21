@@ -54,13 +54,13 @@ Spec_Workflow 是一套**纯文档型方法论（Layer-0）**：方法论本体�
 
 ### 吃狗粮开发（Dogfooding）
 
-本仓用自己定义的流程开发自己。每个改动批次落一条 `specwf-p<NNN>-<date>` 决策流（`tools/spec_runner/sessions/*.jsonl`，五步 `research → design → implement → verify → finalize`），由 `step-gate` / `step-enforce` 门禁在提交瞬间强制校验——批次无决策流、或决策链不一致即阻断提交（`.pre-commit-config.yaml` 共 5 道 pre-commit 门禁）。首例 = P-020 step-gate（同时是 ADR-0010 三问的首个完整用例）。
+本仓用自己定义的流程开发自己。每个改动批次落一条 `specwf-p<NNN>-<date>` 决策流（`tools/spec_runner/sessions/*.jsonl`，五步 `research → design → implement → verify → finalize`），由 `step-gate` / `step-enforce` 门禁在提交瞬间强制校验——批次无决策流、或决策链不一致即阻断提交（`.pre-commit-config.yaml` 共 6 道 pre-commit 门禁）。首例 = P-020 step-gate（同时是 ADR-0010 三问的首个完整用例）。
 
 ## 方法论自测（无外部对照）
 
 <img src="docs/assets/readme/evidence.svg" alt="M7 方法论自测数据（无外部对照）" width="840">
 
-这套工作流自身也被当作实验对象测量——每轮审查/审计追加样本至 [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md)。截至 2026-09-29：样本 1-38，横跨 LLM 审查臂（同基座自查 / 异构双盲 / 真异基座独立 pass）与机械拦截臂（pre-commit 提交瞬间 / dry-run 重数），登记形态 II 复发 97 处、归纳 4 条复发规律——其中第 4 条「审计修正自身含计数错误」由异基座复验独立重跑发现，直接印证了 RULE-5 的实证基础。本段数字为时点快照，累积真值以 M7 账本为准。
+这套工作流自身也被当作实验对象测量——每轮审查/审计追加样本至 [M7_EVIDENCE_LOG.md](docs/M7_EVIDENCE_LOG.md)。截至 2026-10-21：样本 1-39，横跨 LLM 审查臂（同基座自查 / 异构双盲 / 真异基座独立 pass）与机械拦截臂（pre-commit 提交瞬间 / dry-run 重数），登记形态 II 复发 97 处、归纳 4 条复发规律——其中第 4 条「审计修正自身含计数错误」由异基座复验独立重跑发现，直接印证了 RULE-5 的实证基础。本段数字为时点快照，累积真值以 M7 账本为准。
 
 ## 仓库结构
 

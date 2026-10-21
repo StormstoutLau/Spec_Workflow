@@ -1,6 +1,6 @@
 # L2 CI 门禁（远程兜底强制）——P-070 · spec/ci-gate/DESIGN.md §3
 #
-# 定位：本地 pre-commit 五 hook 是 L1（诚实护栏，git 官方明示可用 `--no-verify` 绕过，
+# 定位：本地 pre-commit 六 hook 是 L1（诚实护栏，git 官方明示可用 `--no-verify` 绕过，
 # hook-surface §3.2 实证 12 种绕过向量全放行）。本 workflow 把同一批判据搬到远端复验：
 # **本地能拦的，CI 也拦** —— 绕过本地 hook 不再等于放行。
 #
@@ -38,7 +38,7 @@ jobs:
         with:
           python-version: "3.11"   # 与开发环境一致（P-070 实测本机 = 3.11.16）
 
-      # ── 与本地五 hook 等价的复验（顺序 = 门禁链顺序）──────────────────────
+      # ── 与本地六 hook 等价的复验（顺序 = 门禁链顺序；黑盒测试见下方独立 step）──
       - name: DC 契约 + R7 计数（dc-validator）
         run: python scripts/dc_validator.py --check-all
       - name: M7 账本 hits 块（m7-stats）
@@ -61,3 +61,9 @@ jobs:
           python scripts/console_gen.py --selftest
           python tools/spec_runner/spec_runner.py selftest
           python scripts/rework_graph_check.py --selftest
+
+      # ── P-111 外置黑盒回归（step_enforce 包装层 + spec_map 契约；stdlib unittest）──
+      # 定位：只补内嵌 selftest 未覆盖的 CLI 包装层。本地已接第 6 道 hook `blackbox-tests`
+      # （用户指令覆盖初裁 B1）；本 step = 远端兜底，绕过本地 hook 时仍拦截。
+      - name: 外置黑盒回归（tests/，P-111）
+        run: python -m unittest discover -s tests -v
