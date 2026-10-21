@@ -1,7 +1,7 @@
 ---
 id: academic-writing-workflow-ACADEMIC_FILE_SPEC
 type: framework
-version: 1.0
+version: 1.1
 status: active
 date: 2026-10-01
 depends: [academic-writing-workflow-RESEARCH]
@@ -252,7 +252,7 @@ Get-ChildItem $root\paper -File -Include *.aux,*.log,*.out,*.toc,*.bbl,*.blg,*.f
 
 ## 7. 轴六 · spec 学术规范（论文仓内的纪律移植）
 
-> **原则**: 移植**纪律**而非**工具**（本仓零依赖不变式 D6 同源）。论文仓不引入本仓的脚本，只引入"把话说实"的规矩。
+> **原则**: 移植**纪律**而非**工具**（本仓零依赖不变式 D6 同源）。论文仓不引入本仓的脚本，只引入"把话说实"的规矩。 **学术推理八条**见 [ACADEMIC_REASONING_CONSTRAINTS.md](ACADEMIC_REASONING_CONSTRAINTS.md)（引用不复制；P-116）。
 
 | # | 约定 | 依据 |
 |---|------|------|
@@ -304,3 +304,4 @@ Get-ChildItem $root\paper -File -Include *.aux,*.log,*.out,*.toc,*.bbl,*.blg,*.f
 | 版本 | 日期 | 变更 |
 |---|---|---|
 | 1.0 | 2026-10-01 | 初版：六轴规范（对应 / 追溯 / 版本 / 血缘 / 日志 / spec 纪律）+ 三条不变量 + `RESULT_MAP.md` 与 `LINEAGE.md` 两项核心新增 + 引用映射表 + 未决与偏离区。全部条目以可机械检出为合格线；不新增外部断言。 |
+| 1.1 | 2026-10-21 | P-116：§7 增八条指针；八条独立成文为 [ACADEMIC_REASONING_CONSTRAINTS.md](ACADEMIC_REASONING_CONSTRAINTS.md) v1.0；不复制。 |

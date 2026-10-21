@@ -1,7 +1,7 @@
 ---
 id: academic-writing-workflow-ACADEMIC_S3_RUN_CARD
 type: template
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-10-10
 depends: [academic-writing-workflow-ACADEMIC_FILE_SPEC, academic-writing-workflow-ACADEMIC_REPO_TASK_CARD]
@@ -29,6 +29,8 @@ upstream: academic-writing-workflow-ACADEMIC_FILE_SPEC
 ---
 
 ## 1. 运行口径（四组）
+
+> **学术推理八条**：见 [ACADEMIC_REASONING_CONSTRAINTS.md](ACADEMIC_REASONING_CONSTRAINTS.md)（规范本体；本卡引用不复制，P-116）。
 
 ### 1.1 六轴对齐（每个写作动作的静态合规动作）
 
@@ -118,3 +120,4 @@ upstream: academic-writing-workflow-ACADEMIC_FILE_SPEC
 | 版本 | 日期 | 变更 |
 |---|---|---|
 | 1.0 | 2026-10-10 | 初版：S3 运行卡（运行口径四组〔六轴对齐 / 回溯 C-8 / 收敛 C-9 / 触发〕+ 留痕载体 = 既有件 + 首轮定义〔决策 2·B〕+ 通过门四条 + 红线五条 + 回退 R-6）；**自足化边界三条**；**不新增编号断言**；产出方不执行。 |
+| 1.1 | 2026-10-21 | P-116：增八条指针（引用 [ACADEMIC_REASONING_CONSTRAINTS.md](ACADEMIC_REASONING_CONSTRAINTS.md) v1.0；不复制）。 |
