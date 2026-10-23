@@ -4,7 +4,7 @@
 
 id: graph-structure-upgrade-RESEARCH
 type: design
-version: 1.1
+version: 1.2
 status: draft
 date: 2026-10-24
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: graph-structure-upgrade（图结构升级 / RPC 集群接入的前置调研——基础、代价、收益、风险、缓解）
 > **创建日期**: 2026-10-24
+> **修订**: v1.2（2026-10-24，P-127：**补充 U-6/U-7 专项调研**——§13 给出拦截率/误报率的故障矩阵 + 双样本 + 基率 + 置信区间测量方案；§14 给出 P4 前置三件 V-EXPORT / V-FENCE / V-LEASE 的验收判据；新增 11 条外部来源（T1 8 / T2 3）；A 26→37 / B 10→15 / C 5→7 / H 7→9）
 > **修订**: v1.1（2026-10-24，P-126：**补充风险点解决办法**——§8 按「预防 / 检测 / 响应 / 机械核验 / 残余」五段重写；新增 §12 外部引文 T1 核验，订正 1 处 arXiv ID 误引；A 20→26 / B 6→10 / H 5→7）
 > **状态**: draft（本轮只出调研与缓解建议；不改任何代码/配置；`D:\RPC` 侧零写入）
 > **Spec 步骤**: Step 1-2
@@ -25,12 +26,12 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 26 | 本仓 / RPC 只读代码与文档的机械取证（E1）+ 外部锚点（v1.1 起：6 条回原文 T1，其余 E3/T2） |
-| B 推断类 | 10 | 由 A 类推出的判定（见附录 B） |
-| C 类（决策） | 5 | 不参与 R7 机械对账（DR-2） |
-| 假设区 | 7 | 未实测项（见附录 C） |
+| A 事实类 | 37 | 本仓 / RPC 只读代码与文档的机械取证（E1）+ 外部锚点（v1.1 起：6 条回原文 T1，其余 E3/T2） |
+| B 推断类 | 15 | 由 A 类推出的判定（见附录 B） |
+| C 类（决策） | 7 | 不参与 R7 机械对账（DR-2） |
+| 假设区 | 9 | 未实测项（见附录 C） |
 
-> **取证口径（v1.1 起）**：本仓与 RPC 事实 = E1（逐字读文件 / 机械枚举）；外部框架与论文 = **T1（arXiv abs 原文 / arXiv API / 会议页）或 E3/T2（未回原文，仅摘要级转述）**。v1.1 对正文实际使用的 6 条外部引文做了逐条核验（§12）：2 条升 T1 并进入 A 类（A-23 / A-24），3 条仅确认 ID/标题（A-26，数字仍不入判据），1 条 ID 误引被订正（A-25）。未回原文的条目不进 A 类。
+> **取证口径（v1.2 起）**：本仓与 RPC 事实 = E1（逐字读文件 / 机械枚举）；外部框架与论文 = **T1（arXiv abs 原文 / 官方文档 / 会议页 / API 参考）或 T2（官方页片段或书目级，未回全文）/ E3（二手转述）**。v1.1 核验 6 条（§12）：2 条升 T1（A-23 / A-24）、3 条仅确认 ID/标题（A-26）、1 条 ID 误引订正（A-25）。v1.2 追加 11 条（§13.2 / §14.4）：8 条 T1（A-27 / A-28 / A-29 / A-32 / A-33 / A-35 / A-36 / A-37）、3 条 T2（A-30 / A-31 / A-34），未发现新引文缺陷。未回原文的条目不进 A 类。
 
 ---
 
@@ -48,7 +49,7 @@ upstream: null
 - **不改**任何代码 / 配置 / 门禁；**不新增**真值源；
 - **零写入** `D:\RPC`（只读其 README / ADR / 调研 / 设计文档）；
 - **不引入** LangGraph / CrewAI / AutoGen / MAF / ADK / Temporal / Airflow 等任何框架；
-- 外部锚点 v1.1 已对 6 条做 T1 核验；其余仍为 **E3/T2**，不作为门禁判据；
+- 外部锚点 v1.1/v1.2 已对 17 条做 T1/T2 核验（§12 / §13.2 / §14.4）；其余仍为 **E3**，不作为门禁判据；
 - 本批只落 **Step 1-2**（调研 + 审查），不进入 DESIGN / IMPLEMENTATION。
 
 ---
@@ -63,7 +64,7 @@ upstream: null
 | Read（`D:\RPC`） | RPC README、ADR-0013、图编排调研 v1.3、P3 建图语义设计 | 成功（E1，只读） |
 | 既有会话（P-006 / P-050 / P-107） | LangGraph 否决先例、返工图/决策路径、研究批模板 | 成功（E2） |
 | RPC 图调研的外部链接 | LangGraph / CrewAI / AutoGen / MAF / ADK / Temporal / HTPS / LeanDojo-v2 / LongCat / Gödel-Code-Prover / 一致性测试 / Build Systems à la Carte / Workflow Patterns / DSM | 复用（E3/T2） |
-| **WebFetch（v1.1 新增）** | 逐条回 arXiv abs 原文核验 | 成功（6 条，见 §12；2 条升 T1、1 条误引订正） |
+| **WebFetch / WebSearch（v1.1 起）** | 逐条回原文核验（arXiv abs / 官方文档 / 会议页） | 成功（v1.1 6 条 + v1.2 11 条；2 条升 T1、1 条误引订正、3 条 T2） |
 | **arXiv API（v1.1 新增）** | 标题精确检索（`ti:"Build Systems a la Carte"`） | 成功：`totalResults = 0`（无 arXiv 版） |
 | **WebSearch（v1.1 新增）** | 会议页交叉核验（ICFP 2018 / ACM DL） | 成功（DOI 10.1145/3236774） |
 
@@ -334,6 +335,7 @@ upstream: null
 3. **「先补全基础，再试运行」更合适，但补全 = 契约 + 最小语义 + 最小工具；试运行 = 一个真实复杂任务 pilot**。全框架留到 RPC P4 三判据满足之后。
 4. **三层图分开**：Spec_Workflow 做 G1 + G2 契约/证据/验收；RPC 做 G2 执行（P1/P2/P3）；Auto_Prover 做 G3 领域语义。
 5. **缓解措施按阶段落地**（v1.1 新增）：S0/S1 只做预防与只读检测；R3/R4/R9/R11 的运行时检测留 S2 pilot；R1 的拓扑导出、R5 的 fencing 属 P4 前置——**未到阶段的缓解只登记，不预先实施**（否则即 ADR-0010 的「未激活副作用」与 R8 的 graph theater）。
+6. **U-6/U-7 已从「无判据」转为「有方案 / 判据、实现待阶段」**（v1.2 新增）：U-6 采用「故障矩阵 + 双样本 + 基率 + 置信区间」（§13）；U-7 采用 V-EXPORT / V-FENCE / V-LEASE 三件验收（§14）；二者仍 open，但不再是不可裁的空项。
 
 **分档**：
 
@@ -354,6 +356,8 @@ upstream: null
 【C】C-4 **P4 框架**只在三判据满足后评估，且须另立 ADR。
 
 【C】C-5 **本仓不建图引擎**；只做 G1 + G2 契约/证据/验收；图构建/校验为只读最小工具。
+【C】C-6 **U-6 测量口径** = 故障语料 + 干净语料双样本，报告 TPR / FPR / 基率 / Wilson 95% CI，并预注册最小故障矩阵单元；**禁止只报单一准确率或只报 TPR**（§13）。
+【C】C-7 **U-7 前置判据** = V-EXPORT + V-FENCE + V-LEASE 三件**同时满足**；框架自称「有图 API / 有 checkpointer / 有 leader election」不作数，须逐条机械验收（§14）。
 
 ---
 
@@ -366,8 +370,8 @@ upstream: null
 | U-3 | 图构建/校验器归属（Spec_Workflow vs RPC）未定 | DESIGN 段 + ADR-0013 边界 |
 | U-4 | 未回原文的外部锚点仍为 E3/T2（v1.1 已核 6 条，余 6 类未核） | 正式 DESIGN 前逐条回原文 |
 | U-5 | pilot 的实际成本（墙钟/失败率/重放次数）未测 | S2 pilot |
-| U-6 | **缓解措施的实际拦截率 / 误报率未测**（崩溃注入、并发 resume、条件边回归集均未建） | S2 pilot 实测 |
-| U-7 | **P4 前置形态未定**（拓扑导出 API / fencing token / 租约） | P4 立项 ADR |
+| U-6 | **缓解措施的实际拦截率 / 误报率未测**（方案已定于 §13；崩溃注入、并发 resume、条件边回归集均未建） | S2 pilot 按 §13.3 故障矩阵实测；读数入 pilot 报告 |
+| U-7 | **P4 前置实现未做**（判据已定于 §14：V-EXPORT / V-FENCE / V-LEASE） | P4 立项 ADR 逐条机械验收；不满足则不采用框架 |
 
 ---
 
@@ -396,6 +400,19 @@ upstream: null
 - Gödel-Code-Prover: arXiv:2603.19329v3（ID / 标题已核；数字仍 E3）
 - *Build Systems à la Carte*: Mokhov / Mitchell / Peyton Jones, **ICFP 2018, DOI 10.1145/3236774**（**无 arXiv 版；v1.0 的 arXiv:1809.02942 为误引，已订正**）
 
+**外部（v1.2 U-6/U-7 专项）**：
+- Axelsson 2000, *The Base-Rate Fallacy and the Difficulty of Intrusion Detection*（ACM TISSEC）——**T1**
+- ALICE / BOB, OSDI 2014, *All File Systems Are Not Created Equal*——**T1**
+- FoundationDB Simulation and Testing（官方文档）——**T1**
+- *Principles of Chaos Engineering*（2019 版）——**T2**
+- Jia & Harman 2011, *An Analysis and Survey of the Development of Mutation Testing*（IEEE TSE 37(5):649-678, DOI 10.1109/TSE.2010.62）——**T2（书目级）**
+- OpenLineage Object Model（官方文档）——**T1**
+- LangChain `draw_mermaid` API reference——**T1**
+- Chubby OSDI 2006, *The Chubby lock service for loosely-coupled distributed systems*（§2.4 sequencer）——**T2（官方页片段）**
+- Kubernetes Lease（官方文档）——**T1**
+- etcd Lease（官方文档）——**T1**
+- Gray & Cheriton 1989, *Leases: An Efficient Fault-Tolerant Mechanism for Distributed File Cache Consistency*（SOSP）——**T1**
+
 **外部（仍 E3/T2，未回原文）**：
 - LangGraph / CrewAI Flows / AutoGen / MS Agent Framework / Google ADK / Temporal（RPC 图调研 §2.1 链接）
 - LeanDojo-v2, https://leandojo.org/leandojo
@@ -413,6 +430,7 @@ upstream: null
 - **T1 定位**：对正文实际使用的 6 条外部引文，逐条取 arXiv `abs` 页原文（WebFetch），只把**摘要可见的事实**升级为 T1；摘要未含的表述**不升级**。
 - **ID 三连核验**：标题 / 作者 / 年份与正文声称一致；对无 arXiv 版者用 arXiv API 标题精确检索 + 会议页交叉核验。
 - **不核验项**：未在正文承担判据的文献保持 E3/T2，登记为 U-4。
+- **v1.2 追加（U-6/U-7 专项）**：另有 11 条来源单独核验（T1 8 / T2 3），方法同「回原文取摘要或官方页」；结果见 §13.2 / §14.4。本轮未发现新引文缺陷，故不新增 M7 样本。
 
 ### 12.2 结果
 
@@ -433,6 +451,135 @@ upstream: null
 
 ---
 
+
+## 13. U-6：缓解措施的拦截率 / 误报率怎么测
+
+### 13.1 为什么「测过了」不成立
+
+- **只报拦截率 = 不可复核**：拦截率（TPR = TP/(TP+FN)）与误报率（FPR = FP/(FP+TN)）必须成对出现；只有 TPR 无法回答「正常运行时会不会误报」。
+- **基率支配**：用户真正关心的是 P(故障 | 告警) = TPR·π / (TPR·π + FPR·(1−π))，其中 π 是故障基率；π 很小时 FPR 是限制因素——这正是 Axelsson 的结论（A-27）。因此报告必须同时给 **π、TPR、FPR**，否则「99% 拦截率」在低基率下仍可能几乎全是误报。
+- **双样本缺一不可**：没有干净语料（无故障运行）⇒ FPR 无定义；没有故障语料（注入）⇒ TPR 无定义。只跑其中一种，结论都是半截。
+- **缓解分两类，测法不同**：
+  - **预防型**（R1/R2/R10/R12）：没有「告警」动作，只能测「违规实例数 = 0」+ 用种子违规测「校验器逃逸率」（变异测试思路，A-31）。
+  - **检测型**（R3/R4/R5/R9/R11）：有告警/阻断动作，才可测 TPR / FPR / P(故障|告警)。
+
+### 13.2 社区与学术案例
+
+【A】A-27 Axelsson 2000（T1，PDF 原文）：对一组合理假设，**误报率是入侵检测系统性能的限制因素**；由于基率谬误，要让贝叶斯检测率 P(Intrusion|Alarm) 达到可观值，必须把误报率压到（有时不可达的）极低水平。⇒ 本仓报告「缓解有效率」时必须同时给基率与 FPR。
+
+【A】A-28 ALICE / BOB（T1，OSDI 2014 摘要）：对 11 个广泛使用的系统（数据库、KV 存储、版本控制、分布式系统、虚拟化）分析应用级崩溃一致性协议，共发现 **60 个崩溃漏洞**；方法 = 先测持久化属性（BOB），再**违反属性生成 crash states**，跑应用恢复并判定一致性（ALICE）。⇒ 故障注入应按「属性 × crash point」枚举单元，而不是随机重启。
+
+【A】A-29 FoundationDB Simulation（T1，官方文档）：**确定性**单线程模拟整个集群；夜间运行**数万次**模拟，累计约 **1 万亿 CPU 小时**等效；模拟网络、机器、数据中心级故障，真实/模拟时间约 **10:1**；确定性使失败可完美重放。⇒ 先确定性模拟，再真机注入；确定性 harness 每单元一次即可复现。
+
+【A】A-30 Chaos Engineering 四步（T2，官方原则页）：① 定义稳态（可测输出）② 对控制组与实验组做同一假设 ③ 注入真实世界事件 ④ 找稳态差异以证伪假设；要求**最小爆炸半径**与**持续自动化**。⇒ 实验必须有对照组与稳态指标，不能在「没有基线」的情况下注入。
+
+【A】A-31 变异测试（T2，书目级：Jia & Harman, IEEE TSE 37(5):649-678, 2011, DOI 10.1109/TSE.2010.62）：用变异体被测试集杀死的比例衡量测试集的故障发现能力；等价变异体是已知偏差。⇒ 可用于估计「条件边回归集」与「校验器」的拦截强度，但须报告等价变异体处理口径。
+
+### 13.3 三层测量设计
+
+**L1 契约 / 预防层（S0/S1，可先做）**
+
+- 对象：R1 双真相源、R2 卡替换、R10 硬编码、R12 跨层边。
+- 语料：四组卡 fixture（无字段 / 部分字段 / 非法字段 / 未知字段）+ 种子违规（手写一份「故意错误」的图/卡，测校验器是否捕获）。
+- 指标：违规实例数（必须 0）、种子逃逸数（必须 0）、digest 复算一致率。
+- 报告：`runs` / `violations` / `seeded_mutants` / `escaped`；不适用 TPR/FPR（无告警动作）。
+
+**L2 故障注入层（S2，需 pilot）**
+
+- 对象：R3 重放、R9 证据链污染、R5 门漂移、R11 敏感外发。
+- **R3 故障矩阵（建议维度）**：
+  - crash point：写产物前 / 写产物中 / 写后入链前 / 入链后（4）
+  - 并发 resume：1 / 2 / 4 进程（3）
+  - checkpoint 有效性：合法 / schema 非法（2）
+  - 外部效应：无 / 幂等 API / 非幂等 API（3）
+  - ⇒ 名义 72 单元；**预注册最小子集**（例如 24 单元）与每单元运行次数，禁止事后挑单元。
+- 判据（每单元）：产物 digest 集合不变、重复副作用计数 = 0、消费闸一赢家、未记录外部效应 = 0。
+- **R9**：注入「重放 / 双写者 / 入链后改写 / 未记录效应」四类故障 + 干净语料；指标 = 四类各自检出率、每 100 次干净运行的误报数。
+- **R5/R11**：分区 / 暂停旧 holder / `local-only` 请求注入；判据 = 旧 token 写入被拒数 = 全部尝试、`local-only` 出网 = 0。
+- 工具（社区案例，T2）：容器级 Chaos Mesh / LitmusChaos；网络 `tc netem` 或 Toxiproxy；进程 `SIGKILL` harness；分布式历史检查 Jepsen 风格。**工具只作执行手段，判据仍以本仓契约为准。**
+- 确定性 harness 每单元 1 次即可复现；含 LLM 的单元须每单元 ≥30 次、锁模型版本与温度、报告 Wilson 95% CI。
+
+**L3 条件边回归层（S2）**
+
+- 对象：R4 条件边判错。
+- 语料：正例（应走 A/B）、负例（不应触发）、边界（非法输出 / 超时 / 工具缺失 / 参数畸形）。
+- 指标：TPR、FPR、fallback 率、非法输出率；用变异测试（翻阈值 / 删 default / 改枚举）估计回归集强度（A-31）。
+- 报告 Wilson 95% CI；**禁止只报 accuracy**（基率陷阱，A-27）。
+
+### 13.4 报告模板（拟议，不落脚本 / 不新增真值源）
+
+- 预防型单元：`{"risk":"R2","suite":"card-fixtures","runs":N,"violations":0,"seeded_mutants":M,"escaped":0}`。
+- 检测型单元：`{"risk":"R3","suite":"crash-matrix","cells_total":72,"cells_run":24,"tp":..,"fn":..,"fp":..,"tn":..,"tpr":..,"fpr":..,"base_rate":..,"ci":"wilson95","clean_runs":..,"fault_runs":..,"harness":"deterministic|llm","as_of":"YYYY-MM-DD"}`。
+- **纪律**：模板只是形态；数值必须由 harness 机械生成，不得手填（R7 同构）。本批**不建 harness、不写账本、不接门禁**。
+
+### 13.5 最小第一步与触发
+
+- **现在可做（S1 内）**：R2 四组 fixture + R4 三类语料 + 种子违规集；纯测试资产，不改运行时。
+- **S2 pilot 才做**：R3/R9 崩溃注入与并发 resume、R5/R11 分区与外发注入、R4 回归集实测。
+- **U-6 保持 open 直到 S2 出读数**；读数入 pilot 报告，**不进 M7**（M7 记审查轮，不记可靠性读数）。
+
+---
+
+## 14. U-7：P4 前置判据（拓扑导出 / fencing / 租约）
+
+### 14.1 V-EXPORT：拓扑导出 API 六条
+
+1. **机器可读 schema**（JSON / JSONL / Protobuf），且有版本号；**Mermaid 渲染文本不算**。
+2. **完整**：节点、边、条件边、子图、join 节点；每节点带 `layer` 与语义类型。
+3. **运行期真值**：导出 = 实际执行拓扑（含运行时选择的分支），不是仅设计期声明。
+4. **只读、无副作用**：运行中与结束后都可调用，不改变状态。
+5. **稳定 ID + 可复算 digest**：同一 run 两次导出逐字节一致。
+6. **版本协商**：未知字段 fail-soft；schema 版本不匹配 ⇒ 拒绝托管。
+
+【A】A-33 反例（T1）：LangGraph 的 `draw_mermaid(nodes, edges, ...)` 是一个渲染函数，返回 **Mermaid 字符串**；`get_graph()` 返回结构（T2 二手页）。⇒ **有图 API ≠ 满足 V-EXPORT**：若只能导出图片/文本，无法做拓扑对账与 digest 校验。
+
+【A】A-32 正例参考（T1）：OpenLineage 对象模型把 **设计期**（`JobEvent` / `DatasetEvent`）与 **运行期**（`RunEvent`）分开，Run 内记录输入/输出 Dataset；另有 `lineage` job facet 显式记录数据流边（T2 官方页片段）。它不是控制流拓扑，但给出了「设计期声明 × 运行期观测」双事件的导出形态，可借用其分层，不直接采用其本体。
+
+### 14.2 V-FENCE：fencing token 六条
+
+1. 每次获锁生成**单调 token**（generation / epoch）。
+2. **资源侧校验 token**，拒绝旧 token；不信任「客户端声称仍持锁」。
+3. token 与锁**同一共识存储 / 同一单调序列**派生。
+4. token 随每次写请求携带；资源记录已见最大 token。
+5. **分区 / 暂停演练**：旧 holder 恢复后写入必须被拒。
+6. 验收读数：旧 token 写入尝试 **全部被拒**（拒绝数 = 尝试数）。
+
+【A】A-34 案例（T2）：Chubby 的锁携带 **lock generation number**；客户端把它作为 **sequencer** 传给受保护资源，接收方应校验该 sequencer（OSDI'06 官方页 §2.4 片段；本批未回全文，标 T2）。
+
+### 14.3 V-LEASE：租约五条 + 与 fencing 的区别
+
+1. **TTL + 续租 + 到期释放**；租约到期后资源不得再接受旧 holder 写入（需 V-FENCE 配合）。
+2. **holder identity + 单调版本**（如 `holderIdentity` / `renewTime` / `resourceVersion`）。
+3. **时钟偏斜上界** + 单调时钟；租约长度 > 续租间隔 + 偏斜。
+4. **无双 holder 窗口**：任意时刻至多一个 holder；旧 holder 暂停后恢复不得写。
+5. **验收读数**：到期释放、续租成功、旧 holder 写入拒绝三项均有记录。
+
+【A】A-35 案例（T1）：Kubernetes `coordination.k8s.io` Lease 以 `holderIdentity` / `leaseDurationSeconds` / `renewTime` 表达持有者与续租，用于 leader election 与 node heartbeat；**K8s Lease 本身不做资源侧 token 校验**，所以它满足 V-LEASE 的一部分，不自动满足 V-FENCE。
+【A】A-36 案例（T1）：etcd 的 lease 有 TTL、keepalive 流、键绑定租约；TTL 到期后租约及其键被删除。
+【A】A-37 理论（T1）：Gray & Cheriton 1989 的 lease 是**时间型缓存一致性机制**，短租约把非拜占庭失败的影响限制在租约期内；**它不是 fencing token**。
+
+> **关键区分（B15）**：lease ≠ fencing。只做租约、不做资源侧 token 校验，旧 holder 在暂停后恢复仍可写入——这正是 V-FENCE 要单独存在的原因。把「有 leader election / 有 lease」当成「已 fencing」是常见误读。
+
+### 14.4 三件关系与裁定
+
+- **P4 托管执行外壳的前置 = V-EXPORT + V-FENCE + V-LEASE 三件同时满足**；缺一不采用。
+- 框架自称「有 checkpointer / 有图 API / 有 leader election」**不作数**；须逐条机械验收。
+- 验收动作：导出 schema 解析 + 两次导出 digest 一致；分区 / 暂停演练 + 旧 token 拒绝计数；租约到期 / 续租读数。
+- 与 P-125 的 P4 三判据关系：三判据回答「**要不要**外置」，本节回答「**外置前必须满足什么**」；两者叠加，不互相替代。
+
+
+### 14.5 社区案例对照
+
+| 来源 | 提供什么 | 不提供什么 | 对本仓的含义 |
+|---|---|---|---|
+| OpenLineage（A-32） | 设计期 / 运行期双事件；输入输出 Dataset | 控制流、条件边、join | 借「双事件」形态，不直接采用本体 |
+| LangGraph `draw_mermaid`（A-33） | Mermaid 文本渲染 | 稳定 schema、运行期真值 | 反例：有图 API 仍需另验 V-EXPORT |
+| Chubby sequencer（A-34） | 单调 sequencer + 接收方校验 | 开源实现、TTL 细节 | V-FENCE 判据原型 |
+| Kubernetes Lease（A-35） | holderIdentity / renewTime / TTL | 资源侧 token 校验 | V-LEASE 原型，仍需 V-FENCE |
+| etcd lease（A-36） | TTL / keepalive / 键绑定 | fencing token | V-LEASE 实现参考 |
+| Gray & Cheriton（A-37） | 时间型 lease 理论 | fencing | 纠正「lease = fencing」误读 |
+
+---
 ## 附录 A：A 类事实清单
 
 | ID | 事实 | 等级 |
@@ -463,6 +610,17 @@ upstream: null
 | A-24 | Checkpoint/Rollback 五类失效 + 三攻击（含重复付款） | T1 |
 | A-25 | arXiv:1809.02942 误引（实为 CA-as-CNN；标题检索 0） | T1 |
 | A-26 | 三条既有 ID 核验通过（2205.11491 / 2603.21065 / 2603.19329） | T1 |
+| A-27 | Axelsson 2000：误报率是 IDS 性能限制因素；基率谬误（T1） | T1 |
+| A-28 | ALICE/BOB：11 系统 60 崩溃漏洞；属性违反→crash states（T1） | T1 |
+| A-29 | FoundationDB Simulation：确定性全集群模拟；夜间数万次；~1 万亿 CPU 小时等效（T1） | T1 |
+| A-30 | Chaos Engineering 四步：稳态→假设→注入→证伪；最小爆炸半径（T2） | T2 |
+| A-31 | 变异测试：变异体杀死率衡量测试集故障发现能力（T2 书目级） | T2 |
+| A-32 | OpenLineage：设计期/运行期双事件 + 输入输出 Dataset（T1） | T1 |
+| A-33 | LangGraph draw_mermaid 返回 Mermaid 字符串，非 schema（T1） | T1 |
+| A-34 | Chubby sequencer：lock generation number + 接收方校验（T2 官方页片段） | T2 |
+| A-35 | Kubernetes Lease：holderIdentity / renewTime / leaseDurationSeconds（T1） | T1 |
+| A-36 | etcd lease：TTL / keepalive / 键绑定 / 到期删除（T1） | T1 |
+| A-37 | Gray & Cheriton 1989：时间型 lease；非 fencing token（T1） | T1 |
 
 ## 附录 B：B 类推断（机读登记）
 
@@ -477,6 +635,11 @@ upstream: null
 {"id": "B8", "claim": "崩溃语义下「恰好一次」不能由单一框架自证，须消费闸 + 单写者 + 产物 digest 三件共同保证。", "basis": "A-23/A-24/A-22"}
 {"id": "B9", "claim": "缓解落点必须绑定阶段；运行时缓解未经 pilot 不得宣称有效。", "basis": "A-11/A-21"}
 {"id": "B10", "claim": "进入正文的外部 ID 必须机械可解析；标题级检索为 0 时不得保留 arXiv ID。", "basis": "A-25/A-26"}
+{"id": "B11", "claim": "拦截率与误报率必须双样本（故障+干净）+ 基率 + 置信区间；只报 TPR 或单一 accuracy 不可复核。", "basis": "A-27/A-30"}
+{"id": "B12", "claim": "预防型缓解用「违规数 0 + 变异逃逸率」，检测型缓解才用 TPR/FPR；两者不可混测。", "basis": "A-28/A-31"}
+{"id": "B13", "claim": "P4 前置 = V-EXPORT + V-FENCE + V-LEASE 三件同时满足；框架自称能力不作数。", "basis": "A-32/A-33/A-34/A-35/A-36"}
+{"id": "B14", "claim": "拓扑导出必须是机器可读 schema；Mermaid 渲染文本不满足 V-EXPORT。", "basis": "A-33/A-32"}
+{"id": "B15", "claim": "lease ≠ fencing；租约单独不能阻止旧 holder 恢复后写入。", "basis": "A-37/A-34"}
 ```
 
 ## 附录 C：C 类决策与假设区
@@ -492,3 +655,5 @@ upstream: null
 - [H5] pilot 的实际成本（墙钟/失败率/重放次数）未测。
 - [H6] 缓解措施的实际拦截率 / 误报率未测（S2 才可测）。
 - [H7] 崩溃注入与并发 resume 未做（S2 才可测）。
+- [H8] 故障矩阵的最小单元数与每单元运行次数未预注册（S2 前定）。
+- [H9] P4 候选框架的导出 API / fencing / lease 未实测（P4 验收）。
