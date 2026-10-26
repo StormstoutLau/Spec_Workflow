@@ -24,7 +24,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.10.0"
+VERSION = "1.11.0"
 ROOT = Path(__file__).resolve().parent
 
 # ---- 事件行 schema（DESIGN §3 十字段，写入端单点把守） ----
@@ -309,7 +309,7 @@ def cmd_gate_step(args) -> int:
       - 硬性-3（**U-8 / P-092**）：`finalize` 决策强制 `upstream_impact` 三态；非 `none` ⇒
                     该 session 须已登记返工图（**过渡期 = P 编号 ≥ 92**；见 `_finalize_impact_check`）
       - 软性-4 锚点：evidence[].anchor 形态可解析（正则）
-    exit 0 / 1（硬性）/ 2（软性存疑）。
+    exit 0 / 1（硬性）/ 2（软性存疑；未显式声明 --expect / --legacy）。
     """
     w = EventWriter(sessions_dir())
     decisions = [r for r in w.read(args.session) if r.get("event") == "decision"]
@@ -324,12 +324,23 @@ def cmd_gate_step(args) -> int:
     soft += ui_soft
     got = list(seen)
     expect = tuple(args.expect) if args.expect else None
+    legacy = bool(getattr(args, "legacy", False))
+    if args.expect is not None and not args.expect:
+        print(f"step-gate[{args.session}]: --expect 不得为空（显式完整链或 --legacy）")
+        return 2
+    if expect and legacy:
+        print(f"step-gate[{args.session}]: --expect 与 --legacy 互斥")
+        return 2
+    if not expect and not legacy:
+        print(f"step-gate[{args.session}]: 必须显式声明 --expect <steps> 或 --legacy"
+              "（隐式 legacy 已移除；完整链校验请给 --expect）")
+        return 2
     if expect:
         if len(got) != len(expect) or got != list(expect):
             hard.append(f"期望链 {list(expect)} ≠ 已登记 {got}")
     else:
-        print(f"step-gate[{args.session}]: 已登记 {len(got)}/{len(STEP_SEQUENCE)} 步 ({got})"
-              + ("（未声明 --expect 完整性）" if len(got) < len(STEP_SEQUENCE) else ""))
+        print(f"step-gate[{args.session}]: mode=legacy 已登记 {len(got)}/{len(STEP_SEQUENCE)} 步 ({got})"
+              "（仅内部一致性，未声明完整链）")
     for seq, sid_ in back:
         print(f"  [REWORK] seq{seq} 受控回边（重入 {sid_}）——已受理；"
               "如属真实返工须经 backflow-audit + 返工图登记")
@@ -363,7 +374,7 @@ def cmd_step_enforce(args) -> int:
         return 1
     sid = matches[-1][:-len(".jsonl")]  # 取最新（文件名排序末位）
     print(f"step-enforce[{args.pid}]: session 定位 {sid}")
-    return cmd_gate_step(argparse.Namespace(session=sid, expect=None))
+    return cmd_gate_step(argparse.Namespace(session=sid, expect=None, legacy=True))
 
 
 # ---- 模块 2d：verify-anchor 锚点真实性取证（P-025，ADR-0011 出路 C——只读取证：文件存在 + 章节精确匹配 + 行号上界） ----
@@ -906,7 +917,9 @@ def build_parser() -> argparse.ArgumentParser:
     sg = sub.add_parser("step-gate", help="决策产物管线校验（P-020：schema/evidence/step 序，只读）")
     sg.add_argument("--session", required=True)
     sg.add_argument("--expect", nargs="*", default=None,
-                    help="期望完整链 step_id 列表（缺省 = 仅校验已登记链内部一致性）")
+                    help="期望完整链 step_id 列表（与 --legacy 二选一；缺失即 exit 2）")
+    sg.add_argument("--legacy", action="store_true",
+                    help="显式 legacy：仅校验已登记链内部一致性（不要求完整链）")
     sg.set_defaults(func=cmd_gate_step)
     se = sub.add_parser("step-enforce", help="批次级流程强制（P-024：定位 specwf-p0xx-* session + 决策流校验，只读）")
     se.add_argument("--pid", required=True, help="P 编号（如 P-024）——session 前缀锚点")
@@ -1114,7 +1127,7 @@ def run_selftest() -> int:
         check("F19 replay 坏 seq exit 1", p_rp.returncode == 1)
 
         # F20-F23: step-gate 决策产物管线（P-020，CER §3.5）
-        p_sg0 = run_cli("step-gate", "--session", "st-nod")
+        p_sg0 = run_cli("step-gate", "--session", "st-nod", "--legacy")
         check("F20 空流无 decision → exit 1", p_sg0.returncode == 1)
         w_sg = EventWriter(tmp)
         for i, st in enumerate(["research", "design"], 1):
@@ -1130,19 +1143,19 @@ def run_selftest() -> int:
             "category": "feature-design", "scenario": "s",
             "metadata": {"step_id": "research", "step_seq": 1,
                          "evidence": [{"grade": "E1", "anchor": "spec/x.md"}]}})
-        p_sg_miss = run_cli("step-gate", "--session", "st-miss")
+        p_sg_miss = run_cli("step-gate", "--session", "st-miss", "--legacy")
         check("F22 缺 reasoning/outcome/confidence → exit 1", p_sg_miss.returncode == 1)
         w_sg.append("st-soft", "assistant", "decision", input_={
             "category": "c", "scenario": "s", "reasoning": "r", "outcome": "o",
             "confidence": 0.9, "metadata": {"step_id": "research", "step_seq": 1,
             "evidence": [{"grade": "E1", "anchor": "not a valid anchor !!"}]}})
-        p_sg_soft = run_cli("step-gate", "--session", "st-soft")
+        p_sg_soft = run_cli("step-gate", "--session", "st-soft", "--legacy")
         check("F23 锚点形态存疑 → exit 2", p_sg_soft.returncode == 2)
         w_sg.append("st-badd", "assistant", "decision", input_={
             "category": "c", "scenario": "s", "reasoning": "r", "outcome": "o",
             "confidence": 0.9, "metadata": {"step_id": "XXX", "step_seq": 9,
             "evidence": [{"grade": "E1", "anchor": "spec/x.md"}]}})
-        p_sg_badd = run_cli("step-gate", "--session", "st-badd")
+        p_sg_badd = run_cli("step-gate", "--session", "st-badd", "--legacy")
         check("F24 step_id 非法 → exit 1", p_sg_badd.returncode == 1)
 
         # F27-F29: step-enforce 批次级强制（P-024，ADR-0011 出路 A——只读零副作用）
@@ -1197,7 +1210,7 @@ def run_selftest() -> int:
         p_b1 = run_cli("verify-anchor", "--session", "bad-json")
         check("F37 坏行报错含 <路径>:<行号>（verify-anchor，exit 1 不变）",
               p_b1.returncode == 1 and "bad-json.jsonl:2" in p_b1.stderr, p_b1.stderr[-100:])
-        p_b2 = run_cli("step-gate", "--session", "bad-json")
+        p_b2 = run_cli("step-gate", "--session", "bad-json", "--legacy")
         check("F38 同族命令报错一致（step-gate 亦给 <路径>:<行号>）",
               p_b2.returncode == 1 and "bad-json.jsonl:2" in p_b2.stderr, p_b2.stderr[-100:])
         w_va.append("va-detail", "assistant", "decision", input_=_va_d("spec/step-gate/DESIGN.md §4"))
@@ -1247,7 +1260,7 @@ def run_selftest() -> int:
         p_a1 = run_cli("verify-anchor", "--session", "p064-alpha")
         check("F46 字母 + 数字章节号受理（ADR-0006 §B4 真实）→ exit 0",
               p_a1.returncode == 0, p_a1.stdout[-100:])
-        p_a2 = run_cli("step-gate", "--session", "p064-alpha")
+        p_a2 = run_cli("step-gate", "--session", "p064-alpha", "--legacy")
         check("F47 同一锚点 step-gate 亦受理（两处同改收口，soft=0）→ exit 0",
               p_a2.returncode == 0, p_a2.stdout[-100:])
         _p064_samples = ["spec/project-console/RESEARCH.md §7.16",
@@ -1262,7 +1275,7 @@ def run_selftest() -> int:
         p_a3 = run_cli("verify-anchor", "--session", "p064-word")
         check("F49 多字母词形不受理（§selftest 仍不可解析）→ verify-anchor 硬性 exit 1",
               p_a3.returncode == 1)
-        p_a4 = run_cli("step-gate", "--session", "p064-word")
+        p_a4 = run_cli("step-gate", "--session", "p064-word", "--legacy")
         check("F50 同锚点 step-gate 形态存疑（soft）→ exit 2", p_a4.returncode == 2)
         w_va.append("p064-case", "assistant", "decision",
                     input_=_va_d("adr/ADR-0006-assertion-framework-dual-copy-authority.md §b4"))
@@ -1300,14 +1313,14 @@ def run_selftest() -> int:
               p_bf1.returncode == 1 and "[PENDING]" in p_bf1.stdout
               and "待重入" in p_bf1.stdout, p_bf1.stdout[-160:])
 
-        p_sg_back = run_cli("step-gate", "--session", "bf-back")
+        p_sg_back = run_cli("step-gate", "--session", "bf-back", "--legacy")
         check("F55 step-gate 受控回边受理 → exit 0 且打印 [REWORK]",
               p_sg_back.returncode == 0 and "[REWORK]" in p_sg_back.stdout,
               p_sg_back.stdout[-160:])
 
         w_bf.append("bf-dup", "assistant", "decision", input_=_bf_d("research", 1))
         w_bf.append("bf-dup", "assistant", "decision", input_=_bf_d("research", 1))
-        p_sg_dup = run_cli("step-gate", "--session", "bf-dup")
+        p_sg_dup = run_cli("step-gate", "--session", "bf-dup", "--legacy")
         check("F56 step-gate 同位重复仍判硬性（回边受理未豁免真重复）→ exit 1",
               p_sg_dup.returncode == 1, p_sg_dup.stdout[-120:])
 
@@ -1360,22 +1373,22 @@ def run_selftest() -> int:
                                   None if impact == _UI_MISS else impact))
 
         _ui_chain("specwf-p092-s1")
-        p_u1 = run_cli("step-gate", "--session", "specwf-p092-s1")
+        p_u1 = run_cli("step-gate", "--session", "specwf-p092-s1", "--legacy")
         check("F72 finalize 缺 upstream_impact（P ≥ 92）→ 硬性 exit 1",
               p_u1.returncode == 1 and "upstream_impact" in p_u1.stdout, p_u1.stdout[-170:])
 
         _ui_chain("specwf-p092-s2", "bogus")
-        p_u2 = run_cli("step-gate", "--session", "specwf-p092-s2")
+        p_u2 = run_cli("step-gate", "--session", "specwf-p092-s2", "--legacy")
         check("F73 非法 upstream_impact 取值 → 硬性 exit 1",
               p_u2.returncode == 1 and "bogus" in p_u2.stdout, p_u2.stdout[-170:])
 
         _ui_chain("specwf-p092-s3", "none")
-        p_u3 = run_cli("step-gate", "--session", "specwf-p092-s3")
+        p_u3 = run_cli("step-gate", "--session", "specwf-p092-s3", "--legacy")
         check("F74 upstream_impact=none + 全链齐 → exit 0（吃狗粮形态）",
               p_u3.returncode == 0, p_u3.stdout[-170:])
 
         _ui_chain("specwf-p092-s4", "overturned")
-        p_u4 = run_cli("step-gate", "--session", "specwf-p092-s4")
+        p_u4 = run_cli("step-gate", "--session", "specwf-p092-s4", "--legacy")
         check("F75 非 none 且该 session 未登记返工图 → 硬性 exit 1（耦合臂）",
               p_u4.returncode == 1 and "未登记返工图" in p_u4.stdout, p_u4.stdout[-170:])
 
@@ -1392,26 +1405,37 @@ def run_selftest() -> int:
             "non_rework": []}, ensure_ascii=False), encoding="utf-8")
         _ui_chain("specwf-p092-s5", "partial")
         p_u5 = subprocess.run([sys.executable, me, "step-gate", "--session",
-                               "specwf-p092-s5"], capture_output=True, text=True,
+                               "specwf-p092-s5", "--legacy"], capture_output=True, text=True,
                               env=dict(env, **{REGISTRY_ENV: str(reg2)}))
         check("F76 非 none 且该 session 已登记返工图 → exit 0（耦合满足）",
               p_u5.returncode == 0, p_u5.stdout[-170:])
 
         _ui_chain("specwf-p091-hist")
-        p_u6 = run_cli("step-gate", "--session", "specwf-p091-hist")
+        p_u6 = run_cli("step-gate", "--session", "specwf-p091-hist", "--legacy")
         check("F77 过渡期判据：历史批次（P=91）不适用 ⇒ 缺字段仍 exit 0（零回归边界）",
               p_u6.returncode == 0, p_u6.stdout[-170:])
 
         _ui_chain("notbatch-001")
-        p_u7 = run_cli("step-gate", "--session", "notbatch-001")
+        p_u7 = run_cli("step-gate", "--session", "notbatch-001", "--legacy")
         check("F78 sid 形态不匹配（非 specwf-pNNN-）⇒ 不适用 ⇒ exit 0",
               p_u7.returncode == 0, p_u7.stdout[-170:])
 
         p_u8 = subprocess.run([sys.executable, me, "step-gate", "--session",
-                               "specwf-p092-s5"], capture_output=True, text=True,
+                               "specwf-p092-s5", "--legacy"], capture_output=True, text=True,
                               env=dict(env, **{REGISTRY_ENV: str(tmp / "no-reg-ui.json")}))
         check("F79 非 none 且返工图不可用 → 耦合降级为软性（exit 2，不静默通过）",
               p_u8.returncode == 2, p_u8.stdout[-170:])
+
+        # F80-F81: step-gate 显式声明守卫（P-132）——无声明 / 双声明两臂
+        p_sg_nodecl = run_cli("step-gate", "--session", "st-ok")
+        check("F80 未显式声明（既无 --expect 亦无 --legacy）→ exit 2",
+              p_sg_nodecl.returncode == 2 and "必须显式声明" in p_sg_nodecl.stdout,
+              p_sg_nodecl.stdout[-120:])
+        p_sg_both = run_cli("step-gate", "--session", "st-ok",
+                            "--expect", "research", "design", "--legacy")
+        check("F81 --expect 与 --legacy 同时给出 → exit 2（互斥）",
+              p_sg_both.returncode == 2 and "互斥" in p_sg_both.stdout,
+              p_sg_both.stdout[-120:])
 
         # F62-F69: fork 注册扩展（P-089）——成功臂 / 零回归 / fail-fast 原子性
         p_r1 = run_cli("fork", "--session", "st-001", "--seq", "2",

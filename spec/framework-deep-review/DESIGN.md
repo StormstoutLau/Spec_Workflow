@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.1
+version: 1.2
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -15,6 +15,7 @@ upstream: null
 > **Feature**: framework-deep-review（U-1 / O3 Phase 1 门禁实施）
 > **创建日期**: 2026-10-26
 > **修订**: v1.1（2026-10-26，P-131：U-2 边界裁决 129 + §8 边界语义注记）
+> **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明面——`--expect` / `--legacy` 二选一，隐式 legacy 移除）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -209,6 +210,8 @@ class ProgressRow:
 
 > **U-2 裁决（2026-10-26，P-131）**：`BATCH_BINDING_MIN_P = 129`。该边界**只适用于维护模式与仅登记模式**；显式 batch/session/branch 声明带文档改动一律要求 ≥1 个 5/5，**不因 P<129 豁免**——否则旧的不完整 session 可借旧 P 行放行新语义改动。runner 的 `FINALIZE_IMPACT_MIN_P = 92` 是 finalize 字段专项边界，**不与本边界合并**。注入测试：0/5、4/5、P-128 维护放行、P-129 维护判红、P<129 显式声明仍须 5/5。
 
+> **U-2 声明面（2026-10-26，P-132）**：runner `step-gate` 的完整性声明改为**显式二选一**——`--expect <steps>`（校验完整链）或 `--legacy`（仅校验已登记链内部一致性）；两者都缺 ⇒ exit 2，两者同给 ⇒ exit 2，`--expect` 空列表 ⇒ exit 2。**隐式 legacy 已移除**：原默认行为让「忘记声明完整链」与「有意 legacy」在机械读数上不可区分，违反本仓「声明 = 重数」纪律。所有内部调用方（`scripts/step_enforce.py` 的内部一致性检查、runner `step-enforce` 子命令）改为**显式传 `--legacy`**，不依赖缺省。该改动只调整 CLI 声明面，**不触碰 decision schema / 事件写入路径**。
+
 ## 9. 幻觉抑制审查（Step 4 Review）
 
 ### 9.1 设计基于已验证的调研结论
@@ -237,6 +240,7 @@ class ProgressRow:
 - `step_enforce.py` 必须能在 pre-commit（index）与 CI（base...HEAD）两种模式运行。
 - 不引入 `dorny/paths-filter` 或 `tj-actions/changed-files`；用 git 自算变更集。
 - `spec_runner.py` 只作为只读被调用方，不修改其 decision schema。
+- 允许调整 runner 的 `step-gate` CLI 声明面（P-132：显式 `--expect` / `--legacy`），但不得触碰 decision schema 与事件写入路径。
 
 ### 10.2 风险与缓解
 

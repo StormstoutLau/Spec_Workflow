@@ -114,6 +114,8 @@ def _run_gate(sid: str, expect: tuple[str, ...] | None = None) -> int:
     cmd = [sys.executable, str(RUNNER), "step-gate", "--session", sid]
     if expect:
         cmd += ["--expect", *expect]
+    else:
+        cmd += ["--legacy"]          # 内部一致性检查 = 显式 legacy（P-132）
     r = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True,
                        encoding="utf-8", errors="replace")
     return r.returncode

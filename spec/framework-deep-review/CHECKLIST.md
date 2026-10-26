@@ -4,7 +4,7 @@
 
 id: framework-deep-review-CHECKLIST
 type: design
-version: 1.2
+version: 1.3
 status: accepting
 date: 2026-10-26
 depends: [framework-deep-review-IMPLEMENTATION, framework-deep-review-DESIGN]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（U-1 / O3 Phase 1 门禁实施）
 > **创建日期**: 2026-10-26
+> **修订**: v1.3（2026-10-26，P-132：runner `step-gate` 显式声明验收 3 项）
 > **状态**: 验收中（有条件通过：Linux 未实测）
 > **Spec 步骤**: Step 7-8, 10
 > **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)
@@ -44,7 +45,7 @@ upstream: null
 
 | 检查项 | 状态 | 说明 |
 |---|---|---|
-| 20 个测试用例均有验收项 | ☑ | §2.1 列 14 项；§2.2 列 5 项；git 错误见 §5 |
+| 20 个测试用例均有验收项 | ☑ | §2.1 列 14 项；§2.2 列 5 项；git 错误见 §5；§2.3 另列 runner selftest 3 项（不计入 20 例矩阵） |
 | 验收项可追溯到 IMPLEMENTATION §3.5 | ☑ | 用例编号一致 |
 
 ### 1.4 术语一致性
@@ -85,6 +86,14 @@ upstream: null
 | P-128 维护模式 + 1/5 | `test_maintenance_boundary_128_legacy_partial_passes` | exit 0，mode=maintenance | ☑ | unittest ok |
 | P-129 维护模式 + 1/5 | `test_maintenance_boundary_129_requires_complete` | exit 1（边界含 129） | ☑ | unittest ok |
 | P-128 显式声明 + 文档 + 1/5 | `test_legacy_declaration_with_docs_still_requires_complete` | exit 1（声明不豁免） | ☑ | unittest ok |
+
+### 2.3 runner 显式声明（P-132）
+
+| 验收项 | 测试方法 | 通过条件 | 状态 | 证据 |
+|---|---|---|---|---|
+| 未声明（无 `--expect` / `--legacy`） | selftest F80 | exit 2 且含「必须显式声明」 | ☑ | `selftest: 83/83 passed` |
+| 双声明（`--expect` + `--legacy`） | selftest F81 | exit 2 且含「互斥」 | ☑ | `selftest: 83/83 passed` |
+| 内部调用方显式 legacy | `scripts/step_enforce.py` `_run_gate` | 无 expect 时显式传 `--legacy` | ☑ | 20 例批次绑定全通过 |
 
 ## 3. 接口验收
 
@@ -182,21 +191,21 @@ upstream: null
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |---|---|---|---|---|
 | 文档一致性 | 12 | 12 | 0 | 0 |
-| 功能 | 19 | 19 | 0 | 0 |
+| 功能 | 22 | 22 | 0 | 0 |
 | 接口 | 4 | 4 | 0 | 0 |
 | 不变式 | 8 | 8 | 0 | 0 |
 | 错误处理 | 8 | 8 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
 | 兼容性 | 3 | 2 | 0 | 1 |
 | ADD 审计 | 4 | 4 | 0 | 0 |
-| **总计** | 60 | 59 | 0 | 1 |
+| **总计** | 63 | 62 | 0 | 1 |
 
 > **统计口径（RULE-2）**：上表来自逐项核对，非事后汇总推算。
 
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：Linux 平台未在本机实测；其余 59 项全通过，无失败项
+- [x] **有条件通过**：Linux 平台未在本机实测；其余 62 项全通过，无失败项
 - [ ] **验收失败**：<原因>
 
 ### 10.3 签字

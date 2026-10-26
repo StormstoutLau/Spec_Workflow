@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.1
+version: 1.2
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -15,6 +15,7 @@ upstream: null
 > **Feature**: framework-deep-review（U-1 / O3 Phase 1 门禁实施）
 > **创建日期**: 2026-10-26
 > **修订**: v1.1（2026-10-26，P-131：U-2 注入测试 5 例，批次绑定测试 15 → 20）
+> **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明 `--expect` / `--legacy`，selftest 81 → 83）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -63,6 +64,8 @@ scripts/step_enforce.py                # 重写为 O3 解析器
 tests/test_batch_binding.py            # 新增：真实 runner + git 集成测试
 .pre-commit-config.yaml                # step-enforce files 扩到 session + PROGRESS
 .github/workflows/ci.yml               # checkout fetch-depth 0 + 变更集 step-enforce
+tools/spec_runner/spec_runner.py       # P-132：step-gate 显式 --expect / --legacy + selftest F80/F81
+tools/spec_runner/README.md            # P-132：CLI 声明面 + selftest 83 项
 spec/framework-deep-review/
 ├── DESIGN.md                          # 本设计
 ├── IMPLEMENTATION.md                  # 本文件
@@ -209,6 +212,45 @@ FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sess
 | 19 | P-129 维护模式 + 1/5 session（U-2） | fail（边界含 129） |
 | 20 | P-128 显式声明 + 文档 + 1/5（U-2） | fail（声明不豁免） |
 
+### 3.6 `spec_runner.py` / `scripts/step_enforce.py`（P-132）
+
+#### 职责
+
+把 runner `step-gate` 的完整性声明从**隐式缺省**改为**显式二选一**，并让所有内部调用方显式表达意图。
+
+#### 接口签名
+
+```python
+# spec_runner.py（VERSION 1.10.0 → 1.11.0）
+sg.add_argument("--expect", nargs="*", default=None)
+sg.add_argument("--legacy", action="store_true")
+
+def cmd_gate_step(args) -> int: ...
+def cmd_step_enforce(args) -> int:
+    return cmd_gate_step(argparse.Namespace(session=sid, expect=None, legacy=True))
+
+# scripts/step_enforce.py
+def _run_gate(sid: str, expect: tuple[str, ...] | None = None) -> int:
+    cmd = [sys.executable, str(RUNNER), "step-gate", "--session", sid]
+    cmd += ["--expect", *expect] if expect else ["--legacy"]
+```
+
+#### 实施要点
+
+- 三重守卫：`--expect` 空列表 ⇒ exit 2；`--expect` 与 `--legacy` 同给 ⇒ exit 2；两者都缺 ⇒ exit 2（提示「必须显式声明」）；
+- legacy 模式输出 `mode=legacy 已登记 n/5 步`，明确「仅内部一致性，未声明完整链」；
+- 解析错误（坏 JSON）仍在声明守卫之前抛出，保持 F38 的「`<路径>:<行号>` + exit 1」不变；
+- selftest 新增 F80（无声明 → exit 2）/ F81（双声明 → exit 2）；既有 18 处 `step-gate` 调用全部补 `--legacy` 或保留 `--expect`；
+- `scripts/step_enforce.py` 的内部一致性检查显式传 `--legacy`；完整链检查传五个 step_id；
+- 不触碰 decision schema、事件写入路径与 `cmd_gate_step` 的三类校验规则。
+
+#### 低效操作排除
+
+| 潜在低效 | 排除措施 |
+|---|---|
+| 每次调用重复解析 argv | 单次 argparse，守卫为 O(1) |
+| 为 legacy 另写校验路径 | 复用同一 `_decision_chain`，仅跳过 `--expect` 比对 |
+
 ## 4. 接口实施
 
 ### 4.1 `parse_progress_rows`
@@ -269,7 +311,8 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 - `console_gen` 继续使用 `build_pid_map`，不受影响；
 - `spec_runner.py step-enforce --pid`（P-024 子命令，独立实现）不受影响；`scripts/step_enforce.py` 的 hook 入口不再提供 `--pid`，改为 argv 变更集 / `--base`；
 - P<129 的历史 session 不被追溯判红（只在维护 / session-only 放宽）；
-- 语义性文档改动仍必须声明——这是 P0 修复，不是兼容性回归。
+- 语义性文档改动仍必须声明——这是 P0 修复，不是兼容性回归；
+- **runner `step-gate` 的隐式 legacy 是显式断裂（P-132）**：无 `--expect` / `--legacy` 的旧调用现在 exit 2；仓内调用面已全量迁移（`scripts/step_enforce.py` + runner 自身 `step-enforce` + selftest 18 处），README 同步；外部调用方须补声明，这是有意的 fail-closed。
 
 ## 6. 错误处理实施
 
@@ -284,6 +327,8 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 | 只加 P 行 | 无异常，返回 0 | `batch-registration` | #12 |
 | git 读取失败 | 捕获 `OSError` / 非零 | `main` 返回 2 | 手工注入 |
 | 无相关变更 | 无异常，返回 0 | `main` | 现有 no-arg 测试 |
+| step-gate 未显式声明（P-132） | 无异常，返回 2 | `cmd_gate_step` 守卫 | runner F80 |
+| step-gate `--expect` / `--legacy` 同给（P-132） | 无异常，返回 2 | `cmd_gate_step` 守卫 | runner F81 |
 
 ## 7. 不变式实施
 
@@ -306,6 +351,7 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 |---|---|---|---|
 | `spec_map` | `tests/test_batch_binding.py` | 20（含集成） | 关键分支全覆盖 |
 | `step_enforce` | 同上 | 20 | 关键分支全覆盖 |
+| `spec_runner step-gate` | `spec_runner.py selftest` | 83（含 F80/F81） | 声明守卫 + 既有三臂回归 |
 
 ### 8.2 集成测试
 
@@ -367,6 +413,12 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 - 文件: `spec/framework-deep-review/RESEARCH.md` / `DESIGN.md` / `IMPLEMENTATION.md` / `CHECKLIST.md` + P-130 row + session
 - 内容: 用新门禁验本批；P-130 5/5
 - 测试: `step_enforce.py --base HEAD`（或 pre-commit 自动）
+
+### Step 5: runner 声明面（P-132）
+
+- 文件: `tools/spec_runner/spec_runner.py` / `scripts/step_enforce.py` / `tools/spec_runner/README.md`
+- 内容: `step-gate` 三重声明守卫 + selftest F80/F81 + 内部调用方显式 `--legacy`
+- 测试: `spec_runner.py selftest` 83/83；`python -m unittest discover -s tests` 28/28
 
 ---
 
