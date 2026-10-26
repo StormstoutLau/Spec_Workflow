@@ -4,7 +4,7 @@
 
 id: framework-deep-review-CHECKLIST
 type: design
-version: 1.1
+version: 1.2
 status: accepting
 date: 2026-10-26
 depends: [framework-deep-review-IMPLEMENTATION, framework-deep-review-DESIGN]
@@ -44,7 +44,7 @@ upstream: null
 
 | 检查项 | 状态 | 说明 |
 |---|---|---|
-| 15 个测试用例均有验收项 | ☑ | §2.1 列 14 项；git 错误见 §5 |
+| 20 个测试用例均有验收项 | ☑ | §2.1 列 14 项；§2.2 列 5 项；git 错误见 §5 |
 | 验收项可追溯到 IMPLEMENTATION §3.5 | ☑ | 用例编号一致 |
 
 ### 1.4 术语一致性
@@ -75,6 +75,16 @@ upstream: null
 | #12 只加 P 行 | `test_batch_registration_passes` | exit 0 | ☑ | unittest ok |
 | #13 `--all-files` 全量 argv | `test_all_files_mode_ignores_unchanged` | 未变更不误判；真实变更仍 fail | ☑ | unittest ok + 真实仓全量复验 |
 | #14 分块 argv（pre-commit chunk） | `test_partial_argv_uses_git_change_set` | 单块无声明文件不误判，仍 batch pass | ☑ | unittest ok + 六 hook 实测 |
+
+### 2.2 U-2 完整链注入（P-131）
+
+| 验收项 | 测试方法 | 通过条件 | 状态 | 证据 |
+|---|---|---|---|---|
+| 0/5 session + 文档 | `test_zero_step_session_fails` | exit 1（内部不一致） | ☑ | unittest ok |
+| 4/5 session + 文档 | `test_four_step_session_fails` | exit 1（无 5/5） | ☑ | unittest ok |
+| P-128 维护模式 + 1/5 | `test_maintenance_boundary_128_legacy_partial_passes` | exit 0，mode=maintenance | ☑ | unittest ok |
+| P-129 维护模式 + 1/5 | `test_maintenance_boundary_129_requires_complete` | exit 1（边界含 129） | ☑ | unittest ok |
+| P-128 显式声明 + 文档 + 1/5 | `test_legacy_declaration_with_docs_still_requires_complete` | exit 1（声明不豁免） | ☑ | unittest ok |
 
 ## 3. 接口验收
 
@@ -116,7 +126,7 @@ upstream: null
 | 性能指标 | 目标 | 实测 | 状态 |
 |---|---|---|---|
 | 单次 hook 墙钟（本仓全量，66 文档 + 154 session） | < 5 s | 1.14 s | ☑ |
-| 批次绑定集成测试总时长 | < 60 s | 13.5 s（全套 23 例 11.6 s） | ☑ |
+| 批次绑定集成测试总时长 | < 60 s | 28.5 s（20 例；全套 28 例 32.6 s） | ☑ |
 
 ## 7. 兼容性验收
 
@@ -172,21 +182,21 @@ upstream: null
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |---|---|---|---|---|
 | 文档一致性 | 12 | 12 | 0 | 0 |
-| 功能 | 14 | 14 | 0 | 0 |
+| 功能 | 19 | 19 | 0 | 0 |
 | 接口 | 4 | 4 | 0 | 0 |
 | 不变式 | 8 | 8 | 0 | 0 |
 | 错误处理 | 8 | 8 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
 | 兼容性 | 3 | 2 | 0 | 1 |
 | ADD 审计 | 4 | 4 | 0 | 0 |
-| **总计** | 55 | 54 | 0 | 1 |
+| **总计** | 60 | 59 | 0 | 1 |
 
 > **统计口径（RULE-2）**：上表来自逐项核对，非事后汇总推算。
 
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：Linux 平台未在本机实测；其余 54 项全通过，无失败项
+- [x] **有条件通过**：Linux 平台未在本机实测；其余 59 项全通过，无失败项
 - [ ] **验收失败**：<原因>
 
 ### 10.3 签字

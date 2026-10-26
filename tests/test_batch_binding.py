@@ -94,6 +94,10 @@ class BatchBindingTest(unittest.TestCase):
         row = f"| {pid} | demo batch | run | {status} | 高 | {cell} |\n"
         self._write("docs/PROGRESS.md", text + row)
 
+    def _pin_wiki(self, pid: str):
+        """维护模式的 feature→P 映射优先取 CODE_WIKI §9，须同步改写。"""
+        self._write("CODE_WIKI.md", INITIAL_WIKI.replace("P-001 demo", f"{pid} demo"))
+
     def _session(self, sid="specwf-p130-20261026", n=5,
                  anchor="spec/demo/RESEARCH.md"):
         rows = []
@@ -174,6 +178,53 @@ class BatchBindingTest(unittest.TestCase):
     def test_batch_one_step_fails(self):
         self._append_p_row()
         rel = self._session(n=1)
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\nchanged\n")
+        self._stage("docs/PROGRESS.md", "spec/demo/RESEARCH.md", rel)
+        self._assert_fail(self._run(["docs/PROGRESS.md",
+                                     "spec/demo/RESEARCH.md", rel]), "无 5/5")
+
+    def test_zero_step_session_fails(self):
+        """0/5：无 decision 的 session 内部不合法，必须判红。"""
+        self._append_p_row()
+        rel = self._session(n=0)
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\nchanged\n")
+        self._stage("docs/PROGRESS.md", "spec/demo/RESEARCH.md", rel)
+        self._assert_fail(self._run(["docs/PROGRESS.md",
+                                     "spec/demo/RESEARCH.md", rel]), "内部不一致")
+
+    def test_four_step_session_fails(self):
+        """4/5：内部合法但缺 finalize，必须判红。"""
+        self._append_p_row()
+        rel = self._session(n=4)
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\nchanged\n")
+        self._stage("docs/PROGRESS.md", "spec/demo/RESEARCH.md", rel)
+        self._assert_fail(self._run(["docs/PROGRESS.md",
+                                     "spec/demo/RESEARCH.md", rel]), "无 5/5")
+
+    def test_maintenance_boundary_128_legacy_partial_passes(self):
+        """U-2 边界 129：P-128 维护模式只验内部合法，不要求 5/5。"""
+        self._append_p_row(pid="P-128", links=("demo",))
+        self._pin_wiki("P-128")
+        self._session("specwf-p128-20261025", n=1)
+        self._commit("legacy batch")
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\ncontent   \n")
+        self._stage("spec/demo/RESEARCH.md")
+        self._assert_pass(self._run(["spec/demo/RESEARCH.md"]), "maintenance")
+
+    def test_maintenance_boundary_129_requires_complete(self):
+        """U-2 边界 129：P-129 维护模式必须 5/5（边界含 129）。"""
+        self._append_p_row(pid="P-129", links=("demo",))
+        self._pin_wiki("P-129")
+        self._session("specwf-p129-20261025", n=1)
+        self._commit("boundary batch")
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\ncontent   \n")
+        self._stage("spec/demo/RESEARCH.md")
+        self._assert_fail(self._run(["spec/demo/RESEARCH.md"]), "无 5/5")
+
+    def test_legacy_declaration_with_docs_still_requires_complete(self):
+        """边界只作用于维护/登记：P<129 的显式声明带文档改动仍须 5/5。"""
+        self._append_p_row(pid="P-128", links=("demo",))
+        rel = self._session("specwf-p128-20261025", n=1)
         self._write("spec/demo/RESEARCH.md", "# Demo\n\nchanged\n")
         self._stage("docs/PROGRESS.md", "spec/demo/RESEARCH.md", rel)
         self._assert_fail(self._run(["docs/PROGRESS.md",

@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（U-1 / O3 Phase 1 门禁实施）
 > **创建日期**: 2026-10-26
+> **修订**: v1.1（2026-10-26，P-131：U-2 注入测试 5 例，批次绑定测试 15 → 20）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -183,7 +184,7 @@ FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sess
 
 ### 3.5 `tests/test_batch_binding.py`
 
-真实 `spec_runner.py` + 临时 git 仓；不复制 stub。15 个用例：
+真实 `spec_runner.py` + 临时 git 仓；不复制 stub。20 个用例：
 
 | # | 用例 | 期望 |
 |---|---|---|
@@ -202,6 +203,11 @@ FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sess
 | 13 | `--all-files` 全量 argv（含未变更文档） | pass；同 argv 下真实变更仍 fail |
 | 14 | 分块 argv（只传文档子集） | pass batch（以整批变更集判定） |
 | 15 | 非 git 目录 | exit 2（fail-closed） |
+| 16 | 0/5 session + 文档（U-2） | fail（内部不一致） |
+| 17 | 4/5 session + 文档（U-2） | fail（无 5/5） |
+| 18 | P-128 维护模式 + 1/5 session（U-2） | pass maintenance（边界外放行） |
+| 19 | P-129 维护模式 + 1/5 session（U-2） | fail（边界含 129） |
+| 20 | P-128 显式声明 + 文档 + 1/5（U-2） | fail（声明不豁免） |
 
 ## 4. 接口实施
 
@@ -298,8 +304,8 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 
 | 模块 | 测试文件 | 测试数 | 覆盖率目标 |
 |---|---|---|---|
-| `spec_map` | `tests/test_batch_binding.py` | 15（含集成） | 关键分支全覆盖 |
-| `step_enforce` | 同上 | 15 | 关键分支全覆盖 |
+| `spec_map` | `tests/test_batch_binding.py` | 20（含集成） | 关键分支全覆盖 |
+| `step_enforce` | 同上 | 20 | 关键分支全覆盖 |
 
 ### 8.2 集成测试
 
@@ -348,7 +354,7 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 
 - 文件: `scripts/step_enforce.py`
 - 内容: 模式解析、覆盖、完整性、维护模式、exit 语义
-- 测试: 15 例矩阵
+- 测试: 20 例矩阵
 
 ### Step 3: hook 与 CI
 

@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（U-1 / O3 Phase 1 门禁实施）
 > **创建日期**: 2026-10-26
+> **修订**: v1.1（2026-10-26，P-131：U-2 边界裁决 129 + §8 边界语义注记）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -205,6 +206,8 @@ class ProgressRow:
 6. **I-6 exit 2 = fail-closed**：pre-commit / CI 均视为失败，不保留「提示不阻断」语义。
 7. **I-7 不依赖文件名排序**：扫描全部候选 session，v10/v9 不参与选择。
 8. **I-8 本地/CI 同源**：同一 `resolve` 逻辑，仅输入来源不同（index vs base...HEAD）。
+
+> **U-2 裁决（2026-10-26，P-131）**：`BATCH_BINDING_MIN_P = 129`。该边界**只适用于维护模式与仅登记模式**；显式 batch/session/branch 声明带文档改动一律要求 ≥1 个 5/5，**不因 P<129 豁免**——否则旧的不完整 session 可借旧 P 行放行新语义改动。runner 的 `FINALIZE_IMPACT_MIN_P = 92` 是 finalize 字段专项边界，**不与本边界合并**。注入测试：0/5、4/5、P-128 维护放行、P-129 维护判红、P<129 显式声明仍须 5/5。
 
 ## 9. 幻觉抑制审查（Step 4 Review）
 
