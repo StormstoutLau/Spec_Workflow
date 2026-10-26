@@ -4,7 +4,7 @@
 
 id: framework-deep-review-CHECKLIST
 type: design
-version: 1.3
+version: 1.4
 status: accepting
 date: 2026-10-26
 depends: [framework-deep-review-IMPLEMENTATION, framework-deep-review-DESIGN]
@@ -15,6 +15,7 @@ upstream: null
 > **Feature**: framework-deep-review（U-1 / O3 Phase 1 门禁实施）
 > **创建日期**: 2026-10-26
 > **修订**: v1.3（2026-10-26，P-132：runner `step-gate` 显式声明验收 3 项）
+> **修订**: v1.4（2026-10-26，P-134：CI fail-closed 验收 4 项（§2.4），功能 22 → 26）
 > **状态**: 验收中（有条件通过：Linux 未实测）
 > **Spec 步骤**: Step 7-8, 10
 > **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)
@@ -94,6 +95,15 @@ upstream: null
 | 未声明（无 `--expect` / `--legacy`） | selftest F80 | exit 2 且含「必须显式声明」 | ☑ | `selftest: 83/83 passed` |
 | 双声明（`--expect` + `--legacy`） | selftest F81 | exit 2 且含「互斥」 | ☑ | `selftest: 83/83 passed` |
 | 内部调用方显式 legacy | `scripts/step_enforce.py` `_run_gate` | 无 expect 时显式传 `--legacy` | ☑ | 20 例批次绑定全通过 |
+
+### 2.4 CI fail-closed 验收（P-134）
+
+| 验收项 | 测试方法 | 通过条件 | 状态 | 证据 |
+|---|---|---|---|---|
+| 坏 base 显式红 | 本地注入：不存在引用传给 `git diff` | `exit 1` 且输出含 `fail-closed` | ☑ | 注入 5/5（临时仓 git-bash） |
+| 无变更绿灯 | 本地注入：变更集为空 | `exit 0`，不调用门禁 | ☑ | 注入 5/5 |
+| 根提交不误伤 | 本地注入：before 全零且无 `HEAD^` | `BASE=HEAD` 回退，`exit 0` | ☑ | 注入 5/5 |
+| 归档数字订正一致 | 全覆盖 grep：`152 个 specwf` 与 `152 specwf` 与 `152/152` | 仅 RESEARCH 附录 D 归档报告原文（D.1~D.6 逐字收录）保留，以 D.0 订正表为准；PROGRESS / CODE_WIKI 均为 151；历史 session 事件流不重写 | ☑ | 终验 grep（提交前全覆盖执行） |
 
 ## 3. 接口验收
 
@@ -191,21 +201,21 @@ upstream: null
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |---|---|---|---|---|
 | 文档一致性 | 12 | 12 | 0 | 0 |
-| 功能 | 22 | 22 | 0 | 0 |
+| 功能 | 26 | 26 | 0 | 0 |
 | 接口 | 4 | 4 | 0 | 0 |
 | 不变式 | 8 | 8 | 0 | 0 |
 | 错误处理 | 8 | 8 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
 | 兼容性 | 3 | 2 | 0 | 1 |
 | ADD 审计 | 4 | 4 | 0 | 0 |
-| **总计** | 63 | 62 | 0 | 1 |
+| **总计** | 67 | 66 | 0 | 1 |
 
 > **统计口径（RULE-2）**：上表来自逐项核对，非事后汇总推算。
 
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：Linux 平台未在本机实测；其余 62 项全通过，无失败项
+- [x] **有条件通过**：Linux 平台未在本机实测；其余 66 项全通过，无失败项
 - [ ] **验收失败**：<原因>
 
 ### 10.3 签字

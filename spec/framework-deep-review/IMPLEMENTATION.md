@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.2
+version: 1.3
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -16,6 +16,7 @@ upstream: null
 > **创建日期**: 2026-10-26
 > **修订**: v1.1（2026-10-26，P-131：U-2 注入测试 5 例，批次绑定测试 15 → 20）
 > **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明 `--expect` / `--legacy`，selftest 81 → 83）
+> **修订**: v1.3（2026-10-26，P-134：ci.yml step-enforce 段 fail-closed 化（§3.7）+ 本地注入 5 例 + §2.3/§8.1 变更面同步）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -63,7 +64,7 @@ scripts/spec_map.py                    # + parse_progress_rows / changed_pids
 scripts/step_enforce.py                # 重写为 O3 解析器
 tests/test_batch_binding.py            # 新增：真实 runner + git 集成测试
 .pre-commit-config.yaml                # step-enforce files 扩到 session + PROGRESS
-.github/workflows/ci.yml               # checkout fetch-depth 0 + 变更集 step-enforce
+.github/workflows/ci.yml               # checkout fetch-depth 0 + 变更集 step-enforce；P-134 fail-closed 化
 tools/spec_runner/spec_runner.py       # P-132：step-gate 显式 --expect / --legacy + selftest F80/F81
 tools/spec_runner/README.md            # P-132：CLI 声明面 + selftest 83 项
 spec/framework-deep-review/
@@ -251,6 +252,64 @@ def _run_gate(sid: str, expect: tuple[str, ...] | None = None) -> int:
 | 每次调用重复解析 argv | 单次 argparse，守卫为 O(1) |
 | 为 legacy 另写校验路径 | 复用同一 `_decision_chain`，仅跳过 `--expect` 比对 |
 
+### 3.7 `.github/workflows/ci.yml`（P-134）
+
+#### 职责
+
+把 step-enforce step 从 fail-open（`|| true` 吞 git diff 失败 ⇒ 空 FILES ⇒ 绿灯）改为 **fail-closed**，与 step_enforce 的 I-6（exit 2 fail-closed）语义对齐。
+
+#### 实施
+
+```yaml
+- name: 决策流批次强制（step-enforce，merge-base 变更集）
+  shell: bash
+  run: |
+    set -eo pipefail
+    if [ "${{ github.event_name }}" = "pull_request" ]; then
+      BASE="${{ github.event.pull_request.base.sha }}"
+    else
+      BASE="${{ github.event.before }}"
+    fi
+    if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+      if git rev-parse --verify --quiet "HEAD^" >/dev/null 2>&1; then
+        BASE="HEAD^"
+      else
+        BASE="HEAD"
+      fi
+    fi
+    if ! FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sessions/**' 'docs/PROGRESS.md'); then
+      echo "step-enforce: git diff failed for base $BASE (fail-closed)" >&2
+      exit 1
+    fi
+    if [ -n "$FILES" ]; then
+      python scripts/step_enforce.py --base "$BASE" $FILES
+    else
+      echo "step-enforce: no changed gate files"
+    fi
+```
+
+#### 实施要点
+
+- `set -eo pipefail` 为**自文档化冗余**：GitHub Actions `shell: bash` 官方默认已含 `-eo pipefail`（T2 双源证实），显式写出只为可读性，不构成行为变更；
+- 空 FILES 绿灯仅在 `git diff` 成功后成立——失败路径显式 `exit 1`（P-130 的 `|| true` 形态移除）；
+- 根提交 / 孤儿分支：before 为全零空树时，有父提交取 `HEAD^`，无父（根提交）取 `BASE=HEAD` ⇒ 三点空 diff ⇒ 显式绿灯，不崩溃；
+- force-push 非祖先 base ⇒ 三点 diff 无 merge-base ⇒ 红（有意 fail-closed 新红边）；
+- 仍由 git 自算变更集，不引入第三方 changed-files action（CVE-2025-30066）。
+
+#### 本地注入测试（5 例）
+
+注入方式：从 ci.yml 提取真实 run 块，GitHub 表达式换环境变量、`step_enforce.py` 调用换 echo 桩，在临时 git 仓以 git-bash 执行（注意：PATH 上默认 bash 为 WSL，须显式使用 `Git\bin\bash.exe` 并做 Windows→POSIX 路径转换）。
+
+| # | 场景 | 期望 | 结果 |
+|---|---|---|---|
+| 1 | 坏 base（不存在引用） | `exit 1` 且输出含 `fail-closed` | ✅ |
+| 2 | 变更集为空 | `exit 0`，不调用门禁 | ✅ |
+| 3 | 根提交（无 `HEAD^`，before 全零） | `BASE=HEAD` 回退，`exit 0` | ✅ |
+| 4 | push：before + 变更集含门禁路径 | 门禁桩被调用 | ✅ |
+| 5 | PR：`pull_request.base.sha` + 变更集含门禁路径 | 门禁桩被调用 | ✅ |
+
+5/5 通过（P-134，零回归限定见 DESIGN §8 U-10 F 注记）。
+
 ## 4. 接口实施
 
 ### 4.1 `parse_progress_rows`
@@ -352,6 +411,7 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 | `spec_map` | `tests/test_batch_binding.py` | 20（含集成） | 关键分支全覆盖 |
 | `step_enforce` | 同上 | 20 | 关键分支全覆盖 |
 | `spec_runner step-gate` | `spec_runner.py selftest` | 83（含 F80/F81） | 声明守卫 + 既有三臂回归 |
+| `ci.yml` step-enforce 段（P-134） | 临时 git 仓注入（IMPLEMENTATION §3.7） | 5 | fail-closed 两红边 + 三绿灯边 |
 
 ### 8.2 集成测试
 

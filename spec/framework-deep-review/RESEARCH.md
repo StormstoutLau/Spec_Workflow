@@ -4,7 +4,7 @@
 
 id: framework-deep-review-RESEARCH
 type: design
-version: 1.5
+version: 1.6
 status: draft
 date: 2026-10-26
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（当前框架深度评审、前沿对标与分优先级升级建议）
 > **创建日期**: 2026-10-26
+> **修订**: v1.6（2026-10-26，P-134：**U-10 F 实施 + 归档数字订正**——CI step-enforce 段 fail-closed 化；D.0 订正 specwf 批次计数 152 → **151**（naive 子串误计）；§10 U-10/U-7 裁决落档）
 > **修订**: v1.5（2026-10-26，P-133：**五项裁决子代理完整报告落档**——U-10 / U-7 / U-5 / U-6 / U-9 全文入附录 D；主臂复核三条读数订正；A/B/C/H 计数不变）
 > **修订**: v1.4（2026-10-26，P-132：**runner `step-gate` 显式声明面**——隐式 legacy 移除，`--expect` / `--legacy` 二选一；selftest 81 → 83；A/B/C/H 计数不变）
 > **修订**: v1.3（2026-10-26，P-131：**U-2 完整链迁移边界裁决**——取 129；边界只作用于维护/登记；显式声明不豁免；注入测试 5 例；A/B/C/H 计数不变）
@@ -517,11 +518,11 @@ upstream: null
   - **当前倾向**：先修订再执行，避免只优化文档指标；
   - **证据等级**：E1（现状已读）。
 
-- **U-7 图 S2 pilot 对象仍未选**
-  - **判据**：具备真实片间依赖 / 写汇聚 / 迭代需求的任务；
-  - **触发条件**：P0 修复完成；
-  - **当前倾向**：承 graph RESEARCH H1，不提前固化拓扑；
-  - **证据等级**：待选。
+- **U-7 图 S2 pilot 对象（实为 graph U-1，编号错位见 D.0）**
+  - **判据**：具备真实片间依赖 / 写汇聚 / 迭代需求的任务，**且 graph S0 契约与 S1 只读工具已落地**；
+  - **触发条件**：**用户裁决（2026-10-26）**：**Cpp_Hub 二次吸收第 1 批 = 首选候选，现在不启动**（graph 目录仅 RESEARCH.md，S2 无契约可测）；启动前置 = graph S0 DESIGN（`depends_on` / `join` / `iter_budget` / `join_policy` / `graph_version` 五字段 + fixture）+ S1 只读工具 + 第二轮吸收范围冻结（3 机制 → 3 片 + 1 join + 1 有界 Review 迭代）；
+  - **当前倾向**：候选序 = Cpp_Hub 二次吸收 > Cpp_Hub 代码批走 RPC 卡 > Spec_Workflow 多阶段批 > Auto_Prover P3；pilot 读数入 pilot 报告、不进 M7（承 graph RESEARCH §13）；不固化拓扑；
+  - **证据等级**：E1（D.2 实证画像：三条 INTERFACE 依赖链 / 多账本写汇聚 / 1−Φ 族第 4 例迭代闭环 / agent-run digest 装置；引用口径订正见 D.0 增补）。
 
 - **U-8 `strict: true` 对单人流程的影响未测**
   - **判据**：多 PR 并行时仍能合并且不产生额外等待；
@@ -535,11 +536,11 @@ upstream: null
   - **当前倾向**：先生成高频汇总行，不整体拆分文档；
   - **证据等级**：待测。
 
-- **U-10 U-1 Phase 1 门禁实施未立项**
-  - **判据**：O3 解析器落地，§11.6 的 11 类故障注入全过，旧 session 放行路径为 0；
-  - **触发条件**：用户批准 Phase 1 + 完成 DESIGN；
-  - **当前倾向**：边界 P≥129；先本地 hook，再 CI 变更集；
-  - **证据等级**：方案已分析（§11）/ 已实施（P-130，2026-10-26）。
+- **U-10 Phase 2（证据增强）立项与批次边界**
+  - **判据**：F（CI fail-open 修补）与 C（内容 digest 绑定）可分批实施、互不阻塞回退；
+  - **触发条件**：**用户裁决（2026-10-26）**：F 单独立项 **P-134（本批已实施）**；C 不并入，另批 **P-135 候选**，实施前须预注册三处未决——digest 记录时点（倾向 finalize 而非 verify）、per-batch 作用域与 rebind 规则（finalize 末次改文档后 rebind 并留原因）、过渡边界（提案 `EVIDENCE_MIN_P = 135`）；`session_start` 留 Phase 2b 单独裁决；
+  - **当前倾向**：C 注入面 = 验后改文档 / P≥135 缺 digest / digest 不匹配 / rebind 无原因 六臂；回退 = 边界常量置哨兵值降为观察；
+  - **证据等级**：E1（批次 session gate=0 —— 分析时点 151/151，D.0 订正口径；坏 base → git diff exit 128 且包装层跳过；41bb0c4/3bc99fa/c779e6d 三提交同改同一组文档 ⇒ per-batch rebind 必要；P-134 本地注入 5/5）。
 
 ---
 
@@ -816,7 +817,7 @@ A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外�
 
 | 复核项 | 子代理读数 | 主臂实测 | 裁定 |
 |---|---|---|---|
-| specwf session 数 | 152 | 152（156 个 jsonl，含 4 个 demo/probe） | ✅ 采纳 152 |
+| specwf session 数 | 152 | **151**（156 个 jsonl，含 **5** 个非批次文件；P-134 订正：152 系 naive 子串 `specwf-p` 误计 `specwf-probe` 所致） | ❌ 订正 151（P-134） |
 | decision / gate / session_start | 729 / 7 / 0 | 729 / 7 / 0；7 个 gate 全在 5 个非批次文件 | ✅ 采纳 |
 | CI fail-open | `git diff ... \|\| true` 可静默跳过 | 坏 base → git diff exit 128 + 零输出；`step_enforce --base` exit 2 | ✅ 包装层 fail-open、工具层 fail-closed |
 | graph S0/S1 | 仅有 RESEARCH.md | `spec/graph-structure-upgrade/` 仅 `RESEARCH.md` | ✅ 无 DESIGN/IMPLEMENTATION |
@@ -825,6 +826,13 @@ A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外�
 | U-7 编号 | 实为 graph U-1 | graph RESEARCH §10：U-1 = pilot 未选定；U-7 = P4 前置 | ✅ 编号错位成立 |
 
 **本批连带订正**：`CODE_WIKI.md` 树行与 §9 行的「形态 II 116 处」改为 **117 处**（真值 = `docs/M7_EVIDENCE_LOG.md` §5 hits `form2_total: 117`）。该漂移此前无机械门禁覆盖。
+
+**P-134 复核增补（2026-10-26，裁决审查轮）**——对五份报告与主臂裁决文本的四项订正：
+
+1. **批次计数 off-by-one（上表第 1 行已订正）**：子代理与 P-133 时点主臂均误记 152；严格正则 `specwf-p\d{3}-` 实测 151（`specwf-probe-20260907.jsonl` 含子串 `specwf-p` 被误计；非批次文件为 5 个非 4 个）。**对 U-10 结论零影响**（151/151 gate=0 比例不变）；P-133 行与 CODE_WIKI banner 已同批订正。D.1 报告原文保留 152 不改（逐字收录原则），以本表为准。
+2. **pipefail 默认旗标（订正主臂裁决 justification）**：GitHub Actions `shell: bash` 默认即 `bash --noprofile --norc -eo pipefail {0}`（官方 workflow-syntax 页本次抓取被截断未回读原文；多源 T2 一致且无反例 ⇒ 采信并标注层级）。子代理标 E3 属实；主臂原文「显式 set -eo pipefail 消除默认差异」**不成立**——显式写出为防御性冗余/自文档化，P-134 保留并订正措辞。
+3. **引用号混叠（U-7 报告 D.2 与裁决文本）**：「B6 负载未满足」应为「**D6 链**负载未满足（主张登记号 B6，graph RESEARCH L633）」；「D6 禁托管」应为「**A-13** 托管禁令：不让本框架托管 Auto_Prover 图执行外壳（ADR-0013 D6/D7，graph RESEARCH L118）」。Cpp_Hub 并发撞树行号为 `docs/DEVELOPMENT_LOG.md` **L3127**（D.2 引 3126，漂 1）。语义方向均不变。
+4. **F 的两个新红边（裁决文本已登记）**：fail-closed 化后，① 根提交/孤儿分支 `BASE="HEAD^"` 会失败 → P-134 回退 `BASE=HEAD`（三点空 diff ⇒ 显式绿灯）；② force-push 非祖先 base ⇒ git diff 失败 ⇒ 显式 exit 1 红（有意 fail-closed）。「F 零回归」限定为**零历史 session 回归 + 2 个新 CI 失败边**。本地注入 5/5（坏 base 红 / 无变更绿 / 根提交不误伤 / push 有变更进门禁 / PR 基线进门禁）。
 
 ### D.1 U-10：Phase 2 是否立项（F 必做，C 是否同批）
 

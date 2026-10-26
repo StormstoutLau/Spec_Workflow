@@ -51,18 +51,29 @@ jobs:
         run: python scripts/console_gen.py --check
       # P-130（U-1 O3 Phase 1）：从「全量四文档」改为 merge-base 变更集；
       # 不使用第三方 changed-files action（CVE-2025-30066），路径过滤由 git 自身完成。
+      # P-134（U-10 F）：fail-closed 化——移除 fail-open 短路容错，git diff 失败显式 exit 1；
+      # `set -eo pipefail` 为自文档化冗余（shell: bash 官方默认已含 -eo pipefail）；
+      # 根提交/孤儿分支回退 BASE=HEAD（三点空 diff ⇒ 显式绿灯，不崩溃）；force-push 非祖先 base ⇒ 红（有意 fail-closed）。
       - name: 决策流批次强制（step-enforce，merge-base 变更集）
         shell: bash
         run: |
+          set -eo pipefail
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE="${{ github.event.pull_request.base.sha }}"
           else
             BASE="${{ github.event.before }}"
           fi
           if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
-            BASE="HEAD^"
+            if git rev-parse --verify --quiet "HEAD^" >/dev/null 2>&1; then
+              BASE="HEAD^"
+            else
+              BASE="HEAD"
+            fi
           fi
-          FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sessions/**' 'docs/PROGRESS.md' || true)
+          if ! FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sessions/**' 'docs/PROGRESS.md'); then
+            echo "step-enforce: git diff failed for base $BASE (fail-closed)" >&2
+            exit 1
+          fi
           if [ -n "$FILES" ]; then
             python scripts/step_enforce.py --base "$BASE" $FILES
           else

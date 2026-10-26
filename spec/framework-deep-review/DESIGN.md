@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.2
+version: 1.3
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -16,6 +16,7 @@ upstream: null
 > **创建日期**: 2026-10-26
 > **修订**: v1.1（2026-10-26，P-131：U-2 边界裁决 129 + §8 边界语义注记）
 > **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明面——`--expect` / `--legacy` 二选一，隐式 legacy 移除）
+> **修订**: v1.3（2026-10-26，P-134：U-10 F 实施注记（§8）——CI step-enforce 段 fail-closed 化 + 两红边；C 留 P-135 候选）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -212,6 +213,8 @@ class ProgressRow:
 
 > **U-2 声明面（2026-10-26，P-132）**：runner `step-gate` 的完整性声明改为**显式二选一**——`--expect <steps>`（校验完整链）或 `--legacy`（仅校验已登记链内部一致性）；两者都缺 ⇒ exit 2，两者同给 ⇒ exit 2，`--expect` 空列表 ⇒ exit 2。**隐式 legacy 已移除**：原默认行为让「忘记声明完整链」与「有意 legacy」在机械读数上不可区分，违反本仓「声明 = 重数」纪律。所有内部调用方（`scripts/step_enforce.py` 的内部一致性检查、runner `step-enforce` 子命令）改为**显式传 `--legacy`**，不依赖缺省。该改动只调整 CLI 声明面，**不触碰 decision schema / 事件写入路径**。
 
+> **U-10 F 裁决实施（2026-10-26，P-134）**：CI step-enforce 段 **fail-closed 化**（`.github/workflows/ci.yml`）——移除「`|| true` 吞 git diff 失败 ⇒ 空 FILES ⇒ 绿灯」的 fail-open 形态，diff 失败显式 `exit 1`，与 I-6 对齐。`set -eo pipefail` 为**自文档化冗余**：GitHub Actions `shell: bash` 官方默认已含 `-eo pipefail`（T2 双源证实），显式写出只为可读性。**两个新红边（有意 fail-closed）**：① 根提交 / 孤儿分支——before 为全零空树时回退，有父提交取 `HEAD^`，无父取 `BASE=HEAD`（三点空 diff ⇒ 显式绿灯，不崩溃）；② force-push 非祖先 base ⇒ 三点 diff 无 merge-base ⇒ 红。**零回归限定**：20 例批次绑定 / runner selftest 83 / unittest 28 零回归；新增 2 个 CI 失败边不属回归，本地注入 5/5（坏 base 红 / 无变更绿 / 根提交不误伤 / push 与 PR 有变更均进门禁）。**C（digest 门禁）不并入本批**：另批 P-135 候选，三处未决预注册——digest 计算时点（finalize vs 校验时）、per-batch rebind、边界 `EVIDENCE_MIN_P=135`（沿用 U-2 边界步进惯例）；`session_start` 留 Phase 2b。裁决全文见 RESEARCH §10（v1.6）。
+
 ## 9. 幻觉抑制审查（Step 4 Review）
 
 ### 9.1 设计基于已验证的调研结论
@@ -250,7 +253,7 @@ class ProgressRow:
 | 分支名误绑 | 分支名仅弱回退，且 P 行必须存在、feature 必须覆盖 |
 | 多 feature 批次漏检 | P 行链接集 + 并集覆盖检查 |
 | 旧批次被新规则误伤 | P<129 仅在无文档的 session-only / 维护模式放宽；带文档改动仍要求完整，避免旧 session 替身 |
-| CI 变更集为空 | `git diff` 为空时 exit 0；首次提交用 `HEAD^` 回退 |
+| CI 变更集为空 | `git diff` 成功且为空 ⇒ exit 0；空 before / 根提交回退 `HEAD^`，无父提交则 `BASE=HEAD`（P-134）；diff 失败 ⇒ exit 1（fail-closed） |
 
 ## 11. 未决项登记（四元块）与决策矩阵
 
