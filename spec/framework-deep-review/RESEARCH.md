@@ -4,7 +4,7 @@
 
 id: framework-deep-review-RESEARCH
 type: design
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-10-26
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（当前框架深度评审、前沿对标与分优先级升级建议）
 > **创建日期**: 2026-10-26
+> **修订**: v1.1（2026-10-26，P-129：**U-1 当前批次绑定方案分析**——新增 §11；补 14 条 A（官方文档 / 标准 / 本仓实测）、7 条 B、3 条 C、5 条 H；结论 = 否决静态最新 P，推荐「新 P 行声明 + 变更 session + 维护模式」混合）
 > **状态**: draft（只读评审落档；不改任何代码 / 配置 / 门禁；不合并 PR）
 > **Spec 步骤**: Step 1-2
 > **任务来源**: 用户指令「深度review一下当前框架 对标前沿 给出改进 升级建议」→「先把上一轮详细分析结果全部落档 包含subagent的全部调研细节」
@@ -24,10 +25,10 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 28 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
-| B 推断类 | 20 | 由 A 类推出的判定（见附录 B） |
-| C 类（决策） | 6 | 不参与 R7 机械对账（DR-2） |
-| 假设区 | 9 | 未实测 / 未裁决项（见附录 C） |
+| A 事实类 | 42 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
+| B 推断类 | 27 | 由 A 类推出的判定（见附录 B） |
+| C 类（决策） | 9 | 不参与 R7 机械对账（DR-2） |
+| 假设区 | 14 | 未实测 / 未裁决项（见附录 C） |
 
 > **取证口径**：本仓事实 = E1（逐字读文件、机械枚举、临时目录探针）；外部来源分两档——**T1** = 本次亲自 WebFetch 回 arXiv abs / 标准原文并核对标题、版本与摘要数字；**T2** = 子代理返回的官方文档或论文摘要，未逐字回原文，只作设计启发，不进入门禁判据。2026 年新论文按**预印本**对待，不当作领域共识。
 
@@ -478,9 +479,9 @@ upstream: null
 
 - **U-1 当前批次绑定形态未定**
   - **判据**：pre-commit 能仅凭本次提交机械确定 PID 与 session，且旧 session 无法放行；
-  - **触发条件**：用户批准 P0-1 立项；
-  - **当前倾向**：session-first + feature 关系集 + legacy 回退；
-  - **证据等级**：E1（缺陷已实测）/ 方案待裁决。
+  - **触发条件**：用户裁决 O3 并批准 Phase 1 立项（§11.7）；
+  - **当前倾向**：**新 P 行声明优先 → 变更 session 证据 → 维护模式回退**（§11 推荐 O3）；静态最新 P 已实测否决；
+  - **证据等级**：E1（缺陷与方案成本已实测）/ 待 DESIGN 与用户裁决。
 
 - **U-2 完整链迁移边界未定**
   - **判据**：新批次强制完整链、历史批次不回溯判红，边界机械可判；
@@ -530,9 +531,183 @@ upstream: null
   - **当前倾向**：先生成高频汇总行，不整体拆分文档；
   - **证据等级**：待测。
 
+- **U-10 U-1 Phase 1 门禁实施未立项**
+  - **判据**：O3 解析器落地，§11.6 的 11 类故障注入全过，旧 session 放行路径为 0；
+  - **触发条件**：用户批准 Phase 1 + 完成 DESIGN；
+  - **当前倾向**：边界 P≥129；先本地 hook，再 CI 变更集；
+  - **证据等级**：方案已分析（§11）/ 待实施。
+
 ---
 
-## 11. 参考文献
+
+## 11. U-1 方案分析：当前批次绑定
+
+> **检索说明（降级链）**：`mcp_english-search_search_web` 对 4 组查询均返回 `status 404`，判定为工具端点不可用；改用 `WebSearch` + `WebFetch` 直接读取官方文档与标准页。该降级不影响结论，但按 SPEC_PROCESS 的检索纪律如实登记。
+
+### 11.1 不变量与三个子问题
+
+U-1 的目标不是「让静态映射更聪明」，而是让下面这条不变量在提交门禁上成立：
+
+> 对任意受门禁约束的变更集 C，存在一个**当前批次声明** B(C)；C 中每个管线文档都属于与 B(C) 关联的 feature；B(C) 的 session 满足该档位的完整性；任何旧批次 session 都不能替代 B(C)。
+
+拆成三个子问题：
+
+1. **识别当前批次**：C 属于哪个 P？
+2. **关联文档**：C 中每个四文档属于哪些 feature，是否都被该 P 覆盖？
+3. **证明完整性**：该 P 的 session 是否满足档位要求，且不能拿旧 session 充数。
+
+当前实现只回答了「这个 feature 曾经关联过某个 P」，没有回答「C 属于哪个 P」。
+
+### 11.2 实测约束
+
+【A】A-29 pre-commit 官方文档（T1）：`pass_filenames` 默认 `true`；`files` 决定哪些文件进入 hook；`stages` 可选择 git hook 阶段（含 `commit-msg` 与 `prepare-commit-msg`）。来源：[pre-commit.com](https://pre-commit.com/)。
+
+【A】A-30 Git `githooks` 官方文档（T1）：`pre-commit` 不接收参数，且在**获得提交信息之前**运行；`commit-msg` 接收 message 文件；`prepare-commit-msg` **不被 `--no-verify` 抑制**。来源：[git-scm.com/docs/githooks](https://git-scm.com/docs/githooks)。
+
+【A】A-31 Git `git-diff` 官方文档（T1）：`A...B` 等价于 `git diff $(git merge-base A B) B`，用于计算分支相对共同祖先的变更集。来源：[git-scm.com/docs/git-diff](https://git-scm.com/docs/git-diff)。
+
+【A】A-32 Gerrit Change-Id 官方文档（T1）：Change-Id 位于提交信息 footer；共享同一 Change-Id 的多个 patchset 视为同一变更；amend 时保留。来源：[Gerrit Change-Ids](https://gerrit-documentation.storage.googleapis.com/beta/user-changeid.html)。
+
+【A】A-33 Changesets 官方 dictionary（T1）：changeset = 「an intent to release a set of packages at particular bump types with a summary of the changes made」；存放于 changeset folder，可叠加。来源：[changesets dictionary](https://raw.githubusercontent.com/changesets/changesets/HEAD/docs/dictionary.md)。
+
+【A】A-34 towncrier 官方文档（T1）：读取 news fragments 生成 changelog，避免所有人写同一文件产生冲突。来源：[towncrier docs](https://towncrier.readthedocs.io/en/stable/)。
+
+【A】A-35 NVD CVE-2025-30066（T1）：`tj-actions/changed-files` 46 之前版本受影响；v1–v45.0.7 标签于 2025-03-14/15 被改指向 commit `0e58ed8`，可在 Actions 日志泄露 secrets。来源：[NVD](https://nvd.nist.gov/vuln/detail/cve-2025-30066)。第三方报告称影响 23,000+ 仓库（T2，未回原文）。
+
+【A】A-36 本仓 session 机械枚举（E1，2026-10-26）：`specwf-p*.jsonl` 共 **148** 个，覆盖 **109** 个 PID；**7** 个 PID 有多个 session（P-042 有 **24** 个、P-050 有 10 个）；**8** 个 session 少于 5 步（最大编号 P-051）；`session_start` 事件**使用 0 次**。
+
+【A】A-37 真实 runner 探针（E1）：临时目录构造 `specwf-p999-...v9`（1 步）与 `...v10`（5 步），`step-enforce --pid P-999` 选中 **v9**（字典序 `v10 < v9`），输出「1/5 步」并 **exit 0**。
+
+【A】A-38 `step_enforce.py` 只处理以 `spec/` 开头的参数；直接传 session 文件时 feature 集为空并 exit 0；session 文件不在 `step-enforce` hook 的 `files` 正则内（E1）。
+
+【A】A-39 映射源结构（E1）：PROGRESS **128** 行 P 记录中，**27** 行没有任何 `spec/<feature>/` 链接，其余行含 2–26 个链接；`CODE_WIKI §9` **40** 行中，单行含 1–33 个 P 编号，**13** 行的 P 编号非升序。
+
+【A】A-40 静态 first→max 实测（E1）：40 个 §9 行中 **15** 行会改变映射；例：`doc-contract` 003→106、`precommit-dc-validator` 007→106、`project-console` 042→102、`academic-writing-workflow` 040→124。
+
+【A】A-41 当前 CI 的 `step-enforce` 以 `git ls-files 'spec/*/*.md'` 传入**全量文档**，不是变更集（E1）。
+
+【A】A-42 本仓 P 行实践（E1）：P-125 与 P-127 的 P 行均在与文档同一提交中以 `done` 新增（`git show 7a91e01` / `git show e2c6beb`）；这是当前实践，不是普遍保证。
+
+**表 11.1 约束 → 设计含义**
+
+| 实测 | 数值 | 对 U-1 的约束 |
+|---|---|---|
+| 多 session PID | 7 个；P-042 24 个 | 不能依赖「文件名末位」；必须显式声明或使用变更 session |
+| 版本后缀排序 | `v10 < v9` | 当前 `sorted()[-1]` 会选错；需自然排序或废除此启发式 |
+| 不完整 session | 8 个，max P-051 | 完整链强制必须有历史边界 |
+| `session_start` | 0 次使用 | 可作为 Phase 2 schema 扩展，但当前无先例 |
+| PROGRESS 多链接 / 零链接 | 27 行零链接；2–26 链接 | 行内「首个链接」不能作为批次绑定 |
+| §9 多 P / 非升序 | 1–33 个 P；13 行非升序 | 首/末/最大都不是语义安全的「当前批次」 |
+| 静态 max P | 15/40 行会变 | 静态最新 P 不能作为终态门禁 |
+| CI 全量文档 | 非变更集 | CI 必须改为 merge-base 变更集 |
+| P 行同提交新增 | P-125/P-127 实测 | 新 P 行可作为批次声明，但需门禁固化 |
+
+### 11.3 候选方案
+
+**O0 维持现状**：`feature → 主 P` 单值映射 + 文件名末位 session。成本最低，但保留 P0。
+
+**O1 静态最新 P**：把 §9 行内 P 编号改为取**数值最大**，PROGRESS 兜底保持首个链接。改动面小，但仍是静态单值。
+
+**O2 变更 session 优先**：hook 同时接收四文档与 session 文件；由本次变更的 session id 解析 PID；四文档的 feature 必须与该 PID 有关联。无 session 变更时回退旧映射。
+
+**O3 新 P 行声明 + session 证据 + 维护模式**：以本提交新增/修改的 P 行为批次声明；否则以变更 session 为证据；否则仅允许「维护模式」（格式类改动）。批次模式下四文档 feature 必须由该 P 行的 spec 链接覆盖，且 session 完整。
+
+**O4 独立 batch manifest**：新增 `batches/<P>.json`，显式登记 PID、features、session、tier、doc digests；hook 与 CI 只读 manifest。显式、可扩展，但新增工件与双真相源。
+
+**O5 commit trailer / Change-Id 风格**：提交信息 footer 写 `Batch: P-129` / `Session: specwf-p129-...`；由 `commit-msg` 或 `prepare-commit-msg` 校验。`pre-commit` 阶段看不到提交信息，因此无法替代现有 L1。
+
+### 11.4 五维对比
+
+> 评分为相对判断；「改动面」按代码与配置触点计，不按时间计。等权仅用于排序，不作量化结论。
+
+| 方案 | 改动面 | 收益 | 兼容 | 维护负担 | 升级潜力 | 结论 |
+|---|---|---|---|---|---|---|
+| O0 现状 | 无 | 无 | 高 | 无 | 无 | 基线；P0 保留 |
+| O1 静态最新 P | 小（`spec_map` + 少量测试） | 低—中（15/40 变化，含错误绑定） | 高 | 低 | 低 | **否决** |
+| O2 session 优先 | 中（hook 面 + resolver + CI + 测试） | 中 | 中（chore / 多 commit 批次会误伤） | 中 | 高 | 作为 O3 组件 |
+| **O3 混合** | 中（resolver + PROGRESS diff + 维护模式） | **高** | 高（新批次边界可设） | 中 | 高 | **推荐** |
+| O4 manifest | 高（新工件 + schema + 生成器） | 中—高 | 低（新批次都要建 manifest） | 高 | 最高 | 暂缓 |
+| O5 trailer | 中（commit-msg / prepare-commit-msg + CI 解析） | 中 | 低（提交习惯 + L1 不可见） | 中 | 高 | 跨仓阶段再评估 |
+
+### 11.5 为何否决「静态最新 P」
+
+O1 看起来能立刻把 graph 从 P-125 改到 P-127，但机械实测暴露了两个反例：
+
+- `doc-contract` 的 §9 行最大 P 是 **P-106**，而 P-106 是「DC5 版本引用一致性」工具批，其 session 记录的是 `dc_validator` / `PLAN v1.9` 的改动，不是一次新的 doc-contract 文档修订；
+- `precommit-dc-validator` 的最大 P 同样是 **P-106**，而该 feature 的主批是 P-007/P-008。
+
+如果按 max P 绑定，未来一次 doc-contract 文档修订会被 P-106 的旧 session 放行——这正是 P0 的另一种形态，不是修复。**任何静态单值映射（首个 / 末个 / 最大）都无法区分「这个 P 曾经改过这个 feature」与「本次变更属于这个 P」。** 因此 O1 只能作为诊断读数，不能作为门禁语义。
+
+### 11.6 推荐：O3 混合解析器
+
+**声明优先级**（从强到弱）：
+
+1. **新 P 行**：staged `docs/PROGRESS.md` 出现新的 `| P-\\d{3} |` 行（或状态从 `pending` 变为 `done`）⇒ 该 P 为当前批次；该行的 `spec/<feature>/` 链接定义允许的 feature 集；
+2. **变更 session**：没有新 P 行，但本次提交包含 session 文件 ⇒ 由 session id 解析 PID；四文档 feature 必须与该 PID 有关联；
+3. **分支名辅助**：没有新 P 行 / session，但当前分支名匹配 `p(\\d{3})` 且该 PID 有完整 session ⇒ 作为弱声明，输出 `branch-declared`；
+4. **维护模式**：以上皆无 ⇒ 仅当四文档改动是**格式类**（`git diff -w` 为空）时放行，输出 `maintenance-only`，**不得声明批次完成**；
+5. **否则失败**：语义性四文档改动但无任何声明 ⇒ exit 1。
+
+**完整性规则**：
+
+- 批次模式：本次声明的 P 至少有一个 **5/5 步** session；同一 P 的多个变更 session 必须各自内部合法，且至少一个完整；
+- 维护模式：该 feature 的既有映射 P 至少有一个完整 session，否则失败；
+- 历史边界：`P < BATCH_BINDING_MIN_P` 走 legacy；建议 `BATCH_BINDING_MIN_P = 129`（P-128 为本次评审批，已完整；P-001~P-128 不追溯）。
+
+**关联规则**：
+
+- 新 P 行有 `spec/<feature>/` 链接 ⇒ 每个变更的四文档 feature 必须出现在该 P 行的链接集内；新批次 P 行若 0 链接 ⇒ 失败（新批次必须声明 feature）；
+- 无新 P 行 ⇒ 用 `spec_map` 的 feature→P 关系集做「至少一个关联」校验，并要求 session PID 是该 feature 的**当前声明 P**（§9 行内最大 P）或分支声明 P。
+
+**输出与退出码**：
+
+- 必须打印 `mode`（batch / session / branch / maintenance）、`pid`、`session`、`relation_source`；
+- exit 0 = 通过；1 = 违规；2 = 映射缺位，**按失败处理**（修正 `step_enforce.py` 当前「提示，不阻断」的文案）。
+
+**表 11.2 故障注入矩阵**
+
+| # | 注入 | 期望 |
+|---|---|---|
+| 1 | 改 graph 文档 + 旧 P-125 session，无新 P 行 | 失败（无当前声明） |
+| 2 | 改 graph 文档 + 新 P-129 行 + P-129 完整 session | 通过（batch） |
+| 3 | 新 P-129 行 + 只有 P-125 session | 失败（PID 不匹配） |
+| 4 | 新 P-129 行 + P-129 1/5 步 session | 失败（完整链） |
+| 5 | 一提交改两个 feature + P-129 行链接两者 + 一个 5 步 session | 通过（batch 多 feature） |
+| 6 | 只改 session，不改四文档 | 通过（session 自证；若 session 不完整则失败） |
+| 7 | 只做行尾归一 / 空白改动，无声明 | 通过（maintenance-only，输出警告） |
+| 8 | 语义性四文档改动，无声明 | 失败（exit 1） |
+| 9 | 新 P 行 0 个 spec 链接 | 失败（新批次未声明 feature） |
+| 10 | `v9` 与 `v10` 两个 session 同时存在 | 必须按自然序选择，不得选 `v9` |
+| 11 | CI 与本地对同一变更集 | 输出 mode/pid/session 一致 |
+
+### 11.7 分阶段路线
+
+- **Phase 1（P0 修复）**：实现 O3 解析器；`BATCH_BINDING_MIN_P = 129`；本地 hook 接收四文档 + session + PROGRESS；CI 改为 `git diff --name-only base...head` 的变更集；补 11 类故障注入测试。**验收**：上表 11 项全过；旧 session 放行路径为 0；维护模式不能声明批次完成。
+- **Phase 2（证据增强）**：新增 `session_start` 事件，`input.metadata = {pid, features, tier}`；`verify` 步记录变更文档 digest；gate 重算 digest。**验收**：验后修改文档必失败；同证据与策略重放判定一致。
+- **Phase 3（跨仓/外部副作用）**：在 RPC 外部副作用或跨仓发布时，引入 manifest / in-toto / SLSA attestation；本仓纯文档阶段不做。**验收**：subject digest、策略版本、验证者身份可校验。
+
+### 11.8 外部锚点
+
+| 来源 | 事实 | 对 U-1 的用法 | 等级 |
+|---|---|---|---|
+| [pre-commit docs](https://pre-commit.com/) | `pass_filenames` 默认 true；`files` / `stages` 可配 | hook 可同时接收文档、session、PROGRESS；阶段选择影响可见信息 | T1 |
+| [Git githooks](https://git-scm.com/docs/githooks) | `pre-commit` 在提交信息之前运行；`prepare-commit-msg` 不被 `--no-verify` 抑制 | trailer 方案不能替代 L1；只能作为 commit-msg 层补充 | T1 |
+| [git-diff](https://git-scm.com/docs/git-diff) | `A...B` = merge-base 到 B | CI 必须用变更集，不得用全量 `git ls-files` | T1 |
+| [Gerrit Change-Id](https://gerrit-documentation.storage.googleapis.com/beta/user-changeid.html) | footer 中的稳定 Change-Id 绑定多个 patchset | 「稳定变更身份」可行，但需外部系统或专门 hook 维护 | T1 |
+| [Changesets](https://raw.githubusercontent.com/changesets/changesets/HEAD/docs/dictionary.md) | changeset = 发布意图 + summary，存于文件夹 | O4 manifest 的社区同构；显式但多一个工件 | T1 |
+| [towncrier](https://towncrier.readthedocs.io/en/stable/) | news fragment 逐条记录，避免单文件冲突 | fragment 模式适合变更声明，但本仓已有 P 行，无需重复 | T1 |
+| [CVE-2025-30066](https://nvd.nist.gov/vuln/detail/cve-2025-30066) | `tj-actions/changed-files` 标签被改指向恶意 commit | 不引入第三方 changed-files action；用 git 自算变更集，Actions 固定 SHA | T1 |
+| [SLSA v1.2](https://slsa.dev/spec/v1.2/verifying-artifacts) | 验证 subject digest、builder、externalParameters | Phase 3 的 attestation 形态 | T1 |
+| [in-toto](https://in-toto.io/) | link metadata 记录步骤、材料与产物 | Phase 3 的跨仓链路形态 | T1 |
+
+### 11.9 结论与不做什么
+
+- **结论**：U-1 的终态应是 **事件绑定，而非静态映射**；O3 混合以现有 PROGRESS + session 为真值源，成本最低、兼容最好、可升级。
+- **不做**：不把 max P 改成门禁；不引入 manifest / commit trailer / 第三方 changed-files action；不在 Phase 1 做签名或透明日志。
+- **待裁决**：`BATCH_BINDING_MIN_P` 取 129 还是更早的 52（当前不完整 session 最大 P-051）；新 P 行 0 链接是否一律失败；维护模式是否只允许 `git diff -w` 为空。
+
+
+## 12. 参考文献
 
 按第一作者 / 机构字母序；括号内为本次核验状态。
 
@@ -559,7 +734,7 @@ upstream: null
 
 ## 附录 A：A 类断言索引
 
-A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-26 为已回原文的外部一手来源；A-27~A-28 为标准原文。逐条证据已在 §3~§5 就地给出，此处不重复。
+A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外部一手来源 / 标准原文；A-29~A-35 为本次核验的官方文档与安全公告；A-36~A-42 为 U-1 专项实测。逐条证据已在 §3~§5、§11 就地给出，此处不重复。
 
 ## 附录 B：B 类推断（机读登记）
 
@@ -584,7 +759,14 @@ A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-26 为已回原文的外�
 {"id": "B17", "claim": "高风险批次应强制独立语义 Review，低风险 T3 不应增加同等成本。", "basis": "A-15/A-16 + B8"},
 {"id": "B18", "claim": "「规范文本自包含」不等于「完整 B 类工具闭环可重放」；迁移声明应分 Core / Full。", "basis": "A-14"},
 {"id": "B19", "claim": "人工派生视图回写是结构性成本与漂移源；应生成高频汇总、保留 append-only 历史。", "basis": "A-13"},
-{"id": "B20", "claim": "图升级应排在他门禁保真度修复之后；薄图路径保留，完整引擎继续后置。", "basis": "A-18 + B1/B2/B3"}
+{"id": "B20", "claim": "图升级应排在他门禁保真度修复之后；薄图路径保留，完整引擎继续后置。", "basis": "A-18 + B1/B2/B3"},
+{"id": "B21", "claim": "静态单值映射（首个/末个/最大 P）在语义上不足：15/40 行会变，且 doc-contract / precommit 的 max P 是交叉工具批，不是该 feature 的文档批。", "basis": "A-39/A-40"},
+{"id": "B22", "claim": "session-first 单独不足：多 session PID、v10<v9 排序陷阱、chore 提交与多 commit 批次会产生误判。", "basis": "A-36/A-37"},
+{"id": "B23", "claim": "本仓 P 行「同提交新增 done」的实践使新 P 行可作为批次声明，但必须门禁化，不能依赖习惯。", "basis": "A-42"},
+{"id": "B24", "claim": "O3 混合（新 P 行 > 变更 session > 维护模式）是成本/收益最优；不需要新 manifest。", "basis": "A-29/A-30/A-42 + B21/B22/B23"},
+{"id": "B25", "claim": "commit trailer 更接近 Gerrit Change-Id，但 pre-commit 阶段看不到提交信息，不能替代 L1；只能作为 CI / commit-msg 层补充。", "basis": "A-30/A-32"},
+{"id": "B26", "claim": "不应引入第三方 changed-files action；应使用 merge-base 变更集，并将 Actions 固定到完整 SHA。", "basis": "A-31/A-35"},
+{"id": "B27", "claim": "内容 digest 绑定应作为第二阶段：先解决批次识别，再解决「验后修改」。", "basis": "A-19/A-28 + B24"}
 ]
 ```
 
@@ -597,7 +779,10 @@ A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-26 为已回原文的外�
 - C-3 P0-2 自动路径派生期望链，历史批次保留 legacy 模式；
 - C-4 执行证据复用现有 `gate` 事件，不新建平台；
 - C-5 高风险批次强制独立语义 Review，低风险 T3 不增加成本；
-- C-6 图升级延后到 P0 修复之后，继续走 A 薄图路径。
+- C-6 图升级延后到 P0 修复之后，继续走 A 薄图路径；
+- C-7 否决「静态最新 P」作为门禁语义（仅可作诊断读数）；
+- C-8 采用 O3 混合：新 P 行声明 > 变更 session > 维护模式；新批次边界 P≥129；
+- C-9 暂不引入 manifest / commit trailer / 第三方 changed-files action；内容 digest 留 Phase 2。
 
 **假设区**：
 
@@ -610,3 +795,8 @@ A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-26 为已回原文的外�
 - [H7] 图 S2 pilot 对象未选。
 - [H8] `strict: true` 对单人流程的影响未测。
 - [H9] 派生视图生成化的收益 / 成本未测。
+- [H10] 「新 P 行」判定语义（新增 / 状态变更 / 仅文案订正）未在 DESIGN 定稿。
+- [H11] 完整链边界取 P-129 还是 P-052（当前不完整 session 最大 P-051）未裁决。
+- [H12] 多 PID / 多 session 提交的选择与聚合规则未定。
+- [H13] `session_start` metadata 是否启用未定（当前 0 使用）。
+- [H14] 文档 digest 绑定与 gate 事件的 Phase 2 范围未定。
