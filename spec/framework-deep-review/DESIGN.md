@@ -1,0 +1,272 @@
+# 设计文档：批次绑定门禁（O3 Phase 1）
+
+---
+
+id: framework-deep-review-DESIGN
+type: design
+version: 1.0
+status: draft
+date: 2026-10-26
+depends: [framework-deep-review-RESEARCH]
+upstream: null
+
+---
+
+> **Feature**: framework-deep-review（U-1 / O3 Phase 1 门禁实施）
+> **创建日期**: 2026-10-26
+> **状态**: 草稿
+> **Spec 步骤**: Step 3-4
+> **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
+
+---
+
+## 1. 设计目标
+
+在不引入新工件、不改变 session schema、不引入第三方 changed-files action 的前提下，让提交门禁回答一个问题：
+
+> 本次变更属于哪个批次，且该批次的 session 是否满足完整性要求？
+
+本设计只实施 U-1 Phase 1（批次识别与门禁），不实施 U-2（runner 内部完整链默认值）与 Phase 2（digest / `session_start`）。
+
+## 2. 设计依据
+
+### 2.1 调研结论
+
+| 调研发现 | 设计决策 | 引用 |
+|---|---|---|
+| 静态 first/max P 都会绑错交叉工具批 | 放弃静态单值；以「本次变更的声明」为主 | RESEARCH §11.5 / A-40 |
+| 148 session / 7 个多 session PID；v10<v9 | 不按文件名排序选 session；扫描全部候选 | RESEARCH §11.2 / A-36/A-37 |
+| PROGRESS 27 行零链接、§9 13 行非升序 | 新 P 行的链接集作为批次 feature 声明 | RESEARCH §11.6 / A-39 |
+| CI 当前验全量文档 | 改为 merge-base 变更集 | RESEARCH §11.6 / A-41 |
+| 旧 session 可替代当前批次 | 任何语义性四文档改动必须有声明 | RESEARCH §11.5 |
+
+### 2.2 相关 ADR
+
+| ADR | 决策 | 对本设计的影响 |
+|---|---|---|
+| [ADR-0010](../../adr/ADR-0010-lazy-loading-architecture-gate.md) | 懒加载三问 | 本设计为 Layer-1 门禁改动，必须显式激活并保留回退点 |
+| [ADR-0011](../../adr/ADR-0011-step-gate-trigger-dependency-and-theatrical-decision.md) | 决策流门禁 | 沿用 session / step-gate 既有语义，不新建决策格式 |
+
+### 2.3 职责边界
+
+**职责内**：识别当前批次、校验 feature 覆盖、校验 session 完整性、区分维护模式、统一本地 / CI 判定。
+
+**职责外**：不修改 `spec_runner` 的 decision schema；不实现 digest 绑定；不实现跨仓 attestation；不修改 `step-gate` 的规则；不重写历史 session。
+
+## 3. 架构设计
+
+### 3.1 整体架构
+
+```text
+pre-commit / CI
+  → changed files（docs / sessions / PROGRESS）
+  → step_enforce.py
+      → ProgressRows（新/旧 PROGRESS）
+      → DeclarationResolver（batch / session / branch / maintenance）
+      → SessionChecker（调用真实 spec_runner step-gate）
+      → Decision(mode, pids, sessions, features, source)
+  → exit 0 / 1 / 2 + 机读输出
+```
+
+### 3.2 模块划分
+
+| 模块 | 职责 | 输入 | 输出 | 依赖 |
+|---|---|---|---|---|
+| `spec_map.parse_progress_rows` | 解析 P 行、状态、feature 链接 | PROGRESS 文本 | `{P: Row}` | stdlib `re` |
+| `spec_map.changed_pids` | 识别新增 P 行 / 状态变更 | 新旧 PROGRESS | PID 列表 | 上者 |
+| `step_enforce.resolve` | 模式判定与覆盖检查 | changed files + 新旧 PROGRESS + branch | `Decision` | `spec_map` |
+| `step_enforce.check_sessions` | 调用真实 runner 校验 session | session id 列表 | complete/internal 结果 | `spec_runner.py` |
+| `step_enforce.main` | 组装、输出、exit code | argv / git | stdout / exit | 上者 |
+
+### 3.3 数据流
+
+1. 归一化路径（Windows `\` → `/`）；
+2. 本地模式（无 `--base`）**直接以 git 实际变更集为准**：`暂存 ∪ 工作树改动 ∪ 未跟踪`（仅保留门禁路径）——预提交钩子会**分块传参**，单次 argv 可能只是四文档子集，信 argv 会把同一提交的声明拆散误判；`pre-commit run --all-files` 的全量 argv 亦由此收敛；
+3. 从（本地 git / CI argv）变更集分类：四文档 / session / PROGRESS；
+4. 读新旧 PROGRESS（本地 `HEAD:` vs `:`；CI `base:` vs working tree）；
+5. 计算声明（新 P 行 / 状态变更 / 变更 session / 分支）；
+6. 校验声明 P 行的 feature 集覆盖所有变更四文档；
+7. 校验 session（内部合法 + 至少一个 5/5，按边界）；
+8. 无声明时：仅允许 whitespace-only 维护模式；
+9. 输出 `mode / pid / sessions / features / source`，返回 exit。
+
+### 3.4 控制流
+
+- 有文档、有声明 → 严格模式；
+- 有文档、无声明 → 维护模式或失败；
+- 无文档、有 session → `session-progress`（允许部分链）；
+- 无文档、有 P 行 → `batch-registration`（新 P 行必须有链接）；
+- 无任何相关变更 → exit 0。
+
+## 4. 接口定义
+
+### 4.1 `spec_map.parse_progress_rows`
+
+```python
+def parse_progress_rows(text: str) -> dict[str, dict]:
+    """P-xxx -> {"status": str, "features": set[str]}。"""
+```
+
+### 4.2 `spec_map.changed_pids`
+
+```python
+def changed_pids(old_text: str, new_text: str) -> list[str]:
+    """新增 P 行，或 status 列发生变化；按新文本顺序返回。"""
+```
+
+### 4.3 `step_enforce.resolve`
+
+```python
+@dataclass
+class Decision:
+    mode: str
+    pids: list[str]
+    sessions: list[str]
+    features: set[str]
+    source: str
+    errors: list[str]
+
+def resolve(changed_docs, changed_sessions, progress_changed,
+            old_progress, new_progress, branch, whitespace_only) -> Decision:
+    ...
+```
+
+### 4.4 `step_enforce.check_sessions`
+
+```python
+def check_sessions(sids: list[str], require_complete: bool) -> tuple[list[str], list[str]]:
+    """返回 (complete_sids, errors)。内部合法性对所有 sid 强制。"""
+```
+
+## 5. 替代方案
+
+### 5.1 方案 A：O3 混合（选择）
+
+- 描述：新 P 行 > 变更 session > 分支名 > 维护模式。
+- 优点：复用现有真值源；无新工件；兼容多 session PID；维护模式不冒充批次完成。
+- 缺点：语义性文档改动必须有声明，提交粒度变严。
+- 选择理由：唯一能同时满足 P0 修复、成本、兼容与升级潜力的方案。
+
+### 5.2 方案 B：静态最新 P（否决）
+
+- 描述：§9 行取最大 P。
+- 否决理由：15/40 行改变；doc-contract / precommit 会被绑到交叉工具批 P-106（RESEARCH §11.5）。
+
+### 5.3 方案 C：独立 manifest（暂缓）
+
+- 描述：每批写 `batches/<P>.json`。
+- 否决理由：新增工件与双真相源；当前收益不足以抵消维护成本；留 Phase 3 跨仓阶段。
+
+### 5.4 方案 D：commit trailer（暂缓）
+
+- 描述：footer 写 `Batch: P-130`。
+- 否决理由：`pre-commit` 在提交信息之前运行（A-30），不能替代 L1；只可作 CI / commit-msg 补充。
+
+## 6. 数据结构
+
+### 6.1 ProgressRow
+
+```python
+@dataclass(frozen=True)
+class ProgressRow:
+    pid: str
+    status: str
+    features: tuple[str, ...]
+```
+
+### 6.2 Decision
+
+见 §4.3。字段语义：`mode` ∈ {batch, session, branch, maintenance, session-progress, batch-registration}；`source` 记录声明来源（`P-row` / `session` / `branch` / `whitespace`）。
+
+## 7. 错误处理
+
+| 错误场景 | 处理方式 | 用户可见信息 |
+|---|---|---|
+| 语义性四文档改动、无声明 | exit 1 | `no declaration for changed docs` |
+| 新 P 行 0 个 spec 链接 | exit 1 | `P-xxx declares no feature` |
+| 变更 feature 不在声明 P 行 | exit 1 | `feature not covered: <f>` |
+| 有文档改动的声明无 5/5 session | exit 1 | `incomplete session for P-xxx` |
+| 新 P 行无 session | exit 1 | `no session for P-xxx` |
+| 只改 session、链不完整 | exit 0 | `session-progress`（允许） |
+| 只改 P 行、无文档/session | exit 0 | `batch-registration` |
+| git 读取失败 | exit 2 | `git error: ...`（fail-closed） |
+| 无相关变更 | exit 0 | `nothing to gate` |
+| 全量传参（`--all-files`） | 本地模式以 git 变更集为准，全量 argv 自动收敛 | `mode=...` 同提交态 |
+| 分块传参（pre-commit chunk） | 单块缺声明文件不影响判定（看整批变更集） | `mode=...` 同提交态 |
+| 本地变更集不可计算 | exit 2 | `git error: ...`（fail-closed） |
+
+## 8. 不变式（Invariants）
+
+1. **I-1 无声明不放行语义改动**：任何四文档语义改动必须有 batch/session/branch 声明。
+2. **I-2 声明必须可解析**：声明 P 必须存在于 PROGRESS，且至少有 1 个 `spec/<feature>/` 链接。
+3. **I-3 覆盖闭合**：每个变更四文档 feature 必须属于声明 P 的 feature 集。
+4. **I-4 完整性按边界**：带四文档改动的 batch/session/branch 声明，其 P 必须至少有一个 5/5 session；P<129 仅在无文档的 session-only 与维护模式放宽完整性。
+5. **I-5 维护模式不冒充完成**：仅 whitespace-only 放行，输出 `maintenance-only`。
+6. **I-6 exit 2 = fail-closed**：pre-commit / CI 均视为失败，不保留「提示不阻断」语义。
+7. **I-7 不依赖文件名排序**：扫描全部候选 session，v10/v9 不参与选择。
+8. **I-8 本地/CI 同源**：同一 `resolve` 逻辑，仅输入来源不同（index vs base...HEAD）。
+
+## 9. 幻觉抑制审查（Step 4 Review）
+
+### 9.1 设计基于已验证的调研结论
+
+- [x] 所有设计决策可追溯到 RESEARCH §11 / A-29~A-42
+- [x] 无未经验证的假设（`v10<v9`、148 session、15/40 均为实测）
+- [x] 无「声明即事实」：所有模式均有机械判据
+
+### 9.2 替代方案审查
+
+- [x] 至少列 4 个替代方案
+- [x] 每个替代方案有明确否决 / 暂缓理由
+
+### 9.3 职责边界审查
+
+- [x] 不修改 decision schema、不新增门禁类型、不改历史 session
+- [x] 不把「分支名」当强声明，仅作弱回退
+
+> **Review 声明（RULE-4）**：本轮为单 Agent 自查（单视角），非异基座独立 pass；高风险项（exit 语义、legacy 边界）已在 DESIGN 与 CHECKLIST 中登记，待实施后以故障注入复核。
+
+## 10. 对实施的输入
+
+### 10.1 关键工程约束
+
+- 仅 stdlib；Python 3.11+；Windows/Linux 双平台路径归一化。
+- `step_enforce.py` 必须能在 pre-commit（index）与 CI（base...HEAD）两种模式运行。
+- 不引入 `dorny/paths-filter` 或 `tj-actions/changed-files`；用 git 自算变更集。
+- `spec_runner.py` 只作为只读被调用方，不修改其 decision schema。
+
+### 10.2 风险与缓解
+
+| 风险 | 缓解措施 |
+|---|---|
+| 维护模式被滥用 | 仅 whitespace-only；语义改动必须声明 |
+| 分支名误绑 | 分支名仅弱回退，且 P 行必须存在、feature 必须覆盖 |
+| 多 feature 批次漏检 | P 行链接集 + 并集覆盖检查 |
+| 旧批次被新规则误伤 | P<129 仅在无文档的 session-only / 维护模式放宽；带文档改动仍要求完整，避免旧 session 替身 |
+| CI 变更集为空 | `git diff` 为空时 exit 0；首次提交用 `HEAD^` 回退 |
+
+## 11. 未决项登记（四元块）与决策矩阵
+
+- **U-1 「新 P 行」判定语义**
+  - **判据**：新增行 / status 变更是否足以区分「新批次」与「文案订正」；
+  - **触发条件**：首个非新增但改 P 行的真实提交；
+  - **当前倾向**：新增行或 status 变化算；纯描述修改不算；
+  - **证据等级**：E1（P-125/P-127 实践）。
+
+- **U-2 维护模式的 whitespace 判定**
+  - **判据**：`git diff -w --ignore-blank-lines` 为空是否覆盖行尾归一与纯空白；
+  - **触发条件**：首个维护模式提交；
+  - **当前倾向**：是；非空白 typo 必须声明；
+  - **证据等级**：待实测。
+
+- **U-3 多 PID 提交的聚合**
+  - **判据**：一个提交声明多个 P 时，是否要求每个 P 都有完整 session；
+  - **当前倾向**：是；
+  - **触发条件**：首个多 PID 批次；
+  - **证据等级**：待实测。
+
+**决策矩阵**：不启用（本设计为 Type-2 可逆门禁改动，先做再改）。
+
+---
+
+**Review 签字**: 单 Agent 自查（单视角） 日期: 2026-10-26

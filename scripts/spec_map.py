@@ -98,3 +98,33 @@ def is_historical_exempt(pid: str) -> bool:
     """
     m = re.search(r"P-(\d{3})", pid or "")
     return bool(m) and int(m.group(1)) < DECISION_STREAM_MIN_P
+
+
+# ---------------------------------------------------------------- P 行结构与批次声明（P-130 / U-1 O3）
+# P 行前四列：`| P-xxx | 事项 | 依据 | status |`；只取前四列，避免描述列中的 `|` 干扰。
+# 注意：**不得复用** `PROGRESS_ROW_RE`——那是 `progress_pid_map` 的 feature 捕获形态，
+# 两者语义不同（A-33 教训：同名常量覆写会静默改变旧函数行为）。
+P_ROW_RE = re.compile(
+    r"^\|\s*(P-\d{3})\s*\|([^|]*)\|([^|]*)\|\s*([^|]*)\|")
+SPEC_LINK_RE = re.compile(r"spec/([a-z0-9-]+)/")
+
+
+def parse_progress_rows(text: str) -> dict[str, dict]:
+    """P-xxx -> {"status": str, "features": tuple[str, ...]}（保序去重）。"""
+    rows = {}
+    for line in text.splitlines():
+        m = P_ROW_RE.match(line)
+        if not m:
+            continue
+        pid = m.group(1)
+        status = m.group(4).replace("*", "").strip()
+        features = tuple(dict.fromkeys(SPEC_LINK_RE.findall(line)))
+        rows[pid] = {"status": status, "features": features}
+    return rows
+
+
+def changed_pids(old_text: str, new_text: str) -> list[str]:
+    """新增 P 行，或 status 列变化；按新文本顺序返回。"""
+    old, new = parse_progress_rows(old_text), parse_progress_rows(new_text)
+    return [pid for pid, row in new.items()
+            if pid not in old or old[pid]["status"] != row["status"]]

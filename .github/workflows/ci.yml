@@ -34,6 +34,8 @@ jobs:
       # 2026-10-04（P-070 追加轮 ⑨）：checkout v4 → v5 / setup-python v5 → v6
       # 消除 Node 20 deprecation 告警（v4/v5 目标 Node 20，被强制跑在 Node 24）
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0          # P-130：merge-base 变更集需要完整历史
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"   # 与开发环境一致（P-070 实测本机 = 3.11.16）
@@ -47,9 +49,25 @@ jobs:
         run: python scripts/repo_stats.py
       - name: 派生视图与源一致（console-gen --check）
         run: python scripts/console_gen.py --check
-      - name: 决策流批次强制（step-enforce，全量四文档）
+      # P-130（U-1 O3 Phase 1）：从「全量四文档」改为 merge-base 变更集；
+      # 不使用第三方 changed-files action（CVE-2025-30066），路径过滤由 git 自身完成。
+      - name: 决策流批次强制（step-enforce，merge-base 变更集）
         shell: bash
-        run: python scripts/step_enforce.py $(git ls-files 'spec/*/*.md')
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            BASE="HEAD^"
+          fi
+          FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sessions/**' 'docs/PROGRESS.md' || true)
+          if [ -n "$FILES" ]; then
+            python scripts/step_enforce.py --base "$BASE" $FILES
+          else
+            echo "step-enforce: no changed gate files"
+          fi
 
       # ── 内嵌自测（齐平 + 自测档：把回归面也纳入远端）────────────────────
       - name: 内嵌自测（六件）

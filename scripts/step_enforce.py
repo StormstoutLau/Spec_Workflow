@@ -1,81 +1,324 @@
 #!/usr/bin/env python
-"""step-enforce hook 入口（P-024，ADR-0011 出路 A——批次级流程强制）。
+"""批次绑定门禁入口（P-130 / U-1 O3 Phase 1）。
 
-pre-commit 传入匹配文件（files: ^spec/<feature>/([A-Z0-9_]+_)?(四文档).md$——含非标准前缀命名），
-本脚本：① 提取 feature 名 → ② 经共享模块 `spec_map` 映射 P 编号（`CODE_WIKI §9` 行标注优先 →
-`PROGRESS` 行内链接兜底，C-16）→ ③ 调用 spec_runner step-enforce。
-只读零副作用（P-022 教训：不创建/修改/提交任何文件）。
-exit 0 = 全部应走批次决策流就绪；1 = 任一缺失（阻断）；2 = 映射缺位（提示，不阻断）。
-历史豁免（P-027 盲区修复，2026-09-09）：P-020 前批次（决策流纪律建立前）不追溯强制。
+目标：回答「本次变更属于哪个批次，且该批次的 session 是否完整」，而不是
+「这个 feature 曾经关联过哪个 P」。模式优先级（DESIGN §3.4）：
+
+  1. batch      = 本提交新增 / 变更 P 行；
+  2. session    = 本提交变更 session；
+  3. branch     = 分支名 pNNN + P 行存在；
+  4. maintenance= 仅 whitespace-only 文档改动；
+  5. 其余语义性四文档改动 → 失败。
+
+只读零副作用。exit 0 = 通过；1 = 违规；2 = git / 映射错误（fail-closed）。
 """
+from __future__ import annotations
+
+import argparse
 import re
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))   # 共享纯函数模块（同目录）
-import spec_map   # noqa: E402  （C-16/I-10：feature ↔ P 映射的唯一实现）
+import spec_map   # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 PROGRESS = ROOT / "docs" / "PROGRESS.md"
 WIKI = ROOT / "CODE_WIKI.md"
 RUNNER = ROOT / "tools" / "spec_runner" / "spec_runner.py"
+SESSIONS = ROOT / "tools" / "spec_runner" / "sessions"
 
-# P-003 命名约定前遗留的前缀命名（COMMUNITY_ECOSYSTEM_RESEARCH.md / STEP_GATE_CHECKLIST.md 等）纳入扫描；
-# 模板（*_TEMPLATE.md）/ PLAN / *_AUDIT.md 非管线交付物，不触发。
-FEATURE_RE = re.compile(r"^spec/([a-z0-9-]+)/(?:[A-Z0-9_]+_)?(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(?:_FUNC)?)\.md$")
+FEATURE_RE = re.compile(
+    r"^spec/([a-z0-9-]+)/(?:[A-Z0-9_]+_)?"
+    r"(?:RESEARCH|DESIGN|IMPLEMENTATION|CHECKLIST(?:_FUNC)?)\.md$")
+SESSION_RE = re.compile(
+    r"^tools/spec_runner/sessions/(specwf-p(\d{3})-[a-z0-9-]+)\.jsonl$")
+BRANCH_RE = re.compile(r"(?:^|[/_-])p(\d{3})(?:$|[/_-])", re.I)
+STEP_SEQUENCE = ("research", "design", "implement", "verify", "finalize")
+BATCH_BINDING_MIN_P = 129
 
 
-def _read(path: Path) -> str:
+@dataclass
+class Decision:
+    mode: str = ""
+    pids: list[str] = field(default_factory=list)
+    sessions: list[str] = field(default_factory=list)
+    features: set[str] = field(default_factory=set)
+    source: str = ""
+    errors: list[str] = field(default_factory=list)
+
+
+def _norm(path: str) -> str:
+    """路径归一化：反斜杠 → 斜杠；绝对路径 → 仓内相对路径。"""
+    p = (path or "").replace("\\", "/")
+    while p.startswith("./"):
+        p = p[2:]
+    q = Path(p)
+    if q.is_absolute():
+        try:
+            p = q.resolve().relative_to(ROOT).as_posix()
+        except ValueError:
+            return ""
+    return p
+
+
+def _git(args: list[str]) -> subprocess.CompletedProcess:
+    return subprocess.run(["git"] + args, cwd=str(ROOT), capture_output=True,
+                          text=True, encoding="utf-8", errors="replace")
+
+
+def _read_progress(ref: str) -> str:
+    """ref ∈ HEAD / INDEX / WORKTREE / <base-sha>。失败抛 RuntimeError（fail-closed）。"""
+    if ref == "WORKTREE":
+        try:
+            return PROGRESS.read_text(encoding="utf-8")
+        except OSError as e:
+            raise RuntimeError(f"读 PROGRESS 失败: {e}") from e
+    spec = ":docs/PROGRESS.md" if ref == "INDEX" else f"{ref}:docs/PROGRESS.md"
+    r = _git(["show", spec])
+    if r.returncode != 0:
+        raise RuntimeError((r.stderr or r.stdout).strip() or f"git show {spec} 失败")
+    return r.stdout
+
+
+def _read_text(path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8")
     except OSError:
         return ""
 
 
-def build_feature_pid_map():
-    """feature → P-0xx 映射（C-16：**唯一实现** = `spec_map`，本处与 console_gen 复用同一纯函数）。
+def _branch() -> str:
+    r = _git(["branch", "--show-current"])
+    return (r.stdout or "").strip()
 
-    语义（RESEARCH v1.3 §7.10 C-16 ①）= `CODE_WIKI §9` 行标注**优先** → `PROGRESS` P 行内
-    首个 `spec/<feature>/` 链接**兜底** → 缺位不入表（调用方 exit 2 提示）。
-    旧语义（只认 PROGRESS 行内链接）会被「引用上游依据」的 P 行劫持（A-33，4 个 feature 受害），
-    且两处实现同错、一致性对账抓不住 → 故收敛为单一来源（I-10 语义同源）。
+
+def _branch_pid(branch: str) -> str | None:
+    m = BRANCH_RE.search(branch or "")
+    return f"P-{m.group(1)}" if m else None
+
+
+def _pid_num(pid: str) -> int:
+    m = re.search(r"P-(\d{3})", pid or "")
+    return int(m.group(1)) if m else -1
+
+
+def _sessions_for_pid(pid: str) -> list[str]:
+    key = pid.lower().replace("-", "")
+    return sorted(p.stem for p in SESSIONS.glob(f"specwf-{key}-*.jsonl"))
+
+
+def _run_gate(sid: str, expect: tuple[str, ...] | None = None) -> int:
+    cmd = [sys.executable, str(RUNNER), "step-gate", "--session", sid]
+    if expect:
+        cmd += ["--expect", *expect]
+    r = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
+    return r.returncode
+
+
+def _check_sessions(sids: list[str], require_complete: bool) -> tuple[list[str], list[str]]:
+    """内部合法性对所有 session 强制；完整性只要求「至少一个 5/5」。"""
+    complete, errors = [], []
+    for sid in sids:
+        internal = _run_gate(sid)
+        if internal != 0:
+            errors.append(f"session {sid} 内部不一致（step-gate exit {internal}）")
+            continue
+        if require_complete and _run_gate(sid, STEP_SEQUENCE) == 0:
+            complete.append(sid)
+    if require_complete and not complete:
+        errors.append("无 5/5 完整 session")
+    return complete, errors
+
+
+def _local_changed() -> set[str] | None:
+    """本地模式的实际变更集：暂存 ∪ 工作树（DESIGN §3.3 步 2a）。
+
+    背景：`pre-commit run --all-files` 会把**全量**匹配文件作为 argv 传入，
+    若直接按 argv 判「变更」，每次 P 行变更都会把 66 份四文档误判为改动。
+    提交时 pre-commit 只传暂存文件，故求交**不削弱**门禁；git 失败返回 None（fail-closed）。
     """
-    return spec_map.build_pid_map(_read(PROGRESS), _read(WIKI))
+    changed: set[str] = set()
+    for args in (["diff", "--cached", "--name-only"],
+                 ["diff", "--name-only"],
+                 ["ls-files", "--others", "--exclude-standard"]):
+        r = _git(args)
+        if r.returncode != 0:
+            return None
+        changed.update(x.strip().replace("\\", "/")
+                       for x in (r.stdout or "").splitlines() if x.strip())
+    return changed
 
 
-def main(argv) -> int:
-    files = [a for a in argv if a.startswith("spec/")]
-    features = sorted({m.group(1) for f in files
-                       for m in [FEATURE_RE.match(f)] if m})
-    if not features:
-        return 0
-    mapping = build_feature_pid_map()
-    fails = []
-    for feat in features:
+def _whitespace_only(docs: list[str], base: str | None) -> bool:
+    """维护模式判据：仅空白 / 行尾差异。git 失败按非维护处理（fail-closed）。"""
+    if not docs:
+        return False
+    args = (["diff", f"{base}...HEAD"] if base else ["diff", "--cached"])
+    args += ["-w", "--ignore-blank-lines", "--"] + docs
+    r = _git(args)
+    if r.returncode != 0:
+        return False
+    return not (r.stdout or "").strip()
+
+
+def _resolve_declared(d: Decision, docs_features: set[str], rows: dict) -> None:
+    allowed: set[str] = set()
+    for pid in d.pids:
+        row = rows.get(pid)
+        if not row:
+            d.errors.append(f"{pid} 不在 PROGRESS")
+            continue
+        if not row["features"]:
+            d.errors.append(f"{pid} 未声明任何 spec/<feature>/ 链接")
+            continue
+        allowed.update(row["features"])
+    if d.errors:
+        return
+    missing = sorted(docs_features - allowed)
+    if missing:
+        d.errors.append("变更 feature 未被声明 P 覆盖: " + ", ".join(missing))
+        return
+    d.features = allowed
+    for pid in d.pids:
+        sids = _sessions_for_pid(pid)
+        if not sids:
+            d.errors.append(f"{pid} 无 session")
+            continue
+        complete, errs = _check_sessions(sids, require_complete=True)
+        d.errors += errs
+        d.sessions += complete
+
+
+def _resolve_maintenance(d: Decision, docs_features: set[str], new_progress: str) -> None:
+    mapping = spec_map.build_pid_map(new_progress, _read_text(WIKI))
+    d.features = set(docs_features)
+    pids: set[str] = set()
+    for feat in sorted(docs_features):
         pid = mapping.get(feat)
         if not pid:
-            print(f"step-enforce: {feat} 无对应 P 行（PROGRESS 映射缺位）→ exit 2 提示")
-            return 2
-        # P-020 前历史批次豁免（P-027 盲区修复）：决策流纪律 P-020 起建立，
-        # 早于 P-020 的 feature（遗留前缀命名为主）无 specwf session，不追溯强制。
-        # P-068（I-10 / B25 / B26）：边界改为**单点定义**（`spec_map.is_historical_exempt`），
-        # 与 `console_gen` 的派生态豁免面共用同一判据（原为本地字面量 `< 20`）。
-        if spec_map.is_historical_exempt(pid):
-            print(f"step-enforce: {feat} ({pid}) 为 P-020 前历史批次 → 豁免（不追溯强制）")
+            d.errors.append(f"feature {feat} 无 feature→P 映射")
             continue
-        r = subprocess.run([sys.executable, str(RUNNER), "step-enforce",
-                            "--pid", pid], capture_output=True, text=True)
-        if r.stdout:
-            print(r.stdout, end="")
-        if r.stderr:
-            print(r.stderr, end="", file=sys.stderr)
-        if r.returncode != 0:
-            fails.append((feat, pid, r.returncode))
-    if fails:
-        for feat, pid, code in fails:
-            print(f"step-enforce: {feat} ({pid}) 校验未过 → exit {code}")
+        pids.add(pid)
+        sids = _sessions_for_pid(pid)
+        if _pid_num(pid) >= BATCH_BINDING_MIN_P:
+            if not sids:
+                d.errors.append(f"{pid} 无 session（维护模式要求完整链）")
+                continue
+            complete, errs = _check_sessions(sids, require_complete=True)
+            d.errors += errs
+            d.sessions += complete
+        elif sids:
+            _, errs = _check_sessions(sids, require_complete=False)
+            d.errors += errs
+    d.pids = sorted(pids)
+
+
+def resolve(changed_docs: list[str], changed_sessions: list[tuple[str, str]],
+            progress_changed: bool, old_progress: str, new_progress: str,
+            branch: str, whitespace_only: bool) -> Decision:
+    docs_features = {m.group(1) for f in changed_docs
+                     for m in [FEATURE_RE.match(f)] if m}
+    rows = spec_map.parse_progress_rows(new_progress)
+    declared = spec_map.changed_pids(old_progress, new_progress) if progress_changed else []
+    d = Decision()
+
+    if docs_features:
+        if declared:
+            d.mode, d.pids, d.source = "batch", declared, "P-row"
+        elif changed_sessions:
+            d.mode = "session"
+            d.pids = sorted({pid for _, pid in changed_sessions})
+            d.source = "session"
+        else:
+            bp = _branch_pid(branch)
+            if bp and bp in rows:
+                d.mode, d.pids, d.source = "branch", [bp], "branch"
+            elif whitespace_only:
+                d.mode, d.source = "maintenance", "whitespace"
+            else:
+                d.errors.append(
+                    "语义性四文档改动缺少批次声明（新 P 行 / 变更 session / 分支名）")
+                return d
+        if d.mode == "maintenance":
+            _resolve_maintenance(d, docs_features, new_progress)
+        else:
+            _resolve_declared(d, docs_features, rows)
+        return d
+
+    if changed_sessions:
+        d.mode, d.source = "session-progress", "session"
+        d.pids = sorted({pid for _, pid in changed_sessions})
+        d.sessions = [sid for sid, _ in changed_sessions]
+        _, errs = _check_sessions(d.sessions, require_complete=False)
+        d.errors += errs
+        return d
+
+    if progress_changed and declared:
+        d.mode, d.source = "batch-registration", "P-row"
+        d.pids = declared
+        for pid in declared:
+            row = rows.get(pid)
+            if not row:
+                d.errors.append(f"{pid} 不在 PROGRESS")
+            elif _pid_num(pid) >= BATCH_BINDING_MIN_P and not row["features"]:
+                d.errors.append(f"{pid} 未声明任何 spec/<feature>/ 链接")
+        return d
+
+    d.mode = "nothing"
+    return d
+
+
+def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="step_enforce")
+    ap.add_argument("files", nargs="*")
+    ap.add_argument("--base", help="CI 模式：旧 PROGRESS 的 git ref")
+    ap.add_argument("--branch", help="CI 模式：分支名（默认读当前分支）")
+    args = ap.parse_args(argv)
+
+    files = [_norm(f) for f in args.files]
+    if not args.base:
+        changed = _local_changed()
+        if changed is None:
+            print("step-enforce: git error: 无法计算本地变更集", file=sys.stderr)
+            return 2
+        # 本地模式以 git 实际变更集为准：pre-commit 会按块传参（单次 argv 可能只是
+        # 四文档子集），若信 argv 会把「同一次提交的声明」分块误判（DESIGN §3.3 步 2）。
+        files = [f for f in changed
+                 if FEATURE_RE.match(f) or SESSION_RE.match(f)
+                 or f == "docs/PROGRESS.md"]
+    docs = [f for f in files if FEATURE_RE.match(f)]
+    sessions = []
+    for f in files:
+        m = SESSION_RE.match(f)
+        if m:
+            sessions.append((m.group(1), f"P-{m.group(2)}"))
+    progress_changed = "docs/PROGRESS.md" in files
+    if not docs and not sessions and not progress_changed:
+        return 0
+
+    try:
+        old = _read_progress(args.base) if args.base else _read_progress("HEAD")
+        new = _read_progress("WORKTREE") if args.base else _read_progress("INDEX")
+    except RuntimeError as e:
+        print(f"step-enforce: git error: {e}", file=sys.stderr)
+        return 2
+
+    branch = args.branch or _branch()
+    d = resolve(docs, sessions, progress_changed, old, new, branch,
+                _whitespace_only(docs, args.base))
+    if d.errors:
+        for e in d.errors:
+            print(f"step-enforce: {e}", file=sys.stderr)
+        print(f"step-enforce: mode={d.mode} pid={','.join(d.pids) or '-'} -> exit 1",
+              file=sys.stderr)
         return 1
+    print(f"step-enforce: mode={d.mode} pid={','.join(d.pids) or '-'} "
+          f"sessions={','.join(d.sessions) or '-'} "
+          f"features={','.join(sorted(d.features)) or '-'} source={d.source}")
     return 0
 
 
