@@ -10,11 +10,18 @@
   4. maintenance= 仅 whitespace-only 文档改动；
   5. 其余语义性四文档改动 → 失败。
 
+U-10 C（P-137）：batch / session / branch 三种显式声明在 P ≥ `EVIDENCE_MIN_P` 时，还须校验
+该 P 最新 5/5 session 的 finalize `metadata.evidence_digest`——per-file sha256 文件表必须与
+**即将提交的内容**逐字节一致（「验后改文档」由此判红）；同一 session 多次 finalize（rebind）
+时末次须带 `metadata.rebind_reason`。生成侧入口 = `--doc-digest <feature>`（唯一实现）。
+
 只读零副作用。exit 0 = 通过；1 = 违规；2 = git / 映射错误（fail-closed）。
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -38,6 +45,14 @@ SESSION_RE = re.compile(
 BRANCH_RE = re.compile(r"(?:^|[/_-])p(\d{3})(?:$|[/_-])", re.I)
 STEP_SEQUENCE = ("research", "design", "implement", "verify", "finalize")
 BATCH_BINDING_MIN_P = 129
+# U-10 C（P-137）：**内容 digest 绑定**过渡边界（独立常量，不与 129 / FINALIZE_IMPACT_MIN_P 合并）。
+# 推导（预注册 §10 U-10 行 + 附录 E.1 提案 135 已被占用）：135 → 136 → **137 = 实施批自身**
+# （同 P-092 `FINALIZE_IMPACT_MIN_P=92` 先例：边界取实施批编号，本批吃狗粮自证）。
+# 存量零回归（E1）：151 个 specwf 批次 session（P-001~P-136）全部 < 137，且 digest 校验只作用于
+# **声明 P 的 session**（per-batch 作用域），历史 session 永不重验。
+# 回退 = 本常量置哨兵值（如 9999 > 全部现存 P）⇒ digest 校验整体降为观察（无红、零其他行为变更）。
+EVIDENCE_MIN_P = 137
+DOC_DIGEST_ALGO = "sha256"
 
 
 @dataclass
@@ -108,6 +123,132 @@ def _pid_num(pid: str) -> int:
 def _sessions_for_pid(pid: str) -> list[str]:
     key = pid.lower().replace("-", "")
     return sorted(p.stem for p in SESSIONS.glob(f"specwf-{key}-*.jsonl"))
+
+
+# ---------------------------------------------------------------- U-10 C：内容 digest 绑定（P-137）
+def _norm_bytes(data: bytes) -> bytes:
+    """digest 规范化：CRLF → LF（git 规范形态）。排序与路径由调用方保证。"""
+    return data.replace(b"\r\n", b"\n")
+
+
+def _read_doc_bytes(rel: str, base: str | None, worktree: bool = False) -> bytes | None:
+    """读文档字节：门禁侧本地模式读 **index**（即将提交的内容，I-8 同 `_read_progress`）、
+    CI 模式读工作树（= checkout 出的提交）；生成侧（worktree=True）读工作树（终稿此刻）。
+    失败返回 None（调用方 fail-closed）。"""
+    if worktree or base:
+        try:
+            return _norm_bytes((ROOT / rel).read_bytes())
+        except OSError:
+            return None
+    r = subprocess.run(["git", "show", f":{rel}"], cwd=str(ROOT), capture_output=True)
+    if r.returncode != 0:
+        return None
+    return _norm_bytes(r.stdout)
+
+
+def _digest_scope(features) -> list[str]:
+    """digest 作用域 = feature 目录下**四文档命名**（与 FEATURE_RE 同一口径，非四文档不绑）。"""
+    out: list[str] = []
+    for feat in sorted(set(features)):
+        d = ROOT / "spec" / feat
+        if not d.is_dir():
+            continue
+        for p in sorted(d.glob("*.md")):
+            rel = p.relative_to(ROOT).as_posix()
+            if FEATURE_RE.match(rel):
+                out.append(rel)
+    return out
+
+
+def doc_digest(features, base: str | None = None, worktree: bool = False) -> dict:
+    """生成 digest 块 `{algorithm, files:{path: sha256}}`——**唯一实现**（I-10 语义同源）。
+
+    无 aggregate 字段：单值汇总会掩盖「哪个文件变了」，per-file digest 是「验后改文档」
+    与改动定位的最小充分声明，冗余汇总 = 额外 claim 面（本仓「声明 = 重数」纪律）。
+    """
+    files: dict[str, str] = {}
+    for rel in _digest_scope(features):
+        data = _read_doc_bytes(rel, base, worktree)
+        if data is None:
+            raise RuntimeError(f"读文档失败（无法绑定 digest）: {rel}")
+        files[rel] = hashlib.sha256(data).hexdigest()
+    return {"algorithm": DOC_DIGEST_ALGO, "files": files}
+
+
+def _finalize_decisions(sid: str) -> list[dict]:
+    """session 内 finalize 决策（首现序）。坏行 ⇒ RuntimeError（fail-closed）。"""
+    path = SESSIONS / f"{sid}.jsonl"
+    out: list[dict] = []
+    with path.open("r", encoding="utf-8") as f:
+        for lineno, line in enumerate(f, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError as e:
+                raise RuntimeError(f"{path}:{lineno}: {e.msg}") from e
+            if r.get("event") != "decision":
+                continue
+            inp = r.get("input") if isinstance(r.get("input"), dict) else {}
+            md = inp.get("metadata") if isinstance(inp.get("metadata"), dict) else {}
+            if md.get("step_id") == "finalize":
+                out.append(r)
+    return out
+
+
+def verify_digests(d: Decision, rows: dict, base: str | None) -> tuple[int, list[str]]:
+    """U-10 C 校验（per-batch 作用域）：返回 (已绑定 PID 数, 错误)。
+
+    只作用于 batch / session / branch 三种**带文档改动的显式声明**；只校验声明 P 的
+    **最新 5/5 session** 的**末次** finalize——历史 session 永不重验（承 U-2 边界纪律）。
+    """
+    if d.mode not in ("batch", "session", "branch"):
+        return 0, []
+    checked, errors = 0, []
+    for pid in d.pids:
+        if _pid_num(pid) < EVIDENCE_MIN_P:
+            continue
+        feats = (rows.get(pid) or {}).get("features") or ()
+        if not feats:
+            continue                                   # 已由覆盖检查报错
+        sids = [s for s in _sessions_for_pid(pid) if s in d.sessions]
+        if not sids:
+            continue                                   # 已由完整性检查报错
+        sid = sids[-1]
+        try:
+            finals = _finalize_decisions(sid)
+        except (OSError, RuntimeError) as e:
+            errors.append(f"{sid} 读取失败: {e}")
+            continue
+        if not finals:
+            errors.append(f"{sid} 无 finalize 决策（无法绑定 digest）")
+            continue
+        md = (finals[-1].get("input") or {}).get("metadata") or {}
+        if len(finals) >= 2 and not str(md.get("rebind_reason") or "").strip():
+            errors.append(f"{sid} rebind 缺原因（末次 finalize 须带 metadata.rebind_reason）")
+        dig = md.get("evidence_digest")
+        if (not isinstance(dig, dict) or dig.get("algorithm") != DOC_DIGEST_ALGO
+                or not isinstance(dig.get("files"), dict) or not dig["files"]):
+            errors.append(f"{sid} finalize 缺/非法 evidence_digest"
+                          f"（须为 {DOC_DIGEST_ALGO} 文件表；P≥{EVIDENCE_MIN_P} 必须有）")
+            continue
+        try:
+            actual = doc_digest(feats, base)["files"]
+        except RuntimeError as e:
+            errors.append(f"{sid} {e}")
+            continue
+        declared = {str(k): str(v) for k, v in dig["files"].items()}
+        missing = sorted(set(actual) - set(declared))
+        extra = sorted(set(declared) - set(actual))
+        if missing or extra:
+            errors.append(f"{sid} digest 文件集不一致（缺 {missing} / 多 {extra}）")
+            continue
+        bad = [p for p in sorted(actual) if actual[p] != declared[p]]
+        if bad:
+            errors.append(f"{sid} digest 不匹配（验后改文档）: " + ", ".join(bad))
+        checked += 1
+    return checked, errors
 
 
 def _run_gate(sid: str, expect: tuple[str, ...] | None = None) -> int:
@@ -279,7 +420,19 @@ def main(argv: list[str]) -> int:
     ap.add_argument("files", nargs="*")
     ap.add_argument("--base", help="CI 模式：旧 PROGRESS 的 git ref")
     ap.add_argument("--branch", help="CI 模式：分支名（默认读当前分支）")
+    ap.add_argument("--doc-digest", action="append", default=None, metavar="FEATURE",
+                    help="U-10 C：打印 feature 四文档 sha256 绑定块（粘贴进 finalize "
+                         "metadata.evidence_digest；可重复指定 feature）")
     args = ap.parse_args(argv)
+
+    if args.doc_digest:
+        try:
+            block = doc_digest(args.doc_digest, worktree=True)  # 生成侧读工作树（终稿此刻）
+        except RuntimeError as e:
+            print(f"step-enforce: {e}", file=sys.stderr)
+            return 2
+        print(json.dumps(block, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
 
     files = [_norm(f) for f in args.files]
     if not args.base:
@@ -312,6 +465,11 @@ def main(argv: list[str]) -> int:
     branch = args.branch or _branch()
     d = resolve(docs, sessions, progress_changed, old, new, branch,
                 _whitespace_only(docs, args.base))
+    checked, digest_errors = 0, []
+    if not d.errors:      # 声明 / 覆盖 / 完整性已红时不叠加 digest 噪声（同一次修复即可）
+        checked, digest_errors = verify_digests(
+            d, spec_map.parse_progress_rows(new), args.base)
+        d.errors += digest_errors
     if d.errors:
         for e in d.errors:
             print(f"step-enforce: {e}", file=sys.stderr)
@@ -321,6 +479,9 @@ def main(argv: list[str]) -> int:
     print(f"step-enforce: mode={d.mode} pid={','.join(d.pids) or '-'} "
           f"sessions={','.join(d.sessions) or '-'} "
           f"features={','.join(sorted(d.features)) or '-'} source={d.source}")
+    if checked:
+        print(f"step-enforce: digest_bound={checked}（P≥{EVIDENCE_MIN_P} finalize "
+              f"{DOC_DIGEST_ALGO} 文件表与提交内容一致）")
     return 0
 
 

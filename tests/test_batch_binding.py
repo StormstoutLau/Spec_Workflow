@@ -99,25 +99,56 @@ class BatchBindingTest(unittest.TestCase):
         self._write("CODE_WIKI.md", INITIAL_WIKI.replace("P-001 demo", f"{pid} demo"))
 
     def _session(self, sid="specwf-p130-20261026", n=5,
-                 anchor="spec/demo/RESEARCH.md"):
+                 anchor="spec/demo/RESEARCH.md", digest=None, rebind=None):
+        """五步链；P-137 起可带 finalize `evidence_digest`（U-10 C）。
+
+        rebind = (digest, reason)：末次 finalize 之后追加 verify（受控回边）+ 再入 finalize。
+        """
         rows = []
         for i, step in enumerate(STEPS[:n], 1):
             md = {"step_id": step, "step_seq": i,
                   "evidence": [{"grade": "E1", "anchor": anchor}]}
             if step == "finalize":
                 md["upstream_impact"] = "none"
-            rows.append({
-                "ts": "2026-10-26T00:00:%02d+08:00" % i,
-                "seq": i, "session": sid, "source": "assistant",
-                "model": None, "provider": None, "event": "decision",
-                "input": {"category": "feature", "scenario": "s",
-                          "reasoning": "r", "outcome": "o",
-                          "confidence": 0.9, "metadata": md},
-                "output": None, "gate": None,
-            })
+                if digest is not None:
+                    md["evidence_digest"] = digest
+            rows.append(self._row(sid, i, step, i, md))
+        if rebind is not None:
+            re_digest, reason = rebind
+            md_v = {"step_id": "verify", "step_seq": 4,
+                    "evidence": [{"grade": "E1", "anchor": anchor}]}
+            md_f = {"step_id": "finalize", "step_seq": 5,
+                    "evidence": [{"grade": "E1", "anchor": anchor}],
+                    "upstream_impact": "none", "evidence_digest": re_digest}
+            if reason is not None:
+                md_f["rebind_reason"] = reason
+            rows.append(self._row(sid, n + 1, "verify", 4, md_v))
+            rows.append(self._row(sid, n + 2, "finalize", 5, md_f))
         rel = f"tools/spec_runner/sessions/{sid}.jsonl"
         self._write(rel, "\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n")
         return rel
+
+    @staticmethod
+    def _row(sid, seq, step, step_seq, md):
+        return {
+            "ts": "2026-10-26T00:00:%02d+08:00" % (seq % 60),
+            "seq": seq, "session": sid, "source": "assistant",
+            "model": None, "provider": None, "event": "decision",
+            "input": {"category": step, "scenario": "s",
+                      "reasoning": "r", "outcome": "o",
+                      "confidence": 0.9, "metadata": md},
+            "output": None, "gate": None,
+        }
+
+    def _doc_digest(self, *features):
+        """调用生成侧 `--doc-digest`（唯一实现）——测试不自行重算 sha256。"""
+        cmd = [sys.executable, str(self.root / "scripts" / "step_enforce.py")]
+        for f in features:
+            cmd += ["--doc-digest", f]
+        r = subprocess.run(cmd, cwd=str(self.root), capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+        return json.loads(r.stdout)
 
     def _run(self, files, base=None, branch=None):
         cmd = [sys.executable, str(self.root / "scripts" / "step_enforce.py")]
@@ -309,6 +340,86 @@ class BatchBindingTest(unittest.TestCase):
         self._append_p_row(status="pending")
         self._stage("docs/PROGRESS.md")
         self._assert_pass(self._run(["docs/PROGRESS.md"]), "batch-registration")
+
+    # ------------------------------------------------------------ U-10 C digest（P-137）
+
+    def _p137_batch(self, with_digest=True, rebind=None, sid="specwf-p137-20261027"):
+        """P-137 批次夹具；返回 (session 相对路径, digest 块或 None)。
+
+        rebind = None（单次 finalize）| "" / "原因"（追加 verify 回边 + 再入 finalize）。
+        digest 在文档终稿后由**生成侧**算出（`--doc-digest`），测试不自行重算。
+        """
+        self._append_p_row(pid="P-137", links=("demo",))
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\nchanged\n")
+        need = with_digest or rebind is not None
+        dig = self._doc_digest("demo") if need else None
+        reb = (dig, rebind) if rebind is not None else None
+        rel = self._session(sid, digest=dig, rebind=reb)
+        self._stage("docs/PROGRESS.md", "spec/demo/RESEARCH.md", rel)
+        return rel, dig
+
+    def test_digest_bound_pass_p137(self):
+        """P-137 + finalize digest 与提交内容一致 → pass；作用域 = 四文档命名。"""
+        _, dig = self._p137_batch()
+        self.assertEqual(sorted(dig["files"]), ["spec/demo/RESEARCH.md"])
+        r = self._run([])
+        self._assert_pass(r, "batch")
+        self.assertIn("digest_bound=1", r.stdout)
+
+    def test_digest_missing_fails_p137(self):
+        """P≥137 且带文档改动但 finalize 无 evidence_digest → exit 1。"""
+        self._p137_batch(with_digest=False)
+        self._assert_fail(self._run([]), "evidence_digest")
+
+    def test_digest_mismatch_after_finalize_fails(self):
+        """验后改文档：digest 记录后再改同一文档并提交 → exit 1（digest 不匹配）。"""
+        self._p137_batch()
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\nchanged after finalize\n")
+        self._stage("spec/demo/RESEARCH.md")
+        self._assert_fail(self._run([]), "digest 不匹配")
+
+    def test_digest_file_set_mismatch_fails(self):
+        """finalize 后新增四文档 → 文件集不一致（digest 作用域变了）。"""
+        self._p137_batch()
+        self._write("spec/demo/DESIGN.md", "# Demo design\n")
+        self._stage("spec/demo/DESIGN.md")
+        self._assert_fail(self._run([]), "文件集不一致")
+
+    def test_digest_rebind_without_reason_fails(self):
+        """同一 session 再次 finalize（rebind）但无 rebind_reason → exit 1。"""
+        self._p137_batch(rebind="")
+        self._assert_fail(self._run([]), "rebind 缺原因")
+
+    def test_digest_rebind_with_reason_passes(self):
+        """rebind 带原因且 digest 一致 → pass（受控回边 + 再入 finalize 仍判 5/5）。"""
+        self._p137_batch(rebind="P-137 verify 后补订正：RESEARCH 措辞")
+        r = self._run([])
+        self._assert_pass(r, "batch")
+        self.assertIn("digest_bound=1", r.stdout)
+
+    def test_digest_historical_p136_not_checked(self):
+        """历史批次（P<137）无 digest 不被追溯判红（存量零回归）。"""
+        self._append_p_row(pid="P-136", links=("demo",))
+        rel = self._session("specwf-p136-20261027")
+        self._write("spec/demo/RESEARCH.md", "# Demo\n\nchanged\n")
+        self._stage("docs/PROGRESS.md", "spec/demo/RESEARCH.md", rel)
+        r = self._run([])
+        self._assert_pass(r, "batch")
+        self.assertNotIn("digest_bound", r.stdout)
+
+    def test_digest_not_applied_without_docs(self):
+        """无文档改动的两种模式（session-progress / batch-registration）不受 digest 影响。"""
+        rel = self._session("specwf-p137-20261027", n=1)
+        self._stage(rel)
+        r = self._run([])
+        self._assert_pass(r, "session-progress")
+        self.assertNotIn("digest_bound", r.stdout)
+        self._commit("session only")
+        self._append_p_row(pid="P-137", links=("demo",))
+        self._stage("docs/PROGRESS.md")
+        r2 = self._run([])
+        self._assert_pass(r2, "batch-registration")
+        self.assertNotIn("digest_bound", r2.stdout)
 
     def test_git_error_returns_2(self):
         root = Path(tempfile.mkdtemp(prefix="p130_nogit_"))

@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.3
+version: 1.4
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -17,6 +17,7 @@ upstream: null
 > **修订**: v1.1（2026-10-26，P-131：U-2 边界裁决 129 + §8 边界语义注记）
 > **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明面——`--expect` / `--legacy` 二选一，隐式 legacy 移除）
 > **修订**: v1.3（2026-10-26，P-134：U-10 F 实施注记（§8）——CI step-enforce 段 fail-closed 化 + 两红边；C 留 P-135 候选）
+> **修订**: v1.4（2026-10-27，P-137：U-10 C 实施设计（§12）——内容 digest 绑定：finalize 时点 / per-batch 作用域 / rebind 留因 / `EVIDENCE_MIN_P=137` / `--doc-digest` 生成侧；不改 runner schema）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -276,6 +277,81 @@ class ProgressRow:
   - **证据等级**：待实测。
 
 **决策矩阵**：不启用（本设计为 Type-2 可逆门禁改动，先做再改）。
+
+## 12. U-10 C：内容 digest 绑定（P-137）
+
+> **定位**：本设计的第一阶段（§1）明确声明「不实现 digest 绑定」；U-10 裁决把 C 拆为另批（RESEARCH §10 / 附录 E.1），本批实施。§12 = 该子项的设计，**不改变 §1~§11 的既有语义**。
+
+### 12.1 设计目标与职责边界
+
+**解决**：`finalize` 记录的证据内容，是否就是**提交出去的内容**？（`verify-anchor` 只验锚点位置可达，不验内容字节。）
+
+**职责内**：在 `scripts/step_enforce.py` 内新增 digest 生成与校验，作用于 batch / session / branch 三种显式声明。
+
+**职责外**：不改 `spec_runner` 的 decision schema 与事件写入路径（`metadata` 为自由字段，沿用 `upstream_impact` 先例）；不新增 session 事件类型；不新增工件（无 manifest / 无 digest 文件）；不改 `.pre-commit-config.yaml` 与 CI 段（触发面已覆盖 `scripts/` 与四文档）；不实现 `session_start`（Phase 2b）。
+
+### 12.2 三项设计决策（承 RESEARCH §12.2 的 R1/R2/R3）
+
+| 决策 | 取值 | 否决项与理由 |
+|---|---|---|
+| 记录时点 | `finalize` 末次 | `verify`——文档终稿晚于 verify（P-130/131/132 同改同一组文档），且 verify 职责是锚点真实性 |
+| 作用域 / rebind | per-batch（声明 P 的 feature 集）+ 同 session 内 rebind 须留因 | 全量历史重验（155 批次全红）；跨批原因强制（第二 claim 面，重复 PROGRESS 已记事实） |
+| 过渡边界 | `EVIDENCE_MIN_P = 137`（独立常量） | 135 / 136 已被占用；与 129 / 92 合并（语义不同：入口 / 字段 / 内容绑定） |
+
+### 12.3 接口定义
+
+```python
+EVIDENCE_MIN_P = 137
+DOC_DIGEST_ALGO = "sha256"
+
+def doc_digest(features, base: str | None = None, worktree: bool = False) -> dict:
+    """{"algorithm": "sha256", "files": {"spec/<f>/XXX.md": "<hex>"}}；唯一实现。"""
+
+def verify_digests(d: Decision, rows: dict, base: str | None) -> tuple[int, list[str]]:
+    """返回 (已绑定 PID 数, 错误)；只作用于 batch / session / branch。"""
+```
+
+CLI：`python scripts/step_enforce.py --doc-digest <feature>`（可重复）打印**可直接粘贴**的 digest 块，退出 0；feature 目录缺失 / 读失败 ⇒ 2。
+
+### 12.4 数据流
+
+```text
+终稿（工作树） --doc-digest--> metadata.evidence_digest（写入 finalize decision）
+提交前门禁（index / CI 工作树） --> verify_digests：
+    P < 边界 或 模式 ∉ {batch,session,branch} → 跳过
+    声明 P 的最新 5/5 session → 末次 finalize
+      缺/非法块 → 红；键集不等 → 红；逐文件哈希不等 → 红（验后改文档）
+      ≥2 次 finalize 且末次无 rebind_reason → 红
+```
+
+### 12.5 不变式
+
+1. **I-9a 绑定存在**：P ≥ 边界且带四文档改动 ⇒ 末次 finalize 必须有 `evidence_digest`。
+2. **I-9b 内容一致**：digest 键集 = 声明 P 的 feature 四文档集；逐文件哈希 = 提交内容。
+3. **I-9c rebind 留因**：同 session 多次 finalize ⇒ 末次须带非空 `rebind_reason`。
+4. **I-9d 历史不重验**：历史 session 永不因 digest 判红（per-batch 作用域，不靠边界豁免）。
+5. **I-9e 失败不静默**：读失败 / 坏 JSON ⇒ 错误入 `errors` ⇒ exit 1 或 2，绝不当作通过。
+
+### 12.6 替代方案
+
+| 方案 | 否决理由 |
+|---|---|
+| A. `verify` 时点记录 digest | 终稿晚于 verify（实测三提交）⇒ 记录即失效 |
+| B. aggregate 单值 digest | 掩盖「哪个文件变了」；无法定位改动 ⇒ 只增 claim 面 |
+| C. 独立 digest 文件（manifest） | 新增工件 + 双真相源（§5.3 同结论，留 Phase 3） |
+| D. 全量历史 session 重验 | 155 批次无 digest ⇒ 全红（存量零回归破坏） |
+| E. 跨批强制 rebind 原因 | 与 PROGRESS 变更理由重复（第二 claim 面） |
+
+### 12.7 风险与回退
+
+| 风险 | 缓解 |
+|---|---|
+| 手工写错 digest | 生成侧唯一实现（`--doc-digest`），测试用同一实现自算 |
+| finalize 后改文档 | I-9b 判红；修法 = rebind（回边 + 再入 finalize + 原因）|
+| 维护模式豁免被滥用 | 维护模式本身要求 `git diff -w` 为空 + P≥129 完整链；字节变了其后须 rebind |
+| 边界常量误合并 | 三常量语义独立，注释互指（129 入口 / 92 字段 / 137 内容）|
+
+**回退**：`EVIDENCE_MIN_P` 置 9999 ⇒ 整体降为观察（无红、`digest_bound` 不再输出）。
 
 ---
 

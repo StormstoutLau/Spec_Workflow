@@ -4,7 +4,7 @@
 
 id: framework-deep-review-CHECKLIST
 type: design
-version: 1.4
+version: 1.5
 status: accepting
 date: 2026-10-26
 depends: [framework-deep-review-IMPLEMENTATION, framework-deep-review-DESIGN]
@@ -16,6 +16,7 @@ upstream: null
 > **创建日期**: 2026-10-26
 > **修订**: v1.3（2026-10-26，P-132：runner `step-gate` 显式声明验收 3 项）
 > **修订**: v1.4（2026-10-26，P-134：CI fail-closed 验收 4 项（§2.4），功能 22 → 26）
+> **修订**: v1.5（2026-10-27，P-137：digest 绑定验收 8 项（§2.5），功能 26 → 34、接口 4 → 6、不变式 8 → 13、错误处理 8 → 12；总计 67 → 86）
 > **状态**: 验收中（有条件通过：Linux 未实测）
 > **Spec 步骤**: Step 7-8, 10
 > **基于实施**: [IMPLEMENTATION.md](./IMPLEMENTATION.md)
@@ -46,7 +47,7 @@ upstream: null
 
 | 检查项 | 状态 | 说明 |
 |---|---|---|
-| 20 个测试用例均有验收项 | ☑ | §2.1 列 14 项；§2.2 列 5 项；git 错误见 §5；§2.3 另列 runner selftest 3 项（不计入 20 例矩阵） |
+| 28 个测试用例均有验收项 | ☑ | §2.1 列 14 项；§2.2 列 5 项；§2.5 列 8 项（P-137）；git 错误见 §5；§2.3 另列 runner selftest 3 项（不计入 28 例矩阵） |
 | 验收项可追溯到 IMPLEMENTATION §3.5 | ☑ | 用例编号一致 |
 
 ### 1.4 术语一致性
@@ -105,6 +106,19 @@ upstream: null
 | 根提交不误伤 | 本地注入：before 全零且无 `HEAD^` | `BASE=HEAD` 回退，`exit 0` | ☑ | 注入 5/5 |
 | 归档数字订正一致 | 全覆盖 grep：`152 个 specwf` 与 `152 specwf` 与 `152/152` | 仅 RESEARCH 附录 D 归档报告原文（D.1~D.6 逐字收录）保留，以 D.0 订正表为准；PROGRESS / CODE_WIKI 均为 151；历史 session 事件流不重写 | ☑ | 终验 grep（提交前全覆盖执行） |
 
+### 2.5 digest 绑定验收（P-137）
+
+| 验收项 | 测试方法 | 通过条件 | 状态 | 证据 |
+|---|---|---|---|---|
+| #21 P-137 + 正确 digest | `test_digest_bound_pass_p137` | exit 0，`mode=batch`，输出 `digest_bound=1`；作用域 = 四文档命名 | ☑ | unittest ok |
+| #22 P-137 缺 `evidence_digest` | `test_digest_missing_fails_p137` | exit 1 且含 `evidence_digest` | ☑ | unittest ok |
+| #23 验后改文档（digest 后改并提交） | `test_digest_mismatch_after_finalize_fails` | exit 1 且含「digest 不匹配」 | ☑ | unittest ok |
+| #24 finalize 后新增四文档 | `test_digest_file_set_mismatch_fails` | exit 1 且含「文件集不一致」 | ☑ | unittest ok |
+| #25 rebind 无 `rebind_reason` | `test_digest_rebind_without_reason_fails` | exit 1 且含「rebind 缺原因」 | ☑ | unittest ok |
+| #26 rebind 有原因 | `test_digest_rebind_with_reason_passes` | exit 0（受控回边 + 再入 finalize 仍判 5/5） | ☑ | unittest ok |
+| #27 P-136 无 digest + 文档改动 | `test_digest_historical_p136_not_checked` | exit 0（历史不重验），无 `digest_bound` 输出 | ☑ | unittest ok |
+| #28 无文档改动双模式 | `test_digest_not_applied_without_docs` | `session-progress` / `batch-registration` 均 exit 0 且不校验 | ☑ | unittest ok |
+
 ## 3. 接口验收
 
 | 验收项 | 通过条件 | 状态 |
@@ -113,6 +127,8 @@ upstream: null
 | `changed_pids` 签名 | 与 DESIGN §4.2 一致 | ☑ |
 | `resolve` 签名 | 与 DESIGN §4.3 一致 | ☑ |
 | `check_sessions` 签名 | 与 DESIGN §4.4 一致 | ☑ |
+| `doc_digest` 签名（P-137） | 与 DESIGN §12.3 一致（`features, base=None, worktree=False`） | ☑ |
+| `verify_digests` 签名（P-137） | 与 DESIGN §12.3 一致（`-> (int, list[str])`） | ☑ |
 
 ## 4. 不变式验收
 
@@ -126,6 +142,11 @@ upstream: null
 | I-6 exit 2 fail-closed | 坏仓实测（`test_git_error_returns_2`） | ☑ |
 | I-7 不依赖文件名排序 | #9 | ☑ |
 | I-8 本地/CI 同源 | 本地 hook + CI step（同一脚本与模式解析） | ☑ |
+| I-9a 绑定存在（P-137，DESIGN §12.5） | #21 / #22 | ☑ |
+| I-9b 内容一致（P-137） | #23 / #24 | ☑ |
+| I-9c rebind 留因（P-137） | #25 / #26 | ☑ |
+| I-9d 历史不重验（P-137） | #27（P-136 无 digest 仍 pass） | ☑ |
+| I-9e 失败不静默（P-137） | #22 + 读取失败返回 1/2 | ☑ |
 
 ## 5. 错误处理验收
 
@@ -139,13 +160,17 @@ upstream: null
 | 只改 session 1/5 | #11 | exit 0 | ☑ |
 | 只加 P 行 | #12 | exit 0 | ☑ |
 | git 读取失败 | 临时坏仓 | exit 2 | ☑ |
+| P≥137 缺/非法 `evidence_digest`（P-137） | #22 | exit 1 | ☑ |
+| digest 键集 ≠ 四文档集（P-137） | #24 | exit 1 | ☑ |
+| digest 哈希不等（验后改文档，P-137） | #23 | exit 1 | ☑ |
+| rebind 无 `rebind_reason`（P-137） | #25 | exit 1 | ☑ |
 
 ## 6. 性能验收
 
 | 性能指标 | 目标 | 实测 | 状态 |
 |---|---|---|---|
-| 单次 hook 墙钟（本仓全量，66 文档 + 154 session） | < 5 s | 1.14 s | ☑ |
-| 批次绑定集成测试总时长 | < 60 s | 28.5 s（20 例；全套 28 例 32.6 s） | ☑ |
+| 单次 hook 墙钟（本仓全量，100 文档 + 160 session） | < 5 s | 1.24 s（2026-10-27 P-137 复测，含 digest 4 次 `git show`） | ☑ |
+| 批次绑定集成测试总时长 | < 60 s | 43.4 s（28 例；全套 36 例 39.9 s，2026-10-27 复测） | ☑ |
 
 ## 7. 兼容性验收
 
@@ -201,21 +226,21 @@ upstream: null
 | 类别 | 总数 | 通过 | 失败 | 待办 |
 |---|---|---|---|---|
 | 文档一致性 | 12 | 12 | 0 | 0 |
-| 功能 | 26 | 26 | 0 | 0 |
-| 接口 | 4 | 4 | 0 | 0 |
-| 不变式 | 8 | 8 | 0 | 0 |
-| 错误处理 | 8 | 8 | 0 | 0 |
+| 功能 | 34 | 34 | 0 | 0 |
+| 接口 | 6 | 6 | 0 | 0 |
+| 不变式 | 13 | 13 | 0 | 0 |
+| 错误处理 | 12 | 12 | 0 | 0 |
 | 性能 | 2 | 2 | 0 | 0 |
 | 兼容性 | 3 | 2 | 0 | 1 |
 | ADD 审计 | 4 | 4 | 0 | 0 |
-| **总计** | 67 | 66 | 0 | 1 |
+| **总计** | 86 | 85 | 0 | 1 |
 
 > **统计口径（RULE-2）**：上表来自逐项核对，非事后汇总推算。
 
 ### 10.2 验收决定
 
 - [ ] **验收通过**：所有 P1 项通过，无阻塞性问题
-- [x] **有条件通过**：Linux 平台未在本机实测；其余 66 项全通过，无失败项
+- [x] **有条件通过**：Linux 平台未在本机实测；其余 85 项全通过，无失败项
 - [ ] **验收失败**：<原因>
 
 ### 10.3 签字
@@ -231,4 +256,6 @@ upstream: null
 |---|---|---|---|
 | 更新 PROGRESS.md（P-130） | 实施者 | 本批 | ☑ |
 | 更新 CODE_WIKI / CONSOLE | 实施者 | 本批 | ☑ |
-| Phase 2（session_start / digest） | 待裁决 | 未定 | 未开始 |
+| U-10 C 内容 digest 绑定（P-137，§2.5 八项） | 实施者 | P-137 | ☑ |
+| Phase 2b `session_start` 开场事件 | 待裁决 | 未定 | 未开始 |
+| U-9 扩 CONSOLE compact 当前状态块 | 实施者 | P-138 候选 | 未开始 |

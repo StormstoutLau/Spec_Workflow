@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.3
+version: 1.4
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -17,6 +17,7 @@ upstream: null
 > **修订**: v1.1（2026-10-26，P-131：U-2 注入测试 5 例，批次绑定测试 15 → 20）
 > **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明 `--expect` / `--legacy`，selftest 81 → 83）
 > **修订**: v1.3（2026-10-26，P-134：ci.yml step-enforce 段 fail-closed 化（§3.7）+ 本地注入 5 例 + §2.3/§8.1 变更面同步）
+> **修订**: v1.4（2026-10-27，P-137：U-10 C 实施（§3.8）——digest 生成 / 校验 + `--doc-digest` + 8 例注入，批次绑定测试 20 → 28）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -61,8 +62,8 @@ upstream: null
 
 ```text
 scripts/spec_map.py                    # + parse_progress_rows / changed_pids
-scripts/step_enforce.py                # 重写为 O3 解析器
-tests/test_batch_binding.py            # 新增：真实 runner + git 集成测试
+scripts/step_enforce.py                # 重写为 O3 解析器；P-137：+ doc_digest / verify_digests / --doc-digest
+tests/test_batch_binding.py            # 新增：真实 runner + git 集成测试（P-137：20 → 28）
 .pre-commit-config.yaml                # step-enforce files 扩到 session + PROGRESS
 .github/workflows/ci.yml               # checkout fetch-depth 0 + 变更集 step-enforce；P-134 fail-closed 化
 tools/spec_runner/spec_runner.py       # P-132：step-gate 显式 --expect / --legacy + selftest F80/F81
@@ -310,6 +311,61 @@ def _run_gate(sid: str, expect: tuple[str, ...] | None = None) -> int:
 
 5/5 通过（P-134，零回归限定见 DESIGN §8 U-10 F 注记）。
 
+### 3.8 `scripts/step_enforce.py` 内容 digest 绑定（P-137）
+
+#### 职责
+
+为 P ≥ `EVIDENCE_MIN_P` 的显式声明提供「finalize 记录的字节 = 提交的字节」机械校验，并提供生成侧入口，使 digest 由工具算出而非人工书写。
+
+#### 接口签名
+
+```python
+EVIDENCE_MIN_P = 137            # 独立常量（不并入 129 / 92）
+DOC_DIGEST_ALGO = "sha256"
+
+def _norm_bytes(data: bytes) -> bytes: ...                       # CRLF → LF
+def _read_doc_bytes(rel, base, worktree=False) -> bytes | None: ...
+def _digest_scope(features) -> list[str]: ...                    # FEATURE_RE 口径
+def doc_digest(features, base=None, worktree=False) -> dict: ...
+def _finalize_decisions(sid) -> list[dict]: ...
+def verify_digests(d: Decision, rows: dict, base: str | None) -> tuple[int, list[str]]: ...
+```
+
+CLI：`--doc-digest FEATURE`（`action="append"`，可重复）⇒ 打印 `{algorithm, files}` 块并 exit 0；读失败 exit 2。
+
+#### 实施要点
+
+- **单一实现**：生成（`--doc-digest`）与校验（`verify_digests`）共用 `doc_digest`，测试也调用 CLI 生成，**不重算 sha256**（守「两实现漂移」教训）；
+- **读面分工**：生成侧读工作树；校验侧本地读 **index**（`git show :path`，即将提交内容）、CI 读工作树（`--base`）——与 `_read_progress` 的 INDEX/WORKTREE 分工同源（I-8）；
+- **作用面**：仅在 `resolve` **无错**后执行（避免错误叠加）；模式 ∈ {batch, session, branch}；PID 数 ≥ 137；session = 已判定 5/5 的最新一个；只读**末次** finalize；
+- **四类错误**：块缺失/非法、文件集不一致、逐文件哈希不等（验后改文档）、rebind 缺原因（≥2 次 finalize 且末次 `rebind_reason` 空）；
+- **不改 runner**：不新增子命令、不触碰 decision schema / 事件写入路径 / `cmd_gate_step`；
+- **输出**：通过时追加一行 `digest_bound=<n>`（仅在有校验时输出，历史批次输出零变化）。
+
+#### 低效操作排除
+
+| 潜在低效 | 排除措施 |
+|---|---|
+| 每 session 调一次 runner | 复用 `_check_sessions` 已得的 complete 列表，零额外 runner 进程 |
+| 全仓 session 扫描找 digest | 只读声明 P 的最新 session 文件（单文件流式读） |
+| 逐文件 `git show` 重复启动 | 每个 feature 四文档各一次（上限 4×feature 数）；CI 模式改为直接读盘 |
+| 校验与生成两套哈希逻辑 | 单函数 `doc_digest`，出参即入参形态 |
+
+#### 注入测试（8 例，落于 `tests/test_batch_binding.py`）
+
+| # | 场景 | 期望 | 结果 |
+|---|---|---|---|
+| 21 | P-137 + 正确 digest | pass + `digest_bound=1` | ✅ |
+| 22 | P-137 缺 `evidence_digest` | exit 1 | ✅ |
+| 23 | digest 记录后改同一文档并提交 | exit 1（digest 不匹配） | ✅ |
+| 24 | finalize 后新增四文档 | exit 1（文件集不一致） | ✅ |
+| 25 | rebind 无 `rebind_reason` | exit 1 | ✅ |
+| 26 | rebind 有原因 | pass（仍判 5/5） | ✅ |
+| 27 | P-136 无 digest + 文档改动 | pass（历史不重验） | ✅ |
+| 28 | 无文档改动（session-progress / batch-registration） | pass（不校验） | ✅ |
+
+8/8 通过（P-137）；`python -m unittest tests.test_batch_binding` 28/28；`spec_runner selftest` 83/83（runner 未改动）。
+
 ## 4. 接口实施
 
 ### 4.1 `parse_progress_rows`
@@ -372,6 +428,7 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 - P<129 的历史 session 不被追溯判红（只在维护 / session-only 放宽）；
 - 语义性文档改动仍必须声明——这是 P0 修复，不是兼容性回归；
 - **runner `step-gate` 的隐式 legacy 是显式断裂（P-132）**：无 `--expect` / `--legacy` 的旧调用现在 exit 2；仓内调用面已全量迁移（`scripts/step_enforce.py` + runner 自身 `step-enforce` + selftest 18 处），README 同步；外部调用方须补声明，这是有意的 fail-closed。
+- **digest 绑定是新增面（P-137）**：`step_enforce` 新增 `--doc-digest`（纯读、零副作用），P < 137 的批次与无文档改动模式行为零变化；历史 session 永不重验（per-batch 作用域）。失败时的修法 = 重新生成 digest + rebind（受控回边 + 再入 finalize + 原因），无需重写 session。
 
 ## 6. 错误处理实施
 
@@ -388,6 +445,11 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 | 无相关变更 | 无异常，返回 0 | `main` | 现有 no-arg 测试 |
 | step-gate 未显式声明（P-132） | 无异常，返回 2 | `cmd_gate_step` 守卫 | runner F80 |
 | step-gate `--expect` / `--legacy` 同给（P-132） | 无异常，返回 2 | `cmd_gate_step` 守卫 | runner F81 |
+| P≥137 finalize 缺/非法 `evidence_digest`（P-137） | 无异常，返回 1 | `verify_digests` errors | #22 |
+| digest 键集 ≠ 四文档集（P-137） | 无异常，返回 1 | `verify_digests` errors | #24 |
+| digest 哈希不等（验后改文档，P-137） | 无异常，返回 1 | `verify_digests` errors | #23 |
+| rebind 无 `rebind_reason`（P-137） | 无异常，返回 1 | `verify_digests` errors | #25 |
+| digest 生成侧读文档失败（P-137） | 无异常，返回 2 | `main --doc-digest` | 手工注入 |
 
 ## 7. 不变式实施
 
@@ -401,6 +463,11 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 | I-6 exit 2 fail-closed | `main` | 手工注入 |
 | I-7 不依赖文件名排序 | `sessions_for_pid` + 扫描 | #9 |
 | I-8 本地/CI 同源 | `main --base` | CI step + 本地 hook |
+| I-9a 绑定存在（P-137） | `verify_digests` | #21 / #22 |
+| I-9b 内容一致（P-137） | `doc_digest` + `verify_digests` | #23 / #24 |
+| I-9c rebind 留因（P-137） | `verify_digests` | #25 / #26 |
+| I-9d 历史不重验（P-137） | `_pid_num < EVIDENCE_MIN_P` + per-batch 作用域 | #27 |
+| I-9e 失败不静默（P-137） | `verify_digests` errors / exit 2 | #22 / 读取失败 |
 
 ## 8. 测试策略
 
@@ -408,8 +475,9 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 
 | 模块 | 测试文件 | 测试数 | 覆盖率目标 |
 |---|---|---|---|
-| `spec_map` | `tests/test_batch_binding.py` | 20（含集成） | 关键分支全覆盖 |
-| `step_enforce` | 同上 | 20 | 关键分支全覆盖 |
+| `spec_map` | `tests/test_batch_binding.py` | 28（含集成） | 关键分支全覆盖 |
+| `step_enforce`（模式 / 覆盖 / 完整性） | 同上 | 20 | 关键分支全覆盖 |
+| `step_enforce`（digest 生成 / 校验，P-137） | 同上 | 8 | 六臂 + 作用域漂移 + 双无文档模式 |
 | `spec_runner step-gate` | `spec_runner.py selftest` | 83（含 F80/F81） | 声明守卫 + 既有三臂回归 |
 | `ci.yml` step-enforce 段（P-134） | 临时 git 仓注入（IMPLEMENTATION §3.7） | 5 | fail-closed 两红边 + 三绿灯边 |
 
@@ -479,6 +547,13 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 - 文件: `tools/spec_runner/spec_runner.py` / `scripts/step_enforce.py` / `tools/spec_runner/README.md`
 - 内容: `step-gate` 三重声明守卫 + selftest F80/F81 + 内部调用方显式 `--legacy`
 - 测试: `spec_runner.py selftest` 83/83；`python -m unittest discover -s tests` 28/28
+
+### Step 6: 内容 digest 绑定（P-137）
+
+- 文件: `scripts/step_enforce.py` / `tests/test_batch_binding.py`
+- 内容: `doc_digest`（gen/verify 单一实现）+ `verify_digests`（per-batch 作用域）+ `--doc-digest` CLI + `EVIDENCE_MIN_P = 137`
+- 测试: `python -m unittest tests.test_batch_binding` 28/28；`python -m unittest discover -s tests` 36/36；`selftest` 83/83 零回归
+- 本批自证: `python scripts/step_enforce.py --doc-digest framework-deep-review` → 写入 `specwf-p137-20261027` 的 finalize `metadata.evidence_digest`
 
 ---
 

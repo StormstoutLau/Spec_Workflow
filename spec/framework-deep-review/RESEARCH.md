@@ -4,7 +4,7 @@
 
 id: framework-deep-review-RESEARCH
 type: design
-version: 1.8
+version: 1.9
 status: draft
 date: 2026-10-26
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（当前框架深度评审、前沿对标与分优先级升级建议）
 > **创建日期**: 2026-10-26
+> **修订**: v1.9（2026-10-27，P-137：**U-10 C 实施——内容 digest 绑定门禁**——新增 §12（三处未决裁决 R1 finalize 时点 / R2 per-batch 作用域与 rebind / R3 边界 137 + 数据结构 + 六臂注入 + 残余风险）；原 §12 参考文献顺延为 §13；§10 U-10 行状态更新；A/B/C/H 计数不变）
 > **修订**: v1.8（2026-10-27，P-136：**U-5 / U-6 / U-9 三裁决落档**——U-5 采 D.3 方案 C 分阶段〔Phase 1 = 20 项读数预注册、达标后扩 30+30 当门禁〕/ U-6 采 D.4 方案 E〔prereg v1.1 修订实施 + 不改名 + 新引用加限定〕/ U-9 采 D.5 方案 D〔否独立 SUMMARY.md，扩 CONSOLE = P-138 候选，C 先占 P-137〕；A/B/C/H 计数不变）
 > **修订**: v1.7（2026-10-27，P-135：**U-10 / U-7 裁决与复审过程完整落档**——新增附录 E（时间线 / 两轮裁决 / 复审四偏差与幻觉排除确认）；C 候选批预标 P-135 顺延 **P-136**；A/B/C/H 计数不变）
 > **修订**: v1.6（2026-10-26，P-134：**U-10 F 实施 + 归档数字订正**——CI step-enforce 段 fail-closed 化；D.0 订正 specwf 批次计数 152 → **151**（naive 子串误计）；§10 U-10/U-7 裁决落档）
@@ -540,9 +541,9 @@ upstream: null
 
 - **U-10 Phase 2（证据增强）立项与批次边界**
   - **判据**：F（CI fail-open 修补）与 C（内容 digest 绑定）可分批实施、互不阻塞回退；
-  - **触发条件**：**用户裁决（2026-10-26）**：F 单独立项 **P-134（本批已实施）**；C 不并入，另批候选（预标 P-135 被 P-135 裁决落档批占用、改标 P-136 后又被三裁决批〔P-136，2026-10-27〕占用 ⇒ **二次顺延 P-137 候选**；三处未决预注册不变，见附录 E.1 / E.4 与本行）——digest 记录时点（倾向 finalize 而非 verify）、per-batch 作用域与 rebind 规则（finalize 末次改文档后 rebind 并留原因）、过渡边界（提案 `EVIDENCE_MIN_P = 135`）；`session_start` 留 Phase 2b 单独裁决；
-  - **当前倾向**：C 注入面 = 验后改文档 / P≥135 缺 digest / digest 不匹配 / rebind 无原因 六臂；回退 = 边界常量置哨兵值降为观察；
-  - **证据等级**：E1（批次 session gate=0 —— 分析时点 151/151，D.0 订正口径；坏 base → git diff exit 128 且包装层跳过；41bb0c4/3bc99fa/c779e6d 三提交同改同一组文档 ⇒ per-batch rebind 必要；P-134 本地注入 5/5）。
+  - **触发条件**：**用户裁决（2026-10-26）**：F 单独立项 **P-134（已实施）**；C 不并入，另批候选（预标 P-135 → P-136 两次被占用 ⇒ **P-137 已实施**，2026-10-27）——三处未决已在 §12.2 裁决并落为机械判据（digest 记录时点 = **finalize**、per-batch 作用域 + 同 session rebind 留因、边界 `EVIDENCE_MIN_P = **137**`）；`session_start` 留 Phase 2b 单独裁决；
+  - **当前倾向**：C 六臂注入落为 8 例（临时 git 仓 + 真实 runner，`tests/test_batch_binding.py` 20 → 28）；回退 = 边界常量置哨兵值（9999）降为观察；跨批 rebind 原因**不作要求**（理由见 §12.2 R2）；
+  - **证据等级**：E1（批次 session gate/digest 读数：160 jsonl / **155 批次 session** / 5 非批次 / 批次最大 P = P-136 ⇒ 全 < 137，2026-10-27 实测；坏 base → git diff exit 128 且包装层跳过；41bb0c4/3bc99fa/c779e6d 三提交同改同一组文档 ⇒ per-batch 作用域必要；P-134 本地注入 5/5；P-137 注入 8/8）。
 
 ---
 
@@ -714,7 +715,83 @@ O1 看起来能立刻把 graph 从 P-125 改到 P-127，但机械实测暴露了
 - **待裁决**：`BATCH_BINDING_MIN_P` 取 129 还是更早的 52（当前不完整 session 最大 P-051）；新 P 行 0 链接是否一律失败；维护模式是否只允许 `git diff -w` 为空。
 
 
-## 12. 参考文献
+## 12. U-10 C 实施：内容 digest 绑定门禁（P-137，2026-10-27）
+
+> **定位**：Phase 2 的 **C 项**（内容 digest 绑定）实施记录。F（CI fail-closed）已在 P-134 实施（§10 U-10 行）。本节只记录 **三处未决的裁决 + 数据结构 + 六臂注入 + 残余风险**；`session_start`（Phase 2b）仍留未决。
+> **要回答的问题**：该批次 `finalize` 记录的证据内容，**是否就是提交出去的内容**？
+
+### 12.1 目标与不变式（I-9，三子句）
+
+| 子句 | 表述 | 机械判据 |
+|---|---|---|
+| **I-9a 绑定存在** | P ≥ `EVIDENCE_MIN_P` 且带四文档改动的 batch / session / branch 声明，其声明 P 的最新 5/5 session 的**末次** `finalize` 必须带 `metadata.evidence_digest` | 块存在、`algorithm = sha256`、`files` 为非空对象 |
+| **I-9b 内容一致** | digest 的 `files` 键集 = 该 P 声明 feature 的四文档集（`FEATURE_RE` 口径），每个值 = **即将提交的内容**的 sha256 | 键集相等 + 逐文件哈希相等 |
+| **I-9c rebind 留因** | 同一 session 出现 ≥2 次 `finalize`（受控回边后重入）时，末次须带非空 `metadata.rebind_reason` | 非空字符串 |
+
+**作用面**：只在 `batch` / `session` / `branch` 三种**带文档改动的显式声明**上生效；`maintenance` / `session-progress` / `batch-registration` / `nothing` 四模式不校验（见 §12.5 第 4 条对 maintenance 的诚实边界）。
+
+### 12.2 三处未决裁决
+
+**（R1）digest 记录时点 = `finalize`（否决 `verify`）**
+
+- 依据：本仓文档生命周期实测——41bb0c4 / 3bc99fa / c779e6d（P-130 / P-131 / P-132）三提交**同改同一组 4 文档**（`E1`）⇒ 在 `verify` 记录的 digest 到终稿前必然失效；`finalize` 是五步链末步，是「内容冻结」的唯一机械时点。
+- `verify` 的既有职责 = 锚点真实性（`verify-anchor` 与 `ANCHOR_RE` 同一口径，只验位置可达），与内容字节无关；把 digest 塞进 `verify` 会让两个不同语义共享同一个步位。
+- **明示代价**：`finalize` 之后的任何文档改动都必须 **rebind**（追加 `verify` 受控回边 + 再入 `finalize`），成本 = 2 条 decision。该代价由 `_decision_chain` 的 P-069 受控回边机制天然承载，**无需新 schema、无需转义行**（`seen` 首现序保证 `--expect` 仍判 5/5）。
+
+**（R2）作用域 = per-batch；rebind 原因只在同 session 内要求**
+
+- **作用域**：绑定对象 = **声明 P 行的 feature 集**；校验对象 = **该 P 的最新 5/5 session 的末次 finalize**；历史 session **永不重验**。这是存量零回归的结构性保证（不靠边界豁免，而靠作用域本身）——与 U-2 边界纪律同思路。
+- **rebind 留因的边界 = 同 session 内**：跨批次不要求原因——新 P 行 + 新 session 本身即声明，PROGRESS 行记录变更理由；再要求一份「跨批 rebind 原因」= 同一事实的第二 claim 面，违反本仓「声明 = 重数」纪律。
+- 依据：上述三提交属**跨批**同改，由 per-batch 作用域吸收；同批内「finalize 后改文档」才是 I-9 要拦的缺陷。
+
+**（R3）过渡边界 `EVIDENCE_MIN_P = 137`**
+
+- 预注册提案 135 已被 P-135（裁决落档批）占用，改标 136 后又被 P-136（三裁决批）占用 ⇒ 取**实施批自身 137**（同 P-092 `FINALIZE_IMPACT_MIN_P = 92` 先例：边界取实施批编号，本批吃狗粮自证）。
+- **独立常量**：不与 `BATCH_BINDING_MIN_P = 129`（入口完整性）、`FINALIZE_IMPACT_MIN_P = 92`（finalize 字段）合并——三者语义不同（入口 / 字段 / 内容绑定）。
+- 存量读数（`E1`，2026-10-27 实测）：`tools/spec_runner/sessions` 160 jsonl / **155 批次 session** / 5 非批次文件 / 批次最大 P = **P-136** ⇒ 全部 < 137。
+
+### 12.3 数据结构与唯一实现
+
+```text
+metadata.evidence_digest = {"algorithm": "sha256",
+                            "files": {"spec/<feature>/RESEARCH.md": "<64 hex>", ...}}
+metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 finalize）
+```
+
+- **无 aggregate 单值字段**：单值汇总会掩盖「哪个文件变了」；per-file 文件表既是「验后改文档」判据，又是改动定位的最小充分声明。冗余汇总 = 额外 claim 面。
+- 作用域 = `FEATURE_RE` 口径（feature 目录下四文档命名），与门禁管辖面**同一口径**（PLAN / README 类非四文档不绑，避免 finalize 后误触）。
+- 规范化 = CRLF → LF（git 规范形态）；路径排序固定（生成与校验逐字节同序）。
+- **读面分工**：生成侧（`--doc-digest <feature>`）读**工作树**（终稿此刻）；门禁侧本地模式读 **index**（即将提交的内容，与 `_read_progress` 同源，pre-commit 会暂存未暂存改动 ⇒ 两者一致）、CI 模式读工作树（= checkout 出的提交）。
+- **唯一实现**：`scripts/step_enforce.py` 的 `doc_digest` / `verify_digests`（生成与校验共用同一函数，守 I-10 语义同源纪律）；不新增 runner 子命令、不改 decision schema（`metadata` 为自由字段，与 `upstream_impact` 同级先例）。
+
+### 12.4 六臂注入（落为 8 例，临时 git 仓 + 真实 `spec_runner`）
+
+| # | 臂（预注册六臂 → 细分） | 注入 | 期望 | 用例 |
+|---|---|---|---|---|
+| 1 | 基线 | P-137 + 正确 digest（生成侧自算） | pass，输出 `digest_bound=1` | `test_digest_bound_pass_p137` |
+| 2 | P≥边界缺 digest | finalize 无 `evidence_digest` | exit 1 | `test_digest_missing_fails_p137` |
+| 3 | 验后改文档 | digest 记录后改同一文档并提交 | exit 1（digest 不匹配） | `test_digest_mismatch_after_finalize_fails` |
+| 4 | 作用域漂移（细分自臂 3） | finalize 后新增四文档 | exit 1（文件集不一致） | `test_digest_file_set_mismatch_fails` |
+| 5 | rebind 无原因 | 受控回边 + 再入 finalize，`rebind_reason` 为空 | exit 1 | `test_digest_rebind_without_reason_fails` |
+| 6 | rebind 有原因 | 同上 + 非空原因 | pass（仍判 5/5） | `test_digest_rebind_with_reason_passes` |
+| 7 | 历史批次不误伤 | P-136 session 无 digest + 文档改动 | pass（不检查） | `test_digest_historical_p136_not_checked` |
+| 8 | 无 document 改动（细分自臂 7） | `session-progress` 与 `batch-registration` 两模式 | pass（不检查） | `test_digest_not_applied_without_docs` |
+
+实跑（2026-10-27）：`python -m unittest tests.test_batch_binding` **28/28**（20 既有零回归 + 8 新增）；`spec_runner selftest` **83/83**（runner 未改动，零回归）。
+
+### 12.5 残余风险与诚实边界
+
+1. **`session_start`（Phase 2b）未实施**：不引入 `input.metadata = {pid, features, tier}` 的开场声明，批次身份仍由「PROGRESS 声明 + session 文件名 + finalize digest」三面表达。
+2. **digest 不证明审查充分性**：它只证明「finalize 记录的字节 = 提交的字节」。`verify-anchor` 仍只验锚点可达（RULE-1 的边界不变），语义正确性不在任何机械门禁的可证范围内。
+3. **JSONL 无哈希链**：session 行本身可被改写而 digest 不可检出（承附录 D.1 报告 §7 同项不确定，未在本批处理）。
+4. **maintenance 模式不校验 digest**：仅空白改动的语义面为零，且 P≥129 的维护模式已要求完整链；但字节确实变了 ⇒ 其后同批 strict 提交须 rebind。这是**明示代价**，不是静默豁免。
+5. **跨批 rebind 原因不作要求**（R2 的取舍）；若未来出现「跨批同改且无新 P 行」的真实形态，须另立裁决而非默认沿用。
+
+### 12.6 回退
+
+`EVIDENCE_MIN_P` 置哨兵值 **9999**（大于全部现存 P）⇒ 校验整体降为观察（`digest_bound` 不再输出、无红），其余行为零变更；`--doc-digest` 生成侧保留可用。不涉及 runner / session schema / hook 配置的回退。
+
+## 13. 参考文献
 
 按第一作者 / 机构字母序；括号内为本次核验状态。
 
