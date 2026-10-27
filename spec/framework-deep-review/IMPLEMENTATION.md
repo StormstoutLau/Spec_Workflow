@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.7
+version: 1.8
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -21,6 +21,7 @@ upstream: null
 > **修订**: v1.5（2026-10-27，P-139：P1-1 真实 runner 集成回归（§3.9）——触发面补 runner + `tests/harness.py` + 集成 10 例 + 变异 4 例，`unittest discover` 36 → 50）
 > **修订**: v1.6（2026-10-27，P-140：CI 逐提交遍历（§3.10）——`rev-list --reverse` + `checkout -f` + 执行器能力分派 + 合并提交跳过；`test_ci_per_commit_walk` 5 断言；零脚本行为变更）
 > **修订**: v1.7（2026-10-28，P-141：CI 远端读数回填——§3.10 补远端首次实测读数；实施面零变更）
+> **修订**: v1.8（2026-10-28，P-142：`push(main)` 合并面读数回填——§3.10 补真实合并提交走查读数；实施面零变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -413,7 +414,7 @@ CLI：`--doc-digest FEATURE`（`action="append"`，可重复）⇒ 打印 `{algo
 
 - 不引入第三方 changed-files action（CVE-2025-30066 先例，P-130）；路径过滤全由 `git diff --name-only -- 'spec/**' …` 完成；
 - 不重复 checkout 同一提交（`rev-list` 天然去重）；合并/根/空集三条分支在任何 git 操作前短路；
-- 实测 16 提交全走查 **8.95 s**（含 6 次历史 runner 子进程），相对同 job 的 `unittest discover`（39.6 s 量级）可忽略；**远端复验（P-141 回填）= run `40579430749` 的 verify job 1m30s 全绿**（8 step 全过）。
+- 实测 16 提交全走查 **8.95 s**（含 6 次历史 runner 子进程），相对同 job 的 `unittest discover`（39.6 s 量级）可忽略；**远端复验（P-141 回填）= run `40579430749` 的 verify job 1m30s 全绿**（8 step 全过）；**`push(main)` 合并面（P-142 回填）= run `40585936395`：merge `adfec33` 被 skip、受判 18 个、墙钟 68 s 全绿**（8 step 全过）。
 
 #### 形态 guard（`tests/test_runner_integration.py::test_ci_per_commit_walk`）
 
