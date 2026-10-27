@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.6
+version: 1.7
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -20,6 +20,7 @@ upstream: null
 > **修订**: v1.4（2026-10-27，P-137：U-10 C 实施设计（§12）——内容 digest 绑定：finalize 时点 / per-batch 作用域 / rebind 留因 / `EVIDENCE_MIN_P=137` / `--doc-digest` 生成侧；不改 runner schema）
 > **修订**: v1.5（2026-10-27，P-139：P1-1 真实 runner 集成回归设计（§13）——触发面补 runner + 集成用例 + 四类变异体 + 不变式 I-10；零行为变更）
 > **修订**: v1.6（2026-10-27，P-140：CI 逐提交判定面（§14）——逐提交变更集 + 执行器随提交 + 合并提交跳过 + 不变式 I-11a~c；零脚本行为变更）
+> **修订**: v1.7（2026-10-28，P-141：CI 远端读数回填——§14.6 补远端首次实测〔run `40579430749` / verify 1m30s 全绿〕；设计面零变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -453,7 +454,7 @@ M1 删除完整链检查 / M2 改回静态最新 P / M3 吞掉 gate 硬失败 / 
 
 | 风险 | 缓解 |
 |---|---|
-| 逐提交 checkout 拖慢 CI | 实测 **8.95 s**（16 提交全走查，含 6 次历史 runner 子进程）；同 job 的 `unittest discover` 为 39.6 s 量级 |
+| 逐提交 checkout 拖慢 CI | 实测 **8.95 s**（16 提交全走查，含 6 次历史 runner 子进程）；同 job 的 `unittest discover` 为 39.6 s 量级；**远端首次实测（P-141 回填）= run `40579430749` verify job 1m30s 全绿** |
 | 历史执行器本身有缺陷 | 同判定面优先：本地当时即如此判定；新规则只对**新提交**生效，不回判历史 |
 | evil merge 内容不被覆盖 | U-11 登记；由 `push(main)` 走查 + 同 job 其余四道全量校验兜底 |
 | checkout 后工作树与 PR 头不一致 | `trap ... EXIT` 恢复 `HEAD_SHA`；后续 step 沿用原工作树 |
