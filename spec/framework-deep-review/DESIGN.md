@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.5
+version: 1.6
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -19,6 +19,7 @@ upstream: null
 > **修订**: v1.3（2026-10-26，P-134：U-10 F 实施注记（§8）——CI step-enforce 段 fail-closed 化 + 两红边；C 留 P-135 候选）
 > **修订**: v1.4（2026-10-27，P-137：U-10 C 实施设计（§12）——内容 digest 绑定：finalize 时点 / per-batch 作用域 / rebind 留因 / `EVIDENCE_MIN_P=137` / `--doc-digest` 生成侧；不改 runner schema）
 > **修订**: v1.5（2026-10-27，P-139：P1-1 真实 runner 集成回归设计（§13）——触发面补 runner + 集成用例 + 四类变异体 + 不变式 I-10；零行为变更）
+> **修订**: v1.6（2026-10-27，P-140：CI 逐提交判定面（§14）——逐提交变更集 + 执行器随提交 + 合并提交跳过 + 不变式 I-11a~c；零脚本行为变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -404,4 +405,59 @@ M1 删除完整链检查 / M2 改回静态最新 P / M3 吞掉 gate 硬失败 / 
 
 **回退**：删 `tests/harness.py` / `tests/test_runner_integration.py` / `tests/test_runner_mutation.py` + 还原 `blackbox-tests.files` 一行 ⇒ 逐字节回到 P-138 后状态。
 
-**Review 签字**: 单 Agent 自查（单视角） 日期: 2026-10-26
+## 14. CI 逐提交判定面（P-140）
+
+### 14.1 设计目标与职责边界
+
+目标：让 CI 的 step-enforce 段的**变更集构造**与本地逐提交语义一致——每个非合并提交只对该提交自身的变更负责，且判定所用执行器 = 该提交所在时点的版本（RESEARCH §14.1 的两条假红面均由此消失）。
+
+**职责内**：`.github/workflows/ci.yml` 的 step-enforce 段构造方式；一条形态 guard 测试。
+**职责外**：不改 `step_enforce` / `spec_map` / `spec_runner` 任何行为；不改其他 CI step；不重写历史（P-127 的数据缺口按**新提交补数据**处理，不动历史提交）。
+
+### 14.2 判定面定义
+
+| 维度 | 本地 hook | CI（本设计） |
+|---|---|---|
+| 变更集 | 本次提交的 staged 集（`--cached` + 未跟踪） | `git rev-list --reverse BASE..HEAD` 逐提交，再按 `C^ → C` 求路径过滤后的文件集 |
+| 旧 PROGRESS | `HEAD`（提交前） | 该提交的父提交 ref（`--base C^`） |
+| 执行器 | 工作树当前版本（= 该提交自身版本） | **该提交自身版本**（checkout 到 C 后运行仓内脚本） |
+| 合并提交 | 不适用（本地不产生） | 显式跳过（变更 = 父提交并集） |
+| 失败语义 | exit 非 0 阻断提交 | 任一提交 exit 非 0 ⇒ step 失败（`set -eo pipefail`） |
+
+### 14.3 不变式
+
+| # | 不变式 | 验证 |
+|---|---|---|
+| I-11a | **逐提交 = 单一变更集**：每个非合并提交只按自身 diff 判定，绝不把分支并集当作一个提交 | A-46 真实历史 16 提交；合成 merge 实验 |
+| I-11b | **执行器随提交**：判定所用门禁脚本取该提交自身版本（无 `--base` 的旧版按原调用约定分派） | 对照实验：HEAD 版执行器复验 P-127 提交 ⇒ 红 |
+| I-11c | **合并提交显式跳过**：`git rev-list --parents -n 1` 词数 > 2 即跳过并打印原因 | 合成 merge：17 条中 1 skip、16 受判 |
+
+### 14.4 控制流
+
+1. 取 `BASE`（PR = `base.sha`；push = `before`；零/缺 ⇒ `HEAD^` 回退，仍缺 ⇒ `HEAD`）；
+2. `git rev-list --reverse BASE..HEAD` 取有序提交表（失败 ⇒ exit 1，fail-closed）；
+3. 逐提交：合并提交跳过 → 根提交跳过 → `git checkout -f C` → 取 `C^` 与路径过滤后的变更文件（失败 ⇒ exit 1）→ 空集跳过 → 按 `scripts/step_enforce.py` 是否声明 `--base` 分派调用；
+4. `trap` 保证 step 结束恢复 `HEAD`（同 job 后续 step 仍在 PR 头工作树上运行）；
+5. 结束打印受判提交数（观测面，不参与判定）。
+
+### 14.5 替代方案
+
+| 方案 | 判定 | 理由 |
+|---|---|---|
+| A. HEAD 版执行器 + 逐提交 | 否决 | 追溯施加当时不存在的新规则（P-127 提交在 P-130 规则下变红 = A-46 对照实验） |
+| B. 保留 `BASE...HEAD` + 补 P-127 数据 | 否决 | 跨批 digest 面仍在（A-45 ②） |
+| C. 只判末提交 | 否决 | 中间批次的声明与 digest 失去校验 |
+| D. 按 `spec/<feature>` 目录聚合判定 | 否决 | 同一 feature 多批次共用目录（framework-deep-review = P-128~P-140），无法按目录回推批次 |
+
+### 14.6 风险与回退
+
+| 风险 | 缓解 |
+|---|---|
+| 逐提交 checkout 拖慢 CI | 实测 **8.95 s**（16 提交全走查，含 6 次历史 runner 子进程）；同 job 的 `unittest discover` 为 39.6 s 量级 |
+| 历史执行器本身有缺陷 | 同判定面优先：本地当时即如此判定；新规则只对**新提交**生效，不回判历史 |
+| evil merge 内容不被覆盖 | U-11 登记；由 `push(main)` 走查 + 同 job 其余四道全量校验兜底 |
+| checkout 后工作树与 PR 头不一致 | `trap ... EXIT` 恢复 `HEAD_SHA`；后续 step 沿用原工作树 |
+
+**回退**：还原 ci.yml 的 step-enforce 段 ⇒ 回到 P-139 后状态（其余面零改动）。
+
+**Review 签字**: 单 Agent 自查（单视角） 日期: 2026-10-27

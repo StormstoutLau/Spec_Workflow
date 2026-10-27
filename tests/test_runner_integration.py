@@ -7,7 +7,9 @@
   - `verify-anchor` 两态：真实锚点 / 文件缺失硬红（+ `--detail` 逐锚点）；
   - `fork` 前缀复制（写路径只在 temp 仓）；
   - `anchor-audit`（J2⊆J1 守门）/ `backflow-audit`（零待处理）；
-  - **门禁面 parity guard**：本地 hook 触发面含 runner、CI 跑同一 `unittest discover`。
+  - **门禁面 parity guard**：本地 hook 触发面含 runner、CI 跑同一 `unittest discover`；
+  - **CI 逐提交面 guard（P-140）**：`rev-list --reverse` 逐提交 + 执行器取提交自身版本
+    （`--base` 能力探测）+ 合并提交跳过，且不再出现 `BASE...HEAD` 单次 diff 形态。
 
 纪律：真实 runner + 临时仓 + `SR_SESSIONS_DIR` / `SR_REWORK_REGISTRY` 注入；零写入真实仓。
 """
@@ -113,6 +115,20 @@ class RunnerIntegrationTest(unittest.TestCase):
         ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         self.assertIn("python -m unittest discover -s tests", ci,
                       "CI 未跑与本地同一 unittest discover ⇒ 同一变异体判定面不一致")
+
+    def test_ci_per_commit_walk(self):
+        """P-140：CI step-enforce 须逐提交遍历（回归 `BASE...HEAD` 单次 diff）。"""
+        ci = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        self.assertIn("git rev-list --reverse", ci,
+                      "CI 未逐提交遍历 ⇒ 整条分支被塞进单一变更集（P-127 类结构性假红）")
+        self.assertIn("git checkout -q -f", ci,
+                      "CI 未 checkout 到各提交 ⇒ 判定用的工作树内容与提交不一致")
+        self.assertIn("""grep -q 'add_argument("--base"'""", ci,
+                      "CI 未按提交自身版本分派执行器 ⇒ 拿新规则追溯判处历史内容")
+        self.assertIn('echo "step-enforce: skip merge commit', ci,
+                      "CI 未跳过合并提交 ⇒ 其 diff = 父提交并集，重新引入单次 diff 假红")
+        self.assertNotIn('"$BASE"...HEAD', ci,
+                         "CI 仍存在 `BASE...HEAD` 单次 diff 形态（P-127 假红成因）")
 
 
 if __name__ == "__main__":

@@ -49,12 +49,19 @@ jobs:
         run: python scripts/repo_stats.py
       - name: 派生视图与源一致（console-gen --check）
         run: python scripts/console_gen.py --check
-      # P-130（U-1 O3 Phase 1）：从「全量四文档」改为 merge-base 变更集；
+      # P-130（U-1 O3 Phase 1）：从「全量四文档」改为变更集；
       # 不使用第三方 changed-files action（CVE-2025-30066），路径过滤由 git 自身完成。
       # P-134（U-10 F）：fail-closed 化——移除 fail-open 短路容错，git diff 失败显式 exit 1；
       # `set -eo pipefail` 为自文档化冗余（shell: bash 官方默认已含 -eo pipefail）；
-      # 根提交/孤儿分支回退 BASE=HEAD（三点空 diff ⇒ 显式绿灯，不崩溃）；force-push 非祖先 base ⇒ 红（有意 fail-closed）。
-      - name: 决策流批次强制（step-enforce，merge-base 变更集）
+      # 根提交/孤儿分支回退 BASE 取不到父提交（显式绿灯，不崩溃）；force-push 非祖先 base ⇒ 红（有意 fail-closed）。
+      # P-140（P-127 假红 + digest 跨批冲突）：**逐提交遍历**替代 `BASE...HEAD` 单次 diff。
+      # 本地门禁语义 = 「每个提交各自声明自己那一批」；单次 diff 把整条分支的所有批次塞进一个
+      # 变更集（实测 PR #58：declared = P-125..P-139 共 15 条 ⇒ P-127 无链接行被重复点名），
+      # 且 P-137/P-138 的 digest 绑定各自批次字节、与 PR 头必然不等 ⇒ 结构性假红。
+      # 同判定面（I-11）= **该提交的内容 × 该提交所在时点的门禁版本**：拿 HEAD 版门禁复验历史
+      # 内容属于「追溯施加当时不存在的新规则」（实测：P-127 提交在 P-130 新增的「声明须有
+      # feature 链接」规则下变红 = 另一类结构性假红），故执行器取提交自身版本。
+      - name: 决策流批次强制（step-enforce，逐提交）
         shell: bash
         run: |
           set -eo pipefail
@@ -64,21 +71,50 @@ jobs:
             BASE="${{ github.event.before }}"
           fi
           if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
-            if git rev-parse --verify --quiet "HEAD^" >/dev/null 2>&1; then
-              BASE="HEAD^"
-            else
-              BASE="HEAD"
-            fi
+            BASE="$(git rev-parse --verify --quiet HEAD^ || true)"
+            [ -n "$BASE" ] || BASE="$(git rev-parse HEAD)"
           fi
-          if ! FILES=$(git diff --name-only "$BASE"...HEAD -- 'spec/**' 'tools/spec_runner/sessions/**' 'docs/PROGRESS.md'); then
-            echo "step-enforce: git diff failed for base $BASE (fail-closed)" >&2
+          HEAD_SHA="$(git rev-parse HEAD)"
+          trap 'git checkout -q -f "$HEAD_SHA"' EXIT
+          if ! COMMITS=$(git rev-list --reverse "$BASE..HEAD"); then
+            echo "step-enforce: git rev-list failed for base $BASE (fail-closed)" >&2
             exit 1
           fi
-          if [ -n "$FILES" ]; then
-            python scripts/step_enforce.py --base "$BASE" $FILES
-          else
-            echo "step-enforce: no changed gate files"
+          if [ -z "$COMMITS" ]; then
+            echo "step-enforce: no commits in range $BASE..HEAD"
+            exit 0
           fi
+          n=0
+          for C in $COMMITS; do
+            # 合并提交的变更 = 其父提交的并集（逐父已被本循环覆盖）；对它求 diff 会把整条分支
+            # 塞回单一变更集 ⇒ 结构性假红。显式跳过（残留 = evil merge 内容不被本步覆盖）。
+            if [ "$(git rev-list --parents -n 1 "$C" | wc -w)" -gt 2 ]; then
+              echo "step-enforce: skip merge commit $C（变更 = 父提交并集）"
+              continue
+            fi
+            PARENT="$(git rev-parse --verify --quiet "$C^" || true)"
+            if [ -z "$PARENT" ]; then
+              echo "step-enforce: root commit $C（无父提交，显式跳过）"
+              continue
+            fi
+            git checkout -q -f "$C"
+            if ! FILES=$(git diff --name-only "$PARENT" "$C" -- 'spec/**' 'tools/spec_runner/sessions/**' 'docs/PROGRESS.md'); then
+              echo "step-enforce: git diff failed for $C (fail-closed)" >&2
+              exit 1
+            fi
+            if [ -z "$FILES" ]; then
+              continue
+            fi
+            n=$((n + 1))
+            echo "step-enforce: commit $C"
+            # 执行器 = 该提交自身版本（P-130 前的版本无 `--base`，按其原调用约定运行）
+            if grep -q 'add_argument("--base"' scripts/step_enforce.py; then
+              python scripts/step_enforce.py --base "$PARENT" $FILES
+            else
+              python scripts/step_enforce.py $FILES
+            fi
+          done
+          echo "step-enforce: 逐提交遍历完成，受判提交 $n 个（range $BASE..$HEAD_SHA）"
 
       # ── 内嵌自测（齐平 + 自测档：把回归面也纳入远端）────────────────────
       - name: 内嵌自测（六件）

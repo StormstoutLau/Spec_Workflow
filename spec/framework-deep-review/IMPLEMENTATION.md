@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.5
+version: 1.6
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -19,6 +19,7 @@ upstream: null
 > **修订**: v1.3（2026-10-26，P-134：ci.yml step-enforce 段 fail-closed 化（§3.7）+ 本地注入 5 例 + §2.3/§8.1 变更面同步）
 > **修订**: v1.4（2026-10-27，P-137：U-10 C 实施（§3.8）——digest 生成 / 校验 + `--doc-digest` + 8 例注入，批次绑定测试 20 → 28）
 > **修订**: v1.5（2026-10-27，P-139：P1-1 真实 runner 集成回归（§3.9）——触发面补 runner + `tests/harness.py` + 集成 10 例 + 变异 4 例，`unittest discover` 36 → 50）
+> **修订**: v1.6（2026-10-27，P-140：CI 逐提交遍历（§3.10）——`rev-list --reverse` + `checkout -f` + 执行器能力分派 + 合并提交跳过；`test_ci_per_commit_walk` 5 断言；零脚本行为变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -66,10 +67,10 @@ scripts/spec_map.py                    # + parse_progress_rows / changed_pids
 scripts/step_enforce.py                # 重写为 O3 解析器；P-137：+ doc_digest / verify_digests / --doc-digest
 tests/test_batch_binding.py            # 新增：真实 runner + git 集成测试（P-137：20 → 28）
 tests/harness.py                       # P-139：临时仓 + 脚本副本 + env 注入共享夹具
-tests/test_runner_integration.py       # P-139：真实 runner 10 例（step-gate / verify-anchor / fork / 两审计 / parity）
+tests/test_runner_integration.py       # P-139：真实 runner 10 例（step-gate / verify-anchor / fork / 两审计 / parity）；P-140：+ CI 逐提交 guard
 tests/test_runner_mutation.py          # P-139：四类变异体 guard proof
 .pre-commit-config.yaml                # step-enforce files 扩到 session + PROGRESS；P-139：blackbox files 补 runner
-.github/workflows/ci.yml               # checkout fetch-depth 0 + 变更集 step-enforce；P-134 fail-closed 化
+.github/workflows/ci.yml               # checkout fetch-depth 0 + 变更集 step-enforce；P-134 fail-closed 化；P-140 逐提交遍历
 tools/spec_runner/spec_runner.py       # P-132：step-gate 显式 --expect / --legacy + selftest F80/F81
 tools/spec_runner/README.md            # P-132：CLI 声明面 + selftest 83 项
 spec/framework-deep-review/
@@ -388,6 +389,35 @@ CLI：`--doc-digest FEATURE`（`action="append"`，可重复）⇒ 打印 `{algo
 
 **读数**：新增 **14/14 PASS**；全套 `unittest discover` **36 → 50**；增量 **8.7 s**（全套 39.6 s）；`pre-commit run blackbox-tests --files tools/spec_runner/spec_runner.py` = **Passed**（触发面实证）。
 
+### 3.10 CI 逐提交遍历（P-140 / U-11 前置）
+
+#### 职责
+
+把 CI step-enforce 的变更集构造从「`BASE...HEAD` 一次 diff」改为「**逐提交** `C^ → C`」，使远端判定面与本地 hook 的逐提交语义一致（DESIGN §14.2 / I-11a~c），并消除两类结构性假红（RESEARCH §14.1）。
+
+#### 实施要点
+
+| # | 要点 | 位置 |
+|---|---|---|
+| 1 | `BASE` 取法沿用（PR = `base.sha` / push = `before`；零或缺失 ⇒ `HEAD^` 回退，仍缺 ⇒ `HEAD`） | step 前段 |
+| 2 | `COMMITS=$(git rev-list --reverse "$BASE..HEAD")`；取表失败 ⇒ `exit 1`（fail-closed） | 同上 |
+| 3 | 合并提交跳过：`git rev-list --parents -n 1 "$C"` 词数 > 2（变更 = 父提交并集） | 循环头 |
+| 4 | 根提交跳过（无 `C^`）；`git checkout -q -f "$C"` 后按 `C^ → C` 求路径过滤集（失败 ⇒ exit 1） | 循环体 |
+| 5 | 空变更集跳过（不调门禁，计数不加） | 循环体 |
+| 6 | **执行器能力分派**：`grep -q 'add_argument("--base"' scripts/step_enforce.py` ⇒ 传 `--base "$PARENT"`；否则按原调用约定（P-130 前版本无 `--base`） | 循环体 |
+| 7 | `trap 'git checkout -q -f "$HEAD_SHA"' EXIT`：step 结束恢复 PR 头，后续 step 不受影响 | step 头 |
+| 8 | `echo` 受判提交数（观测面，不参与判定） | step 尾 |
+
+#### 低效操作排除
+
+- 不引入第三方 changed-files action（CVE-2025-30066 先例，P-130）；路径过滤全由 `git diff --name-only -- 'spec/**' …` 完成；
+- 不重复 checkout 同一提交（`rev-list` 天然去重）；合并/根/空集三条分支在任何 git 操作前短路；
+- 实测 16 提交全走查 **8.95 s**（含 6 次历史 runner 子进程），相对同 job 的 `unittest discover`（39.6 s 量级）可忽略。
+
+#### 形态 guard（`tests/test_runner_integration.py::test_ci_per_commit_walk`）
+
+5 断言：含 `git rev-list --reverse`、含 `git checkout -q -f`、含 `--base` 能力探测、含 `skip merge commit`、**不含** `"$BASE"...HEAD`（回归单次 diff 形态）。只读文本，不执行 CI。
+
 ## 4. 接口实施
 
 ### 4.1 `parse_progress_rows`
@@ -586,6 +616,13 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 - 测试: 新增 14/14 PASS；`python -m unittest discover -s tests` 36 → 50；`selftest` 83/83 零回归
 - 触发面自证: `pre-commit run blackbox-tests --files tools/spec_runner/spec_runner.py` → Passed
 
+### Step 8: CI 逐提交遍历（P-140）
+
+- 文件: `.github/workflows/ci.yml` / `docs/PROGRESS.md`（P-127 行补 feature 链接）/ `tests/test_runner_integration.py`
+- 内容: step-enforce 段改为 `rev-list --reverse` 逐提交 + `git checkout -f` + 执行器能力分派 + 合并提交跳过 + `trap` 恢复
+- 数据: P-127 行补 `spec/graph-structure-upgrade/` 链接（全表唯一无 feature 链接的行；派生视图零变化）
+- 测试: `test_ci_per_commit_walk` 5 断言；真实历史 16 提交走查 `EXIT=0`（含 P-137/P-138/P-139 `digest_bound=1`）
+
 ---
 
-**Review 签字**: 单 Agent 自查（单视角） 日期: 2026-10-26
+**Review 签字**: 单 Agent 自查（单视角） 日期: 2026-10-27
