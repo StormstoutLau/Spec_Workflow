@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.9
+version: 1.10
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -23,6 +23,7 @@ upstream: null
 > **修订**: v1.7（2026-10-28，P-141：CI 远端读数回填——§3.10 补远端首次实测读数；实施面零变更）
 > **修订**: v1.8（2026-10-28，P-142：`push(main)` 合并面读数回填——§3.10 补真实合并提交走查读数；实施面零变更）
 > **修订**: v1.9（2026-10-28，P-143：`push(main)` 补充读数——§3.10 补第 2 样本读数；实施面零变更）
+> **修订**: v1.10（2026-10-28，P-144：**U-11 合并面关闭**——§3.11 新增 `step_enforce --check-merge` + CI 阶段 1 + 4 例测试；`unittest discover` 51 → 55）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -419,7 +420,43 @@ CLI：`--doc-digest FEATURE`（`action="append"`，可重复）⇒ 打印 `{algo
 
 #### 形态 guard（`tests/test_runner_integration.py::test_ci_per_commit_walk`）
 
-5 断言：含 `git rev-list --reverse`、含 `git checkout -q -f`、含 `--base` 能力探测、含 `skip merge commit`、**不含** `"$BASE"...HEAD`（回归单次 diff 形态）。只读文本，不执行 CI。
+5 断言：含 `git rev-list --reverse`、含 `git checkout -q -f`、含 `--base` 能力探测、含 `skip merge commit`、**不含** `"$BASE"...HEAD`（回归单次 diff 形态）。只读文本，不执行 CI（P-144 追加第 6 断言：CI 含 `--check-merge`）。
+
+### 3.11 evil merge 检测（P-144 / U-11）
+
+**代码面（1 文件）**：`scripts/step_enforce.py`
+
+| 项 | 内容 |
+|---|---|
+| 常量 | `JUDGED_PATHS = ("spec/**", "tools/spec_runner/sessions/**", "docs/PROGRESS.md")` —— 与 CI 逐提交过滤同口径（单一实现） |
+| 纯函数 | `_parents(sha)` / `_same(ref_a, ref_b, path)`（`git diff --quiet`：0=同 / 1=异 / 其它=None） |
+| 入口 | `check_merge(sha)` —— 非合并 ⇒ exit 0（打印说明）；逐受判路径比较两父，**两父皆无** ⇒ 打印路径 + exit 1；git 失败 ⇒ exit 2（fail-closed） |
+| CLI | `--check-merge <COMMIT>`（子命令式，与 `--doc-digest` 并列；两者互斥） |
+
+**CI 面（1 文件）**：`.github/workflows/ci.yml` 的 step-enforce 段新增**阶段 1**（先于逐提交循环、零 checkout）：
+
+```bash
+for C in $COMMITS; do
+  if [ "$(git rev-list --parents -n 1 "$C" | wc -w)" -gt 2 ]; then
+    python scripts/step_enforce.py --check-merge "$C"
+  fi
+done
+```
+
+- 阶段 1 只读 git 对象、不动工作树 ⇒ 与阶段 2（逐提交 checkout）无耦合；
+- 逐提交循环对 merge 的 `skip` 保留（其并集 diff 仍是假红面），注释改为「evil 内容已由阶段 1 兜底」；
+- 执行器取 CI 自身 checkout（新规则前向生效）；删旗标 ⇒ argparse exit 2 ⇒ 红（无静默旁路）。
+
+**测试面（1 文件 4 例）**：`tests/test_runner_integration.py`
+
+| 用例 | 断言 |
+|---|---|
+| `test_evil_merge_detected` | 冲突解决写入两父皆无内容 ⇒ exit 1 + stderr 含路径 |
+| `test_clean_merge_passes` | 两侧改不同文件 ⇒ exit 0 + `无 evil 内容` |
+| `test_merge_equals_first_parent_passes` | 受判路径 = 第一父 ⇒ exit 0 + `0 个受判路径` |
+| `test_check_merge_non_merge_commit_is_noop` | 非合并 ⇒ exit 0 + `非合并提交` |
+
+**读数（E1）**：新增 **4/4 PASS**；`unittest discover` **51 → 55**；实验仓交叉验证 `--check-merge <M>` → exit 1、`<C2>` → exit 0（A-49/A-50）。
 
 ## 4. 接口实施
 
