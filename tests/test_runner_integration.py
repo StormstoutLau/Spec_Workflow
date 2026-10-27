@@ -10,18 +10,29 @@
   - **门禁面 parity guard**：本地 hook 触发面含 runner、CI 跑同一 `unittest discover`；
   - **CI 逐提交面 guard（P-140）**：`rev-list --reverse` 逐提交 + 执行器取提交自身版本
     （`--base` 能力探测）+ 合并提交跳过，且不再出现 `BASE...HEAD` 单次 diff 形态。
+  - **evil merge 检测（P-144 / U-11）**：`--check-merge` 四态——冲突解决写入两父皆无的内容
+    ⇒ exit 1；干净合并 / 受判路径等于第一父 / 非合并提交 ⇒ exit 0（不产生并集假红）。
 
 纪律：真实 runner + 临时仓 + `SR_SESSIONS_DIR` / `SR_REWORK_REGISTRY` 注入；零写入真实仓。
 """
 from __future__ import annotations
 
 import shutil
+import subprocess
 import unittest
 from pathlib import Path
 
-from tests.harness import REPO_ROOT, STEPS, make_repo, run_cli, write_session
+from tests.harness import (REPO_ROOT, STEPS, git, make_repo, run_cli, write,
+                           write_session)
 
 RUNNER_REL = "tools/spec_runner/spec_runner.py"
+STEP_ENFORCE_REL = "scripts/step_enforce.py"
+
+
+def _commit(root: Path, msg: str) -> str:
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "-m", msg)
+    return git(root, "rev-parse", "HEAD").stdout.strip()
 
 
 class RunnerIntegrationTest(unittest.TestCase):
@@ -129,6 +140,66 @@ class RunnerIntegrationTest(unittest.TestCase):
                       "CI 未跳过合并提交 ⇒ 其 diff = 父提交并集，重新引入单次 diff 假红")
         self.assertNotIn('"$BASE"...HEAD', ci,
                          "CI 仍存在 `BASE...HEAD` 单次 diff 形态（P-127 假红成因）")
+        self.assertIn("--check-merge", ci,
+                      "CI 未接 evil merge 检测 ⇒ 合并提交中两父皆无的内容永久逃逸（U-11）")
+
+    # ----------------------------------------------- evil merge（P-144 / U-11）
+
+    def test_evil_merge_detected(self):
+        """冲突解决写入两父皆无的语义内容 ⇒ --check-merge exit 1（U-11 逃逸口）。"""
+        rel = "spec/demo/RESEARCH.md"
+        base = git(self.root, "rev-parse", "HEAD").stdout.strip()
+        mainb = git(self.root, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        write(self.root, rel, "# 1. Demo\n\nline main\n")
+        _commit(self.root, "main side")
+        git(self.root, "checkout", "-q", "-b", "feat", base)
+        write(self.root, rel, "# 1. Demo\n\nline feat\n")
+        _commit(self.root, "branch side")
+        with self.assertRaises(subprocess.CalledProcessError):
+            git(self.root, "merge", mainb, "-m", "auto merge")
+        write(self.root, rel, "# 1. Demo\n\nline evil\n")   # 两父皆无
+        merge = _commit(self.root, "merge with evil resolution")
+        r = run_cli(self.root, STEP_ENFORCE_REL, "--check-merge", merge)
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertIn("evil merge 内容（两父皆无）", r.stderr)
+        self.assertIn(rel, r.stderr)
+
+    def test_clean_merge_passes(self):
+        """两侧改不同文件（无冲突）⇒ 合并结果等于某一父 ⇒ 不判。"""
+        base = git(self.root, "rev-parse", "HEAD").stdout.strip()
+        mainb = git(self.root, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        write(self.root, "spec/demo/RESEARCH.md", "# 1. Demo\n\nmain side\n")
+        _commit(self.root, "main side")
+        git(self.root, "checkout", "-q", "-b", "feat", base)
+        write(self.root, "spec/other/RESEARCH.md", "# 1. Other\n\nfeat side\n")
+        _commit(self.root, "branch side")
+        git(self.root, "merge", mainb, "-q", "-m", "clean merge")
+        sha = git(self.root, "rev-parse", "HEAD").stdout.strip()
+        r = run_cli(self.root, STEP_ENFORCE_REL, "--check-merge", sha)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("无 evil 内容", r.stdout)
+
+    def test_merge_equals_first_parent_passes(self):
+        """main 侧只改非受判文件 ⇒ 受判路径上合并结果 = 第一父 ⇒ 不判。"""
+        base = git(self.root, "rev-parse", "HEAD").stdout.strip()
+        mainb = git(self.root, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        write(self.root, "docs/rework-graph.json", '{"graph_version": "1.1"}\n')
+        _commit(self.root, "main side (non-judged path)")
+        git(self.root, "checkout", "-q", "-b", "feat", base)
+        write(self.root, "spec/demo/RESEARCH.md", "# 1. Demo\n\nfeat side\n")
+        _commit(self.root, "branch side")
+        git(self.root, "merge", mainb, "-q", "-m", "clean merge")
+        sha = git(self.root, "rev-parse", "HEAD").stdout.strip()
+        r = run_cli(self.root, STEP_ENFORCE_REL, "--check-merge", sha)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("0 个受判路径", r.stdout)
+
+    def test_check_merge_non_merge_commit_is_noop(self):
+        """非合并提交 ⇒ 直接放行（该面由逐提交循环负责）。"""
+        sha = git(self.root, "rev-parse", "HEAD").stdout.strip()
+        r = run_cli(self.root, STEP_ENFORCE_REL, "--check-merge", sha)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("非合并提交", r.stdout)
 
 
 if __name__ == "__main__":

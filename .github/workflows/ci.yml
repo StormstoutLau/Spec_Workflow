@@ -84,10 +84,21 @@ jobs:
             echo "step-enforce: no commits in range $BASE..HEAD"
             exit 0
           fi
+          # P-144（U-11）：合并提交的 evil 内容检测（阶段 1，先于逐提交判定）。
+          # 合并提交在下方循环被跳过（变更 = 父提交并集）；冲突解决时手写进来、两父皆无的
+          # 内容会因此**永久逃逸**（P-144 实测 A-49：同一内容走普通提交判红 exit 1，走合并
+          # 解决则循环 exit 0）。本段只判「同时不等于两父」的受判路径 ⇒ 干净合并不判，
+          # 不引入 P-140 那类并集假红。执行器取 CI 自身 checkout（新规则前向生效）。
+          for C in $COMMITS; do
+            if [ "$(git rev-list --parents -n 1 "$C" | wc -w)" -gt 2 ]; then
+              python scripts/step_enforce.py --check-merge "$C"
+            fi
+          done
+
           n=0
           for C in $COMMITS; do
             # 合并提交的变更 = 其父提交的并集（逐父已被本循环覆盖）；对它求 diff 会把整条分支
-            # 塞回单一变更集 ⇒ 结构性假红。显式跳过（残留 = evil merge 内容不被本步覆盖）。
+            # 塞回单一变更集 ⇒ 结构性假红。显式跳过（evil 内容已由上方阶段 1 检测兜底）。
             if [ "$(git rev-list --parents -n 1 "$C" | wc -w)" -gt 2 ]; then
               echo "step-enforce: skip merge commit $C（变更 = 父提交并集）"
               continue

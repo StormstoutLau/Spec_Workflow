@@ -15,6 +15,10 @@ U-10 C（P-137）：batch / session / branch 三种显式声明在 P ≥ `EVIDEN
 **即将提交的内容**逐字节一致（「验后改文档」由此判红）；同一 session 多次 finalize（rebind）
 时末次须带 `metadata.rebind_reason`。生成侧入口 = `--doc-digest <feature>`（唯一实现）。
 
+U-11（P-144）：合并提交（≥2 父）在 CI 逐提交循环里被跳过（变更 = 父提交并集），冲突解决时
+手写进来、两父皆无的内容（evil merge）因此永久逃逸。`--check-merge <commit>` 只判这类内容：
+受判路径上**同时不等于两父** ⇒ exit 1；等于任一父（干净合并）⇒ 不判（不引入并集假红）。
+
 只读零副作用。exit 0 = 通过；1 = 违规；2 = git / 映射错误（fail-closed）。
 """
 from __future__ import annotations
@@ -308,6 +312,70 @@ def _whitespace_only(docs: list[str], base: str | None) -> bool:
     return not (r.stdout or "").strip()
 
 
+# ---------------------------------------------------------------- U-11：evil merge 内容检测（P-144）
+# 受判路径集：与 CI 逐提交循环的 `git diff --name-only` 过滤完全一致
+# （合并面只在这三条路径上兜底；其余文件本就不进本门禁）。
+JUDGED_PATHS = ("spec/**", "tools/spec_runner/sessions/**", "docs/PROGRESS.md")
+
+
+def _parents(sha: str) -> list[str] | None:
+    """父提交列表；git 失败返回 None（调用方 fail-closed）。"""
+    r = _git(["rev-list", "--parents", "-n", "1", sha])
+    if r.returncode != 0:
+        return None
+    return (r.stdout or "").split()[1:]
+
+
+def _same(ref_a: str, ref_b: str, path: str) -> bool | None:
+    """该路径在两棵树中逐字节相同？git 失败返回 None（fail-closed）。"""
+    r = _git(["diff", "--quiet", ref_a, ref_b, "--", path])
+    if r.returncode == 0:
+        return True
+    if r.returncode == 1:
+        return False
+    return None
+
+
+def check_merge(sha: str) -> int:
+    """U-11 / P-144：合并提交的 evil 内容检测（只判逐提交通道覆盖不到的那部分）。
+
+    evil 定义（DESIGN §14.7）：合并结果在某受判路径上**同时不等于两个父提交**——
+    即冲突解决时手写进来、不属于任一父的变更。干净合并（等于任一父）不判，
+    故不产生 P-140 那类「并集当单一变更集」的结构性假红。
+    """
+    parents = _parents(sha)
+    if parents is None:
+        print(f"step-enforce: git error: 无法解析 {sha} 的父提交", file=sys.stderr)
+        return 2
+    if len(parents) < 2:
+        print(f"step-enforce: {sha} 非合并提交（跳过 evil 检测）")
+        return 0
+    p1, p2 = parents[0], parents[1]
+    r = _git(["diff", "--name-only", p1, sha, "--", *JUDGED_PATHS])
+    if r.returncode != 0:
+        print(f"step-enforce: git error: 无法计算 {p1}..{sha} 变更集", file=sys.stderr)
+        return 2
+    names = [x for x in (r.stdout or "").splitlines() if x.strip()]
+    evil: list[str] = []
+    for f in names:
+        eq1, eq2 = _same(p1, sha, f), _same(p2, sha, f)
+        if eq1 is None or eq2 is None:
+            print(f"step-enforce: git error: 无法比较 {f}", file=sys.stderr)
+            return 2
+        if eq1 or eq2:
+            continue                     # 等于任一父 ⇒ 干净合并（该父已被逐提交覆盖）
+        evil.append(f)
+    if not evil:
+        print(f"step-enforce: merge {sha} 无 evil 内容"
+              f"（{len(names)} 个受判路径均等于某一父）")
+        return 0
+    for f in evil:
+        print(f"step-enforce: evil merge 内容（两父皆无）: {f}", file=sys.stderr)
+    print(f"step-enforce: evil merge {sha} -> exit 1"
+          f"（该内容须由后续声明批次承载）", file=sys.stderr)
+    return 1
+
+
 def _resolve_declared(d: Decision, docs_features: set[str], rows: dict) -> None:
     allowed: set[str] = set()
     for pid in d.pids:
@@ -423,7 +491,13 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--doc-digest", action="append", default=None, metavar="FEATURE",
                     help="U-10 C：打印 feature 四文档 sha256 绑定块（粘贴进 finalize "
                          "metadata.evidence_digest；可重复指定 feature）")
+    ap.add_argument("--check-merge", metavar="COMMIT",
+                    help="U-11 / P-144：检测合并提交是否引入两父皆无的内容（evil merge；"
+                         "只判 spec/**、sessions、PROGRESS 三条受判路径）")
     args = ap.parse_args(argv)
+
+    if args.check_merge:
+        return check_merge(args.check_merge)
 
     if args.doc_digest:
         try:
