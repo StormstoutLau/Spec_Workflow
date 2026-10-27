@@ -1,7 +1,7 @@
 ---
 id: project-console-CHECKLIST
 type: design
-version: 1.19
+version: 1.20
 status: accepting
 date: 2026-09-11
 depends: [project-console-IMPLEMENTATION, project-console-DESIGN]
@@ -11,7 +11,7 @@ upstream: null
 # 验收清单：项目控制台实施批（P-043）/ 视图增补批（P-044）/ 承载与步骤表批（P-046）/ 锚点与映射收敛批（P-047，含收口修正批）
 
 > **Feature**: 项目控制台（`spec/project-console/`）
-> **被验收物**: [DESIGN v1.17](./DESIGN.md) + [IMPLEMENTATION v1.23](./IMPLEMENTATION.md)（**P-064 批的契约载体 = [`independent-verify DESIGN v1.4`](../independent-verify/DESIGN.md)**——锚点形态契约归属该 feature，同 C-29 / C-30 先例；**P-084 批落地面 = `scripts/console_gen.py` 单文件**——D19 / A-26 / DR-29）
+> **被验收物**: [DESIGN v1.18](./DESIGN.md) + [IMPLEMENTATION v1.24](./IMPLEMENTATION.md)（**P-064 批的契约载体 = [`independent-verify DESIGN v1.4`](../independent-verify/DESIGN.md)**——锚点形态契约归属该 feature，同 C-29 / C-30 先例；**P-084 批落地面 = `scripts/console_gen.py` 单文件**——D19 / A-26 / DR-29；**P-138 批落地面 = 同文件 `_status_compact`**——D22 / A-28 / I-13）
 > **Spec 步骤**: Step 7-8
 > **v1.1 变更（P-044）**: 新增功能验收 **F11-F15**（描述列 / 描述回退链 / per-feature 折叠与锚点 / 三口径架构图 / I-8 缺口清单）+ 不变式 **I-8** 行；§8 补 P-044 复跑记录；§9 回填 H6/H7 实测部分。
 > **v1.2 变更（P-046，用户指令「先执行 C-13 和 C-14，C-16 共享模块单独处理」）**: 新增功能验收 **F16**（hook 链列表块 + `name` + 安全化通则）/ **F17**（步骤级动态描述六列 + 多轮 + 无 session 显式缺失）+ 不变式 **I-9** 行；§8 补 P-046 复跑记录（含 **I-9 全表机械核对**）；§9 再回填 H6/H7；**C-15 / C-16 显式登记为「不在本批」**。
@@ -143,6 +143,7 @@ upstream: null
 | **F59** | **列头即状态行（计数承载）**（P-084 / C-41 / A-19）：三档列头 = 词 + **机械计数**（`len(bucket)`，声明 = 重数）+ DoR/DoD 两行形态（`**{tier}**（{n} 项）` + `> DoR：… · DoD：…`） | ✅ selftest **S51**（fixture 档位 **1/2/7**）+ 真机 `docs/CONSOLE.md` 三档列头 **0/0/0**（与 A-73 ④ 同读数）；A-26 ①③ |
 | **F60** | **DoR/DoD = 既有判据的档级重投影**（I-10 精神）：条件文案与 DESIGN §5 / §5.2 及 `derive_state` 分支逐条对齐，**静态契约不随数据漂移**；**limit / sum 不适用且不虚假声称** | ✅ selftest **S52**（三条 DoR 文案 + `· DoD：` 齐备）+ A-26 ④（同批订正 DESIGN §4 §1 行） |
 | **F61** | **开关态分流 + 默认态渲染面复验**：派生态下 Ready to Verify 第二进入支由 `_eff_status` 短路归 `done` ⇒ 该档 DoR 文案随开关态分流；**默认态**重生成后 `--check` 报「与源一致」 | ✅ selftest **S53**（默认态含第二支 / 派生态不含）+ `console_gen --check` **exit 0**；A-26 ②③ |
+| **F62** | **compact 当前状态块（P-138 / D.5 方案 D）**：`docs/CONSOLE.md` 头部新增 `## 当前状态（compact）` **5 行表**（在册批次状态分布 / 最近批次 / session 覆盖 / 行动队列 / feature 阶段分布）；**逐行纯机械派生、零判断性文案**；行动队列与 §1 三档**同源**（`derive_state` + `TIER_ORDER`）；**不新增 hook / 校验器 / 依赖** | ✅ selftest **S56**（五行逐值：`11（done 1 · pending 6 · in-progress 3 · blocked 1）` / `P-011 pending（2026-09-11）` / `4 个 P（最近 specwf-p006-20260911 · 2026-09-11T15:00:00+08:00）` / `Needs Attention 1 · Ready to Verify 2 · Recommended 7` / `4（调研 1 · 设计 0 · 实施 0 · 验收 0 · 未启动 3）`）+ 真机重生成后五行读数（A-28 ③）+ `--check` 一致；**回退 R-9**（删块与 S56 ⇒ 逐字节回到现状） |
 
 ## 3. 接口验收
 
@@ -166,6 +167,9 @@ upstream: null
 | **I-8** | **显式缺口**（P-044 新增） | selftest S24（未声明脚本清单）；空 import 边如实标「（无）」；缺映射保留 `—` | ✅ |
 | **I-9** | **承载安全**（P-046 新增） | selftest S32（竖线→全角 + 列数守恒）；真实仓全表扫描 **19 张 / 0 张列数不齐**；hook 正则已移出表格单元格 | ✅ |
 | **I-10** | **语义同源**（P-047 新增） | selftest S35（本模块不再暴露 `feature_pid_map`）+ 源码核对（两处均 `import spec_map`，无本地实现残留）；映射优先级单测（§9 优先 / PROGRESS 兜底 / 皆无空表） | ✅ |
+| **I-11** | **层定义全函数性与方向单调**（P-099 新增；**执行位点未激活**） | DESIGN §5.4 的 **13 例冻结矩阵**（归类 8 + 边 5）+ D20-5 覆盖上限；**本表仅登记契约**（零执行面） | ✅（判据面；P-099） |
+| **I-12** | **返工视图零边等价**（P-101 新增；§3.3 补登 = P-138） | selftest **S54**（有边 ⇒ `Needs Attention` 计数 1→2）+ **S55**（零边 ⇒ 无附加行） | ✅ |
+| **I-13** | **compact 块单点生成**（P-138 新增） | selftest **S56**（五行逐值断言）+ `--check` 一致 + 源码核对（块只由 `_status_compact` 产出、无 wall clock / git 读取） | ✅ |
 
 ## 5. 错误处理验收（DESIGN §7）
 
@@ -478,6 +482,8 @@ upstream: null
 
 ## 9. 后续行动
 
+- **U-9 compact 当前状态块——已实施（P-138，Layer-1 单文件）**：承 framework-deep-review [RESEARCH §10 U-9](../framework-deep-review/RESEARCH.md)（P-136 裁决：**否独立 SUMMARY.md**，采 **D.5 方案 D**「扩展现有生成视图」）⇒ `console_gen` 头部新增 **`## 当前状态（compact）` 5 行表**（[DESIGN §4.2](./DESIGN.md) D22 + **I-13** + **回退点 R-9** = `R-S1`）；**五行全机械派生**（`parse_progress` / `read_sessions` / `artifact_map`+`feature_stage` / `derive_state`+`TIER_ORDER`），**零判断性文案 / 零 wall clock**；selftest **57/57 → 58/58**（+S56）；**不新增 hook / 校验器 / 依赖**（并入既有 `console-gen` hook 与 `--check`）；**实施期发现** = DESIGN §3.3 不变式表缺 I-12 行（P-101 仅在 §5.5）⇒ 同批补登 I-12 + 新增 I-13，本 §4 表同步补 I-11/I-12/I-13 三行。**判据 ⑤（连续 3 批人工触点 ≤6 处）** = **待复测**（本轮为首批样本，触点读数 = 本批视图面 CODE_WIKI / PROGRESS / CONSOLE 3 文件；后续 2 批复测后回填）。
+
 - **§7.19 迭代调研回写机制三处缺口——待裁决项（Layer-0、零代码、本批只登记，P-042 v1.16）**：**判定 = 机制可实现且本仓已在运行**（§7.14~§7.18 连续五轮即活实例）。**三处缺口** = **A** 未决项未一等公民化（建议**四元登记块**：判据 / 触发条件 / 当前倾向 / 证据等级）/ **B** 无**多维度决策矩阵模板**（维度 = 成本·收益·可维护性·兼容·升级潜力·短期·长期；每格附**证据等级 + 读数日期**；格内含计数须 = 机械重数 ⇒ **R7 同构**）——**此件直击「避免随机选择」** / **C** 无**迭代收敛停止规则**（**净收敛纪律** + **Type-1/2 委派**）。**硬边界** = 三件全落 Layer-0、**零 Layer-1 位点 / 不加门禁**，且**可机械化仅「格齐全 / 证据等级非空 / 触发条件存在 / 引用完整」，绝不核结论正确性**（否则重犯 A-33 / DR-21 之病）。**实施须用户裁决后另立批**（可三件合批，或**仅取 B 单件**先试）。
 - **P0 批（V1a / V1a′ / V2a / P2a）——已实施（P-042 v1.17，Layer-1）**：四件全部落地（RESEARCH §7.20 / 附录 A-57 / 本 CHECKLIST F25~F29 实测 ✅）：① **V2a** 补建 4 条 session（P-048 / P-053 / P-054 / P-055，依 commit body + PROGRESS 回溯重建，首步明示【补建】）；② **V1a** 立项即登记纪律（`PROGRESS` L5）；③ **V1a′** 过渡期判据三件（`PROGRESS` L6，机械边界 = **P 编号 ≥ P-058**）；④ **P2a** `derive_state` 拆支（`pending` 无 session → `Recommended`；属**可见行为变更**，F28 真机四处位点对照已执行——**结果 = 真实仓四处均呈「无活动项」（零真机差异，A-55 预测成立）**，差异只能由 fixture S38~S41 观测，含 DR-23 第四处）。**验收完成**：selftest **41/41** + 4 条补建 session 门禁 4/4 全绿 + 幂等保持。**P2b 边界仍在**（下述）。
 - **DR-19 + DR-21 合并小批——已实施（P-042 v1.18，Layer-1）**：按 C-26 三前置全部落地——① **前置 Ⅰ 变量隔离实测**（F30：候选① 证伪 / 候选② 确认 / **新发现「前缀白名单只存在于 `ANCHOR_RE`」**）；② **前置 Ⅱ `--detail` 默认关闭**（F33）；③ **前置 Ⅲ 判定面零改动**（F34）。**交付三件** = DR-19 方向 B（`spec_runner.py` **1 文件**：`SessionParseError` + `_read_rows()` 报 `<路径>:<行号>`，**exit 码保持 1**；VERSION **1.3.0 → 1.4.0**）/ DR-21 方向 B(i)（`verify-anchor --detail`）/ DR-21 方向 B(ii)（契约登记落 [`spec/independent-verify/DESIGN.md`](../independent-verify/DESIGN.md) **v1.1 §4.1.1** 九例形态表 + 两处记述订正 + banner `状态` 对齐）。**验收完成**：selftest **43/43** + 三校验器全绿 + 门禁链全 exit 0 + 真机默认输出逐字节一致。
@@ -516,3 +522,4 @@ upstream: null
 **验收签字（P-042 v1.25 / B′ 采纳裁决回写 · Layer-0 登记批，**零代码**）**: 自查（`console_gen --selftest` **47/47**（零改动复跑一致）/ `spec_runner selftest` **47/47**（零改动复跑一致）/ 三校验器 **0 违规**（dc 声明 RESEARCH **67A+24B+36C+5H** 与机械重数一致 / m7 1 条 by-design P3 / repo P3 0）/ `step-enforce --pid P-042` **exit 0**（5/5 步，session `specwf-p042-20261001v4`）/ `verify-anchor` 锚点全真实 / **`scripts/` 与 `tools/`（除新增 session）零代码变更**）；**F52 实测 ✅**；**用户采纳 B′（维持开关关）已生效**（`derived` 仍默认 `False`）/ **U-7 关闭**（转重审闸门）/ **U-6 仍开但紧迫度下降**） 日期: 2026-10-01
 **验收签字（P-064 / `§` 编号空间收口 · Layer-1 实施轮）**: 自查（`spec_runner selftest` **54/54**（+F46~F52）/ 真机 `anchor-audit` **87 session / 618 锚点**（J1 匹配 **617** / J2 可解析 **611** / **`J2\J1` = 0** / `J1\J2` 分工面 **6** / 两处皆不支持 **1**）——**改前改后逐项一致** / **判定翻转 0 例** / 三校验器 **0 违规** / `step-enforce --pid P-064` **exit 0**（5/5 步，session `specwf-p064-20261001`）/ `verify-anchor` 锚点全真实 / **d 类偏离与既有命令 exit 码语义零改动** / `console_gen --selftest` **47/47**（零改动复跑））；**F53~F55 全部实测 ✅**；**新开 U-8 / U-9**） 日期: 2026-10-01
 **验收签字（P-084 / C-40 Layer-0 首项落地 · Layer-1 单文件微改）**: 自查（`console_gen --selftest` **52/52 → 55/55**（+S51~S53）/ `console_gen --check` **报「CONSOLE.md 与源一致」exit 0** / 三校验器 **0 违规**（dc 声明 RESEARCH **75A+29B+41C+5H**、本 IMPLEMENTATION **26A+6B+0C+0H** 与机械重数一致 / m7 1 条 by-design P3 / repo P3 0，`progress_tasks` 83 → **84**）/ `spec_runner selftest` **54/54**（零改动复跑）/ `step-enforce --pid P-084` **exit 0**（5/5 步，session `specwf-p084-20261010`）/ `verify-anchor` **9 锚点全真实** / **`PROGRESS` 状态列与三校验器零改动**（代码面 = `console_gen.py` 单文件））；**F59~F61 全部实测 ✅**；**新回退点 R-5**；**同批订正 DESIGN §4 §1 行 1 处**） 日期: 2026-10-10
+**验收签字（P-138 / U-9 compact 当前状态块 · Layer-1 单文件）**: 自查（`console_gen --selftest` **57/57 → 58/58**（+S56）/ `console_gen --check` **报「CONSOLE.md 与源一致」exit 0** / 三校验器 **0 违规**（dc 声明与本 IMPLEMENTATION §0 机械重数一致 / m7 1 条 by-design P3 / repo P3 0，`progress_tasks` 137 → **138**）/ `spec_runner selftest` **83/83**（零改动复跑）/ `step-enforce --pid P-138` **exit 0**（5/5 步，session `specwf-p138-20261027`）/ `verify-anchor` 锚点全真实 / **`PROGRESS` 状态列与三校验器零改动**（代码面 = `console_gen.py` 单文件））；**F62 实测 ✅**；**新回退点 R-9**；**实施期发现 2 项**（DESIGN §3.3 缺 I-12 行 ⇒ 同批补登 / I-13 新增） 日期: 2026-10-27

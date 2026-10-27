@@ -1,7 +1,7 @@
 ---
 id: project-console-IMPLEMENTATION
 type: design
-version: 1.23
+version: 1.24
 status: verified
 date: 2026-10-16
 depends: [project-console-DESIGN, board-generator-IMPLEMENTATION]
@@ -11,7 +11,7 @@ upstream: null
 # 实施文档：项目控制台多视图生成器与归属迁移（P-043）/ 视图增补（P-044）/ 承载与步骤表（P-046）/ 锚点与映射收敛（P-047，含收口修正批）
 
 > **Feature**: 项目控制台（`spec/project-console/`）
-> **设计依据**: [DESIGN v1.17](./DESIGN.md)（D1-D21 + I-1~I-11）
+> **设计依据**: [DESIGN v1.18](./DESIGN.md)（D1-D22 + I-1~I-13）
 > **Spec 步骤**: Step 5-6
 > **本批范围**: P-043 = 归属迁移（前身退役）+ 多视图扩展；**P-044 = 视图增补（描述列 / per-feature 流程 / 架构图口径）**；**P-046 = 承载修复与步骤级动态描述（hook 链表形态 / 步骤四字段）**；**P-047 = 锚点双属性（C-15）+ 映射来源语义反转与共享模块（C-16）+ 收口修正批（§6 缺映射清单 / 兜底面归零）**；**Layer-1 生成端派生视图 + hook 入口只读映射**
 > **v1.1 变更（P-044，用户指令「好的，按 C-9/C-10/C-12 落代码」）**: `scripts/console_gen.py` 增补 **D8 描述列**（`first_h1` / `shorten_title` / `feature_desc`）+ **D9 per-feature 流程**（`_feature_process_section`）+ **D10 架构图显式关系口径**（`_arch_section` + `DECLARED_SOURCES` / `TRUTH_NODES`）+ 新增不变式 **I-8**；selftest **16/16 → 27/27**；**C-11 不在本批**。
@@ -261,9 +261,15 @@ upstream: null
 
 **【A】A-27: P-101 U-9 实施批读数（E1，读数日期 2026-10-16）** = ① **实现面 = `scripts/console_gen.py` 单文件**——`read_forks` 改返**边对象列表**（`forks` 字段 = `new`；旧读 `name` 系隐患，本批就地订正）+ 新增 `fork_rewrite_pids`（`FORK_ORIGIN_PID_RE = ^specwf-(p\d{3})` → 边 `origin` 映射该 P 任务）+ `_tier_lines(tasks, sessions, derived, fork_pids=None)` 增**前置**分支（`t.pid in fork_pids` ⇒ `Needs Attention`「待重写 / 待重入」，**先于** `derive_state` 的 `done` 短路）+ `render` 调用点传 `fork_rewrite_pids(forks)` + 「⑂ fork / 支线」区改渲染 `f.get('new')`；② `console_gen --selftest` **55/55 → 57/57**（+**S54** 返工边 → `P-003` 进 `Needs Attention`〔计数 1→2〕/ **S55** 零返工边 ⇒ 无 U-9 附加行）；③ **零边等价（I-12 ①）** = U-9 分支**真机不触发**（真实仓 `forks=[]` ⇒ `fork_pids` 为空 ⇒ 三档队列**无**「待重写 / 待重入」条目；`--check` 报「与源一致」）；本批 `docs/CONSOLE.md` 变化**仅限本批自身登记**（P-101 卡片与计数）；④ **单点消费（I-12 ②）** = 只读返工图**已登记**边，不重实现 `backflow-audit` 检测；⑤ `rework_graph_check` **exit 0**（`forks=0 · non_rework=1`，**真值源零写入**）；⑥ 三校验器全绿 + 门禁链 exit 0（`step-gate` 5/5 · `verify-anchor` 全真实 · `step-enforce --pid P-101` exit 0）；⑦ **边界** = Layer-1 单文件 / 零新依赖 / 零新门禁 / **不写返工真值源** / 不改 `PROGRESS` 状态列 / 不改任何校验器。
 
+## 9. 本批实施记录（P-138 · U-9 compact 当前状态块 · Layer-1 单文件）
+
+> P-138（2026-10-27）：framework-deep-review 未决项 **U-9** 经裁决执行（P-136 采 **D.5 方案 D**：否独立 SUMMARY.md、扩展现有生成视图）；规格 = [DESIGN §4.2](./DESIGN.md)（**D22** + 不变式 **I-13** + 回退点 **R-9** = `R-S1`）。
+
+**【A】A-28: P-138 U-9 compact 块实施批读数（E1，读数日期 2026-10-27）** = ① **实现面 = `scripts/console_gen.py` 单文件**——新增 `COMPACT_STATUS_WORDS` / `COMPACT_STAGE_WORDS` + `_status_compact(tasks, sessions, features, spec_dir, fork_pids, derived)`（五行 = 在册批次状态分布 / 最近批次 / session 覆盖 / 行动队列 / feature 阶段分布）+ `render` 在「生成基准」与「⚑ 需要你 / NEXT」之间插入 `## 当前状态（compact）`；② `console_gen --selftest` **57/57 → 58/58**（+**S56** 逐行断言：`11（done 1 · pending 6 · in-progress 3 · blocked 1）` / `P-011 pending（2026-09-11）` / `4 个 P（最近 specwf-p006-20260911 · 2026-09-11T15:00:00+08:00）` / `Needs Attention 1 · Ready to Verify 2 · Recommended 7` / `4（调研 1 · 设计 0 · 实施 0 · 验收 0 · 未启动 3）`）；③ **真机读数（终版 = 本批 P 行与 session 落盘后重生成）** = `docs/CONSOLE.md` compact 块五行 = `138（done 138 · pending 0 · in-progress 0 · blocked 0）` / `P-138 done（2026-10-27）` / `119 个 P（最近 specwf-p138-20261027 · 2026-10-27T19:30:00+08:00）` / `Needs Attention 0 · Ready to Verify 0 · Recommended 0` / `40（调研 15 · 设计 0 · 实施 0 · 验收 24 · 未启动 1）`（落盘前实现期读数为 `137` / `P-137` / `118 个 P`，差值全部来自本批自身新增的 P 行与 session——**声明随产物重数**，不回写为旧值）；④ **零判断性文案（I-13 ②）** = 五行全部由 `parse_progress` / `read_sessions` / `artifact_map`+`feature_stage` / `derive_state`+`TIER_ORDER` 复算，无归纳/评价/建议；⑤ **无外部时钟（I-13 ③）** = 不读 wall clock / git，`--check` 与双跑字节一致（S12/S13 既有断言零改动通过）；⑥ **不动计数面** = `declared.scripts` 10 / `declared.hooks` 6 / P 行计数均不受影响（块内无 `^| P-xxx |` 形态行，`progress_tasks` 仅因本批新增 P 行 137 → 138）；⑦ **实施期发现（就地补登）** = DESIGN §3.3 不变式表**缺 I-12 行**（P-101 仅在 §5.5 声明）⇒ 本批**同批补登 I-12 行并新增 I-13 行**（不改 I-12 语义）；⑧ **边界** = Layer-1 单文件 / 零新依赖 / 零新门禁 / 零新 hook / 不改 `PROGRESS` 状态列 / 不改任何校验器。
+
 ## 附录 A：A 类断言明细
 
-- A-1 至 A-26：见 §2.2 / §3 / §5 各 `【A】` 行（本机实测；A-5/A-6 为 P-044 新增，A-7/A-8 为 P-046 新增，A-9/A-10/A-11 为 P-047 及收口批新增，**A-12 为 P-042 v1.8 新增**，**A-13 为 P-042 v1.11 新增**，**A-14 为 P-042 v1.15 新增**，**A-15 为 P-042 v1.17 新增**，**A-16 为 P-042 v1.18 新增**，**A-17 为 P-042 v1.19 新增**，**A-18 为 P-042 v1.20 新增**，**A-19 为 P-042 v1.21 新增**，**A-20 为 P-042 v1.22 新增**，**A-21 为 P-042 v1.23 新增**，**A-22 为 P-042 v1.24 新增**，**A-23 为 P-042 v1.25 新增**，**A-24 为 P-064 新增**，**A-25 为 P-068 新增**，**A-26 为 P-084 新增**，**A-27 为 P-101 新增**）。
+- A-1 至 A-26：见 §2.2 / §3 / §5 各 `【A】` 行（本机实测；A-5/A-6 为 P-044 新增，A-7/A-8 为 P-046 新增，A-9/A-10/A-11 为 P-047 及收口批新增，**A-12 为 P-042 v1.8 新增**，**A-13 为 P-042 v1.11 新增**，**A-14 为 P-042 v1.15 新增**，**A-15 为 P-042 v1.17 新增**，**A-16 为 P-042 v1.18 新增**，**A-17 为 P-042 v1.19 新增**，**A-18 为 P-042 v1.20 新增**，**A-19 为 P-042 v1.21 新增**，**A-20 为 P-042 v1.22 新增**，**A-21 为 P-042 v1.23 新增**，**A-22 为 P-042 v1.24 新增**，**A-23 为 P-042 v1.25 新增**，**A-24 为 P-064 新增**，**A-25 为 P-068 新增**，**A-26 为 P-084 新增**，**A-27 为 P-101 新增**，**A-28 为 P-138 新增**）。
 
 ## 附录 B：B 类推断机读块
 
