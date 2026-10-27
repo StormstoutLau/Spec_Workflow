@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.8
+version: 1.9
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -22,6 +22,7 @@ upstream: null
 > **修订**: v1.6（2026-10-27，P-140：CI 逐提交判定面（§14）——逐提交变更集 + 执行器随提交 + 合并提交跳过 + 不变式 I-11a~c；零脚本行为变更）
 > **修订**: v1.7（2026-10-28，P-141：CI 远端读数回填——§14.6 补远端首次实测〔run `40579430749` / verify 1m30s 全绿〕；设计面零变更）
 > **修订**: v1.8（2026-10-28，P-142：`push(main)` 合并面读数回填——§14.6 补真实合并提交走查〔run `40585936395` / merge `adfec33` skip + 受判 18 个 / 68 s 全绿〕；设计面零变更）
+> **修订**: v1.9（2026-10-28，P-143：`push(main)` 补充读数——§14.6 补第 2 样本〔run `40589457291` / merge `3bb7680` skip + 受判 1 个 / 87 s 全绿〕；设计面零变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -455,7 +456,7 @@ M1 删除完整链检查 / M2 改回静态最新 P / M3 吞掉 gate 硬失败 / 
 
 | 风险 | 缓解 |
 |---|---|
-| 逐提交 checkout 拖慢 CI | 实测 **8.95 s**（16 提交全走查，含 6 次历史 runner 子进程）；同 job 的 `unittest discover` 为 39.6 s 量级；**远端首次实测（P-141 回填）= run `40579430749` verify job 1m30s 全绿**；**`push(main)` 合并面实测（P-142 回填）= run `40585936395` 墙钟 68 s 全绿（merge `adfec33` skip + 受判 18 个）** |
+| 逐提交 checkout 拖慢 CI | 实测 **8.95 s**（16 提交全走查，含 6 次历史 runner 子进程）；同 job 的 `unittest discover` 为 39.6 s 量级；**远端首次实测（P-141 回填）= run `40579430749` verify job 1m30s 全绿**；**`push(main)` 合并面实测（P-142 回填）= run `40585936395` 墙钟 68 s 全绿（merge `adfec33` skip + 受判 18 个）**；**补充读数（P-143）= run `40589457291` 墙钟 87 s 全绿（merge `3bb7680` skip + 受判 1 个）** |
 | 历史执行器本身有缺陷 | 同判定面优先：本地当时即如此判定；新规则只对**新提交**生效，不回判历史 |
 | evil merge 内容不被覆盖 | U-11 登记；由 `push(main)` 走查 + 同 job 其余四道全量校验兜底；`push(main)` 面已实测无并集式假红（A-48），evil merge 内容仍未构造 |
 | checkout 后工作树与 PR 头不一致 | `trap ... EXIT` 恢复 `HEAD_SHA`；后续 step 沿用原工作树 |
