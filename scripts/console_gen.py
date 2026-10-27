@@ -542,6 +542,63 @@ def feature_stage(am: dict) -> str:
     return "未启动"
 
 
+# ---------------------------------------------------------------- compact 当前状态（P-138 / D.5 方案 D）
+COMPACT_STATUS_WORDS = ("done", "pending", "in-progress", "blocked")
+COMPACT_STAGE_WORDS = ("调研", "设计", "实施", "验收", "未启动")
+
+
+def _status_compact(tasks, sessions, features, spec_dir, fork_pids=None,
+                    derived=False) -> list:
+    """compact「当前状态」块（P-138 / D.5 方案 D）：**逐行纯机械派生，零判断性文案**。
+
+    输入面（D.5 §3 限定）= `PROGRESS` 字节 + sessions 清单 + feature 四文档存在性；
+    不新增真值源、不读 wall clock、不读 git（I-2 确定性）。五行分别可用
+    `parse_progress` / `read_sessions` / `feature_stage` / `derive_state` 复算——
+    行动队列与 §1 三档**同源判据**（`derive_state`+`TIER_ORDER`），防视图分裂（A-61 含义二）。
+    """
+    counts = {w: 0 for w in COMPACT_STATUS_WORDS}
+    other = 0
+    for t in tasks:
+        if t.status in counts:
+            counts[t.status] += 1
+        else:
+            other += 1
+    other_seg = f" · 其他 {other}" if other else ""
+    if tasks:
+        latest = max(tasks, key=lambda x: int(x.pid[2:]))
+        s = sessions.get(latest.pid)
+        day = s.last_ts.split("T")[0] if s and s.last_ts != "—" else "—"
+        latest_row = f"{latest.pid} {latest.status}（{day}）"
+    else:
+        latest_row = "—"
+    stamps = sorted((s.last_ts, s.sid) for s in sessions.values() if s.last_ts != "—")
+    sess_row = (f"{len(sessions)} 个 P（最近 {stamps[-1][1]} · {stamps[-1][0]}）"
+                if stamps else "—")
+    stages = {w: 0 for w in COMPACT_STAGE_WORDS}
+    for name in features:
+        stages[feature_stage(artifact_map(spec_dir / name))] += 1
+    tiers = {w: 0 for w in TIER_ORDER}
+    fork_pids = fork_pids or {}
+    for t in tasks:
+        if t.pid in fork_pids:
+            tiers["Needs Attention"] += 1
+            continue
+        d = derive_state(t, sessions.get(t.pid), derived)
+        if d.tier:
+            tiers[d.tier] += 1
+    return [
+        "| 项 | 值 |",
+        "|---|---|",
+        f"| 在册批次 | {len(tasks)}（done {counts['done']} · pending {counts['pending']}"
+        f" · in-progress {counts['in-progress']} · blocked {counts['blocked']}{other_seg}） |",
+        f"| 最近批次 | {latest_row} |",
+        f"| session 覆盖 | {sess_row} |",
+        "| 行动队列 | " + " · ".join(f"{w} {tiers[w]}" for w in TIER_ORDER) + " |",
+        f"| feature 阶段 | {len(features)}（"
+        + " · ".join(f"{w} {stages[w]}" for w in COMPACT_STAGE_WORDS) + "） |",
+    ]
+
+
 def _cell(text: str) -> str:
     """表格单元格安全化（C-13 升为**通则**）：半角竖线会破坏表格结构（A-37 的直接成因）。
 
@@ -855,8 +912,11 @@ def render(tasks, sessions, features, mapping, edges, dyn, hooks, forks, spec_di
         f"> 生成基准：{_basis(tasks, sessions, features)}",
         i7_line,
         "",
-        "## ⚑ 需要你 / NEXT",
+        "## 当前状态（compact）",
     ]
+    out += _status_compact(tasks, sessions, features, spec_dir,
+                           fork_rewrite_pids(forks), derived)
+    out += ["", "## ⚑ 需要你 / NEXT"]
     out += _tier_lines(tasks, sessions, derived, fork_rewrite_pids(forks))
     out += ["## feature 视图（分组键）"]
     out += _feature_table(features, mapping, sessions, spec_dir, tasks_by_pid)
@@ -1284,6 +1344,14 @@ def run_selftest() -> int:
           and "**Needs Attention**（2 项）" in text_rw)
     check("S55 零返工边 ⇒ 无 U-9 附加行（回归安全）",
           "待重写 / 待重入" not in text)
+    check("S56 compact 当前状态块（五行全机械派生：状态分布 / 最近批次 / session / 队列 / feature 阶段）",
+          "## 当前状态（compact）" in text
+          and "| 在册批次 | 11（done 1 · pending 6 · in-progress 3 · blocked 1） |" in text
+          and "| 最近批次 | P-011 pending（2026-09-11） |" in text
+          and "| session 覆盖 | 4 个 P（最近 specwf-p006-20260911 · "
+              "2026-09-11T15:00:00+08:00） |" in text
+          and "| 行动队列 | Needs Attention 1 · Ready to Verify 2 · Recommended 7 |" in text
+          and "| feature 阶段 | 4（调研 1 · 设计 0 · 实施 0 · 验收 0 · 未启动 3） |" in text)
     shutil.rmtree(root2, ignore_errors=True)
 
     shutil.rmtree(root, ignore_errors=True)

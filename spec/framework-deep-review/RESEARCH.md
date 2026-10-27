@@ -4,7 +4,7 @@
 
 id: framework-deep-review-RESEARCH
 type: design
-version: 1.9
+version: 1.10
 status: draft
 date: 2026-10-26
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（当前框架深度评审、前沿对标与分优先级升级建议）
 > **创建日期**: 2026-10-26
+> **修订**: v1.10（2026-10-27，P-138：**U-9 执行件落地**——`console_gen` 新增 compact「当前状态」5 行块 + selftest S56（57 → 58）；§10 U-9 行状态由「P-138 候选」改为「已实施」；判据⑤（连续 3 批人工触点 ≤6 处）待复测；A/B/C/H 计数不变）
 > **修订**: v1.9（2026-10-27，P-137：**U-10 C 实施——内容 digest 绑定门禁**——新增 §12（三处未决裁决 R1 finalize 时点 / R2 per-batch 作用域与 rebind / R3 边界 137 + 数据结构 + 六臂注入 + 残余风险）；原 §12 参考文献顺延为 §13；§10 U-10 行状态更新；A/B/C/H 计数不变）
 > **修订**: v1.8（2026-10-27，P-136：**U-5 / U-6 / U-9 三裁决落档**——U-5 采 D.3 方案 C 分阶段〔Phase 1 = 20 项读数预注册、达标后扩 30+30 当门禁〕/ U-6 采 D.4 方案 E〔prereg v1.1 修订实施 + 不改名 + 新引用加限定〕/ U-9 采 D.5 方案 D〔否独立 SUMMARY.md，扩 CONSOLE = P-138 候选，C 先占 P-137〕；A/B/C/H 计数不变）
 > **修订**: v1.7（2026-10-27，P-135：**U-10 / U-7 裁决与复审过程完整落档**——新增附录 E（时间线 / 两轮裁决 / 复审四偏差与幻觉排除确认）；C 候选批预标 P-135 顺延 **P-136**；A/B/C/H 计数不变）
@@ -533,11 +534,11 @@ upstream: null
   - **当前倾向**：暂维持 `strict=false`；
   - **证据等级**：E1（现状已读）。
 
-- **U-9 派生视图生成化：已裁决（否独立 SUMMARY.md；采扩 CONSOLE，执行件 P-138 候选）**
+- **U-9 派生视图生成化：已实施（否独立 SUMMARY.md；采扩 CONSOLE，执行件 P-138 已落地）**
   - **判据**：人工回写触点下降且 `--check` 仍可防漂移；
-  - **触发条件**：**用户裁决（2026-10-27，P-136）**：**不接受「独立 SUMMARY.md + 指针」**；采 **D.5 方案 D（扩展现有生成视图）**——`console_gen` 增 compact「当前状态」生成块 + 1 条 selftest，为 **P-138 候选**（Layer-1 单文件批；C〔digest 门禁〕先占 P-137 候选；含 project-console DESIGN / IMPLEMENTATION / CHECKLIST 对应更新 + 验收判据⑤ = 连续 3 批人工触点 ≤6 处且无 P-052/053/103 型欠账；回退 R-S1 = 删块与 selftest，删后与现状逐字节一致）；**A′ 升级路径保留** = 仅当扩视图后回写欠账仍复发（同族 ≥1 新例）才按 A′ 最小步骤升级（I-1 改「声明产物集」+ 引用块指针 + 同批删 CONSOLE 重复块防第三载体）；
-  - **当前倾向**：拒绝理由 = compact 当前状态已有 100% 机械载体（CONSOLE `--check` 字节级防漂移），新增 SUMMARY 只增第三载体不降触点（Keep a Changelog 1.1.0 T1 锚：「不一致的日志与没有一样危险」）；触点实测 = 近 10 批每批必改 3 视图文件（CODE_WIKI 5–11 行 / PROGRESS 1–7 行 / CONSOLE 4–32 行），SUMMARY 不降 CODE_WIKI banner / §9 与 PROGRESS 汇总表的真实成本；
-  - **证据等级**：E1（D.5 报告：console_gen / repo_stats / spec_map 源码级取证 + `git numstat` 近 10 批触点表 + 8 条外部锚点〔7 T1〕）。
+  - **触发条件**：**用户裁决（2026-10-27，P-136）**：**不接受「独立 SUMMARY.md + 指针」**；采 **D.5 方案 D（扩展现有生成视图）**——`console_gen` 增 compact「当前状态」生成块 + 1 条 selftest，为 **P-138 候选**（Layer-1 单文件批；C〔digest 门禁〕先占 P-137 候选；含 project-console DESIGN / IMPLEMENTATION / CHECKLIST 对应更新 + 验收判据⑤ = 连续 3 批人工触点 ≤6 处且无 P-052/053/103 型欠账；回退 R-S1 = 删块与 selftest，删后与现状逐字节一致）；**P-138 已实施（2026-10-27）** = `docs/CONSOLE.md` 头部 `## 当前状态（compact）` 5 行（在册批次状态分布 / 最近批次 / session 覆盖 / 行动队列 / feature 阶段分布），逐行纯机械派生、零判断性文案；selftest S56（**57 → 58**）；project-console DESIGN **v1.18**（§4.2 D22 + I-13 + 回退点 R-9）/ IMPLEMENTATION **v1.24**（§9）/ CHECKLIST **v1.20**（F62）；**判据⑤ 待复测**（本批为首批样本；后 2 批复测后回填）；**A′ 升级路径保留** = 仅当扩视图后回写欠账仍复发（同族 ≥1 新例）才按 A′ 最小步骤升级（I-1 改「声明产物集」+ 引用块指针 + 同批删 CONSOLE 重复块防第三载体）；
+  - **当前倾向**：拒绝理由 = compact 当前状态已有 100% 机械载体（CONSOLE `--check` 字节级防漂移），新增 SUMMARY 只增第三载体不降触点（Keep a Changelog 1.1.0 T1 锚：「不一致的日志与没有一样危险」）；触点实测 = 近 10 批每批必改 3 视图文件（CODE_WIKI 5–11 行 / PROGRESS 1–7 行 / CONSOLE 4–32 行），SUMMARY 不降 CODE_WIKI banner / §9 与 PROGRESS 汇总表的真实成本；**P-138 后** = 触点下降需 3 批样本才有读数（D.5 §4 / §7 不确定项①）；
+  - **证据等级**：E1（D.5 报告：console_gen / repo_stats / spec_map 源码级取证 + `git numstat` 近 10 批触点表 + 8 条外部锚点〔7 T1〕；P-138 实施读数见 project-console IMPLEMENTATION A-28）。
 
 - **U-10 Phase 2（证据增强）立项与批次边界**
   - **判据**：F（CI fail-open 修补）与 C（内容 digest 绑定）可分批实施、互不阻塞回退；
