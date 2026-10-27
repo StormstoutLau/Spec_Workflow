@@ -4,7 +4,7 @@
 
 id: framework-deep-review-RESEARCH
 type: design
-version: 1.10
+version: 1.11
 status: draft
 date: 2026-10-26
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（当前框架深度评审、前沿对标与分优先级升级建议）
 > **创建日期**: 2026-10-26
+> **修订**: v1.11（2026-10-27，P-139：**P1-1 真实 runner 集成回归**——新增 §13（门禁缺口实测 A-43 / 最小改动 / 四类变异体 / 读数 A-44 / 边界）；§10 U-3 行状态改为「已实测」；原 §13 参考文献顺延 §14；A 类 42 → 44）
 > **修订**: v1.10（2026-10-27，P-138：**U-9 执行件落地**——`console_gen` 新增 compact「当前状态」5 行块 + selftest S56（57 → 58）；§10 U-9 行状态由「P-138 候选」改为「已实施」；判据⑤（连续 3 批人工触点 ≤6 处）待复测；A/B/C/H 计数不变）
 > **修订**: v1.9（2026-10-27，P-137：**U-10 C 实施——内容 digest 绑定门禁**——新增 §12（三处未决裁决 R1 finalize 时点 / R2 per-batch 作用域与 rebind / R3 边界 137 + 数据结构 + 六臂注入 + 残余风险）；原 §12 参考文献顺延为 §13；§10 U-10 行状态更新；A/B/C/H 计数不变）
 > **修订**: v1.8（2026-10-27，P-136：**U-5 / U-6 / U-9 三裁决落档**——U-5 采 D.3 方案 C 分阶段〔Phase 1 = 20 项读数预注册、达标后扩 30+30 当门禁〕/ U-6 采 D.4 方案 E〔prereg v1.1 修订实施 + 不改名 + 新引用加限定〕/ U-9 采 D.5 方案 D〔否独立 SUMMARY.md，扩 CONSOLE = P-138 候选，C 先占 P-137〕；A/B/C/H 计数不变）
@@ -34,7 +35,7 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 42 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
+| A 事实类 | 44 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
 | B 推断类 | 27 | 由 A 类推出的判定（见附录 B） |
 | C 类（决策） | 9 | 不参与 R7 机械对账（DR-2） |
 | 假设区 | 14 | 未实测 / 未裁决项（见附录 C） |
@@ -498,11 +499,11 @@ upstream: null
   - **当前倾向**：**已裁决 129（2026-10-26）**：边界只作用于维护模式与仅登记模式；显式 batch/session/branch 声明带文档改动一律要求 ≥1 个 5/5，不因 P<129 豁免；runner `FINALIZE_IMPACT_MIN_P=92` 保持独立，不合并；**runner 声明面已改为显式 `--expect` / `--legacy`（P-132）**——隐式 legacy 下「忘记声明完整链」与「有意 legacy」机械读数不可区分；
   - **证据等级**：E1（P-129/P-130 均 5/5；128/129 边界与 0/5、4/5 注入测试已补，P-131；隐式 legacy 移除后 selftest 83/83，P-132）。
 
-- **U-3 真实 runner 集成测试成本未测**
+- **U-3 真实 runner 集成测试成本：已实测（P1-1 已实施，P-139）**
   - **判据**：CI 增量时间可接受，且 4 类变异体全部被捕获；
-  - **触发条件**：P1-1 实施前；
-  - **当前倾向**：stdlib unittest + 临时目录，零新依赖；
-  - **证据等级**：待测。
+  - **触发条件**：P1-1 实施前（**已于 2026-10-27 实施**）；
+  - **当前倾向**：stdlib unittest + 临时仓（`SR_SESSIONS_DIR` / `SR_REWORK_REGISTRY` 注入），零新依赖；触发面已补 `tools/spec_runner/spec_runner.py`；
+  - **证据等级**：**E1（A-43 / A-44）**——门禁缺口实测（单独改 runner 原先不触发任何本地 hook）+ 4/4 变异体被感知 + 新增 14 例（全套 36 → 50，全绿）+ 增量 **8.7 s**（同 `unittest discover` 命令口径）；**CI 远端增量未直接实测**（本批不推送）以本地同命令读数代理。
 
 - **U-4 每步必需 gate 事件集未定**
   - **判据**：能机械列出「哪些步骤缺执行证据」且不误伤历史 session；
@@ -792,7 +793,49 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 `EVIDENCE_MIN_P` 置哨兵值 **9999**（大于全部现存 P）⇒ 校验整体降为观察（`digest_bound` 不再输出、无红），其余行为零变更；`--doc-digest` 生成侧保留可用。不涉及 runner / session schema / hook 配置的回退。
 
-## 13. 参考文献
+## 13. P1-1 真实 runner 集成回归（P-139，2026-10-27）
+
+### 13.1 门禁缺口实测（A-43，E1）
+
+【A】A-43 门禁触发面缺口实测（E1）：读 `.pre-commit-config.yaml` 六 hook 的 `files` 正则——`blackbox-tests` 原覆盖 `tests/.*\.py` 与 `scripts/(step_enforce|spec_map)\.py`；`repo-stats` 覆盖 `CODE_WIKI.md` / `README` / `.pre-commit-config.yaml` / `docs/` / `spec/` / `adr/` / `scripts/`；`console-gen` 覆盖 `docs/PROGRESS.md` / `sessions/` / `spec` 四文档；其余三道只覆盖 `.md`。**三者叠加仍不含 `tools/spec_runner/spec_runner.py`** ⇒ 单独改 runner 的提交在本地**不触发任何 hook**（CI 仍跑 runner `selftest`，但只看内嵌自测）。P-137 的 digest 注入测试虽已用真实 runner，但只有 `tests/` 变更才触发测试——**被被测对象变更却不触发其测试**即本批的直接缺口（非覆盖缺口，是触发面缺口）。
+
+### 13.2 最小改动（与 §7.3 逐条对应）
+
+1. `blackbox-tests` 触发面补 `tools/spec_runner/spec_runner.py`（唯一生产配置改动）；
+2. 新增 `tests/harness.py`：临时仓 + 三个脚本副本 + `SR_SESSIONS_DIR` / `SR_REWORK_REGISTRY` 显式注入；
+3. 新增 `tests/test_runner_integration.py`（10 例 = step-gate 四态 / verify-anchor 两态 / fork / anchor-audit / backflow-audit / 门禁面 parity guard）；
+4. 新增 `tests/test_runner_mutation.py`（4 例变异体 guard proof）；
+5. 既有 `test_hook_blackbox.py`（纯函数与命名契约）与 `test_batch_binding.py`（step_enforce 批次面）**保留不替换**——stub 与真实 runner 互不替代。
+
+### 13.3 四类变异体
+
+| # | 变异 | 载体 | 探针 | 原版 exit | 变异 exit |
+|---|---|---|---|---|---|
+| M1 | 删除完整链检查 | runner `step-gate` 期望链比较 | 4/5 步 + `--expect` 5 | 1 | 0 |
+| M2 | 改回静态最新 P | `step_enforce.resolve` 的声明解析 | 只改 P 行描述 + 四文档变更（无新行） | 1 | 0 |
+| M3 | 吞掉 gate 硬失败 | runner `step-gate` 硬性分支 | 4/5 步 + `--expect` 5 | 1 | 0 |
+| M4 | 破坏锚点路径解析 | runner `_check_anchor` 调用 | 指向不存在文件的锚点 | 1 | 0 |
+
+变异体实现 = **复制到 temp 后就地改字**（原字面量须唯一命中；源码漂移 ⇒ harness 断言失败，测试红）；真实仓脚本永不改动（无污染路径）。
+
+### 13.4 读数（A-44，E1，2026-10-27）
+
+【A】A-44 本批集成与变异读数（E1，2026-10-27）：
+
+- 新增用例 **14/14 PASS**；全套 `python -m unittest discover -s tests` **36 → 50 例，全绿**；
+- 增量 = **新增两模块 8.7 s**（全套 39.6 s；与 CI 同命令、同平台口径）；CI `step` 未改 ⇒ 增量即 14 例；
+- 4/4 变异体被感知（原版 exit ≠ 变异版 exit，见 §13.3）；
+- 触发面实证 = `pre-commit run blackbox-tests --files tools/spec_runner/spec_runner.py` → **Passed**（改造前该文件不触发该 hook）；
+- **U-3 判据 = 满足**（4/4 捕获 + 增量可接受）；**CI 远端增量未直接实测**（本批不推送）——以同一命令的本地读数代理，如实登记。
+
+### 13.5 边界与回退
+
+- 只加测试与一条 `files` 正则；**不改 runner / `step_enforce` / `spec_map` 任何行为**，零新依赖、零新 hook、零 session schema 变更；
+- 回退 = 删三个测试文件 + 还原 `blackbox-tests` 的 `files` 一行 ⇒ 逐字节回到 P-138 后状态；
+- 不覆盖：runner 的 `run` / `gate` / LLM 端点路径（需 mock server，属 runner `selftest` 面，不重复建设）；
+- 本批**不新增**「每步执行证据」判据——那是 P1-2（U-4），须另立设计批。
+
+## 14. 参考文献
 
 按第一作者 / 机构字母序；括号内为本次核验状态。
 
@@ -819,7 +862,7 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 ## 附录 A：A 类断言索引
 
-A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外部一手来源 / 标准原文；A-29~A-35 为本次核验的官方文档与安全公告；A-36~A-42 为 U-1 专项实测。逐条证据已在 §3~§5、§11 就地给出，此处不重复。
+A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外部一手来源 / 标准原文；A-29~A-35 为本次核验的官方文档与安全公告；A-36~A-42 为 U-1 专项实测；**A-43~A-44 为 P1-1 门禁缺口与真实 runner 集成回归实测（§13）**。逐条证据已在 §3~§5、§11、§13 就地给出，此处不重复。
 
 ## 附录 B：B 类推断（机读登记）
 

@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.4
+version: 1.5
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -18,6 +18,7 @@ upstream: null
 > **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明面——`--expect` / `--legacy` 二选一，隐式 legacy 移除）
 > **修订**: v1.3（2026-10-26，P-134：U-10 F 实施注记（§8）——CI step-enforce 段 fail-closed 化 + 两红边；C 留 P-135 候选）
 > **修订**: v1.4（2026-10-27，P-137：U-10 C 实施设计（§12）——内容 digest 绑定：finalize 时点 / per-batch 作用域 / rebind 留因 / `EVIDENCE_MIN_P=137` / `--doc-digest` 生成侧；不改 runner schema）
+> **修订**: v1.5（2026-10-27，P-139：P1-1 真实 runner 集成回归设计（§13）——触发面补 runner + 集成用例 + 四类变异体 + 不变式 I-10；零行为变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -353,6 +354,54 @@ CLI：`python scripts/step_enforce.py --doc-digest <feature>`（可重复）打�
 
 **回退**：`EVIDENCE_MIN_P` 置 9999 ⇒ 整体降为观察（无红、`digest_bound` 不再输出）。
 
----
+## 13. P1-1 真实 runner 集成回归（P-139）
+
+### 13.1 设计目标与职责边界
+
+让「真实 runner 的行为」进入**提交门禁的常规观测面**：被被测对象（`tools/spec_runner/spec_runner.py`）变更时，其集成测试必须在本地 hook 上运行；且测试对四类已登记缺陷**有感知**（变异可感知），而不是只在全绿时给出存在性安慰。
+
+**职责内**：`.pre-commit-config.yaml` 的 `blackbox-tests` 触发面、`tests/` 下的集成与变异用例。
+**职责外**：不改 runner / `step_enforce` / `spec_map` 任何行为；不改 CI workflow（同一入口已存在）；不引入 mock server（runner `selftest` 面）；不做 P1-2「每步执行证据」。
+
+### 13.2 测试形态
+
+| 面 | 形态 | 理由 |
+|---|---|---|
+| 仓 | 每例独立 temp 仓（`git init` + 初始提交），脚本副本 | 真实 `git show :path` / 工作树语义，零写入真实仓 |
+| 注入 | `SR_SESSIONS_DIR` + `SR_REWORK_REGISTRY`（既有先例） | 真实 CLI 路径，不 monkeypatch 内部函数 |
+| 会话 | JSONL 直接落盘（decision 八字段 + `metadata.step_id/step_seq/evidence`） | 与 runner `EventWriter` 读取面一致 |
+| 变异 | 复制脚本到 temp 后**单点改字**（原字面量须唯一命中） | 源码漂移 ⇒ harness 断言失败，变异体不会静默失配 |
+| 触发面 | `blackbox-tests.files` 补 runner | 单独改 runner 必须触发其测试 |
+
+### 13.3 不变式
+
+| # | 不变式 | 验证 |
+|---|---|---|
+| I-10a | **变异可感知**：§13.4 四类变异体每个至少使一例的判定翻转 | 变异 guard 4 例（M1~M4） |
+| I-10b | **同判定面**：本地 hook 与 CI 跑同一入口（`python -m unittest discover -s tests`） | parity guard（读 `.pre-commit-config.yaml` + `ci.yml`） |
+| I-10c | **零行为变更**：生产脚本字节不变，只增测试与一条 `files` 正则 | 本批 diff 面（3 新测试文件 + 1 配置行） |
+
+### 13.4 四类变异体（与 RESEARCH §7.3 逐条对应）
+
+M1 删除完整链检查 / M2 改回静态最新 P / M3 吞掉 gate 硬失败 / M4 破坏锚点路径解析 —— 探针与原版/变异版退出码见 RESEARCH §13.3。
+
+### 13.5 替代方案
+
+| 方案 | 判定 | 理由 |
+|---|---|---|
+| A. 只补触发面（不加用例） | 否决 | 触发面扩了但没有针对性用例，等于把 runner 变更送进旧用例（覆盖率不变） |
+| B. 复用 `test_batch_binding` 夹具 | 否决 | 该文件面向 `step_enforce`（批次面），混入 runner 命令面会让失败归因变模糊 |
+| C. 新建独立 CI job | 否决 | 与「同判定面」冲突且增 CI 维护面；现有 `unittest discover` 已覆盖 |
+| D. 加入 runner `selftest` 作替代 | 否决 | selftest 是内嵌自证（同源），不能替代外置集成（RULE-5 同精神） |
+
+### 13.6 风险与回退
+
+| 风险 | 缓解 |
+|---|---|
+| 变异体与源码漂移（改 runner 后 needle 失配） | harness 断言「原字面量命中数 == 1」⇒ 立即红并指明变异点 |
+| 测试变慢拖累提交 | 增量实测 8.7 s（14 例）；仍属同一步 |
+| temp 仓污染真实仓 | 全部路径在 `tempfile.mkdtemp` 下；`addCleanup` 清理 |
+
+**回退**：删 `tests/harness.py` / `tests/test_runner_integration.py` / `tests/test_runner_mutation.py` + 还原 `blackbox-tests.files` 一行 ⇒ 逐字节回到 P-138 后状态。
 
 **Review 签字**: 单 Agent 自查（单视角） 日期: 2026-10-26

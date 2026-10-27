@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.4
+version: 1.5
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -18,6 +18,7 @@ upstream: null
 > **修订**: v1.2（2026-10-26，P-132：runner `step-gate` 显式声明 `--expect` / `--legacy`，selftest 81 → 83）
 > **修订**: v1.3（2026-10-26，P-134：ci.yml step-enforce 段 fail-closed 化（§3.7）+ 本地注入 5 例 + §2.3/§8.1 变更面同步）
 > **修订**: v1.4（2026-10-27，P-137：U-10 C 实施（§3.8）——digest 生成 / 校验 + `--doc-digest` + 8 例注入，批次绑定测试 20 → 28）
+> **修订**: v1.5（2026-10-27，P-139：P1-1 真实 runner 集成回归（§3.9）——触发面补 runner + `tests/harness.py` + 集成 10 例 + 变异 4 例，`unittest discover` 36 → 50）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -64,7 +65,10 @@ upstream: null
 scripts/spec_map.py                    # + parse_progress_rows / changed_pids
 scripts/step_enforce.py                # 重写为 O3 解析器；P-137：+ doc_digest / verify_digests / --doc-digest
 tests/test_batch_binding.py            # 新增：真实 runner + git 集成测试（P-137：20 → 28）
-.pre-commit-config.yaml                # step-enforce files 扩到 session + PROGRESS
+tests/harness.py                       # P-139：临时仓 + 脚本副本 + env 注入共享夹具
+tests/test_runner_integration.py       # P-139：真实 runner 10 例（step-gate / verify-anchor / fork / 两审计 / parity）
+tests/test_runner_mutation.py          # P-139：四类变异体 guard proof
+.pre-commit-config.yaml                # step-enforce files 扩到 session + PROGRESS；P-139：blackbox files 补 runner
 .github/workflows/ci.yml               # checkout fetch-depth 0 + 变更集 step-enforce；P-134 fail-closed 化
 tools/spec_runner/spec_runner.py       # P-132：step-gate 显式 --expect / --legacy + selftest F80/F81
 tools/spec_runner/README.md            # P-132：CLI 声明面 + selftest 83 项
@@ -366,6 +370,24 @@ CLI：`--doc-digest FEATURE`（`action="append"`，可重复）⇒ 打印 `{algo
 
 8/8 通过（P-137）；`python -m unittest tests.test_batch_binding` 28/28；`spec_runner selftest` 83/83（runner 未改动）。
 
+### 3.9 真实 runner 集成回归（P-139 / P1-1）
+
+**配置面（唯一生产改动）**：`.pre-commit-config.yaml` 的 `blackbox-tests.files` 追加 `tools/spec_runner/spec_runner\.py`——改造前单独改 runner 不触发任何本地 hook（RESEARCH §13.1 / A-43）。`entry` 与 CI step 零改动（同入口 = I-10b）。
+
+**夹具 `tests/harness.py`**：
+
+| 函数 | 作用 |
+|---|---|
+| `make_repo(prefix, progress=None, mutate=None)` | 建 temp 仓 + 复制 `step_enforce` / `spec_map` / `spec_runner` + 初始 commit；`mutate=(rel, needle, repl)` 只改 temp 副本，且断言 needle 唯一命中 |
+| `write_session(root, sid, n=5, anchor=...)` | 写 decision JSONL（八字段 + `metadata.step_id/step_seq/evidence`；finalize 带 `upstream_impact: none`） |
+| `run_cli(root, rel, *args)` | 注入 `SR_SESSIONS_DIR` / `SR_REWORK_REGISTRY` / UTF-8 后的真实子进程调用 |
+
+**集成用例（10 例，`tests/test_runner_integration.py`）**：step-gate 完整链 pass / 缺步硬红 / 无显式声明 exit 2 / legacy 内部一致；verify-anchor 真实 pass（含 `--detail`）/ 文件缺失硬红；fork 前缀复制；anchor-audit 不变量成立；backflow-audit 零待处理；**parity guard**（hook 触发面含 runner + CI 跑同一 `unittest discover`）。
+
+**变异用例（4 例，`tests/test_runner_mutation.py`）**：M1 完整链检查 / M2 静态最新 P / M3 gate 硬失败 / M4 锚点路径解析——探针见 RESEARCH §13.3，判定式 = `原版 exit ≠ 变异版 exit`。
+
+**读数**：新增 **14/14 PASS**；全套 `unittest discover` **36 → 50**；增量 **8.7 s**（全套 39.6 s）；`pre-commit run blackbox-tests --files tools/spec_runner/spec_runner.py` = **Passed**（触发面实证）。
+
 ## 4. 接口实施
 
 ### 4.1 `parse_progress_rows`
@@ -479,6 +501,8 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 | `step_enforce`（模式 / 覆盖 / 完整性） | 同上 | 20 | 关键分支全覆盖 |
 | `step_enforce`（digest 生成 / 校验，P-137） | 同上 | 8 | 六臂 + 作用域漂移 + 双无文档模式 |
 | `spec_runner step-gate` | `spec_runner.py selftest` | 83（含 F80/F81） | 声明守卫 + 既有三臂回归 |
+| `spec_runner` CLI 集成（P-139） | `tests/test_runner_integration.py` | 10 | step-gate 四态 / verify-anchor 两态 / fork / 两审计 / 触发面 parity |
+| 变异可感知（P-139） | `tests/test_runner_mutation.py` | 4 | M1~M4 各使判定翻转（I-10a） |
 | `ci.yml` step-enforce 段（P-134） | 临时 git 仓注入（IMPLEMENTATION §3.7） | 5 | fail-closed 两红边 + 三绿灯边 |
 
 ### 8.2 集成测试
@@ -554,6 +578,13 @@ def changed_pids(old_text: str, new_text: str) -> list[str]:
 - 内容: `doc_digest`（gen/verify 单一实现）+ `verify_digests`（per-batch 作用域）+ `--doc-digest` CLI + `EVIDENCE_MIN_P = 137`
 - 测试: `python -m unittest tests.test_batch_binding` 28/28；`python -m unittest discover -s tests` 36/36；`selftest` 83/83 零回归
 - 本批自证: `python scripts/step_enforce.py --doc-digest framework-deep-review` → 写入 `specwf-p137-20261027` 的 finalize `metadata.evidence_digest`
+
+### Step 7: 真实 runner 集成回归（P-139）
+
+- 文件: `.pre-commit-config.yaml` / `tests/harness.py` / `tests/test_runner_integration.py` / `tests/test_runner_mutation.py`
+- 内容: `blackbox-tests.files` 补 runner + 共享夹具 + 集成 10 例 + 变异 4 例
+- 测试: 新增 14/14 PASS；`python -m unittest discover -s tests` 36 → 50；`selftest` 83/83 零回归
+- 触发面自证: `pre-commit run blackbox-tests --files tools/spec_runner/spec_runner.py` → Passed
 
 ---
 
