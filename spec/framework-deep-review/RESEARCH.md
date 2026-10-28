@@ -4,7 +4,7 @@
 
 id: framework-deep-review-RESEARCH
 type: design
-version: 1.22
+version: 1.23
 status: draft
 date: 2026-10-26
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,7 @@ upstream: null
 
 > **Feature**: framework-deep-review（当前框架深度评审、前沿对标与分优先级升级建议）
 > **创建日期**: 2026-10-26
+> **修订**: v1.23（2026-10-28，P-151：**evil 侧远端阻断实测（A-51）**——路径 2 探针 PR #67（run `40681417404`）：阶段 1 判 `evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` → **exit 1**，`verify = failure`、`mergeStateStatus = BLOCKED`、`origin/main` 未被污染；新增 §14.9 三项判据读数 + 边界（空白变体夹具的诚实声明）；A 类 **50 → 51**）
 > **修订**: v1.22（2026-10-28，P-150：**PR 面读数订正 + evil 侧远端路径裁决**——① 订正 P-145~P-149 五行「PR 面阶段 1 未命中」的错误表述（实测 5 个 PR run 均命中 GitHub 合成 merge ref 并判 `无 evil 内容`）；② 新增 §14.8 两条 evil 侧构造路径对比（社区实践分级）+ **裁决 = 路径 2（分支内构造合并提交 → 失败 PR）**；③ A 类计数不变）
 > **修订**: v1.21（2026-10-28，P-149：**阶段 1 远端第 5 样本**——§14.7 追加真实 `push(main)` 读数（run `40676513311` / 合并提交 `64c6313` / `无 evil 内容（6 个受判路径均等于某一父）` / 墙钟 81 s 全绿）；同一断言 A-50 的第 5 远端样本，A 类计数不变）
 > **修订**: v1.20（2026-10-28，P-148：**阶段 1 远端第 4 样本**——§14.7 追加真实 `push(main)` 读数（run `40666293529` / 合并提交 `fb01568` / `无 evil 内容（6 个受判路径均等于某一父）` / 墙钟 82 s 全绿）；同一断言 A-50 的第 4 远端样本，A 类计数不变）
@@ -46,7 +47,7 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 50 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
+| A 事实类 | 51 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
 | B 推断类 | 27 | 由 A 类推出的判定（见附录 B） |
 | C 类（决策） | 9 | 不参与 R7 机械对账（DR-2） |
 | 假设区 | 14 | 未实测 / 未裁决项（见附录 C） |
@@ -558,11 +559,11 @@ upstream: null
   - **当前倾向**：C 六臂注入落为 8 例（临时 git 仓 + 真实 runner，`tests/test_batch_binding.py` 20 → 28）；回退 = 边界常量置哨兵值（9999）降为观察；跨批 rebind 原因**不作要求**（理由见 §12.2 R2）；
   - **证据等级**：E1（批次 session gate/digest 读数：160 jsonl / **155 批次 session** / 5 非批次 / 批次最大 P = P-136 ⇒ 全 < 137，2026-10-27 实测；坏 base → git diff exit 128 且包装层跳过；41bb0c4/3bc99fa/c779e6d 三提交同改同一组文档 ⇒ per-batch 作用域必要；P-134 本地注入 5/5；P-137 注入 8/8）。
 
-- **U-11 逐提交遍历的合并面残留**（**已实测并关闭（P-144）**）
+- **U-11 逐提交遍历的合并面残留**（**已实测并关闭（P-144）；远端阻断由 P-151 实测（A-51，§14.9）**）
   - **判据**：合并提交（≥2 父）的内容变更须有覆盖路径，且 `push(main)` 走查不因并集 diff 重复判红；
   - **触发条件**：出现 evil merge（合并结果含父提交均无的内容）导致漏检，或 `main` 的 push 走查出现并集式假红（P-140 已实施，2026-10-27）；
   - **当前倾向**：常规 diff 仍**显式跳过**（变更 = 父提交并集，逐父已被同循环覆盖）；**evil 内容**（两父皆无）由 `step_enforce --check-merge` 单独判红（P-144 实施），该内容须由后续声明批次承载；**不做并集 diff**（避免 P-140 假红复发）；
-  - **证据等级**：E1（A-49 逃逸实测：同内容走合并解决 exit 0 / 走普通提交 exit 1；A-50 检测四态：evil→1、干净→0、=第一父→0、非合并→0；`push(main)` 面无并集假红，A-48）；**边界 = 非受判路径**（`spec/**` / `sessions/**` / `docs/PROGRESS.md` 之外）不在本门禁内——合并与非合并同口径，非合并特有残留。
+  - **证据等级**：E1（A-49 逃逸实测：同内容走合并解决 exit 0 / 走普通提交 exit 1；A-50 检测四态：evil→1、干净→0、=第一父→0、非合并→0；`push(main)` 面无并集假红，A-48；**P-151 远端阻断实测 A-51** = 探针 PR #67 阶段 1 exit 1 + `verify = failure` + `mergeStateStatus = BLOCKED` + `main` 无污染〔夹具 = 行尾空白变体，语义级 evil 仍以 A-49/A-50 临时仓读数为准〕）；**边界 = 非受判路径**（`spec/**` / `sessions/**` / `docs/PROGRESS.md` 之外）不在本门禁内——合并与非合并同口径，非合并特有残留。
 
 ---
 
@@ -1096,6 +1097,28 @@ git rev-list --reverse main..HEAD  → 3566355 C2 (words=2)
 
 **边界**：探针分支上的 C1 / C2 也会被阶段 2 受判（无批次声明 ⇒ 同样判红），但阶段 1 fail-fast 先中止，故日志归因唯一；探针 PR 关闭后不并入 `main`，不产生任何真值源改动。
 
+## 14.9 evil 侧远端阻断实测（P-151）
+
+**夹具构造（E1，2026-10-28）**：`git checkout -b probe/evil-merge origin/main` → C1 `6524fbe`（`Feature` 行行尾 +1 空格）→ 从**同一** `origin/main` 开 `probe/evil-side` → C2 `743b29c`（同一行 +2 空格）→ 回 `probe/evil-merge`：`git merge probe/evil-side` ⇒ `CONFLICT (content)` → 解决为 **+3 空格**（既非 C1 的 1 个、也非 C2 的 2 个）→ 合并提交 M `bdc9a96`（父 = `6524fbe` + `743b29c`）。本地预检 `python scripts/step_enforce.py --check-merge bdc9a96` ⇒ **exit 1**。push 分支 + PR #67（`pull_request`）。
+
+| 判据（§14.8.5 预注册） | 读数 | 结论 |
+|---|---|---|
+| ① `verify` = failure 且日志含归因 | run `40681417404`（`pull_request`，head `bdc9a96`）：`11:37:36Z → 11:38:01Z` = **25 s**；`conclusion = failure`；失败 step = `决策流批次强制（step-enforce，逐提交）`；日志 = `step-enforce: evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` + `step-enforce: evil merge bdc9a96… -> exit 1（该内容须由后续声明批次承载）` | ✅ |
+| ② 合并被阻断 | `gh pr view 67 --json mergeStateStatus` = **`BLOCKED`**（同时 `mergeable = MERGEABLE` ⇒ 无冲突，阻断来自 required check 不 success） | ✅ |
+| ③ `main` 无污染 | `origin/main` 仍为 `6b599b5`；`bdc9a96` 只存在于 `origin/probe/evil-merge`（PR 关闭后已删除） | ✅ |
+
+**阶段 2 未执行（fail-fast 生效）**：日志无 `skip merge commit` / `受判提交` 的运行期输出（仅有 workflow 源码回显）⇒ `set -eo pipefail` 下阶段 1 exit 1 立即中止，归因唯一。**清理** = `gh pr close 67 --delete-branch` + 本地分支删除 + `git remote prune origin`；残留 = 一个 closed PR + 一条红 run（本身即证据）。
+
+**边界（诚实）**：
+
+- 夹具内容为**行尾空白变体**（1 / 2 / 3 个空格），**不是**语义文本。原因：本仓 pre-commit 的 `step-enforce` 对四文档语义改动要求批次声明 ⇒ 语义 evil 合并提交在**本地即被拦**，要构造只能 `--no-verify`（违反本仓「不得跳过 pre-commit 检查」纪律）。判据「同时不等于两父」是**逐字节**比较（`git diff --quiet`），空白差异同样成立 ⇒ 结论对**判据本身**有效；但**不能**据此声称「语义级 evil 内容在真实 PR 上被独立阻断」——那部分仍以 A-49 / A-50 临时仓读数为准。
+- **由此暴露一处口径不一致（观察项，本批不开）**：本地 `step-enforce` 的 maintenance 模式用 `-w --ignore-blank-lines` 判「仅空白」，而 `--check-merge` 用逐字节比较 ⇒ **纯空白合并解析在本地面放行、在远端阶段 1 面阻断**。两者面向不同判定（前者判「本批是否声明」、后者判「内容是否属于任一父」），是否应统一 = 待裁决。
+- 探针 PR 的 `mergeable = MERGEABLE` 说明「阻断」= required check 未 success，不是冲突拒绝。
+
+【A】A-51 evil 侧远端阻断实测（E1，2026-10-28）：探针 PR #67（run `40681417404`，head `bdc9a96`）三项判据均成立——阶段 1 对该合并提交判 `evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` 并 exit 1；`verify = failure`（25 s）、`mergeStateStatus = BLOCKED`、`origin/main` 未被污染；阶段 2 未执行（fail-fast）。夹具内容 = 行尾空白变体（边界见上）。
+
+**口径** = 新增 **A-51**（A 类 **50 → 51**），验位点 = CHECKLIST §2.8 **#60**。
+
 ## 15. 参考文献
 
 按第一作者 / 机构字母序；括号内为本次核验状态。
@@ -1123,7 +1146,7 @@ git rev-list --reverse main..HEAD  → 3566355 C2 (words=2)
 
 ## 附录 A：A 类断言索引
 
-A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外部一手来源 / 标准原文；A-29~A-35 为本次核验的官方文档与安全公告；A-36~A-42 为 U-1 专项实测；A-43~A-44 为 P1-1 门禁缺口与真实 runner 集成回归实测（§13）；A-45~A-46 为 P-140 CI 结构性假红与逐提交遍历实测（§14）；**A-47 为 P-141 CI 远端首次实测回填（§14.4）；A-48 为 P-142 `push(main)` 合并面实测回填（§14.5；第 2 样本由 P-143 补充）；A-49～A-50 为 P-144 evil merge 逃逸实测与检测四态（§14.7；**A-50 含 P-145 / P-146 / P-147 / P-148 / P-149 的五个真实 `push(main)` 远端样本**）**。逐条证据已在 §3~§5、§11、§13~§14 就地给出，此处不重复。
+A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外部一手来源 / 标准原文；A-29~A-35 为本次核验的官方文档与安全公告；A-36~A-42 为 U-1 专项实测；A-43~A-44 为 P1-1 门禁缺口与真实 runner 集成回归实测（§13）；A-45~A-46 为 P-140 CI 结构性假红与逐提交遍历实测（§14）；**A-47 为 P-141 CI 远端首次实测回填（§14.4）；A-48 为 P-142 `push(main)` 合并面实测回填（§14.5；第 2 样本由 P-143 补充）；A-49～A-50 为 P-144 evil merge 逃逸实测与检测四态（§14.7；**A-50 含 P-145 / P-146 / P-147 / P-148 / P-149 的五个真实 `push(main)` 远端样本**；**A-51 为 P-151 的 evil 侧远端阻断实测（§14.9：探针 PR #67 / run `40681417404` / exit 1 + BLOCKED + main 无污染）**）**。逐条证据已在 §3~§5、§11、§13~§14 就地给出，此处不重复。
 
 ## 附录 B：B 类推断（机读登记）
 

@@ -4,7 +4,7 @@
 
 id: framework-deep-review-DESIGN
 type: design
-version: 1.16
+version: 1.17
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-RESEARCH]
@@ -30,6 +30,7 @@ upstream: null
 > **修订**: v1.14（2026-10-28，P-148：**阶段 1 远端第 4 样本**——§14.7 补 run `40666293529`（合并提交 `fb01568` / 同为 6 个受判路径 / 82 s 全绿）；设计面零变更）
 > **修订**: v1.15（2026-10-28，P-149：**阶段 1 远端第 5 样本**——§14.7 补 run `40676513311`（合并提交 `64c6313` / 同为 6 个受判路径 / 81 s 全绿）；设计面零变更）
 > **修订**: v1.16（2026-10-28，P-150：**PR 面读数订正 + evil 侧路径裁决**——§14.7 补订正段（PR 面 HEAD = 合成 merge ref ⇒ 阶段 1 恒命中）；新增 §14.8 裁决 = 路径 2（分支内构造合并提交 → 失败 PR）作为 evil 侧唯一取证路径；设计面判据不变）
+> **修订**: v1.17（2026-10-28，P-151：**evil 侧远端阻断实测**——§14.7 补 A-51 读数（探针 PR #67：阶段 1 exit 1 / verify failure / `mergeStateStatus = BLOCKED` / main 无污染）；I-11d / I-11e 判据不变，仅补「阻断力」远端证据）
 > **状态**: 草稿
 > **Spec 步骤**: Step 3-4
 > **基于调研**: [RESEARCH.md](./RESEARCH.md) §11
@@ -528,5 +529,7 @@ done
 **订正（P-150）**：§14.7 各样本表「PR 面阶段 1 未命中」的表述有误。`actions/checkout@v5` 在 `pull_request` 事件下检出 GitHub 合成 merge ref（`refs/pull/N/merge`），`HEAD` 即合成合并提交，故阶段 1 **每次 PR 都命中**并判 `无 evil 内容（6 个受判路径均等于某一父）`（6 个 PR run 实测，#61~#66）；`受判提交 1 个` 是阶段 2 的分支侧普通提交计数。结构含义 = 合成合并提交的树恒等于 head 树（等于某一父）⇒ **PR 面无法证明 evil 判红**，evil 侧必须另行构造（见下）。
 
 **设计面裁决（P-150，§14.8）**：evil 侧取 **路径 2 = 分支内构造合并提交 → 失败 PR**。理由 = ① 唯一能证明「阻断」（required check 失败 ⇒ `mergeStateStatus=BLOCKED`）；② 零 `main` 污染、不动保护规则；③ 失败面停留 Layer-0 可重复。否决路径 1（临时放宽保护直推 `main`）——`push(main)` 面只能事后检测，且合并提交永久留痕（`allow_force_pushes=false`）、恢复窗口风险不可逆。不变式层面：I-11d / I-11e 判据**不变**，本裁决只决定取证方式。
+
+**远端阻断读数（P-151，A-51）**：按 §14.8.5 五步执行，探针 PR #67（head `bdc9a96`，父 = C1 `6524fbe` + C2 `743b29c`）三项判据全部成立——① run `40681417404`（`pull_request`，25 s）`conclusion = failure`，失败 step = `决策流批次强制（step-enforce，逐提交）`，日志 = `evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` + `-> exit 1`；② `mergeStateStatus = BLOCKED`（`mergeable = MERGEABLE` ⇒ 阻断来自 required check）；③ `origin/main` 仍为 `6b599b5`（探针提交只存在于已删除的探针分支）。阶段 2 未执行（日志无 `skip merge commit` / `受判提交` 运行期输出）⇒ fail-fast 归因唯一。**口径**：I-11d / I-11e 判据不变；**边界** = 夹具为行尾空白变体（语义级 evil 合并提交会在本地 pre-commit 被拦，构造需 `--no-verify`，故未取）；由此暴露「本地 maintenance 模式 `-w` 放行空白 vs `--check-merge` 逐字节判红」的口径不一致 = 观察项，本批不开。
 
 **Review 签字**: 单 Agent 自查（单视角） 日期: 2026-10-28
