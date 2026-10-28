@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.10
+version: 1.11
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -24,6 +24,7 @@ upstream: null
 > **修订**: v1.8（2026-10-28，P-142：`push(main)` 合并面读数回填——§3.10 补真实合并提交走查读数；实施面零变更）
 > **修订**: v1.9（2026-10-28，P-143：`push(main)` 补充读数——§3.10 补第 2 样本读数；实施面零变更）
 > **修订**: v1.10（2026-10-28，P-144：**U-11 合并面关闭**——§3.11 新增 `step_enforce --check-merge` + CI 阶段 1 + 4 例测试；`unittest discover` 51 → 55）
+> **修订**: v1.11（2026-10-28，P-145：**阶段 1 远端读数登记**——§3.11 补真实 `push(main)` 读数（run `40603730644` / 合并提交 `e8154eb` / `无 evil 内容（6 个受判路径均等于某一父）` / 88 s 全绿）；实施面零变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -457,6 +458,8 @@ done
 | `test_check_merge_non_merge_commit_is_noop` | 非合并 ⇒ exit 0 + `非合并提交` |
 
 **读数（E1）**：新增 **4/4 PASS**；`unittest discover` **51 → 55**；实验仓交叉验证 `--check-merge <M>` → exit 1、`<C2>` → exit 0（A-49/A-50）。
+
+**远端读数（P-145 登记）**：真实 `push(main)` run `40603730644`（合并提交 `e8154eb`）阶段 1 输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 `skip merge commit` + 受判 1 个、**88 s** 全绿；PR #61 `verify` **1m12s 通过**（range 仅 1 个非合并提交 ⇒ 阶段 1 循环未命中）。
 
 ## 4. 接口实施
 
