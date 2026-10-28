@@ -4,7 +4,7 @@
 
 id: todo-graph-analysis-RESEARCH
 type: design
-version: 1.2
+version: 1.3
 status: draft
 date: 2026-10-28
 depends: [project-console-RESEARCH, graph-structure-upgrade-RESEARCH, rework-and-decision-paths-RESEARCH]
@@ -19,6 +19,7 @@ upstream: null
 > **任务来源**: 用户指令「回溯一下 历史调研里面是否有图结构编排 当前是否具备实施条件 / 另一个问题是 当前待办事项仅列入 progress 缺少待办事项的优先级 依赖关系分析 如何自动化实现此分析 是否与图结构编排存在某种关联 请深入调研」→「落档 P-153 分析批」
 > **修订**: v1.1（2026-10-28，P-154：**外部事实锚点补充 + 两项待裁决的明确建议**——新增 §12 外部事实锚点（**12 条 T1 一手核验**：Taskwarrior 虚拟标签与 ID/UUID 分离、GitHub Issues 原生依赖、Task Master `next` / 依赖校验、Beads 依赖图与 hash ID、Kahn 1962 拓扑排序、Steward 1981 DSM）；新增 §13 两项裁决（**A 开闸时点** / **B P 编号占用**）的对照与建议；A 类 **24 → 36**、B **4 → 5**、C **9 → 11**；原 §12 参考文献顺延 **§14**；零代码）
 > **修订**: v1.2（2026-10-28，P-155：**两项裁决被用户采纳并开始执行**——裁决 A 采 **C-10**（暂不开代码面，先做数据面）；裁决 B 采 **C-11**（允许占用 P 编号 + 语义护栏）；§13.1 / §13.2 各追加「裁决记录」段；执行结果与**准入收缩实测**（预估 8~10 条 → 实际符合「已裁决待开工」仅 **2 条**）见 P-155 行与 §13 记录；A/B/C 计数不变，零代码）
+> **修订**: v1.3（2026-10-28，P-158：**为 P-156 / P-157 两个工作项补外部事实锚点**——新增 §12.4（**6 条 T1**：Nygard 2011 ADR 状态与重审触发、MADR 4.0.0 `superseded by` 枚举、Microsoft Well-Architected「append-only + supersede 互链 + confidence」与「单一真值源」、CQRS 读模型派生、Transactional outbox 单一写入 + 下游派生）；A 类 **36 → 42**；零代码）
 > **批档次**: **T3 轻批**（裁剪理由 = 纯只读分析 + 单文档新增，零代码 / 零门禁 / 零真值源重定义 / 零依赖；v1.1 同理：外部检索 + 文档修订，零代码）
 > **ADR-0010 三问**: Q1 **Layer-0**（只读分析 + 文档新增）/ Q2 **用户指令**（「落档 P-153 分析批」）/ Q3 **副作用 0**（不改 `console_gen` / `spec_map` / `step_enforce` / 任何校验器与 hook）
 
@@ -28,7 +29,7 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 36 | 本仓文件逐行读取 / 机械枚举 / 已有远端与本地读数（E1）+ **12 条回原文核验的外部一手来源（T1）** |
+| A 事实类 | 42 | 本仓文件逐行读取 / 机械枚举 / 已有远端与本地读数（E1）+ **18 条回原文核验的外部一手来源（T1）** |
 | B 推断类 | 5 | 由 A 类推出、尚未实测的判定（附录 B） |
 | C 类（决策） | 11 | 候选路线对比、两项裁决建议（不参与 R7 对账） |
 | 假设区 | 0 | 本批无新开假设（未决项以 U-1~U-3 四元块登记，不入 H 区） |
@@ -295,6 +296,31 @@ upstream: null
 2. **默认只做「可动 / 不可动 + 排序」，不做关键路径**：四家均无 CPM / 松弛量 / 工期推算功能；本仓 §7.4 的「不做 CPM」与社区实践同向。
 3. **反向边与依赖校验是标配而非可选项**：`BLOCKING`（A-27）、`--blocking`（A-29）、`validate-dependencies`（A-31）说明成熟实现都会提供「谁在等我」与「数据是否自洽」两条能力——本仓若只做单向 `dep`，会缺一半。
 4. **编号空间与生命周期解耦是成熟做法**：Taskwarrior「短 ID 可变 + UUID 永久」（A-26）、Beads「hash ID 防碰撞」（A-33）都在解决同一件事——**人读的短号不应承担永久引用职责**。本仓 P 号目前同时承担两者（详见 §13.2）。
+
+---
+
+### 12.4 工作项级外部锚点（P-156 / P-157）
+
+> 本节为两个 `pending` 工作项补外部事实，回答「这两件事在成熟实践里长什么样」；不改变 §13 的裁决结论。
+
+【A】A-37 Nygard（2011）原始 ADR 提案给出状态词表 **proposed / accepted**，并规定「若后续 ADR 改变或推翻某决定，该记录可标记为 **deprecated 或 superseded 并引用其替代**」；同时指出「当上下文改变时，旧决定**应当被重审**（revisited）」——这是「决策需要到期复算」的原始出处，也说明复算的产物是**状态或新记录**，不是改写旧文。来源：<https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions>。
+
+【A】A-38 MADR 4.0.0 模板把替代关系写进 front-matter：`status: "{proposed | rejected | accepted | deprecated | … | superseded by ADR-0123"`——即**替代必须带指针**，不能只写「作废」。来源：<https://adr.github.io/madr/>。
+
+【A】A-39 Microsoft Well-Architected「Maintain an architecture decision record」：ADR 是 **append-only log**，「**不要回头修改已 accepted 的记录**；决定变化时写新记录 supersede 原记录并互链」；状态含 Proposed / Accepted / Superseded；并建议记录决策的 **confidence**，「以便未来重新审议」。来源：<https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record>。
+
+【A】A-40 同页另一条：架构师应推动团队统一采用**单一真值源（single source of truth）**，用于参考、审计与事件响应。来源同上 A-39。
+
+【A】A-41 CQRS（microservices.io）：写模型与读模型分离，**读模型是只读 replica，通过订阅领域事件保持更新**（可并存多个反规范化视图）；代价明列为「复制滞后 / 最终一致」。来源：<https://microservices.io/patterns/data/cqrs.html>。
+
+【A】A-42 Transactional outbox（microservices.io）：在没有 2PC 的前提下，**同时原子写数据库与发消息不可行**；做法是先在同一事务内写 outbox，再由独立 relay 派生发送——即「**单一写入点 + 下游派生**」，而不是双写。来源：<https://microservices.io/patterns/data/transactional-outbox.html>。
+
+**两个工作项的外部形态对照（判断，不新增 C 编号）**：
+
+| 工作项 | 成熟实践给出的形态 | 对本仓的直接含义 |
+|---|---|---|
+| **P-156**（ADR-0006 到期复算） | 状态枚举 + `superseded by` 指针 + **append-only** + 记录 confidence（A-37~A-39） | 到期复算的产物应是**新记录 / 新状态与互链**，**不回改**旧 ADR；`confidence` 与到期判据同源（低置信 ⇒ 更早重审） |
+| **P-157**（三链共振 / 第二消费者） | 单一写入点 + 读出派生（CQRS / outbox）+ 单一真值源（A-40~A-42） | 「第二消费者」出现时的正确动作是让新消费者**从 `PROGRESS` 派生**，而非双写同步；「复制滞后 / 视图过期」是已知代价，应显式声明阈值 |
 
 ---
 
