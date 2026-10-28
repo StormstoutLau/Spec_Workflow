@@ -4,7 +4,7 @@
 
 id: framework-deep-review-RESEARCH
 type: design
-version: 1.21
+version: 1.23
 status: draft
 date: 2026-10-26
 depends: [ADR-0010, FWK-ASSERTION]
@@ -14,6 +14,8 @@ upstream: null
 
 > **Feature**: framework-deep-review（当前框架深度评审、前沿对标与分优先级升级建议）
 > **创建日期**: 2026-10-26
+> **修订**: v1.23（2026-10-28，P-151：**evil 侧远端阻断实测（A-51）**——路径 2 探针 PR #67（run `40681417404`）：阶段 1 判 `evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` → **exit 1**，`verify = failure`、`mergeStateStatus = BLOCKED`、`origin/main` 未被污染；新增 §14.9 三项判据读数 + 边界（空白变体夹具的诚实声明）；A 类 **50 → 51**）
+> **修订**: v1.22（2026-10-28，P-150：**PR 面读数订正 + evil 侧远端路径裁决**——① 订正 P-145~P-149 五行「PR 面阶段 1 未命中」的错误表述（实测 5 个 PR run 均命中 GitHub 合成 merge ref 并判 `无 evil 内容`）；② 新增 §14.8 两条 evil 侧构造路径对比（社区实践分级）+ **裁决 = 路径 2（分支内构造合并提交 → 失败 PR）**；③ A 类计数不变）
 > **修订**: v1.21（2026-10-28，P-149：**阶段 1 远端第 5 样本**——§14.7 追加真实 `push(main)` 读数（run `40676513311` / 合并提交 `64c6313` / `无 evil 内容（6 个受判路径均等于某一父）` / 墙钟 81 s 全绿）；同一断言 A-50 的第 5 远端样本，A 类计数不变）
 > **修订**: v1.20（2026-10-28，P-148：**阶段 1 远端第 4 样本**——§14.7 追加真实 `push(main)` 读数（run `40666293529` / 合并提交 `fb01568` / `无 evil 内容（6 个受判路径均等于某一父）` / 墙钟 82 s 全绿）；同一断言 A-50 的第 4 远端样本，A 类计数不变）
 > **修订**: v1.19（2026-10-28，P-147：**阶段 1 远端第 3 样本**——§14.7 追加真实 `push(main)` 读数（run `40663831556` / 合并提交 `023e456` / `无 evil 内容（6 个受判路径均等于某一父）` / 墙钟 66 s 全绿）；同一断言 A-50 的第 3 远端样本，A 类计数不变）
@@ -45,7 +47,7 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 50 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
+| A 事实类 | 51 | 本仓只读代码 / 机械实测（E1）+ 已回原文核验的外部一手来源（T1） |
 | B 推断类 | 27 | 由 A 类推出的判定（见附录 B） |
 | C 类（决策） | 9 | 不参与 R7 机械对账（DR-2） |
 | 假设区 | 14 | 未实测 / 未裁决项（见附录 C） |
@@ -557,11 +559,11 @@ upstream: null
   - **当前倾向**：C 六臂注入落为 8 例（临时 git 仓 + 真实 runner，`tests/test_batch_binding.py` 20 → 28）；回退 = 边界常量置哨兵值（9999）降为观察；跨批 rebind 原因**不作要求**（理由见 §12.2 R2）；
   - **证据等级**：E1（批次 session gate/digest 读数：160 jsonl / **155 批次 session** / 5 非批次 / 批次最大 P = P-136 ⇒ 全 < 137，2026-10-27 实测；坏 base → git diff exit 128 且包装层跳过；41bb0c4/3bc99fa/c779e6d 三提交同改同一组文档 ⇒ per-batch 作用域必要；P-134 本地注入 5/5；P-137 注入 8/8）。
 
-- **U-11 逐提交遍历的合并面残留**（**已实测并关闭（P-144）**）
+- **U-11 逐提交遍历的合并面残留**（**已实测并关闭（P-144）；远端阻断由 P-151 实测（A-51，§14.9）**）
   - **判据**：合并提交（≥2 父）的内容变更须有覆盖路径，且 `push(main)` 走查不因并集 diff 重复判红；
   - **触发条件**：出现 evil merge（合并结果含父提交均无的内容）导致漏检，或 `main` 的 push 走查出现并集式假红（P-140 已实施，2026-10-27）；
   - **当前倾向**：常规 diff 仍**显式跳过**（变更 = 父提交并集，逐父已被同循环覆盖）；**evil 内容**（两父皆无）由 `step_enforce --check-merge` 单独判红（P-144 实施），该内容须由后续声明批次承载；**不做并集 diff**（避免 P-140 假红复发）；
-  - **证据等级**：E1（A-49 逃逸实测：同内容走合并解决 exit 0 / 走普通提交 exit 1；A-50 检测四态：evil→1、干净→0、=第一父→0、非合并→0；`push(main)` 面无并集假红，A-48）；**边界 = 非受判路径**（`spec/**` / `sessions/**` / `docs/PROGRESS.md` 之外）不在本门禁内——合并与非合并同口径，非合并特有残留。
+  - **证据等级**：E1（A-49 逃逸实测：同内容走合并解决 exit 0 / 走普通提交 exit 1；A-50 检测四态：evil→1、干净→0、=第一父→0、非合并→0；`push(main)` 面无并集假红，A-48；**P-151 远端阻断实测 A-51** = 探针 PR #67 阶段 1 exit 1 + `verify = failure` + `mergeStateStatus = BLOCKED` + `main` 无污染〔夹具 = 行尾空白变体，语义级 evil 仍以 A-49/A-50 临时仓读数为准〕）；**边界 = 非受判路径**（`spec/**` / `sessions/**` / `docs/PROGRESS.md` 之外）不在本门禁内——合并与非合并同口径，非合并特有残留。
 
 ---
 
@@ -958,7 +960,7 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 | 面 | 读数 |
 |---|---|
-| PR #61（`pull_request`） | run `40603562855`：`verify` **1m12s 通过**；range 仅 1 个非合并提交 ⇒ 阶段 1 循环**未命中**（无合并提交），阶段 2 正常受判该提交 |
+| PR #61（`pull_request`） | run `40603562855`：`verify` **1m12s 通过**；**阶段 1 命中 GitHub 合成合并提交 `aabec54` 并判 `无 evil 内容（6 个受判路径均等于某一父）`**，阶段 2 skip 合成合并 + 受判 1 个普通提交（`ca456a4..aabec54`）；〔原记「阶段 1 循环未命中」有误，P-150 订正〕 |
 | 合并 | `gh pr merge --merge` ⇒ 合并提交 `e8154eb`（父 = `ca456a4` + `c255272`） |
 | `push(main)` run `40603730644` | `conclusion = success`、`23:40:30Z → 23:41:58Z` = **88 s**、8 step 全 ✓ |
 | 阶段 1（首次对真实合并提交判定） | `step-enforce: merge e8154eb… **无 evil 内容（6 个受判路径均等于某一父）**`（6 = 四文档 + `docs/PROGRESS.md` + session） |
@@ -972,13 +974,13 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 | 面 | 读数 |
 |---|---|
-| PR #62（`pull_request`） | run `40660422565`：`verify` **1m20s 通过**；range 仅 1 个非合并提交 ⇒ 阶段 1 循环**未命中**（与第 1 样本同形） |
+| PR #62（`pull_request`） | run `40660422565`：`verify` **1m20s 通过**；**阶段 1 命中合成合并提交 `6e1a1a9` 并判 `无 evil 内容（6 个受判路径均等于某一父）`**；〔原记「未命中」有误，P-150 订正〕 |
 | 合并 | `gh pr merge --merge` ⇒ 合并提交 `7bcce12`（父 = `e8154eb` + `ac6d194`） |
 | `push(main)` run `40660622448` | `conclusion = success`、`08:58:13Z → 08:59:42Z` = **89 s**、8 step 全 ✓ |
 | 阶段 1 | `step-enforce: merge 7bcce12… **无 evil 内容（6 个受判路径均等于某一父）**` |
 | 阶段 2 | `skip merge commit 7bcce12…（变更 = 父提交并集）` + `受判提交 1 个（range e8154eb..7bcce12）` |
 
-- **补充意义**：第 1 样本（`e8154eb`）之后紧接一次新的真实合并提交，阶段 1 **再次**产出非空判定（同为 6 个受判路径）且 exit 0 ⇒ 「干净合并不误判」不是一次性的；PR 面的「未命中」也在第 2 个 PR 上重复成立（由 design 决定，非偶然）；
+- **补充意义**：第 1 样本（`e8154eb`）之后紧接一次新的真实合并提交，阶段 1 **再次**产出非空判定（同为 6 个受判路径）且 exit 0 ⇒ 「干净合并不误判」不是一次性的；PR 面同时**命中合成合并提交**并判 `无 evil 内容`（原记「未命中」有误，P-150 订正）⇒ 两级读数均为「命中且无 evil」；
 - **口径**：**不新增 A 编号**（A-50 的第 2 远端样本，A 类计数保持 50）；CHECKLIST §2.8 **#55** 为该样本的验收位点；
 - **边界**：与第 1 样本同——只覆盖干净合并一侧，evil 侧远端仍未构造。
 
@@ -986,13 +988,13 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 | 面 | 读数 |
 |---|---|
-| PR #63（`pull_request`） | run `40663491255`：`verify` **1m25s 通过**；range 仅 1 个非合并提交 ⇒ 阶段 1 循环**未命中**（与第 1 / 第 2 样本同形） |
+| PR #63（`pull_request`） | run `40663491255`：`verify` **1m25s 通过**；**阶段 1 命中合成合并提交 `71f858e` 并判 `无 evil 内容（6 个受判路径均等于某一父）`**；〔原记「未命中」有误，P-150 订正〕 |
 | 合并 | `gh pr merge --merge` ⇒ 合并提交 `023e456`（父 = `7bcce12` + `f5f08a9`） |
 | `push(main)` run `40663831556` | `conclusion = success`、`09:23:18Z → 09:24:24Z` = **66 s**、8 step 全 ✓ |
 | 阶段 1 | `step-enforce: merge 023e456… **无 evil 内容（6 个受判路径均等于某一父）**` |
 | 阶段 2 | `f5f08a9` → `mode=batch pid=P-146 source=P-row`、`digest_bound=1`；`skip merge commit 023e456…（变更 = 父提交并集）` + `受判提交 1 个（range 7bcce12..023e456）` |
 
-- **补充意义**：第 3 个连续真实合并提交上阶段 1 **再次**产出非空判定（受判路径恒为 6 个）且 exit 0 ⇒ 「干净合并不误判」在三个连续样本上稳定；PR 面「未命中」第三次重复成立（由设计决定，非偶然）；
+- **补充意义**：第 3 个连续真实合并提交上阶段 1 **再次**产出非空判定（受判路径恒为 6 个）且 exit 0 ⇒ 「干净合并不误判」在三个连续样本上稳定；PR 面同时命中合成合并提交并判 `无 evil 内容`（原记「未命中」有误，P-150 订正）；
 - **口径**：**不新增 A 编号**（A-50 的第 3 远端样本，A 类计数保持 50）；CHECKLIST §2.8 **#56** 为该样本的验收位点；
 - **边界**：与第 1 / 第 2 样本同——只覆盖**干净合并**一侧，evil 侧远端仍未构造。
 
@@ -1000,13 +1002,13 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 | 面 | 读数 |
 |---|---|
-| PR #64（`pull_request`） | run `40666075396`：`verify` **1m20s 通过**（墙钟 `09:40:25Z → 09:41:49Z`）；range 仅 1 个非合并提交 ⇒ 阶段 1 循环**未命中**（与前三样本同形） |
+| PR #64（`pull_request`） | run `40666075396`：`verify` **1m20s 通过**（墙钟 `09:40:25Z → 09:41:49Z`）；**阶段 1 命中合成合并提交 `a326f9f` 并判 `无 evil 内容（6 个受判路径均等于某一父）`**；〔原记「未命中」有误，P-150 订正〕 |
 | 合并 | `gh pr merge --merge` ⇒ 合并提交 `fb01568`（父 = `023e456` + `ec10e62`） |
 | `push(main)` run `40666293529` | `conclusion = success`、`09:42:07Z → 09:43:29Z` = **82 s**、8 step 全 ✓ |
 | 阶段 1 | `step-enforce: merge fb01568… **无 evil 内容（6 个受判路径均等于某一父）**` |
 | 阶段 2 | `mode=batch pid=P-147 source=P-row`、`digest_bound=1`；`skip merge commit fb01568…（变更 = 父提交并集）` + `受判提交 1 个（range 023e456..fb01568）` |
 
-- **补充意义**：第 4 个连续真实合并提交上阶段 1 **再次**产出非空判定（受判路径恒为 6 个）且 exit 0 ⇒ 「干净合并不误判」在四个连续样本上稳定；PR 面「未命中」第四次重复成立（由设计决定，非偶然）；
+- **补充意义**：第 4 个连续真实合并提交上阶段 1 **再次**产出非空判定（受判路径恒为 6 个）且 exit 0 ⇒ 「干净合并不误判」在四个连续样本上稳定；PR 面同时命中合成合并提交并判 `无 evil 内容`（原记「未命中」有误，P-150 订正）；
 - **口径**：**不新增 A 编号**（A-50 的第 4 远端样本，A 类计数保持 50）；CHECKLIST §2.8 **#57** 为该样本的验收位点；
 - **边界**：与前三个样本同——只覆盖**干净合并**一侧，evil 侧远端仍未构造。
 
@@ -1014,16 +1016,108 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 | 面 | 读数 |
 |---|---|
-| PR #65（`pull_request`） | run `40676348854`：`verify` **58 s 通过**（墙钟 `10:58:49Z → 10:59:51Z`）；range 仅 1 个非合并提交 ⇒ 阶段 1 循环**未命中**（与前四样本同形） |
+| PR #65（`pull_request`） | run `40676348854`：`verify` **58 s 通过**（墙钟 `10:58:49Z → 10:59:51Z`）；**阶段 1 命中合成合并提交并判 `无 evil 内容（6 个受判路径均等于某一父）`**；〔原记「未命中」有误，P-150 订正〕 |
+| PR #66（`pull_request`，**P-150 取证补录**） | run `40677799676`：`verify` **1m22s 通过**；阶段 1 命中合成合并提交 `ed49d47` 并判 `无 evil 内容（6 个受判路径均等于某一父）`；阶段 2 `commit 52e72c0` + `skip merge commit ed49d47` |
 | 合并 | `gh pr merge --merge` ⇒ 合并提交 `64c6313`（父 = `fb01568` + `9f1aebb`） |
 | `push(main)` run `40676513311` | `conclusion = success`、`11:00:06Z → 11:01:27Z` = **81 s**、8 step 全 ✓ |
 | 阶段 1 | `step-enforce: merge 64c6313… **无 evil 内容（6 个受判路径均等于某一父）**` |
 | 阶段 2 | `mode=batch pid=P-148 source=P-row`、`digest_bound=1`；`skip merge commit 64c6313…（变更 = 父提交并集）` + `受判提交 1 个（range fb01568..64c6313）` |
 
-- **补充意义**：第 5 个连续真实合并提交上阶段 1 **再次**产出非空判定（受判路径恒为 6 个）且 exit 0 ⇒ 「干净合并不误判」在五个连续样本上稳定；PR 面「未命中」第五次重复成立（由设计决定，非偶然）；
+- **补充意义**：第 5 个连续真实合并提交上阶段 1 **再次**产出非空判定（受判路径恒为 6 个）且 exit 0 ⇒ 「干净合并不误判」在五个连续样本上稳定；PR 面同时命中合成合并提交并判 `无 evil 内容`（原记「未命中」有误，P-150 订正）；
 - **边际信息量（诚实）**：本样本与前 4 个**完全同形**，新增信息仅「再复现一次」；不改变任何判据，也不构成对 evil 侧的补充证据；
 - **口径**：**不新增 A 编号**（A-50 的第 5 远端样本，A 类计数保持 50）；CHECKLIST §2.8 **#58** 为该样本的验收位点；
 - **边界**：与前四样本同——只覆盖**干净合并**一侧，evil 侧远端仍未构造。
+
+## 14.8 evil 侧远端样本的构造路径裁决（P-150）
+
+### 14.8.1 订正：PR 面阶段 1 实为「命中」而非「未命中」
+
+**事实（E1，2026-10-28 复读 6 个 `pull_request` run 日志）**：`actions/checkout@v5` 在 `pull_request` 事件下默认检出 **GitHub 合成 merge ref**（`refs/pull/N/merge`），故 `HEAD` 本身就是合成合并提交，阶段 1 必然命中：
+
+| PR | run | 阶段 1 日志（合成合并提交） |
+|---|---|---|
+| #61 | `40603562855` | `merge aabec54… 无 evil 内容（6 个受判路径均等于某一父）` |
+| #62 | `40660422565` | `merge 6e1a1a9… 无 evil 内容（6 个受判路径均等于某一父）` |
+| #63 | `40663491255` | `merge 71f858e… 无 evil 内容（6 个受判路径均等于某一父）` |
+| #64 | `40666075396` | `merge a326f9f… 无 evil 内容（6 个受判路径均等于某一父）` |
+| #65 | `40676348854` | （同类行，见 §14.7 第 5 样本表订正） |
+| #66 | `40677799676` | `merge ed49d47… 无 evil 内容（6 个受判路径均等于某一父）` |
+
+**误记根因**：日志里的 `受判提交 1 个` 指**分支侧普通提交**（阶段 2 计数），被误读为「range 内无合并提交 ⇒ 阶段 1 未命中」。**订正范围** = §14.7 五行 PR 行 + 四条「补充意义」bullet；`PROGRESS` P-145~P-149 与 `IMPLEMENTATION §3.11` 同批就地订正；`CODE_WIKI` v1.194~v1.198 历史 banner 保留原貌（版本历史 append-only），订正统一记入 v1.199。
+
+**结构含义（重要）**：本仓**每次 PR 都已天然包含一次合并提交判定**——只是合成合并提交的树恒等于 head 树（等于某一父），故恒判「无 evil」。这条路径无法证明 evil 判红。
+
+### 14.8.2 两条 evil 侧构造路径
+
+| 维度 | 路径 1：临时放宽保护 → 直推 evil 合并到 `main` | 路径 2：分支内构造 evil 合并 → 失败 PR |
+|---|---|---|
+| 机制 | 关 `enforce_admins`（GitHub「Do not allow bypassing」）→ `git push origin main`（本地 merge 冲突解决写入两父皆无内容） | 特征分支上 `git merge` 制造冲突 → 解决写入两父皆无内容 → push 分支 → 开 PR |
+| 能否**阻断** | **不能**：`push(main)` CI 在内容进入 main **之后**才跑，只证明「能检测」 | **能**：required check 失败 ⇒ `mergeStateStatus = BLOCKED` |
+| main 污染 | **永久**：合并提交进历史；`allow_force_pushes=false` ⇒ 连 revert 也无法清除该提交 | **零**（PR 关闭 + 分支删除，两个探针提交不进 main） |
+| 保护规则风险 | 窗口期内**全部**保护失效；恢复漏项 ⇒ 仓库静默降级 | 全程不动保护规则 |
+| 失败面层级 | Layer-1（仓库设置） | Layer-0（分支 + PR） |
+| 可重复性 | 每次都要改设置 | 一次性夹具，可脚本化 |
+| 残留 | main 历史 + 两次设置变更 | 一个 closed PR + 一条红 run（本身即证据） |
+
+### 14.8.3 社区实践检索（分级）
+
+- **T1（官方一手，已回原文）** gitglossary（2.56.0）：*“An evil merge is a merge that introduces changes that do not appear in any parent.”* —— 与 §14.7 判据（同时不等于两父）逐字一致 ⇒ 判据无争议，争议只在「怎么造样本」；
+- **T1（官方一手，已回原文）** GitHub「About protected branches」：① *“By default, the restrictions of a branch protection rule do not apply to people with admin permissions…”* ⇒ 路径 1 必须解除的正是这条默认（本仓 `enforce_admins=true` 已开启「Do not allow bypassing」）；② required check 须为 `successful / skipped / neutral` 才允许合并 ⇒ 路径 2 的判红天然落在「不 success ⇒ 不可合并」；
+- **T3（社区教程）** CI/CD 实操文中的同款手法：*“Open a pull request … but do not merge it. GitHub Actions runs Verify, reports the failed test, and the active ruleset blocks the merge. … That proves the first gate works.”* —— 「用一次性失败 PR 证明门禁有效」是常见做法；
+- **T3（GitLab 议题）** evil merge 在托管平台 UI 中极难辨识（*“hard to work out what happened in a merge commit”*）⇒ 这类样本应只存在于一次性分支，不应进主干。
+
+**诚实边界**：未检索到专门讨论「evil merge 检测门禁」的权威实践文献，也未检索到「为验证门禁而临时关闭 branch protection」的正面案例；上述材料只能支撑「用失败 PR 演示门禁」与「不动生产保护配置」两条一般做法，本仓判据与检测器为自研。
+
+### 14.8.4 机制实测（E1，临时仓，2026-10-28）
+
+在一次性仓复现「分支内合并提交是否进入 PR 式 range」：
+
+```text
+git rev-list --parents -n 1 HEAD   → 04dc0b2 35303a9 3566355   （words = 3）
+git rev-list --reverse main..HEAD  → 3566355 C2 (words=2)
+                                     35303a9 C1 (words=2)
+                                     04dc0b2 MERGE (words=3)   ← 分支内合并提交确实在 range 内
+```
+
+⇒ [ci.yml](../../.github/workflows/ci.yml) 阶段 1 会对该提交调 `--check-merge`；且 `set -eo pipefail` 下 exit 1 **立即中止**（阶段 2 不执行）⇒ 归因单一。
+
+### 14.8.5 裁决：走路径 2
+
+**理由**：① 唯一能证明「阻断」（本门禁最核心、至今未被证明的属性）；② 零 main 污染 + 不动保护规则（代价最小）；③ 可重复、可脚本化，失败面停留在 Layer-0；④ 路径 1 在 `push(main)` 面本就只能事后检测，且永久留痕与保护窗口风险不可逆。
+
+**执行步骤（P-151）**：
+
+1. `git checkout -b probe/evil-merge main` → 改 `spec/framework-deep-review/RESEARCH.md` 某行 → 提交 C1；
+2. 从**同一 `main`** 再开 `probe/evil-side` → 改同一行 → 提交 C2（同源保证 GitHub 能算出合成 merge，否则 CI 不跑）；
+3. 回 `probe/evil-merge`：`git merge probe/evil-side` → 冲突 → 解决为**两父皆无**的新文本 → 合并提交 M；
+4. push + `gh pr create` → 取读数；
+5. `gh pr close` + 删远端 / 本地分支。
+
+**判据（三项同时成立才算闭环）**：① `verify` = failure 且日志含 `evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` + `-> exit 1`；② `gh pr view --json mergeStateStatus` = `BLOCKED`；③ `main` 历史无该合并提交（`git log --oneline main | grep -c MERGE` 不增）。
+
+**边界**：探针分支上的 C1 / C2 也会被阶段 2 受判（无批次声明 ⇒ 同样判红），但阶段 1 fail-fast 先中止，故日志归因唯一；探针 PR 关闭后不并入 `main`，不产生任何真值源改动。
+
+## 14.9 evil 侧远端阻断实测（P-151）
+
+**夹具构造（E1，2026-10-28）**：`git checkout -b probe/evil-merge origin/main` → C1 `6524fbe`（`Feature` 行行尾 +1 空格）→ 从**同一** `origin/main` 开 `probe/evil-side` → C2 `743b29c`（同一行 +2 空格）→ 回 `probe/evil-merge`：`git merge probe/evil-side` ⇒ `CONFLICT (content)` → 解决为 **+3 空格**（既非 C1 的 1 个、也非 C2 的 2 个）→ 合并提交 M `bdc9a96`（父 = `6524fbe` + `743b29c`）。本地预检 `python scripts/step_enforce.py --check-merge bdc9a96` ⇒ **exit 1**。push 分支 + PR #67（`pull_request`）。
+
+| 判据（§14.8.5 预注册） | 读数 | 结论 |
+|---|---|---|
+| ① `verify` = failure 且日志含归因 | run `40681417404`（`pull_request`，head `bdc9a96`）：`11:37:36Z → 11:38:01Z` = **25 s**；`conclusion = failure`；失败 step = `决策流批次强制（step-enforce，逐提交）`；日志 = `step-enforce: evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` + `step-enforce: evil merge bdc9a96… -> exit 1（该内容须由后续声明批次承载）` | ✅ |
+| ② 合并被阻断 | `gh pr view 67 --json mergeStateStatus` = **`BLOCKED`**（同时 `mergeable = MERGEABLE` ⇒ 无冲突，阻断来自 required check 不 success） | ✅ |
+| ③ `main` 无污染 | `origin/main` 仍为 `6b599b5`；`bdc9a96` 只存在于 `origin/probe/evil-merge`（PR 关闭后已删除） | ✅ |
+
+**阶段 2 未执行（fail-fast 生效）**：日志无 `skip merge commit` / `受判提交` 的运行期输出（仅有 workflow 源码回显）⇒ `set -eo pipefail` 下阶段 1 exit 1 立即中止，归因唯一。**清理** = `gh pr close 67 --delete-branch` + 本地分支删除 + `git remote prune origin`；残留 = 一个 closed PR + 一条红 run（本身即证据）。
+
+**边界（诚实）**：
+
+- 夹具内容为**行尾空白变体**（1 / 2 / 3 个空格），**不是**语义文本。原因：本仓 pre-commit 的 `step-enforce` 对四文档语义改动要求批次声明 ⇒ 语义 evil 合并提交在**本地即被拦**，要构造只能 `--no-verify`（违反本仓「不得跳过 pre-commit 检查」纪律）。判据「同时不等于两父」是**逐字节**比较（`git diff --quiet`），空白差异同样成立 ⇒ 结论对**判据本身**有效；但**不能**据此声称「语义级 evil 内容在真实 PR 上被独立阻断」——那部分仍以 A-49 / A-50 临时仓读数为准。
+- **由此暴露一处口径不一致（观察项，本批不开）**：本地 `step-enforce` 的 maintenance 模式用 `-w --ignore-blank-lines` 判「仅空白」，而 `--check-merge` 用逐字节比较 ⇒ **纯空白合并解析在本地面放行、在远端阶段 1 面阻断**。两者面向不同判定（前者判「本批是否声明」、后者判「内容是否属于任一父」），是否应统一 = 待裁决。
+- 探针 PR 的 `mergeable = MERGEABLE` 说明「阻断」= required check 未 success，不是冲突拒绝。
+
+【A】A-51 evil 侧远端阻断实测（E1，2026-10-28）：探针 PR #67（run `40681417404`，head `bdc9a96`）三项判据均成立——阶段 1 对该合并提交判 `evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` 并 exit 1；`verify = failure`（25 s）、`mergeStateStatus = BLOCKED`、`origin/main` 未被污染；阶段 2 未执行（fail-fast）。夹具内容 = 行尾空白变体（边界见上）。
+
+**口径** = 新增 **A-51**（A 类 **50 → 51**），验位点 = CHECKLIST §2.8 **#60**。
 
 ## 15. 参考文献
 
@@ -1052,7 +1146,7 @@ metadata.rebind_reason   = "<非空原因>"      # 仅 rebind 时（末次 final
 
 ## 附录 A：A 类断言索引
 
-A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外部一手来源 / 标准原文；A-29~A-35 为本次核验的官方文档与安全公告；A-36~A-42 为 U-1 专项实测；A-43~A-44 为 P1-1 门禁缺口与真实 runner 集成回归实测（§13）；A-45~A-46 为 P-140 CI 结构性假红与逐提交遍历实测（§14）；**A-47 为 P-141 CI 远端首次实测回填（§14.4）；A-48 为 P-142 `push(main)` 合并面实测回填（§14.5；第 2 样本由 P-143 补充）；A-49～A-50 为 P-144 evil merge 逃逸实测与检测四态（§14.7；**A-50 含 P-145 / P-146 / P-147 / P-148 / P-149 的五个真实 `push(main)` 远端样本**）**。逐条证据已在 §3~§5、§11、§13~§14 就地给出，此处不重复。
+A-1~A-20 为本仓机械实测 / 源码直读；A-21~A-28 为已回原文的外部一手来源 / 标准原文；A-29~A-35 为本次核验的官方文档与安全公告；A-36~A-42 为 U-1 专项实测；A-43~A-44 为 P1-1 门禁缺口与真实 runner 集成回归实测（§13）；A-45~A-46 为 P-140 CI 结构性假红与逐提交遍历实测（§14）；**A-47 为 P-141 CI 远端首次实测回填（§14.4）；A-48 为 P-142 `push(main)` 合并面实测回填（§14.5；第 2 样本由 P-143 补充）；A-49～A-50 为 P-144 evil merge 逃逸实测与检测四态（§14.7；**A-50 含 P-145 / P-146 / P-147 / P-148 / P-149 的五个真实 `push(main)` 远端样本**；**A-51 为 P-151 的 evil 侧远端阻断实测（§14.9：探针 PR #67 / run `40681417404` / exit 1 + BLOCKED + main 无污染）**）**。逐条证据已在 §3~§5、§11、§13~§14 就地给出，此处不重复。
 
 ## 附录 B：B 类推断（机读登记）
 

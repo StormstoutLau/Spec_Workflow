@@ -4,7 +4,7 @@
 
 id: framework-deep-review-IMPLEMENTATION
 type: design
-version: 1.15
+version: 1.17
 status: draft
 date: 2026-10-26
 depends: [framework-deep-review-DESIGN, framework-deep-review-RESEARCH]
@@ -29,6 +29,8 @@ upstream: null
 > **修订**: v1.13（2026-10-28，P-147：**阶段 1 远端第 3 样本**——§3.11 补 run `40663831556`（合并提交 `023e456` / 66 s 全绿）；实施面零变更）
 > **修订**: v1.14（2026-10-28，P-148：**阶段 1 远端第 4 样本**——§3.11 补 run `40666293529`（合并提交 `fb01568` / 82 s 全绿）；实施面零变更）
 > **修订**: v1.15（2026-10-28，P-149：**阶段 1 远端第 5 样本**——§3.11 补 run `40676513311`（合并提交 `64c6313` / 81 s 全绿）；实施面零变更）
+> **修订**: v1.16（2026-10-28，P-150：**PR 面读数订正**——§3.11 五行「PR 面阶段 1 未命中」就地订正（合成 merge ref ⇒ 恒命中）；实施面零变更）
+> **修订**: v1.17（2026-10-28，P-151：**evil 侧远端阻断读数**——§3.11 补探针 PR #67 读数（run `40681417404` / 25 s / failure / 阶段 1 exit 1 / BLOCKED）；实施面零变更）
 > **状态**: 草稿
 > **Spec 步骤**: Step 5-6
 > **基于设计**: [DESIGN.md](./DESIGN.md)
@@ -463,15 +465,19 @@ done
 
 **读数（E1）**：新增 **4/4 PASS**；`unittest discover` **51 → 55**；实验仓交叉验证 `--check-merge <M>` → exit 1、`<C2>` → exit 0（A-49/A-50）。
 
-**远端读数（P-145 登记）**：真实 `push(main)` run `40603730644`（合并提交 `e8154eb`）阶段 1 输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 `skip merge commit` + 受判 1 个、**88 s** 全绿；PR #61 `verify` **1m12s 通过**（range 仅 1 个非合并提交 ⇒ 阶段 1 循环未命中）。
+**远端读数（P-145 登记）**：真实 `push(main)` run `40603730644`（合并提交 `e8154eb`）阶段 1 输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 `skip merge commit` + 受判 1 个、**88 s** 全绿；PR #61 `verify` **1m12s 通过**（PR 面 HEAD = 合成 merge ref ⇒ 阶段 1 命中合成合并提交并判 `无 evil 内容（6 个受判路径）`；原记「未命中」有误，P-150 订正）。
 
-**远端读数（P-146 登记，第 2 样本）**：run `40660622448`（合并提交 `7bcce12`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个、**89 s** 全绿；PR #62 `verify` **1m20s 通过**（range 同样仅 1 个非合并提交 ⇒ 阶段 1 未命中）。
+**远端读数（P-146 登记，第 2 样本）**：run `40660622448`（合并提交 `7bcce12`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个、**89 s** 全绿；PR #62 `verify` **1m20s 通过**（PR 面 HEAD = 合成 merge ref ⇒ 阶段 1 命中合成合并提交并判 `无 evil 内容（6 个受判路径）`；原记「未命中」有误，P-150 订正）。
 
-**远端读数（P-147 登记，第 3 样本）**：run `40663831556`（合并提交 `023e456`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个（`mode=batch pid=P-146`、`digest_bound=1`）、**66 s** 全绿；PR #63 `verify` **1m25s 通过**（range 同样仅 1 个非合并提交 ⇒ 阶段 1 未命中）。
+**远端读数（P-147 登记，第 3 样本）**：run `40663831556`（合并提交 `023e456`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个（`mode=batch pid=P-146`、`digest_bound=1`）、**66 s** 全绿；PR #63 `verify` **1m25s 通过**（PR 面 HEAD = 合成 merge ref ⇒ 阶段 1 命中合成合并提交并判 `无 evil 内容（6 个受判路径）`；原记「未命中」有误，P-150 订正）。
 
-**远端读数（P-148 登记，第 4 样本）**：run `40666293529`（合并提交 `fb01568`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个（`mode=batch pid=P-147`、`digest_bound=1`）、**82 s** 全绿；PR #64 `verify` **1m20s 通过**（range 同样仅 1 个非合并提交 ⇒ 阶段 1 未命中）。
+**远端读数（P-148 登记，第 4 样本）**：run `40666293529`（合并提交 `fb01568`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个（`mode=batch pid=P-147`、`digest_bound=1`）、**82 s** 全绿；PR #64 `verify` **1m20s 通过**（PR 面 HEAD = 合成 merge ref ⇒ 阶段 1 命中合成合并提交并判 `无 evil 内容（6 个受判路径）`；原记「未命中」有误，P-150 订正）。
 
-**远端读数（P-149 登记，第 5 样本）**：run `40676513311`（合并提交 `64c6313`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个（`mode=batch pid=P-148`、`digest_bound=1`）、**81 s** 全绿；PR #65 `verify` **58 s 通过**（range 同样仅 1 个非合并提交 ⇒ 阶段 1 未命中）。
+**远端读数（P-149 登记，第 5 样本）**：run `40676513311`（合并提交 `64c6313`）阶段 1 再次输出 `无 evil 内容（6 个受判路径均等于某一父）`，阶段 2 skip + 受判 1 个（`mode=batch pid=P-148`、`digest_bound=1`）、**81 s** 全绿；PR #65 `verify` **58 s 通过**（PR 面 HEAD = 合成 merge ref ⇒ 阶段 1 命中合成合并提交并判 `无 evil 内容（6 个受判路径）`；原记「未命中」有误，P-150 订正）。
+
+**订正说明（P-150）**：`actions/checkout@v5` 在 `pull_request` 事件下默认检出 GitHub 合成 merge ref（`refs/pull/N/merge`），故本 workflow 在 PR 面的 `HEAD` 即合成合并提交，阶段 1 每次 PR 都会对其调 `--check-merge`；合成合并的树恒等于 head 树（等于某一父）⇒ 恒判「无 evil」。evil 侧取证须走分支内构造合并提交的探针 PR（RESEARCH §14.8，裁决 = 路径 2），实测机制（`rev-list --parents` 词数 = 3）见同节 §14.8.4。
+
+**evil 侧远端阻断读数（P-151，A-51）**：探针 PR #67（head `bdc9a96`，父 = C1 `6524fbe` + C2 `743b29c`；`git merge` 冲突解决写入两父皆无的行尾空白）⇒ run `40681417404`（`pull_request`）：**25 s**、`conclusion = failure`；失败 step = `决策流批次强制（step-enforce，逐提交）`；日志 = `step-enforce: evil merge 内容（两父皆无）: spec/framework-deep-review/RESEARCH.md` + `step-enforce: evil merge bdc9a96… -> exit 1（该内容须由后续声明批次承载）`；阶段 2 **未执行**（无 `skip merge commit` / `受判提交` 运行期输出）= `set -eo pipefail` fail-fast。`gh pr view 67` ⇒ `mergeStateStatus = BLOCKED`、`mergeable = MERGEABLE`。清理后 `origin/main` 仍为 `6b599b5`。**夹具边界** = 行尾空白变体（语义级 evil 合并提交在本地 pre-commit 即被拦，构造需 `--no-verify`，故未取）。
 
 ## 4. 接口实施
 
