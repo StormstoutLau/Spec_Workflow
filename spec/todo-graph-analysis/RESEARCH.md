@@ -4,7 +4,7 @@
 
 id: todo-graph-analysis-RESEARCH
 type: design
-version: 1.0
+version: 1.1
 status: draft
 date: 2026-10-28
 depends: [project-console-RESEARCH, graph-structure-upgrade-RESEARCH, rework-and-decision-paths-RESEARCH]
@@ -17,7 +17,8 @@ upstream: null
 > **状态**: draft（草稿；只读分析 + 契约草案，零代码）
 > **Spec 步骤**: Step 1-2（T3 轻批：单文档研究，无四文档管线）
 > **任务来源**: 用户指令「回溯一下 历史调研里面是否有图结构编排 当前是否具备实施条件 / 另一个问题是 当前待办事项仅列入 progress 缺少待办事项的优先级 依赖关系分析 如何自动化实现此分析 是否与图结构编排存在某种关联 请深入调研」→「落档 P-153 分析批」
-> **批档次**: **T3 轻批**（裁剪理由 = 纯只读分析 + 单文档新增，零代码 / 零门禁 / 零真值源重定义 / 零依赖）
+> **修订**: v1.1（2026-10-28，P-154：**外部事实锚点补充 + 两项待裁决的明确建议**——新增 §12 外部事实锚点（**12 条 T1 一手核验**：Taskwarrior 虚拟标签与 ID/UUID 分离、GitHub Issues 原生依赖、Task Master `next` / 依赖校验、Beads 依赖图与 hash ID、Kahn 1962 拓扑排序、Steward 1981 DSM）；新增 §13 两项裁决（**A 开闸时点** / **B P 编号占用**）的对照与建议；A 类 **24 → 36**、B **4 → 5**、C **9 → 11**；原 §12 参考文献顺延 **§14**；零代码）
+> **批档次**: **T3 轻批**（裁剪理由 = 纯只读分析 + 单文档新增，零代码 / 零门禁 / 零真值源重定义 / 零依赖；v1.1 同理：外部检索 + 文档修订，零代码）
 > **ADR-0010 三问**: Q1 **Layer-0**（只读分析 + 文档新增）/ Q2 **用户指令**（「落档 P-153 分析批」）/ Q3 **副作用 0**（不改 `console_gen` / `spec_map` / `step_enforce` / 任何校验器与 hook）
 
 ---
@@ -26,12 +27,12 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 24 | 本仓文件逐行读取 / 机械枚举 / 已有远端与本地读数（E1） |
-| B 推断类 | 4 | 由 A 类推出、尚未实测的判定（附录 B） |
-| C 类（决策） | 9 | 候选路线对比与建议（不参与 R7 对账） |
+| A 事实类 | 36 | 本仓文件逐行读取 / 机械枚举 / 已有远端与本地读数（E1）+ **12 条回原文核验的外部一手来源（T1）** |
+| B 推断类 | 5 | 由 A 类推出、尚未实测的判定（附录 B） |
+| C 类（决策） | 11 | 候选路线对比、两项裁决建议（不参与 R7 对账） |
 | 假设区 | 0 | 本批无新开假设（未决项以 U-1~U-3 四元块登记，不入 H 区） |
 
-> **取证口径**：本批为**仓内只读调研**，不引入外部来源；所有事实均可由文件路径 + 行号复核。不把 C 类判断写成 A 类事实。
+> **取证口径**：仓内事实 = **E1**（逐字读文件、机械枚举）；外部来源分两档——**T1** = 本次亲自 WebFetch 回原始页面并核对原文（§12 全部 12 条）；**T2** = 检索摘要级、未回原文（仅作背景，不进入判据，本版未使用）。不把 C 类判断写成 A 类事实。
 
 ---
 
@@ -54,6 +55,8 @@ upstream: null
 | 源码读取 | `scripts/spec_map.py`、`scripts/console_gen.py`、`scripts/rework_graph_check.py`、`scripts/repo_stats.py` | 完成（E1） |
 | 机械枚举 | `docs/PROGRESS.md` 152 条 P 行状态、`spec/` 目录数、`docs/rework-graph.json` 分叉数 | 完成（E1） |
 | 正则普查 | `scripts/*.py` 中拓扑序 / DAG / 关键路径相关实现 | **零命中**（E1，见 A-16） |
+| WebFetch（v1.1） | Taskwarrior 文档（tags / ids / man task.1）、GitHub Docs（issue dependencies）、Task Master 命令参考、pkg.go.dev 上的 Beads README | 成功（T1，见 §12） |
+| WebSearch + 引文核对（v1.1） | Kahn 1962（CACM DOI）、Steward 1981（IEEE TEM DOI） | 成功（T1，见 §12） |
 
 ---
 
@@ -212,7 +215,7 @@ upstream: null
 
 ## 9. 开闸条件与建议（C 类）
 
-【C】C-9 若要把本草案推进到 Layer-1 实施，合规路径是**援引 project-console §7.12（四）触发②「用户显式裁决」**（A-15），并在实施批内显式引用该条款作为重审依据；否则只能做路线 B（对账），它不产出顺序。
+【C】C-9 若要把本草案推进到 Layer-1 实施，合规路径是**援引 project-console §7.12（四）触发②「用户显式裁决」**（A-15），并在实施批内显式引用该条款作为重审依据；否则只能做路线 B（对账），它不产出顺序。**外部对照与明确建议见 §13.1**。
 
 **建议执行序**：
 
@@ -228,13 +231,13 @@ upstream: null
 - **U-1 残余待办是否允许占用 P 编号**
   - **判据**：`PROGRESS` 出现 `pending` P 行且 `console_gen` 三档队列非空、`--check` 通过
   - **触发条件**：用户裁决（P 行语义 = 批次登记 vs 待办登记的取舍）
-  - **当前倾向**：只把「可开闸未开」的 8~10 项升格，观测项与跨仓项保持视图态
-  - **证据等级**：E1（现状 152/152 done、三档恒空）
+  - **当前倾向**：只把「可开闸未开」的 8~10 项升格，观测项与跨仓项保持视图态（v1.1 明确建议见 §13.2 C-11：允许占用 + 语义护栏；观察项不占号）
+  - **证据等级**：E1（现状 152/152 done、三档恒空）+ T1（Taskwarrior 双轨 ID A-26 / Beads hash ID A-33）
 
 - **U-2 首版是否只做「可动 / 不可动」二值**
   - **判据**：就绪集区块上线后，连续 3 批无需人工回读四张散文视图
   - **触发条件**：实施批完成后观察
-  - **当前倾向**：是（不引入权重、不做排序打分）
+  - **当前倾向**：是（不引入权重、不做排序打分；外部四家均只做「可动 / 不可动 + 排序」——§12.3 第 2 条）
   - **证据等级**：待核
 
 - **U-3 是否把 `console_gen` 纯派生模式推广到「依赖边」**
@@ -252,7 +255,86 @@ upstream: null
 
 ---
 
-## 12. 参考文献（仓内指针）
+## 12. 外部事实锚点（社区案例 + 学术，全部 T1）
+
+> **取证方式**：每条均于 2026-10-28 亲自 WebFetch 回原始页面并核对原文；检索摘要级（T2）材料一律未采用。外部事实只说明「别人怎么做」，**不构成**本仓实施有效的因果证据（外部有效性边界同 M7 自测口径）。
+
+### 12.1 任务管理工具：就绪集（ready set）是成熟标配
+
+【A】A-25 Taskwarrior 提供虚拟标签 `BLOCKED`（该任务是否依赖另一个未完成任务）、`UNBLOCKED` 与其反向 `BLOCKING`（是否有其他任务依赖本未完成任务），以及 `READY`（任务处于 pending 状态、未被阻塞、且未排期或排期已过；2.4.0 起）。来源：<https://taskwarrior.org/docs/tags/>。
+
+【A】A-26 Taskwarrior 明确区分两种标识：`ID` 是「工作集」中任务的 1-based 索引，会随工作集重建而变化；而 **UUID 永久**，「All tasks … have a UUID, and are always addressable by UUID」。来源：<https://taskwarrior.org/docs/ids/>。
+
+【A】A-27 Taskwarrior 的 `BLOCKING` 标签提供**反向查询**（谁在等我），与 `BLOCKED`（我在等谁）构成双向可查关系，而非只记录单向边。来源同上 A-25。
+
+【A】A-28 GitHub Issues 原生支持**依赖关系**：可把 issue 标记为「blocked by」（依赖他人）或「blocking」（阻塞他人）；被阻塞的 issue 在项目看板或 Issues 页显示 **Blocked 图标**，用于识别瓶颈。来源：<https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/creating-issue-dependencies>。
+
+【A】A-29 GitHub CLI 对同一关系提供命令面与机读面：`gh issue create/edit` 支持 `--blocked-by` / `--blocking`（逗号分隔 issue 号或 URL），`gh issue view --json blockedBy,blocking` 可直接取结构化字段。来源同上 A-28。
+
+【A】A-30 Task Master（`claude-task-master`）提供 `task-master next`：**基于依赖与状态**选出「下一个该做的任务」；同族命令还包括 `add-dependency` / `remove-dependency`。来源：<https://docs.task-master.dev/command-reference>。
+
+【A】A-31 Task Master 同时提供 `validate-dependencies`（只校验、不修复）与 `fix-dependencies`（自动修复非法依赖）⇒ 该工具的设计前提是**依赖数据会脏、需要校验与修复通道**，而非假设一次写对。来源同上 A-30。
+
+【A】A-32 Beads（`github.com/steveyegge/beads`）自我定位为「**Distributed graph issue tracker for AI agents**」，用 **dependency-aware graph** 替代「messy markdown plans」，具备 **auto-ready task detection**；`bd ready` 的定义是「List tasks with no open blockers」。来源：<https://pkg.go.dev/github.com/steveyegge/beads>（README 段）。
+
+【A】A-33 Beads 的 ID 采用 **hash-based**（形如 `bd-a1b2`），其 README 明示理由是「**Zero Conflict**：prevent merge collisions in multi-agent/multi-branch workflows」——即用非顺序 ID 规避多分支并发写入的编号冲突。来源同上 A-32。
+
+【A】A-34 Beads 用层级 ID 表达父子关系（`bd-a3f8` Epic / `bd-a3f8.1` Task / `bd-a3f8.1.1` Sub-task）；当前版本 **v1.3.2（2026-10-24 发布，MIT）**。来源同上 A-32。
+
+### 12.2 学术锚点：拓扑序与依赖矩阵
+
+【A】A-35 Kahn 的拓扑排序论文：A. B. Kahn, “Topological sorting of large networks,” *Communications of the ACM* 5(11): 558-562, 1962，DOI `10.1145/368996.369025`。该文给出「按依赖先后线性化有向图」的经典算法，是「就绪集/拓扑序」的算法基础。来源：<https://dl.acm.org/doi/pdf/10.1145/368996.369025>。
+
+【A】A-36 Steward 的设计结构矩阵（DSM）：D. V. Steward, “The design structure system: A method for managing the design of complex systems,” *IEEE Transactions on Engineering Management* EM-28(3): 71-74, 1981，DOI `10.1109/TEM.1981.6448589`。DSM 用矩阵表达任务间信息流与**回路（circuits）**，并据此决定先后次序——说明「依赖成环不是异常输入，而是需要显式处置的设计问题」。来源：<https://xplorestaging.ieee.org/document/6448589/metrics>。
+
+### 12.3 四条可迁移结论（判断，不新增 C 编号）
+
+1. **就绪集是「结构化存储之上的只读视图」**：四家工具（Taskwarrior / GitHub / Task Master / Beads）都先有结构化记录（task 数据文件、issue 库、`tasks.json`、Dolt 库），再在其上算 blocked/ready；**没有一家把「图引擎」作为前提**。这与本仓 C-5「不建图引擎」一致。
+2. **默认只做「可动 / 不可动 + 排序」，不做关键路径**：四家均无 CPM / 松弛量 / 工期推算功能；本仓 §7.4 的「不做 CPM」与社区实践同向。
+3. **反向边与依赖校验是标配而非可选项**：`BLOCKING`（A-27）、`--blocking`（A-29）、`validate-dependencies`（A-31）说明成熟实现都会提供「谁在等我」与「数据是否自洽」两条能力——本仓若只做单向 `dep`，会缺一半。
+4. **编号空间与生命周期解耦是成熟做法**：Taskwarrior「短 ID 可变 + UUID 永久」（A-26）、Beads「hash ID 防碰撞」（A-33）都在解决同一件事——**人读的短号不应承担永久引用职责**。本仓 P 号目前同时承担两者（详见 §13.2）。
+
+---
+
+## 13. 两项待裁决事项：外部对照与明确建议
+
+### 13.1 裁决 A——现在是否援引 §7.12（四）触发② 开闸实施 Layer-1
+
+**外部事实**：`READY`（A-25）、`next`（A-30）、`bd ready`（A-32）、Blocked 图标（A-28）证明「就绪集」是这类工具的**核心可用性功能**，不是锦上添花。
+
+**但外部事实同时给出前提**：这些工具服务的都是有**真实积压量**的库。本仓当前读数 = `PROGRESS` **152/152 全 `done`**（A-20），残余待办是**散文视图**（§5）。此时上线就绪集，输出必然恒为「（无）」——这就是 `CONSOLE` 三档队列已发生的**机制空转**重演（A-19/A-20）。
+
+【C】C-10 **建议：暂不援引触发② 开代码面；先做数据面（Layer-0，零代码）。**
+
+- **第一步（零代码）**：把「已裁决、可开闸但未开工」的残余项（约 8~10 条）按 §7.1 落成 `pending` P 行 + `trigger` 注释；观察一轮 `CONSOLE` 是否出现非空 `Recommended`。
+- **重审触发（机械可判，任一满足即开 Layer-1）**：① `pending` P 行 ≥ 3 **且** 同一日可动项 ≥ 2；② 连续 3 批出现「人工回读四张散文视图才能确定下一步」；③ 用户显式裁决。
+- **理由（双层）**：外部 = 就绪集的价值随积压量增长（A-30/A-32）；内部 = 本仓纪律「没有真实负载就固化拓扑」（graph RESEARCH L182）与「触发未满却主动开批 = 表演」（PROGRESS L194）。**现在写代码 = 用没有数据的视图替换没有视图的数据**。
+- **被否决的替代**：先写 Layer-1 再补数据（会产生一次「上线即空转」的实施批，且为空转机制增加维护面）；用 `console_gen --check` 之外的新门禁兜底（无数据时门禁同样空转）。
+
+### 13.2 裁决 B——残余待办是否允许占用 P 编号
+
+**外部三种编号空间对照**：
+
+| 方案 | 代表 | 机制 | 代价 |
+|---|---|---|---|
+| 单一序列 | GitHub Issues / 多数 issue tracker | 建单即入号，所有工作项共享一个递增空间 | 号段随时间膨胀；但引用稳定、心智简单（A-28/A-29） |
+| 短号 + 永久 ID 双轨 | Taskwarrior | 短 ID = 工作集索引，可重排；UUID 永久（A-26） | 需两套标识，人读与引用分离 |
+| 非顺序 ID | Beads | hash-based `bd-a1b2`，规避多 agent / 多分支合并冲突（A-33） | 人读性差；但天然唯一、可分布式生成 |
+
+**本仓事实（延伸 A-24）**：P 号当前承担**三重职责**——(a) 人读短号；(b) **永久引用**（`CODE_WIKI §9` 映射、session 证据锚点、`digest` 的批次键、跨行交叉引用）；(c) 「批次登记」语义（152 条全部是已执行批次）。
+
+【C】C-11 **建议：允许占用，但加语义护栏；不做全量升格、不另立第二待办簿。**
+
+- **(a) 只升格「已裁决、待开工」项**（承 P-042 V1a「立项即登记」既有裁决）；**观察项 / 跨仓等对方项不占号**，保持视图态；
+- **(b) 同步改口径声明**：`PROGRESS` 头部声明由「批次登记」改为「**工作项登记（含待开工）**」，并在新 P 行 detail 中标 `pending` + `trigger`；不改 DC2.1 状态词表（`pending` 已在词表内，零契约改动）；
+- **(c) 设机械护栏**：`pending` 行 > **20**，或出现「同一 P 号被引用后语义变更」≥1 例 ⇒ 引入 `T-` 待办命名空间（Beads 式解耦：短号与永久引用分离），P 号回归「已开工/已完成批次」；
+- **(d) 被否决的替代**：① **全量升格**（含 G-11b、Cpp_Hub R-1、D:\RPC 四项）——它们不是「本仓待开工」而是「等外部动作」，升格会制造 10+ 条永久 `blocked` 行，把三档队列变成噪声；② **另立 `docs/TODO.md` 待办簿**——与 `PROGRESS` 并列即为**第二真值源**，违 repo 的单一真值源纪律；③ **给待办分配独立顺序号但不改 PROGRESS 语义**——会产生「P 号已引用但状态语义漂移」的隐性冲突。
+
+**与 U-1 的关系**：以上 (a)~(d) 构成 U-1 的建议答复，但 U-1 仍保持 **open**（裁决权在用户）；若采纳，U-1 的判据（`pending` 行出现且三档队列非空、`--check` 通过）不变。
+
+---
+
+## 14. 参考文献（仓内指针）
 
 | 主题 | 载体 |
 |---|---|
@@ -262,6 +344,7 @@ upstream: null
 | 图 pilot 裁决（S0/S1 缺失） | [framework-deep-review/RESEARCH.md](./../framework-deep-review/RESEARCH.md) 附录 D.2、L1558 |
 | 待办真值源与依赖链人工分析 | [docs/PROGRESS.md](../../docs/PROGRESS.md) L196-L302 |
 | 派生与校验实现 | [scripts/console_gen.py](../../scripts/console_gen.py)、[scripts/spec_map.py](../../scripts/spec_map.py)、[scripts/rework_graph_check.py](../../scripts/rework_graph_check.py) |
+| 外部锚点（社区 / 学术，T1） | 见 §12：Taskwarrior 文档、GitHub Docs（issue dependencies）、Task Master 命令参考、Beads README（pkg.go.dev）、Kahn 1962、Steward 1981 |
 
 ---
 
@@ -272,4 +355,5 @@ upstream: null
 {"id": "B2", "claim": "残余待办落成 pending P 行后，三档队列将由结构性空转变为非空，无需新增门禁即可获得可见收益", "basis": "A-18/A-19/A-20/A-23", "status": "unverified-pending-implementation"}
 {"id": "B3", "claim": "graph S1 只读构建器可由待办图实践先行验证，且不构成对 S0/pilot 的前置依赖", "basis": "A-6/A-8/A-13", "status": "candidate"}
 {"id": "B4", "claim": "CPM 关键路径在本仓缺乏工期数据，强行引入会产生不可复核的假精度", "basis": "A-16/A-24", "status": "judgment"}
+{"id": "B5", "claim": "就绪集收益与待办积压量正相关；本仓 0 pending 时上线将复现三档队列的机制空转", "basis": "A-19/A-20/A-25/A-30/A-32", "status": "judgment"}
 ```
