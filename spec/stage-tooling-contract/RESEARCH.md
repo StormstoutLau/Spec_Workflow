@@ -4,7 +4,7 @@
 
 id: stage-tooling-contract-RESEARCH
 type: design
-version: 1.2
+version: 1.4
 status: draft
 date: 2026-10-21
 depends: [SPEC-PROCESS, ADR-0010, FWK-ASSERTION]
@@ -14,10 +14,10 @@ upstream: null
 
 > **Feature**: stage-tooling-contract（分阶段工具 / Skill / 提示词绑定——可行性、边界与代价）
 > **创建日期**: 2026-10-21
-> **修订**: v1.1（2026-10-21，P-115 · 裁决 5 = C 档：**U-2 全量核验**——19 条参考文献 + 3 条补充页逐条回原文；外部读数从「摘要级 E2/E3」升级为「T1 定位」；订正 **9 处**转述 / 归属 / 未取证缺陷〔含 1 处**方向倒置**〕；§4.2 按 T1 原文重写；U-2 **关闭**）→ v1.2（2026-10-21，P-116：U-3 关闭——§5.10 八条移出至 [ACADEMIC_REASONING_CONSTRAINTS.md](../academic-writing-workflow/ACADEMIC_REASONING_CONSTRAINTS.md) v1.0，本节只留指针；行数保持以稳定 P-115 会话锚点）
+> **修订**: v1.1（2026-10-21，P-115 · 裁决 5 = C 档：**U-2 全量核验**——19 条参考文献 + 3 条补充页逐条回原文；外部读数从「摘要级 E2/E3」升级为「T1 定位」；订正 **9 处**转述 / 归属 / 未取证缺陷〔含 1 处**方向倒置**〕；§4.2 按 T1 原文重写；U-2 **关闭**）→ v1.2（2026-10-21，P-116：U-3 关闭——§5.10 八条移出至 [ACADEMIC_REASONING_CONSTRAINTS.md](../academic-writing-workflow/ACADEMIC_REASONING_CONSTRAINTS.md) v1.0，本节只留指针；行数保持以稳定 P-115 会话锚点）→ v1.3（2026-11-06，P-161：**分阶段外部锚点与多方案裁决取证复核**——新增 §6.5：① 现状确认「外部信息源仅在 Step 1 有硬约束、Step 3 以回退方式间接要求、其余阶段无要求」（A-16 / A-20）；② 确认七维决策矩阵**已存在**（P-058）但有三个缺口——仅 Type-1 触发、无门禁、七维无操作化定义（A-17~A-19）；③ 提出 C-6~C-9 四条 Layer-0 建议（三档触发 / 触发式回退 / 两档矩阵 / 七维操作化）；A **15 → 20**、B **6 → 8**、C **5 → 9**；H 不变；零代码）→ v1.4（2026-11-07，P-162：**补充调研外部可借鉴的阶段映射实践**——新增 §6.6：回原文核验 **3 个社区反馈良好的开源项目**（GitHub Spec Kit / OpenSpec / BMAD-METHOD）的阶段模型、产物形态与门位点；判断 = 阶段映射的正确补强对象是「产物契约 + 门位点」而非阶段数量（B9）；建议 C-10~C-12（阶段产物契约表 / before-after 两型门 / 档位 × 必需阶段矩阵）；A **20 → 23**、B **8 → 9**、C **9 → 12**；零代码、不引入任何依赖）
 > **状态**: draft（草稿；本轮只出调研与建议，不改 SPEC_PROCESS 正文）
 > **Spec 步骤**: Step 1-2
-> **任务来源**: 用户指令「落档 然后分析当前工作流的每个阶段是否可以精细化 指定特定 MCP skill 工具 或者提示词——例如调研阶段要求寻找学术源、开源社区等高质量信息；执行阶段要求 TDD 实现；设计阶段可能需要约束 taste；同时针对学术推理任务可能需要额外的提示词约束」
+> **任务来源**: 用户指令「落档 然后分析当前工作流的每个阶段是否可以精细化 指定特定 MCP skill 工具 或者提示词——例如调研阶段要求寻找学术源、开源社区等高质量信息；执行阶段要求 TDD 实现；设计阶段可能需要约束 taste；同时针对学术推理任务可能需要额外的提示词约束」→ 追加（2026-11-06）「分析当前工作流是否只在调研阶段显式要求搜索外部信息源 / 审计 设计 实施等阶段是否也应要求外部信息锚点 / 多方案裁决是否要求成本 收益 兼容 维护 升级 短期 长期多维度信息」
 
 ---
 
@@ -25,9 +25,9 @@ upstream: null
 
 | 级别 | 条数 | 说明 |
 |---|---|---|
-| A 事实类 | 15 | 本仓 / 本机 / 外部 **T1 原文**的机械取证（E1，见附录 A） |
-| B 推断类 | 6 | 由 A 类推出的判定（见附录 B） |
-| C 类（决策） | 5 | 不参与 R7 机械对账（DR-2） |
+| A 事实类 | 23 | 本仓 / 本机 / 外部 **T1 原文**的机械取证（E1，见附录 A） |
+| B 推断类 | 9 | 由 A 类推出的判定（见附录 B） |
+| C 类（决策） | 12 | 不参与 R7 机械对账（DR-2；C-6~C-9 为 P-161、C-10~C-12 为 P-162 建议） |
 | 假设区 | 4 | 未实测项（见附录 C） |
 
 > **取证口径（v1.1 起）**：本仓事实 = E1（逐字读文件 / 机械枚举）；外部结论 = **T1 原文定位**（arXiv 摘要 / HTML 章节 / 官方文档段落），逐条登记于 §7.1。T2 官方页（Anthropic 工程博客 / Spec Kit 站 / Contra / Glif）只作背景佐证，不与 T1 混级。**未定位到原文的数字不入 A 类**；v1.0 的 E3 二手数字已删除，不再作为论据。
@@ -338,6 +338,79 @@ upstream: null
   - **当前倾向**：**独立成文**——[ACADEMIC_REASONING_CONSTRAINTS.md](../academic-writing-workflow/ACADEMIC_REASONING_CONSTRAINTS.md) v1.0 为唯一权威；SPEC_PROCESS / 本文件只留指针
   - **证据等级**：B6（推断）→ **已闭合（P-116）**
 
+### 6.5 分阶段外部信息锚点与多方案裁决取证（P-161，2026-11-06）
+
+**问题 1：外部信息源是否只在调研阶段被显式要求？**
+
+A-16 现状 = **是**，且只到「Step 1 硬约束 + Step 3 回退」这一层：
+
+| Step | 外部检索要求 | 形态 |
+|---|---|---|
+| 1 调研 | **有（唯一硬约束）** | 学术检索 + 通用检索 + 本仓检索；关键结论 **≥2 独立来源且 ≥1 个 T1**；证据出口 = §发现表 + 来源清单 |
+| 2 调研 Review | 有（核验，非检索） | 每条引用 **ID 可解析**；不可解析只能标「未验证」 |
+| 3 设计 | **无，仅回退** | 契约原文 = 「无（纯文档）；**需外部事实时回 Step 1**」 |
+| 4 设计 Review | 无检索要求 | 只核「是否基于已验证结论 / 无未验证假设 / 替代方案 ≥2」 |
+| 5 实施文档 | 无 | 只约束签名 + 回退点 + 低效排除表 |
+| 6 实施 Review | **狭义外部核验** | 依赖版本**可查到**（存在性，不是「最佳实践」） |
+| 7/8/9/10 | 无外部检索 | 验收 / 一致性 / TDD / ADD 取证矩阵（E1-E5，面向本仓代码） |
+
+A-20 补充：Review 面存在**间接**约束——Step 4 要求「设计基于已验证的调研结论」，但它只约束**是否引用了已核结论**，不约束**该结论是否覆盖了外部成熟实践**；两者不等价。
+
+**问题 2：多方案裁决的七维信息是否未提及？**
+
+A-17 **已提及**：`SPEC_PROCESS` §迭代收敛与未决项登记的 Type-1/Type-2 委派规定「**Type-1（不可逆）⇒ 全维度取证（决策矩阵）**」；模板七维**逐行固定** = 成本 / 收益 / 可维护性 / 兼容 / 升级潜力 / 短期 / 长期，每格要求「证据等级 + 读数日期」。
+
+A-18 但模板自陈「**无门禁、无校验器**」，可机械化仅四项形态（格齐全 / 证据等级非空 / 触发条件存在 / 引用完整），**结论正确性显式留给人工**。
+
+A-19 实际使用仅 **3 处**，且全部集中在 project-console（§7.26 件② 目标路径 / §7.27 派生态启用 / §7.28 `§` 编号空间收口）；`DESIGN_TEMPLATE §11.2` 只引不复制。**尚无任何一批在「方案裁决」之外主动启用它**。
+
+**缺口判定（B 类）**
+
+B7 外部锚点的必要性应随**断言类型与不确定性**触发，而不是随阶段触发：A 类事实（涉及本仓外世界）必须有 T1；纯本仓事实（E1）不需要；方案裁决若缺本仓读数，可引外部「形态对照」，但**不构成有效性证据**（与 §4.5 / R5 同一边界）。
+
+B8 七维矩阵的缺口**不是「没有」而是「不可判」**：Type-1 判定自陈、七维无操作化定义、无门禁 ⇒ 容易退化为「填满七格」的表演（与 C-2 同族）。
+
+**建议（C 类，Layer-0、零门禁、零代码）**
+
+C-6 **三档触发**（替代按阶段一刀切）：① 新引入外部技术 / 框架 / 协议 / 标准 ⇒ **T1 必需**；② 断言涉及本仓外事实且会改变设计 ⇒ **T1 必需**；③ 纯本仓可自证 ⇒ **E1 足够**，不要求外部检索。
+
+C-7 **Step 3 / Step 5 契约各补一行「触发式回退」**：命中 C-6 ①/② ⇒ 回 Step 1，并在 §决策表标 T1 + 读数日期；未命中 ⇒ 允许纯文档并写明「无外部事实断言」。**不新增门禁**（只改形态约束文本）。
+
+C-8 **矩阵两档化**：Type-1 七维全填；**Type-2 只强制「成本 / 收益 / 回退点」三格**——保留取证、避免分析瘫痪（守净收敛纪律与「Type-2 不启动矩阵」的原意兼容）。
+
+C-9 **七维操作化**（每维一条可核验问句）：成本 = 改动文件数 / 新增依赖数（可复算）；收益 = 解决哪条已登记缺口（引编号）；可维护性 = 新增真值源 / 双写点数量；兼容 = 是否改动既有契约 / 词表 / 退出码；升级潜力 = 是否有显式回退点与触发条件；短期 = 本批能否独立回退；长期 = 是否制造需持续维护的第二载体。
+
+**边界（诚实）**：本批只出分析与建议——**不改** `SPEC_PROCESS` 正文、**不改**模板、**不新增**门禁；C-6~C-9 是否落地须另行开批（Layer-0 文档批即可）。
+
+### 6.6 外部可借鉴的阶段映射实践（P-162，2026-11-07）
+
+**调研范围**：只取**社区反馈良好、且在真实仓库持续使用**的开源项目；不限于本机已安装工具。全部回原文（仓库 README）核验，证据等级 T1；只提炼**阶段模型 / 产物形态 / 门位点**三类形态，不评估其在本仓的有效性。
+
+A-21 **GitHub Spec Kit**（MIT）：把流程拆成 `constitution → specify → plan → tasks → implement` 五个可独立调用的入口，并明说「**These are independent entry points, not mandatory phases**」；其补强面不是更多阶段，而是**可组合机制**——`Extension`（新增命令 / 质量门 / 完整流程）、`Extension hook`（在命令前后执行，即 **before/after 两型门位点**）、`Preset`（强制组织或监管标准）、`Workflow` + `overlay` + `step`（流程可叠加改造而不 fork）、`Bundle` / `Catalog`（按角色分发）。原文同时提示「Catalog listings are not audits or endorsements」。来源：<https://github.com/github/spec-kit>。
+
+A-22 **OpenSpec**（MIT）：以**变更包**为单元——`explore → propose → apply → archive`；`propose` 一次产出四件（`proposal.md` 说明为什么/改什么、`specs/` 需求与场景、`design.md` 技术方案、`tasks.md` 实施清单），**纯 Markdown**、需求用 `WHEN/THEN` 场景表达；原文强调「**You review the plan before any code is written**」，`archive` 时把变更归档并更新 specs（specs 是长期真值，changes 是短生命周期）。`Stores`（beta）把 specs 与 changes 放到独立仓，跨仓共享单一真值源。来源：<https://github.com/Fission-AI/OpenSpec>。
+
+A-23 **BMAD-METHOD**（MIT）：交付环 = **Clarify → Plan → Build and verify → Learn and adjust**，并明确「**Right-sized process**」——清晰的小改动**直达 build**，复杂工作才加深规划；同时提供多视角角色（product / architecture / UX / development / testing）与「durable context」（决策随产物前传，而非每次对话重讲）。来源：<https://github.com/bmad-code-org/BMAD-METHOD>。
+
+**与本仓 10 步的对照（判断）**
+
+| 外部形态 | 本仓现状 | 可借点 | 不借点 |
+|---|---|---|---|
+| Spec Kit：入口可独立、门挂在命令前后 | 10 步固定序 + 偶数步 Review | **before/after 两型门位点**（前置校验 / 后置证据）| Extension/Workflow 生态（引入工具链依赖） |
+| OpenSpec：一个变更包 = proposal + specs + design + tasks | 四件套（R/D/I/C） | **「review before code」写成显式门**；变更包归档语义 | 另立 `changes/` 目录（与四件套双真值源） |
+| BMAD：right-sized（小改动直达 build） | T1/T2/T3 档位（仅裁剪文档量） | **把档位与「必需阶段」显式成表** | 多角色 agent 编排（本仓无此负载） |
+| 三者共同 | 阶段 = 产物 + 门 | **补强对象是产物契约与门位点，不是阶段数量** | — |
+
+B9 阶段映射的正确补强对象是**产物契约 + 门位点**：三个项目都不靠增加阶段取胜（Spec Kit 明说入口非强制阶段；OpenSpec 把阶段收敛为一个变更包的四个产物；BMAD 让阶段随工作量伸缩），而都靠「每阶段产出什么、在哪里拦」取胜。
+
+C-10 **阶段产物契约表**：在 `SPEC_PROCESS` 契约节补一张「Step × 产物文件 × 最小必含节 × 证据出口」表（本仓四件套已具备产物，缺的是**逐阶段最小节**），使「阶段完成」有可核形态。**不新增门禁。**
+
+C-11 **门位点两型化**：若未来新增阶段门，形态只允许 before（进入前校验，如「调研未核引用不得进设计」）与 after（退出后取证，如「设计须有拒绝方案与代价」）两型；禁止无位点的「过程要求」。本批只登记形态，不实施。
+
+C-12 **档位 × 必需阶段矩阵**：把 T1/T2/T3 从「文档量裁剪」升级为「可跳过哪些阶段」的显式矩阵（例：T3 是否强制 Step 4/6 Review），使裁剪理由可复核。
+
+**边界（诚实）**：这些项目解决的是「agent 驱动的产品交付」，本仓是**单人 + 方法论仓**；外部形态只作**结构参照**，不构成本仓有效性证据，也**不引入任何依赖**（守 ADR-0010 Q3 与 §6.3 R1）。
+
 ---
 
 ## 7. 参考文献
@@ -417,8 +490,16 @@ upstream: null
 | A-13 | 【A】SkillsBench（arXiv:2602.12670）：策展 skill 使通过率 33.9%→50.5%（+16.6pp，25.5% 归一化）；≤3 模块的聚焦 skill 优于更大 bundles | **E1 T1 原文**：arXiv 摘要 + HTML |
 | A-14 | 【A】TDAD（arXiv:2603.17973）：SWE-bench Verified 回归率 6.08%→1.82%（-70%）；**prompt-only（无定向测试上下文）回归率 9.94%，高于无干预基线** | **E1 T1 原文**：arXiv HTML |
 | A-15 | 【A】RAG-MCP（arXiv:2505.03275）：工具选择准确率 **13.62% 基线 → 43.13%**（more than triples）；prompt tokens 降低 >50%；工具数量增长致选择质量下降 | **E1 T1 原文**：arXiv 摘要 + HTML §1/§3 |
+| A-16 | 【A】外部检索的**唯一硬约束在 Step 1**（≥2 独立来源且 ≥1 T1）；Step 3 契约为「无（纯文档）；需外部事实时回 Step 1」；Step 4/5/7/8/9/10 无外部检索条款 | E1 逐字读 `SPEC_PROCESS.md` §Step 工具与提示词契约表（L128-L139） |
+| A-17 | 【A】多方案裁决七维取证**已存在**：`SPEC_PROCESS` 规定 Type-1（不可逆）⇒ 全维度取证（决策矩阵）；模板七维逐行固定 = 成本 / 收益 / 可维护性 / 兼容 / 升级潜力 / 短期 / 长期，每格要求证据等级 + 读数日期 | E1 读 `SPEC_PROCESS.md` L453-L458 + `spec/templates/DECISION_MATRIX_TEMPLATE.md` L34-L42 |
+| A-18 | 【A】矩阵模板自陈「无门禁、无校验器」；可机械化仅四项形态（格齐全 / 证据等级非空 / 触发条件存在 / 引用完整），结论正确性显式留给人工 | E1 读 `spec/templates/DECISION_MATRIX_TEMPLATE.md` L80-L83 |
+| A-19 | 【A】矩阵实际使用仅 **3 处**，全部在 `spec/project-console/RESEARCH.md`（§7.26 件② 目标路径 / §7.27 派生态启用 / §7.28 `§` 编号空间收口）；`DESIGN_TEMPLATE §11.2` 只引不复制 | E1 grep `决策矩阵\|DECISION_MATRIX`（`spec/` 全量） |
+| A-20 | 【A】Review 面只有间接约束：Step 4 要求「设计基于已验证的调研结论」，但不要求外部锚点或其证据等级；Step 6 仅核「依赖版本真实存在」 | E1 读 `SPEC_PROCESS.md` L305-L329 |
+| A-21 | 【A】GitHub Spec Kit：五入口 `constitution → specify → plan → tasks → implement`，明说「independent entry points, not mandatory phases」；补强面 = Extension / Extension hook（命令前后）/ Preset / Workflow + overlay + step / Bundle / Catalog | **T1 回原文**：<https://github.com/github/spec-kit> |
+| A-22 | 【A】OpenSpec：变更包 `explore → propose → apply → archive`；`propose` 产出 proposal.md + specs/ + design.md + tasks.md；纯 Markdown + WHEN/THEN 场景；「review the plan before any code is written」；archive 时更新 specs | **T1 回原文**：<https://github.com/Fission-AI/OpenSpec> |
+| A-23 | 【A】BMAD-METHOD：交付环 Clarify → Plan → Build and verify → Learn and adjust；「Right-sized process」小改动直达 build；多视角角色 + durable context | **T1 回原文**：<https://github.com/bmad-code-org/BMAD-METHOD> |
 
-## 附录 B. B 推断类断言清单（6 条）
+## 附录 B. B 推断类断言清单（9 条）
 
 ```json
 [
@@ -427,7 +508,10 @@ upstream: null
   {"id": "B3", "claim": "「执行阶段要求 TDD」若只写成一句提示词，不仅退化为表演，还可能提高回归率；起作用的是可执行的失败测试（fixture）", "basis": "A-14, A-10"},
   {"id": "B4", "claim": "「设计阶段约束 taste」不能落成勾选项，只能落成「被拒绝的替代方案 + 判据维度 + 代价」", "basis": "§4.5（T2 读数）"},
   {"id": "B5", "claim": "B 档（单节文档 + 最小绑定）是唯一性价比合理档；C 档（全编排）与 ADR-0010 Q3 冲突", "basis": "A-05, A-06, A-13, A-15"},
-  {"id": "B6", "claim": "学术推理八条已独立成文（ACADEMIC_REASONING_CONSTRAINTS v1.0）；SPEC_PROCESS / RESEARCH 只留指针", "basis": "B2, P-116"}
+  {"id": "B6", "claim": "学术推理八条已独立成文（ACADEMIC_REASONING_CONSTRAINTS v1.0）；SPEC_PROCESS / RESEARCH 只留指针", "basis": "B2, P-116"},
+  {"id": "B7", "claim": "外部锚点的必要性应随断言类型与不确定性触发（A 类外事实需 T1；纯本仓事实 E1 足够），不应按阶段一刀切要求检索", "basis": "A-16, A-20"},
+  {"id": "B8", "claim": "七维决策矩阵的缺口不是「未提及」而是「不可判」：触发判据自陈 + 维度无操作化定义 + 无门禁 ⇒ 易退化为填格表演", "basis": "A-17, A-18, A-19"},
+  {"id": "B9", "claim": "阶段映射的正确补强对象是「产物契约 + 门位点」而非阶段数量：三个社区项目都不靠增加阶段，而靠每阶段产出什么与在哪里拦", "basis": "A-21, A-22, A-23"}
 ]
 ```
 
